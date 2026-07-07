@@ -37,6 +37,15 @@
 - **ParrelSync (`com.veriorpies.parrelsync`)**: 
   エディタ上で複数クライアントを同時に立ち上げてテストするためのツール。ローカルでのマルチプレイヤー同期の検証に使用します。
 
+## シーン構成と役割分担
+プロジェクトは以下の3つのシーンに分割されており、`AdditiveSceneLoader.cs` によってマルチシーンとして結合されます。
+
+| シーン名 | 保存先 | 主な役割 |
+| :--- | :--- | :--- |
+| **Environment** | `Assets/_Content/Scenes/Environment.unity` | 3Dステージ、共通の干渉オブジェクト（岩、木、カードの浮遊演出など） |
+| **UserClient** | `Assets/_Content/Scenes/UserClient.unity` | 体験者用XR Rig、バインダーUI、ハンドトラッキング操作ロジック |
+| **OperatorClient** | `Assets/_Content/Scenes/OperatorClient.unity` | 運営用PC向けUI、システム制御、制限時間の管理・開始トリガー |
+
 ## ディレクトリ構成
 - `Assets/_Content/Scripts/`: 主なロジック・スクリプト類
   - `UserClient.cs`: 体験者向けの機能やPICOエンタープライズの初期化・制御
