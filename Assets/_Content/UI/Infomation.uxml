@@ -1,0 +1,5 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0.79); color: rgba(27, 27, 27, 0); -unity-text-align: upper-center; white-space: nowrap; align-items: center; justify-content: flex-start; padding-top: 40px; padding-bottom: 40px; padding-left: 40px; padding-right: 40px;">
+        <ui:Label text="テンプレート&#10;プロジェクト" style="font-size: 160px; color: rgb(255, 255, 255);"/>
+    </ui:VisualElement>
+</ui:UXML>
