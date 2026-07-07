@@ -20,11 +20,11 @@
 
 ### 3. XRプラットフォーム
 - **PICO Unity OpenXR SDK**:
-  PICOデバイス向けのVR対応パッケージ。
+  PICOデバイス向けのVR/MR対応パッケージ。フルカラーパススルー（Seethrough）の設定に利用します。
 - **PXR_Enterprise**:
   展示用途として、ジェスチャー認識のオフやシステムリセットの無効化など、デバイスの特殊な制御を行うために使用されています。
 - **Meta OpenXR (`com.unity.xr.meta-openxr`)**:
-  Meta Quest向けの対応パッケージ。
+  Meta Quest向けの対応パッケージ（Passthrough機能含む）。
 - **XR Interaction Toolkit (`XRI`)**:
   XR環境下でのインタラクション（つかむ、UI操作など）に使用されます。
 
