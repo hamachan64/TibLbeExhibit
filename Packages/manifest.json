@@ -15,9 +15,11 @@
     "com.unity.test-framework": "1.6.0",
     "com.unity.timeline": "1.8.10",
     "com.unity.ugui": "2.0.0",
+    "com.unity.xr.hands": "1.4.3",
     "com.unity.xr.meta-openxr": "2.3.0",
     "com.unity.xr.openxr.picoxr": "https://github.com/Pico-Developer/PICO-Unity-OpenXR-SDK.git#release_1.4.0",
     "com.veriorpies.parrelsync": "https://github.com/VeriorPies/ParrelSync.git?path=/ParrelSync",
+    "io.github.hatayama.uloopmcp": "2.2.0",
     "org.nuget.observablecollections.r3": "3.3.4",
     "com.unity.modules.accessibility": "1.0.0",
     "com.unity.modules.adaptiveperformance": "1.0.0",
@@ -74,7 +76,8 @@
         "org.nuget.system.servicemodel.primitives",
         "org.nuget",
         "com.cysharp",
-        "com.styly.styly-netsync-utility"
+        "com.styly.styly-netsync-utility",
+        "io.github.hatayama.uloopmcp"
       ]
     }
   ]
