@@ -108,3 +108,14 @@ InitTestScene*.unity*
 # Claude Code
 .claude/*.local.*
 .claude/settings.local.json
+
+# VS Code Settings
+.vscode/
+
+# Large 3rd-party assets
+/[Aa]ssets/Hovl Studio/
+/[Aa]ssets/Hovl Studio.meta
+/[Aa]ssets/JMO Assets/
+/[Aa]ssets/JMO Assets.meta
+/[Aa]ssets/JTS_Wakizashi/
+/[Aa]ssets/JTS_Wakizashi.meta
