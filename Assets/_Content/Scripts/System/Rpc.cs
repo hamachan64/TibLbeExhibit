@@ -1,7 +1,29 @@
-﻿namespace STYLY.TIB_Template
+namespace STYLY.TIB_Template
 {
     public enum Rpc
     {
-        ContentStart
+        /// <summary>コンテンツ開始（引数: [0]=スポーン用乱数シード）</summary>
+        ContentStart,
+
+        // ===== 具現化ポーカー: カード状態同期（CardNetworkSync が送受信する） =====
+
+        /// <summary>カード化（引数: [0]=itemId）</summary>
+        GiCardify,
+        /// <summary>ピンチで掴んだ（引数: [0]=itemId）</summary>
+        GiGrab,
+        /// <summary>離した/取り出した（引数: [0]=itemId, [1..3]=位置xyz）</summary>
+        GiRelease,
+        /// <summary>バインダーに収納した（引数: [0]=itemId）</summary>
+        GiStore,
+        /// <summary>ゲイン（具現化）した（引数: [0]=itemId, [1..3]=位置xyz）</summary>
+        GiGain,
+        /// <summary>錬金による定義変換（引数: [0]=itemId, [1]=変換先cardId）</summary>
+        GiConvert,
+        /// <summary>全体効果の発動（引数: [0]=CardEffectType数値）</summary>
+        GiEffect,
+        /// <summary>リスキーダイスの結果（引数: [0]=出目, [1]=大吉, [2]=大凶, [3..5]=位置xyz）</summary>
+        GiDice,
+        /// <summary>SSカード出現（引数: [0]=itemId, [1..3]=位置xyz）</summary>
+        GiSpawnSS,
     }
 }

@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 09704e645546e4235b7aa127e8948eed, type: 3}
+  m_Name: d_stone
+  m_EditorClassIdentifier: Assembly-CSharp::STYLY.TIB_Template.GIPoker.CardDefinition
+  cardId: d_stone
+  displayName: "\u77F3\u3053\u308D"
+  rank: 0
+  effectType: 0
+  description: "\u305F\u3060\u306E\u77F3\u3053\u308D\u3002\u3060\u304C\u96C6\u3081\u308C\u3070\u5F79\u306B\u306A\u308B\u304B\u3082\u3057\u308C\u306A\u3044\u3002"

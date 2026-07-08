@@ -1350,6 +1350,56 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!1 &1810690059
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1810690061}
+  - component: {fileID: 1810690060}
+  m_Layer: 0
+  m_Name: GIPoker_ItemSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1810690060
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1810690059}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f826c9f65e7c46aa8a8e9243709fa1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::STYLY.TIB_Template.GIPoker.ItemSpawnManager
+  catalog: {fileID: 11400000, guid: 02f215a47d1e841eca6f4f42c7bef037, type: 2}
+  spawnAreaSize: {x: 4, y: 0, z: 4}
+  minHeight: 0.6
+  maxHeight: 1.5
+  minSpacing: 0.5
+  trickleInterval: 12
+--- !u!4 &1810690061
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1810690059}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.10900009, y: 0, z: 0.15499973}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1871243707
 GameObject:
   m_ObjectHideFlags: 0
@@ -1590,3 +1640,4 @@ SceneRoots:
   - {fileID: 377414495}
   - {fileID: 1648872115}
   - {fileID: 1462636544}
+  - {fileID: 1810690061}

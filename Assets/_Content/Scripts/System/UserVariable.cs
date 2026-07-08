@@ -36,5 +36,11 @@ namespace STYLY.TIB_Template
         /// 0: 登録済み
         /// </summary>
         NeedRegistration,
+
+        /// <summary>
+        /// 具現化ポーカーの現在スコア（int）
+        /// バインダーの内容が変わるたびに CardNetworkSync が更新する
+        /// </summary>
+        GiScore,
     }
 }
