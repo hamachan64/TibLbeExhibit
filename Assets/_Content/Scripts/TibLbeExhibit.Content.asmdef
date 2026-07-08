@@ -1,0 +1,28 @@
+{
+    "name": "TibLbeExhibit.Content",
+    "rootNamespace": "",
+    "references": [
+        "UniTask",
+        "UniTask.Linq",
+        "UniTask.DOTween",
+        "UniTask.TextMeshPro",
+        "R3.Unity",
+        "com.styly.styly-netsync",
+        "Styly.NetSync.Utility.Runtime",
+        "com.styly.styly-xr-rig",
+        "Unity.TextMeshPro",
+        "Unity.XR.CoreUtils",
+        "Unity.XR.Hands",
+        "Unity.InputSystem",
+        "PICO.TobSupport"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
