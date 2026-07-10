@@ -161,6 +161,24 @@ namespace STYLY.TIB_Template.GIPoker
         }
 
         /// <summary>
+        /// バインダーを空に戻す（チュートリアルの練習カード撤去用）。
+        /// カードの実体（Source）が残っていれば破棄する。スコアは枚数変化で自動再計算される。
+        /// </summary>
+        public void Clear()
+        {
+            while (cards.Count > 0)
+            {
+                var index = cards.Count - 1;
+                var instance = cards[index];
+                cards.RemoveAt(index);
+                if (instance.Source != null)
+                {
+                    Destroy(instance.Source.gameObject);
+                }
+            }
+        }
+
+        /// <summary>
         /// バインダー内のカードをランダムに破壊する（リスキーダイス「大凶」用）。
         /// </summary>
         /// <returns>実際に破壊された枚数</returns>
