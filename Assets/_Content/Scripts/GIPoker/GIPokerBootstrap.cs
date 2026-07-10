@@ -75,6 +75,11 @@ namespace STYLY.TIB_Template.GIPoker
             var binderView = binderGo.AddComponent<BinderView>();
             binderView.Init(binder);
 
+            // チュートリアル（本編開始前の操作説明。Tutorial 状態の間だけ動作する）
+            var tutorialGo = new GameObject("GIPoker_Tutorial");
+            var tutorialDirector = tutorialGo.AddComponent<TutorialDirector>();
+            tutorialDirector.Init(session, binder);
+
             // リザルト
             var resultGo = new GameObject("GIPoker_ResultView");
             var resultView = resultGo.AddComponent<ResultView>();
