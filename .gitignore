@@ -119,3 +119,7 @@ InitTestScene*.unity*
 /[Aa]ssets/JMO Assets.meta
 /[Aa]ssets/JTS_Wakizashi/
 /[Aa]ssets/JTS_Wakizashi.meta
+
+# Claude Code agent worktrees / uloop outputs
+.claude/worktrees/
+.uloop/
