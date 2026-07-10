@@ -15,6 +15,7 @@ namespace STYLY.TIB_Template.GIPoker
     /// - 左右の手: HandPinchTracker / CardGrabInteractor / FingertipTouchCollider
     /// - ゲイン判定: GainGestureDetector（両手引き裂きジェスチャー）
     /// - バインダー: CardBinder ＋ BinderView（腰元に追従する見開きブック）
+    /// - タイトル: TitleView（開始待ち中に表示するタイトル画面）
     /// - リザルト: ResultView（タイムアップで表示）
     /// </summary>
     [DefaultExecutionOrder(-40)]
@@ -74,6 +75,11 @@ namespace STYLY.TIB_Template.GIPoker
             var binder = binderGo.AddComponent<CardBinder>();
             var binderView = binderGo.AddComponent<BinderView>();
             binderView.Init(binder);
+
+            // タイトル
+            var titleGo = new GameObject("GIPoker_TitleView");
+            var titleView = titleGo.AddComponent<TitleView>();
+            titleView.Init(session);
 
             // リザルト
             var resultGo = new GameObject("GIPoker_ResultView");
