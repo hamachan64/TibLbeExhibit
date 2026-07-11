@@ -28,3 +28,14 @@
   統合時のコンパイルが一発で通る（今回3PR・+1892行でエラー0件）。
 - SendMessage でエージェントを transcript 再開すると worktree を離れてメインツリーで作業することがある。
   再開時は作業ディレクトリとブランチを必ず確認すること。
+
+## MRパススルー用シェーダー（2026-07-12 Issue #7）
+- パススルー合成の premultiplied / straight 規約差に依存しないためには、
+  「黒(0,0,0)＋alpha蓄積（Blend の第2指定 `One OneMinusSrcAlpha`）」の影、
+  「加算＋alpha も加算（`One One, One One`）」の発光、のように framebuffer alpha を必ず書くのが安全。
+- radial dissolve は侵蝕度 0 のとき中心（dist=0）でフロンティア=0 となり縁の発光バンドが点として残る。
+  `clip(erosion - ε)` ＋ 微小域のフェード係数を必ず入れること。
+- グローバル値（`Shader.SetGlobalFloat`）は `CBUFFER_START(UnityPerMaterial)` に入れてはいけない
+  （入れると SRP Batcher がマテリアル値として扱いグローバル更新が反映されない）。
+- depth-only オクルーダーは URP の `DepthOnly` パス（`ColorMask R` / `return positionCS.z`）も
+  併設し、Depth Texture 要求時の整合を取る。ShadowCaster パスは持たせない（現実メッシュの二重影防止）。
