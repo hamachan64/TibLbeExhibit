@@ -19,27 +19,16 @@ namespace STYLY.TIB_Template.GIPoker
     ///
     /// initialCount 分は開始直後、残りは trickleInterval ごとに1個ずつ
     /// maxCount（出現上限）まで追加出現する。
+    ///
+    /// 出現位置は、シーン内の StageSpawnAnchor（階層順で列挙）をシード選択のみで
+    /// 決定論的に割り当てる（docs/MR_STAGE_PLAN.md §6.2）。アンカーが枯渇した場合、
+    /// またはシーンにアンカーが1つも無い場合は従来の箱型ランダム配置にフォールバックする
+    /// （＝アンカー0件のシーンでは旧挙動を完全維持する後方互換）。
+    /// スケジュール構築ロジック自体は SpawnScheduleBuilder（MonoBehaviour 非依存）に
+    /// 分離してあり、本クラスはシーンからの入力収集と実行時の出現タイミング制御のみを担う。
     /// </summary>
     public class ItemSpawnManager : MonoBehaviour
     {
-        private readonly struct ScheduledSpawn
-        {
-            public readonly int NetworkId;
-            public readonly int EntryIndex;
-            public readonly Vector3 Position;
-            public readonly float YawDegrees;
-            public readonly float Time;
-
-            public ScheduledSpawn(int networkId, int entryIndex, Vector3 position, float yawDegrees, float time)
-            {
-                NetworkId = networkId;
-                EntryIndex = entryIndex;
-                Position = position;
-                YawDegrees = yawDegrees;
-                Time = time;
-            }
-        }
-
         [SerializeField, Tooltip("出現アイテムのカタログ")]
         private ItemCatalog catalog;
 
@@ -91,90 +80,62 @@ namespace STYLY.TIB_Template.GIPoker
         }
 
         /// <summary>
-        /// シードから全出現スケジュールを決定論的に構築する。
-        /// UnityEngine.Random は他所の消費で狂うため System.Random を使う。
+        /// シードから全出現スケジュールを決定論的に構築する（実処理は SpawnScheduleBuilder に委譲）。
+        /// カタログ・アンカーの収集はここで行い、rng を用いる割り当てロジック自体には関与しない。
         /// </summary>
         private void BuildSchedule(int seed)
         {
+            var entries = BuildEntrySpecs();
+            var anchors = CollectAnchorSpecs();
+            var builder = new SpawnScheduleBuilder(transform.position, spawnAreaSize, minHeight, maxHeight, minSpacing, trickleInterval);
+
             schedule.Clear();
+            schedule.AddRange(builder.Build(seed, entries, anchors));
             nextSpawnIndex = 0;
-            var rng = new System.Random(seed);
-            var placedPositions = new List<Vector3>();
-            var networkId = 0;
 
-            // 1. 初期出現分（時刻0）
-            for (var i = 0; i < catalog.Entries.Count; i++)
+            if (anchors.Count > 0)
             {
-                var entry = catalog.Entries[i];
-                var count = Mathf.Min(entry.initialCount, entry.maxCount);
-                for (var n = 0; n < count; n++)
+                var anchorUsedCount = 0;
+                foreach (var s in schedule)
                 {
-                    AddSpawn(ref networkId, i, 0f, rng, placedPositions);
+                    if (s.UsedAnchor)
+                    {
+                        anchorUsedCount++;
+                    }
                 }
-            }
-
-            // 2. 追加出現分: 残数をエントリ順に列挙し、シャッフルして間隔ごとに配置
-            var remaining = new List<int>();
-            for (var i = 0; i < catalog.Entries.Count; i++)
-            {
-                var entry = catalog.Entries[i];
-                var rest = entry.maxCount - Mathf.Min(entry.initialCount, entry.maxCount);
-                for (var n = 0; n < rest; n++)
-                {
-                    remaining.Add(i);
-                }
-            }
-            // Fisher-Yates シャッフル（rng の消費順もクライアント間で一致する）
-            for (var i = remaining.Count - 1; i > 0; i--)
-            {
-                var j = rng.Next(i + 1);
-                (remaining[i], remaining[j]) = (remaining[j], remaining[i]);
-            }
-            for (var k = 0; k < remaining.Count; k++)
-            {
-                AddSpawn(ref networkId, remaining[k], trickleInterval * (k + 1), rng, placedPositions);
+                Debug.Log($"[ItemSpawnManager] StageSpawnAnchor {anchorUsedCount}/{anchors.Count} 件を使用（残りは箱型フォールバック）");
             }
         }
 
-        private void AddSpawn(ref int networkId, int entryIndex, float time, System.Random rng, List<Vector3> placedPositions)
+        /// <summary>ItemCatalog のエントリを SpawnScheduleBuilder 用の最小データへ変換する（カタログ順を維持）。</summary>
+        private List<SpawnEntrySpec> BuildEntrySpecs()
         {
-            var position = FindSpawnPosition(rng, placedPositions);
-            placedPositions.Add(position);
-            var yaw = (float)(rng.NextDouble() * 360.0);
-            schedule.Add(new ScheduledSpawn(networkId, entryIndex, position, yaw, time));
-            networkId++;
+            var entries = catalog.Entries;
+            var specs = new List<SpawnEntrySpec>(entries.Count);
+            for (var i = 0; i < entries.Count; i++)
+            {
+                specs.Add(new SpawnEntrySpec(entries[i].initialCount, entries[i].maxCount));
+            }
+            return specs;
         }
 
-        private Vector3 FindSpawnPosition(System.Random rng, List<Vector3> placedPositions)
+        /// <summary>
+        /// このマネージャーが属するシーン内の StageSpawnAnchor を階層順
+        /// （Transform ルート順→siblingIndex 深さ優先）で列挙し、位置情報へ変換する。
+        /// 列挙順はクライアント間で一致する必要があるため、FindObjectsByType 等の
+        /// 不定順APIではなく、シーンルートからの手動深さ優先探索（StageSpawnAnchorEnumerator）を用いる。
+        /// </summary>
+        private List<SpawnAnchorSpec> CollectAnchorSpecs()
         {
-            var basePos = transform.position;
-            Vector3 candidate = basePos + Vector3.up * ((minHeight + maxHeight) * 0.5f);
-            for (var attempt = 0; attempt < 12; attempt++)
+            var roots = gameObject.scene.GetRootGameObjects();
+            var anchors = StageSpawnAnchorEnumerator.EnumerateInHierarchyOrder(roots);
+            var specs = new List<SpawnAnchorSpec>(anchors.Count);
+            for (var i = 0; i < anchors.Count; i++)
             {
-                candidate = basePos + new Vector3(
-                    ((float)rng.NextDouble() - 0.5f) * spawnAreaSize.x,
-                    minHeight + (float)rng.NextDouble() * (maxHeight - minHeight),
-                    ((float)rng.NextDouble() - 0.5f) * spawnAreaSize.z);
-
-                if (HasEnoughSpacing(candidate, placedPositions))
-                {
-                    return candidate;
-                }
+                var anchor = anchors[i];
+                specs.Add(new SpawnAnchorSpec(anchor.transform.position, anchor.IsElevated));
             }
-            return candidate;
-        }
-
-        private bool HasEnoughSpacing(Vector3 position, List<Vector3> placedPositions)
-        {
-            var minSqr = minSpacing * minSpacing;
-            foreach (var placed in placedPositions)
-            {
-                if ((placed - position).sqrMagnitude < minSqr)
-                {
-                    return false;
-                }
-            }
-            return true;
+            return specs;
         }
 
         private async UniTask RunScheduleAsync(CancellationToken ct)
