@@ -73,7 +73,8 @@ namespace STYLY.TIB_Template.GIPoker
             sphereRenderer.receiveShadows = false;
             sphereRenderer.lightProbeUsage = LightProbeUsage.Off;
             sphereRenderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
-            sphereRenderer.allowOcclusionCulling = false;
+            // 全天フェード球はカメラ追従のため動的オクルージョンカリングの対象から外す
+            sphereRenderer.allowOcclusionWhenDynamic = false;
 
             var shader = Shader.Find(ShaderName);
             if (shader != null)
