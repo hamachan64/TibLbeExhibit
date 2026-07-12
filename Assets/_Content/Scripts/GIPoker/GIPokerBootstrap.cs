@@ -16,6 +16,8 @@ namespace STYLY.TIB_Template.GIPoker
     /// - ゲイン判定: GainGestureDetector（両手引き裂きジェスチャー）
     /// - バインダー: CardBinder ＋ BinderView（腰元に追従する見開きブック）
     /// - タイトル: TitleView（開始待ち中に表示するタイトル画面）
+    /// - VR空間: TutorialSpaceDirector（チュートリアル中だけ包む「ゲーム開始の間」）
+    /// - MR⇔VR遷移: TransitionDirector（白フェード＋VR空間の表示制御。ScreenFaderは内部生成）
     /// - リザルト: ResultView（タイムアップで表示）
     /// </summary>
     [DefaultExecutionOrder(-40)]
@@ -85,6 +87,14 @@ namespace STYLY.TIB_Template.GIPoker
             var tutorialGo = new GameObject("GIPoker_Tutorial");
             var tutorialDirector = tutorialGo.AddComponent<TutorialDirector>();
             tutorialDirector.Init(session, binder);
+
+            // VR空間（チュートリアル中だけプレイヤーを包む「ゲーム開始の間」。Issue #13）
+            var tutorialSpace = TutorialSpaceDirector.Create();
+
+            // MR⇔VR遷移（白フェード＋VR空間の表示/非表示をオーケストレーション。Issue #14）
+            var transitionGo = new GameObject("GIPoker_Transition");
+            var transitionDirector = transitionGo.AddComponent<TransitionDirector>();
+            transitionDirector.Init(session, tutorialSpace);
 
             // リザルト
             var resultGo = new GameObject("GIPoker_ResultView");
