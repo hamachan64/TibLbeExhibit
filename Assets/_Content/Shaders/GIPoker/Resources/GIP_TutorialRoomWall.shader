@@ -127,14 +127,16 @@ Shader "GIPoker/Tutorial/RoomWall"
                 float maze = min(d1, d2);
 
                 half lw = _LineWidth;
-                // 発光コア（中心ほど明るい線）
-                half arcs = smoothstep(lw, lw * 0.35h, half(maze));
+                // 発光コア（中心ほど明るい線）。
+                // smoothstep の降順引数（min > max）はHLSL仕様上undefinedで
+                // GPUドライバによって結果が変わるため、昇順＋反転の形で書く
+                half arcs = 1.0h - smoothstep(lw * 0.35h, lw, half(maze));
 
                 // 回路ノード: 弧が接続するセル辺の中点で強めに光らせる
                 float dn = min(
                     min(length(f - float2(0.5, 0.0)), length(f - float2(0.5, 1.0))),
                     min(length(f - float2(0.0, 0.5)), length(f - float2(1.0, 0.5))));
-                half node = smoothstep(lw * 2.2h, 0.0h, half(dn));
+                half node = 1.0h - smoothstep(0.0h, lw * 2.2h, half(dn));
 
                 half glyph = max(arcs, node * 0.85h);
 

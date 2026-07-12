@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
@@ -23,6 +24,12 @@ namespace STYLY.TIB_Template.GIPoker
     [DisallowMultipleComponent]
     public class TutorialSpaceDirector : MonoBehaviour
     {
+        /// <summary>
+        /// 壁面シェーダー名。シェーダーファイルはどのアセットからも参照されないため、
+        /// Resources フォルダ配下（Assets/_Content/Shaders/GIPoker/Resources/）に置いて
+        /// 実機ビルドへの同梱を保証している（stripping されると Shader.Find が null を
+        /// 返し、ルームが透けてパススルーを隠せなくなる）。
+        /// </summary>
         private const string ShaderName = "GIPoker/Tutorial/RoomWall";
         private static readonly int RevealId = Shader.PropertyToID("_Reveal");
 
@@ -99,7 +106,12 @@ namespace STYLY.TIB_Template.GIPoker
             }
             else
             {
-                Debug.LogWarning($"[TutorialSpaceDirector] シェーダー '{ShaderName}' が見つかりません。ルームは無地で表示されます。");
+                // ルーム壁面が描かれず、パススルーを隠せない致命的状態。
+                // シェーダーのビルド同梱漏れ（Resources 外への移動等）が典型原因
+                Debug.LogError(
+                    $"[TutorialSpaceDirector] シェーダー '{ShaderName}' が見つかりません。" +
+                    "ルーム壁面が描画されず、チュートリアルVR空間がパススルーを隠せない致命的状態です。" +
+                    "GIP_TutorialRoomWall.shader が Resources フォルダ配下にあるか確認してください。");
             }
 
             // 生成直後は非表示
@@ -140,7 +152,7 @@ namespace STYLY.TIB_Template.GIPoker
                 .SetEase(Ease.InOutSine)
                 .SetLink(gameObject);
 
-            await revealTween.ToUniTask(cancellationToken: token);
+            await WaitTweenAsync(revealTween, token);
         }
 
         /// <summary>
@@ -160,25 +172,58 @@ namespace STYLY.TIB_Template.GIPoker
                 return;
             }
 
-            if (roomMaterial != null && hideFadeDuration > 0f && roomShell.activeSelf)
+            try
             {
-                var from = roomMaterial.GetFloat(RevealId);
-                revealTween = DOVirtual.Float(from, 0f, hideFadeDuration, v =>
-                    {
-                        if (roomMaterial != null)
+                if (roomMaterial != null && hideFadeDuration > 0f && roomShell.activeSelf)
+                {
+                    var from = roomMaterial.GetFloat(RevealId);
+                    revealTween = DOVirtual.Float(from, 0f, hideFadeDuration, v =>
                         {
-                            roomMaterial.SetFloat(RevealId, v);
-                        }
-                    })
-                    .SetEase(Ease.InQuad)
-                    .SetLink(gameObject);
+                            if (roomMaterial != null)
+                            {
+                                roomMaterial.SetFloat(RevealId, v);
+                            }
+                        })
+                        .SetEase(Ease.InQuad)
+                        .SetLink(gameObject);
 
-                await revealTween.ToUniTask(cancellationToken: token);
+                    await WaitTweenAsync(revealTween, token);
+                }
             }
-
-            if (roomShell != null)
+            finally
             {
-                roomShell.SetActive(false);
+                // フェード待機がキャンセルされても「非表示化」だけは必ず完遂する
+                // （HideAsync の契約はルームを消すこと。中途半端な表示残りを防ぐ）
+                if (roomShell != null)
+                {
+                    roomShell.SetActive(false);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Tween の完了を UniTask で待つ。
+        /// 本プロジェクトの DOTween は DLL プラグイン（Assets/Plugins/Demigiant）のため
+        /// UNITASK_DOTWEEN_SUPPORT シンボルが定義されず、UniTask の
+        /// <c>Tween.ToUniTask()</c> 拡張は使えない。代わりに Tween 非依存の
+        /// ポーリング待機を行う（完了時は autoKill により IsActive() が false になる）。
+        /// キャンセル時は Tween を Kill してから例外を伝播する。
+        /// </summary>
+        private static async UniTask WaitTweenAsync(Tween tween, CancellationToken ct)
+        {
+            try
+            {
+                await UniTask.WaitUntil(
+                    () => tween == null || !tween.IsActive(),
+                    cancellationToken: ct);
+            }
+            catch (OperationCanceledException)
+            {
+                if (tween != null && tween.IsActive())
+                {
+                    tween.Kill();
+                }
+                throw;
             }
         }
 
