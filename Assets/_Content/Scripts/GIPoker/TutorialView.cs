@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using DG.Tweening;
 using R3;
 using TMPro;
@@ -17,8 +18,9 @@ namespace STYLY.TIB_Template.GIPoker
     ///   軽い称賛演出（パネルの発光フラッシュ＋称賛テキスト＋キラキラVFX）を出す
     /// - 日本語テキストには GIPokerAssets.JapaneseFont を適用する（null 許容）。
     ///   本ファイルで使用する漢字は既存UI（TitleView / BinderView / ResultView /
-    ///   ResultGrade / TutorialSequence）で既に描画実績のある字のみを再利用しており、
-    ///   TMPアトラスの新規グリフ追加は発生しない想定（豆腐リスクなし）
+    ///   ResultGrade / 変更前の TutorialSequence・TutorialView）で既に描画実績のある
+    ///   字のみを再利用しており、TMPアトラスの新規グリフ追加は発生しない想定
+    ///   （豆腐リスクなし。「秒」「編」は変更前 TutorialView のカウントダウン文言由来）
     /// </summary>
     public class TutorialView : MonoBehaviour
     {
@@ -55,6 +57,10 @@ namespace STYLY.TIB_Template.GIPoker
 
         private Vector3 instructionBasePos;
         private Tween instructionFadeTween;
+
+        // 本Viewが生成したマテリアル（LBEの連続稼働でセッション毎に再生成されるため、
+        // OnDestroy で確実に破棄してリークを防ぐ）
+        private readonly List<Material> createdMaterials = new();
 
         // 直前に表示していたステップ種別（達成演出を出すべきかの判定に使う）
         private TutorialStepKind? lastStepKind;
@@ -122,7 +128,7 @@ namespace STYLY.TIB_Template.GIPoker
             frame.transform.localPosition = new Vector3(0f, 0f, 0.008f);
             frame.transform.localScale = new Vector3(PanelWidth + 0.01f, PanelHeight + 0.01f, 0.004f);
             frame.GetComponent<Renderer>().sharedMaterial =
-                CardVisualFactory.CreateLitMaterial(GoldColor * 0.55f, GoldEmission);
+                CreateTrackedMaterial(GoldColor * 0.55f, GoldEmission);
 
             // 背景（濃緑〜黒のガラス質パネル。視界を塞がない小さめサイズ）
             var bg = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -131,7 +137,7 @@ namespace STYLY.TIB_Template.GIPoker
             bg.transform.SetParent(panelRoot, false);
             bg.transform.localPosition = new Vector3(0f, 0f, 0.005f);
             bg.transform.localScale = new Vector3(PanelWidth, PanelHeight, 0.008f);
-            bgMaterial = CardVisualFactory.CreateLitMaterial(new Color(0.05f, 0.08f, 0.065f), PanelBaseEmission);
+            bgMaterial = CreateTrackedMaterial(new Color(0.05f, 0.08f, 0.065f), PanelBaseEmission);
             bg.GetComponent<Renderer>().sharedMaterial = bgMaterial;
 
             // タイトル下の金の区切りライン（BinderViewの背表紙ラインと同じ意匠で統一感を出す）
@@ -141,7 +147,7 @@ namespace STYLY.TIB_Template.GIPoker
             divider.transform.SetParent(panelRoot, false);
             divider.transform.localPosition = new Vector3(0f, 0.046f, 0.0005f);
             divider.transform.localScale = new Vector3(PanelWidth - 0.05f, 0.0015f, 0.004f);
-            divider.GetComponent<Renderer>().sharedMaterial = CardVisualFactory.CreateLitMaterial(GoldColor, GoldEmission);
+            divider.GetComponent<Renderer>().sharedMaterial = CreateTrackedMaterial(GoldColor, GoldEmission);
 
             // タイトル
             titleText = CreateText("Title", "チュートリアル", new Vector3(0f, 0.075f, -0.002f), 5.5f,
@@ -163,9 +169,9 @@ namespace STYLY.TIB_Template.GIPoker
 
         private void BuildDots(int stepCount)
         {
-            dotDoneMaterial = CardVisualFactory.CreateLitMaterial(GoldColor, GoldEmission);
-            dotCurrentMaterial = CardVisualFactory.CreateLitMaterial(Color.white, new Color(0.6f, 0.6f, 0.6f));
-            dotPendingMaterial = CardVisualFactory.CreateLitMaterial(new Color(0.3f, 0.32f, 0.3f), Color.black);
+            dotDoneMaterial = CreateTrackedMaterial(GoldColor, GoldEmission);
+            dotCurrentMaterial = CreateTrackedMaterial(Color.white, new Color(0.6f, 0.6f, 0.6f));
+            dotPendingMaterial = CreateTrackedMaterial(new Color(0.3f, 0.32f, 0.3f), Color.black);
 
             const float dotsY = -0.058f;
 
@@ -178,7 +184,7 @@ namespace STYLY.TIB_Template.GIPoker
             track.transform.localPosition = new Vector3(0f, dotsY, 0.0005f);
             track.transform.localScale = new Vector3(trackWidth, 0.0015f, 0.003f);
             track.GetComponent<Renderer>().sharedMaterial =
-                CardVisualFactory.CreateLitMaterial(new Color(0.12f, 0.12f, 0.1f), Color.black);
+                CreateTrackedMaterial(new Color(0.12f, 0.12f, 0.1f), Color.black);
 
             dotRenderers = new Renderer[stepCount];
             var startX = -(stepCount - 1) * 0.5f * DotSpacing;
@@ -374,6 +380,18 @@ namespace STYLY.TIB_Template.GIPoker
                 .SetLink(praise.gameObject);
         }
 
+        /// <summary>
+        /// マテリアルを生成しつつ破棄リストへ登録する。
+        /// CardVisualFactory.CreateLitMaterial は呼び出しごとに new Material するため、
+        /// 本View経由で作ったものはすべてここを通して OnDestroy での一括破棄対象にする。
+        /// </summary>
+        private Material CreateTrackedMaterial(Color color, Color emission)
+        {
+            var mat = CardVisualFactory.CreateLitMaterial(color, emission);
+            createdMaterials.Add(mat);
+            return mat;
+        }
+
         private TextMeshPro CreateText(string name, string content,
             Vector3 localPos, float fontSize, Color color, FontStyles style)
         {
@@ -449,6 +467,24 @@ namespace STYLY.TIB_Template.GIPoker
                 countdownText.color = CalmCountdownColor;
                 countdownText.fontSize = 4f;
             }
+        }
+
+        /// <summary>
+        /// 生成した全マテリアルを破棄する。
+        /// LBEの連続稼働ではセッションごとに TutorialView が生成・破棄されるため、
+        /// ここで確実に解放しないとセッションまたぎで漸増リークする。
+        /// </summary>
+        private void OnDestroy()
+        {
+            foreach (var mat in createdMaterials)
+            {
+                if (mat != null)
+                {
+                    mat.DOKill(); // PlayPanelFlash 等のマテリアルTweenが残っていても先に止める
+                    Destroy(mat);
+                }
+            }
+            createdMaterials.Clear();
         }
 
         private void LateUpdate()
