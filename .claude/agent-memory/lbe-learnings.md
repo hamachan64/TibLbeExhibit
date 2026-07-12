@@ -84,3 +84,15 @@
   `DOTween.To(() => tmp.color, c => tmp.color = c, target, duration)` で代替できる
   （DOTween本体の `DOTween.To(DOGetter<Color>, DOSetter<Color>, Color, float)` オーバーロードは
   Modules非依存でコア機能として存在する）。
+
+## UniTask × DOTween 連携の罠（2026-07-13 PR #16）
+- 本プロジェクトの DOTween は DLL プラグイン（Assets/Plugins/Demigiant）であり UPM ではないため、
+  UniTask 側の `UNITASK_DOTWEEN_SUPPORT` シンボルが定義されず `Tween.ToUniTask()` 等の
+  `DOTweenAsyncExtensions` は**コンパイル不可**。ProjectSettings へのシンボル追加は worktree から
+  行わない方針のため、Tween 完了待ちは `UniTask.WaitUntil(() => tween == null || !tween.IsActive())`
+  のような Tween 非依存のポーリングで書く（キャンセル時は Tween を Kill してから例外伝播）。
+- ランタイム生成マテリアルが `Shader.Find` で取得するシェーダーは、どのアセットからも参照されないと
+  実機ビルドで stripping され null になる。`Resources` フォルダ配下に置いて同梱を保証すること
+  （GraphicsSettings の Always Included は YAML 編集禁止のため使わない）。
+- HLSL の `smoothstep(min, max, x)` は min > max の降順引数が undefined。PICO 等の GPU ドライバ差で
+  見た目が破綻しうるため、必ず昇順＋`1.0h -` 反転の形で書く。
