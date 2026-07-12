@@ -95,22 +95,22 @@ namespace STYLY.TIB_Template.GIPoker
             return new List<TutorialStep>
             {
                 new(TutorialStepKind.Intro,
-                    "アイテムに触れてカードに変え、\nバインダーに集めよう",
+                    "素手でアイテムに触れてカードに変え、\nバインダーへ集めよう！",
                     IntroDurationSeconds, requiresAchievement: false),
                 new(TutorialStepKind.Cardify,
-                    "目の前のアイテムに\n素手で触れてみよう",
+                    "まずは目の前のアイテムに\n素手で触れてみよう",
                     DefaultStepTimeoutSeconds, requiresAchievement: true),
                 new(TutorialStepKind.Grab,
-                    "カードを指でつまんで掴もう",
+                    "指でそっとつまんで\nカードを掴もう",
                     DefaultStepTimeoutSeconds, requiresAchievement: true),
                 new(TutorialStepKind.Store,
-                    "バインダーに近づけて\n指を離すと収納",
+                    "カードをバインダーに近づけて\n指を離すと収納されるよ",
                     DefaultStepTimeoutSeconds, requiresAchievement: true),
                 new(TutorialStepKind.Gain,
-                    "カードを両手で引き裂くと\n元のアイテムに戻り効果が発動（ゲイン）",
+                    "両手でカードを引き裂こう（ゲイン）\n元のアイテムに戻り、効果が発動する",
                     DefaultStepTimeoutSeconds, requiresAchievement: true),
                 new(TutorialStepKind.Rules,
-                    "カード化から1分放置で消滅！\n制限時間5分でハイスコアを狙え",
+                    "カード化して1分放置すると消滅する！\n制限時間5分でハイスコアを狙おう",
                     float.PositiveInfinity, requiresAchievement: false),
             };
         }

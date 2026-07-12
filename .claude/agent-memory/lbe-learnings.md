@@ -58,6 +58,33 @@
   対象選定は名前パターンや専用タグで絞るか、適用後に非ジオメトリオブジェクトが混入していないか
   目視確認すること。
 
+## TutorialView演出リッチ化とTMP新規漢字の回避策（2026-07-13 Issue #15）
+- worktree内でUnityコンパイルができない状況でも「新しい漢字を追加しない」制約は守れる。
+  やり方: `TitleView.cs` / `BinderView.cs` / `ResultView.cs` / `ResultGrade.cs` /
+  変更前の `TutorialSequence.cs`・`TutorialView.cs` など、既に実機/PlayModeで描画実績のある View から
+  `grep -ohoP '"[^"]*[぀-ヿ㐀-鿿][^"]*"'` で日本語リテラルを洗い出し、そこに含まれる漢字だけで
+  新しい文言を組み立てれば、TMPアトラスへの新規グリフ追加ゼロを机上で保証できる。
+  PR本文には「使用した漢字はすべて既存UI由来（新規グリフなし）」と明記すると豆腐リスクの
+  説明責任を果たせる。**出典リストには編集対象ファイル自身の変更前文言も忘れずに含めること**
+  （Issue #15 では「秒」「編」の出典が変更前 TutorialView のカウントダウン文言
+  "本編開始まで {…}秒" であり、他Viewには存在しなかった）。
+- ランタイム生成Viewで `CardVisualFactory.CreateLitMaterial`（毎回 new Material）を使う場合、
+  生成マテリアルをリストに集約して `OnDestroy` で一括 `Destroy()` すること。
+  LBEの連続稼働ではセッション毎にViewが再生成されるため、破棄漏れはセッションまたぎの
+  漸増リークになる（Materialにも `DOKill()` 拡張があるので破棄前にTweenを止められる）。
+- `Material.DOColor(Color, string/int propertyId, float duration)` や `Material.DOFade` /
+  `Material.DOFloat` はこのプロジェクトの Demigiant/DOTween 同梱ソース（Modules配下の .cs）を
+  grep しても定義が見つからない（コンパイル済み DOTween 本体DLL側にショートカット拡張が
+  含まれているため）。実在確認は `Assets/Plugins/Demigiant/DOTween/DOTween.XML` を
+  `grep -n "DOColor(UnityEngine.Material"` のように検索すると確実（既存コードの
+  `StagePedestal.cs` / `BorderCircle.cs` が実例）。
+- `TextMeshPro`（3D版）には `DOFade` 拡張が無い（UGUIのGraphic/Image限定）。
+  代わりに `DOTween.To(() => tmp.alpha, a => tmp.alpha = a, target, duration)` を使う
+  （`ResultView.FadeText` が既存パターン）。同様に色遷移も
+  `DOTween.To(() => tmp.color, c => tmp.color = c, target, duration)` で代替できる
+  （DOTween本体の `DOTween.To(DOGetter<Color>, DOSetter<Color>, Color, float)` オーバーロードは
+  Modules非依存でコア機能として存在する）。
+
 ## UniTask × DOTween 連携の罠（2026-07-13 PR #16）
 - 本プロジェクトの DOTween は DLL プラグイン（Assets/Plugins/Demigiant）であり UPM ではないため、
   UniTask 側の `UNITASK_DOTWEEN_SUPPORT` シンボルが定義されず `Tween.ToUniTask()` 等の
