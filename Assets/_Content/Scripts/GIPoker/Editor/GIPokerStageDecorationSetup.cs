@@ -214,9 +214,11 @@ namespace STYLY.TIB_Template.GIPoker
                     renderer => new[] { ruinStone });
 
                 // アイテム出現アンカー（台座上面）。後続Issueが StageSpawnAnchor を後付けする
+                // 天板上面 y1.03 + カードの浮遊演出分の余白(0.07m)。
+                // 旧プリミティブ台座時代の値(1.15)のまま放置するとFBX刷新後の天板より約12cm浮くので注意。
                 var anchor = new GameObject("AnchorPoint");
                 anchor.transform.SetParent(visualRoot.transform, false);
-                anchor.transform.localPosition = new Vector3(0f, 1.15f, 0f);
+                anchor.transform.localPosition = new Vector3(0f, 1.10f, 0f);
 
                 var haloRenderer = AddGroundHalo(root.transform, 1.1f, halo);
 
@@ -246,9 +248,11 @@ namespace STYLY.TIB_Template.GIPoker
                         ? new[] { mossyRock, grassTop }
                         : new[] { mossyRock });
 
+                // 草地上面 y0.96(モデルオフセット0.8+0.16) + カードの浮遊演出分の余白(0.08m)。
+                // 旧プリミティブ台座時代の値(1.1)のまま放置するとFBX刷新後の岩上面より約13cm浮くので注意。
                 var anchor = new GameObject("AnchorPoint");
                 anchor.transform.SetParent(visualRoot.transform, false);
-                anchor.transform.localPosition = new Vector3(0f, 1.1f, 0f);
+                anchor.transform.localPosition = new Vector3(0f, 1.04f, 0f);
 
                 var haloRenderer = AddGroundHalo(root.transform, 0.9f, halo);
 

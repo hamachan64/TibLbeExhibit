@@ -96,3 +96,40 @@
   （GraphicsSettings の Always Included は YAML 編集禁止のため使わない）。
 - HLSL の `smoothstep(min, max, x)` は min > max の降順引数が undefined。PICO 等の GPU ドライバ差で
   見た目が破綻しうるため、必ず昇順＋`1.0h -` 反転の形で書く。
+
+## プレイエリア座標系とスポーン配置のズレ（2026-07-13 docs/Tib.md対応）
+- **重要**: GIPokerステージ一式（GIPoker_ItemSpawner / GIPoker_Stage配下のSpawnAnchors・ErosionPatches・
+  LeyLines・ShadowCatcher / GIPokerStageDecoration配下の台座・BorderCircle・AmbientMotes）は当初
+  **原点(0,0,0)付近の約4×4mクラスタ**として作られていた。一方、実際の利用可能プレイエリアは
+  VRArea / Area_Floor で定義される **ワールド中心 X≈-4.9, Z≈-6.4、床Y=0、約4×18m の細長い回廊**
+  （Area_Floor bounds: X[-6.98,-2.84], Z[-15.86,2.98]）。両者が重ならず、原点付近に置いたアイテムは
+  エリア外に出現して「歩いても出会えない」状態になっていた。
+- 対策として全ステージ要素を回廊内（幅方向は安全マージンを取り X∈[-6.3,-3.6]、Z=+1.3〜-14.3）へ
+  18m全長に分散再配置した（docs/Tib.md「広い距離を歩けることを活かす」方針）。
+  ItemSpawnManager のフォールバック箱 spawnAreaSize も (3,0,17) に拡大、position を回廊中心へ。
+- **今後アイテム/装飾を追加・配置する際は、原点ではなくこの回廊フレーム（中心 -4.9,0,-6.4 / 4×18m）
+  を基準にすること。** VRArea.MeshRenderer を一時 enable すると Scene で領域を可視化できる（Tib.md §今回の体験エリア）。
+- StageSpawnAnchor の Anchor_01..04 は isElevated=true で4つの台座（RuinPillar×2/FloatingRock×2）の
+  真上に乗っている。台座を動かす時は対応する elevated アンカーも一緒に動かすこと
+  （Y: RuinPillar=1.10 / FloatingRock=1.04、2026-07-15に下記の高さバグ修正で値変更）。
+  Anchor_05..30 は床アンカー(isElevated=false)。
+
+## 台座FBX刷新(ca13976)でアンカー高さが台座天板より浮いていたバグ（2026-07-15）
+- `ca13976`（遺跡台座・浮遊岩をBlender製FBXモデルに刷新）で `VisualRoot` 配下のメッシュが
+  プリミティブ組み立て→FBXへ差し替わり実測の天板高さが変わったが、
+  `GIPokerStageDecorationSetup.cs` の `BuildRuinPillarPrefab`/`BuildFloatingRockPrefab` 内の
+  `AnchorPoint.localPosition.y` は旧モデル基準の値（1.15 / 1.1）のまま据え置かれていた。
+  結果、カード出現位置が台座の実際の天板より **RuinPillar約12.4cm・FloatingRock約13.3cm 上に浮く**
+  見た目のズレが発生していた（コード中のコメントには新モデルの正しい高さ「天板上面≈y1.03」
+  「草地上面+0.16(=0.96)」と明記されていたにもかかわらず、数値側が追従していなかった）。
+- 検知方法: `VisualRoot`配下の全Rendererの合成bounds（world）とAnchorPointのworldPos.yを
+  実機/PlayModeでなくエディタ上で`uloop-execute-dynamic-code`により直接比較すると、
+  FBX差し替え後のズレはコンパイルエラーにもテストにも出ないため座標の実測比較でしか発見できない。
+- 修正: `AnchorPoint.localPosition.y` を RuinPillar=1.10（天板1.03+浮遊余白0.07）、
+  FloatingRock=1.04（草地上面0.96+浮遊余白0.08）に変更し、
+  メニュー「GIPoker/Stage/Rebuild Pedestal Prefabs」でプレハブへ反映（シーンには触れない）。
+  シーン側の Anchor_01/02(FloatingRock用)・Anchor_03/04(RuinPillar用) の worldPos.y も
+  同じ値へ手動で追従させる必要がある（両者は別系統のオブジェクトで自動連動しないため）。
+- **教訓**: 台座やアイテムの見た目モデルを差し替えるPRでは、「アンカー/接地点などモデル形状に
+  依存する固定オフセット値」を横断的に検索し、コメントに書かれた新しい実測値と実際の設定値が
+  一致しているか diff で確認すること。ビルドが通ってもテストが通っても、この種のズレは検出されない。
