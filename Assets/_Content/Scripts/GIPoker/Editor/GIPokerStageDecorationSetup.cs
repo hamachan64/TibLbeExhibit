@@ -10,10 +10,16 @@ namespace STYLY.TIB_Template.GIPoker
     /// ステージ装飾（Issue #8）のアセット生成・シーン配置を行う Editor セットアップスクリプト。
     ///
     /// メニュー「GIPoker/Stage/Setup Decoration」で以下を一括生成する:
-    /// 1. マテリアル（Assets/_Content/Materials/Stage/）— 接地光輪・魔法陣・パーティクル・石材
+    /// 1. マテリアル（Assets/_Content/Materials/Stage/）— 接地光輪・魔法陣・パーティクル・石材PBR
     /// 2. 台座プレハブ（Assets/_Content/Prefabs/Stage/）— RuinPillar / FloatingRock
+    ///    （見た目は Blender 制作の FBX モデル Assets/_Content/Models/Stage/ を使用。
+    ///      テクスチャは PolyHaven の CC0 素材（mossy_stone_wall / mossy_rock / aerial_grass_rock））
     /// 3. 現在開いているシーンへ装飾ルート「GIPokerStageDecoration」を配置
     ///    （StageDecorationDirector＋BorderCircle＋AmbientMotes＋台座のサンプル配置）
+    ///
+    /// モデルだけ作り直した場合は「GIPoker/Stage/Rebuild Pedestal Prefabs」で
+    /// マテリアルと台座プレハブのみを再生成できる（シーンには触らない。
+    /// プレハブはGUID維持で上書きされるため、シーン上の配置は自動で追従する）。
     ///
     /// **Environment.unity を開いた状態で実行すること**（装飾は共有空間の要素のため）。
     /// 再実行した場合、マテリアル・プレハブは同じGUIDのまま内容を更新し（参照は壊れない）、
@@ -32,6 +38,8 @@ namespace STYLY.TIB_Template.GIPoker
 
         private const string MaterialFolder = "Assets/_Content/Materials/Stage";
         private const string PrefabFolder = "Assets/_Content/Prefabs/Stage";
+        private const string ModelFolder = "Assets/_Content/Models/Stage";
+        private const string TextureFolder = "Assets/_Content/Models/Stage/Textures";
 
         // ---------------------------------------------------------------
         // AmbientMotes パーティクル設定値（PICO 72fps 前提の負荷設計）
@@ -55,19 +63,10 @@ namespace STYLY.TIB_Template.GIPoker
         {
             EnsureFolders();
 
-            // --- 1. マテリアル生成 ---
-            var haloMat = CreateOrUpdateMaterial($"{MaterialFolder}/GIPStage_Halo.mat", "GIPoker/Stage/RadialGlow", mat =>
-            {
-                // 台座の接地光輪: 内側まで塗りつぶした淡い緑金の円。
-                // パススルー輝度に馴染むよう彩度・アルファは控えめ（MR_STAGE_PLAN.md §4-4）
-                mat.SetColor("_Color", new Color(0.65f, 0.92f, 0.60f, 0.55f));
-                mat.SetFloat("_InnerRadius", 0f);
-                mat.SetFloat("_OuterRadius", 0.46f);
-                mat.SetFloat("_Softness", 0.22f);
-                mat.SetFloat("_Intensity", 1f);
-                mat.SetFloat("_Segments", 0f);
-            });
+            // --- 1. マテリアル＋台座プレハブ生成 ---
+            var (pillarPrefab, rockPrefab) = BuildPedestalAssets();
 
+            // --- 2. シーン配置用マテリアル生成 ---
             var borderRingMat = CreateOrUpdateMaterial($"{MaterialFolder}/GIPStage_BorderRing.mat", "GIPoker/Stage/RadialGlow", mat =>
             {
                 // 魔法陣の外周実線。既存 TiB_BorderLine.mat（白の細線 α0.33）の淡さを踏襲
@@ -98,22 +97,6 @@ namespace STYLY.TIB_Template.GIPoker
                 mat.SetFloat("_Softness", 0.5f);
             });
 
-            var stoneMat = CreateOrUpdateMaterial($"{MaterialFolder}/GIPStage_Stone.mat", "Universal Render Pipeline/Lit", mat =>
-            {
-                mat.SetColor("_BaseColor", new Color(0.45f, 0.44f, 0.42f, 1f));
-                mat.SetFloat("_Smoothness", 0.15f);
-            });
-
-            var mossMat = CreateOrUpdateMaterial($"{MaterialFolder}/GIPStage_StoneMoss.mat", "Universal Render Pipeline/Lit", mat =>
-            {
-                mat.SetColor("_BaseColor", new Color(0.36f, 0.45f, 0.32f, 1f));
-                mat.SetFloat("_Smoothness", 0.1f);
-            });
-
-            // --- 2. 台座プレハブ生成 ---
-            var pillarPrefab = BuildRuinPillarPrefab(stoneMat, mossMat, haloMat);
-            var rockPrefab = BuildFloatingRockPrefab(stoneMat, mossMat, haloMat);
-
             // --- 3. シーン配置 ---
             PlaceDecorationRoot(pillarPrefab, rockPrefab, borderRingMat, borderRuneMat, motesMat);
 
@@ -123,12 +106,102 @@ namespace STYLY.TIB_Template.GIPoker
             Debug.Log($"[GIPokerStageDecorationSetup] 完了: マテリアル({MaterialFolder}) / プレハブ({PrefabFolder}) / シーン配置({RootName})。シーンを保存してください");
         }
 
+        /// <summary>
+        /// マテリアルと台座プレハブのみを再生成する（シーンには触らない）。
+        /// Blender で FBX（Assets/_Content/Models/Stage/）を更新した後に実行する。
+        /// </summary>
+        [MenuItem("GIPoker/Stage/Rebuild Pedestal Prefabs")]
+        public static void RebuildPedestalPrefabs()
+        {
+            EnsureFolders();
+            BuildPedestalAssets();
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log($"[GIPokerStageDecorationSetup] 台座プレハブ再生成完了: {PrefabFolder}/RuinPillar.prefab, FloatingRock.prefab");
+        }
+
+        /// <summary>台座用マテリアル（接地光輪＋石材PBR）と台座プレハブを生成する</summary>
+        private static (GameObject pillarPrefab, GameObject rockPrefab) BuildPedestalAssets()
+        {
+            var haloMat = CreateOrUpdateMaterial($"{MaterialFolder}/GIPStage_Halo.mat", "GIPoker/Stage/RadialGlow", mat =>
+            {
+                // 台座の接地光輪: 内側まで塗りつぶした淡い緑金の円。
+                // パススルー輝度に馴染むよう彩度・アルファは控えめ（MR_STAGE_PLAN.md §4-4）
+                mat.SetColor("_Color", new Color(0.65f, 0.92f, 0.60f, 0.55f));
+                mat.SetFloat("_InnerRadius", 0f);
+                mat.SetFloat("_OuterRadius", 0.46f);
+                mat.SetFloat("_Softness", 0.22f);
+                mat.SetFloat("_Intensity", 1f);
+                mat.SetFloat("_Segments", 0f);
+            });
+
+            // 石材PBR（テクスチャは PolyHaven CC0。インポーター設定は取り込み時に構成済み）
+            var ruinStoneMat = CreateOrUpdateMaterial($"{MaterialFolder}/GIPStage_RuinStone.mat", "Universal Render Pipeline/Lit",
+                mat => ConfigureTexturedLit(mat, "mossy_stone_wall", withOcclusion: true));
+            var mossyRockMat = CreateOrUpdateMaterial($"{MaterialFolder}/GIPStage_MossyRock.mat", "Universal Render Pipeline/Lit",
+                mat => ConfigureTexturedLit(mat, "mossy_rock", withOcclusion: true));
+            var grassTopMat = CreateOrUpdateMaterial($"{MaterialFolder}/GIPStage_GrassTop.mat", "Universal Render Pipeline/Lit",
+                mat => ConfigureTexturedLit(mat, "aerial_grass_rock", withOcclusion: false));
+
+            // プリミティブ台座時代の単色マテリアルは役目を終えたため破棄
+            AssetDatabase.DeleteAsset($"{MaterialFolder}/GIPStage_Stone.mat");
+            AssetDatabase.DeleteAsset($"{MaterialFolder}/GIPStage_StoneMoss.mat");
+
+            var pillarPrefab = BuildRuinPillarPrefab(ruinStoneMat, haloMat);
+            var rockPrefab = BuildFloatingRockPrefab(mossyRockMat, grassTopMat, haloMat);
+            return (pillarPrefab, rockPrefab);
+        }
+
+        /// <summary>
+        /// URP Lit マテリアルに PolyHaven テクスチャ一式（BaseMap / NormalMap / Occlusion）を結線する。
+        /// </summary>
+        /// <param name="textureBaseName">テクスチャファイル名の接頭辞（例: mossy_stone_wall）</param>
+        /// <param name="withOcclusion">AOマップを持つ素材なら true</param>
+        private static void ConfigureTexturedLit(Material mat, string textureBaseName, bool withOcclusion)
+        {
+            mat.SetColor("_BaseColor", Color.white);
+            mat.SetFloat("_Smoothness", 0.08f);
+            mat.SetTexture("_BaseMap", LoadTexture($"{textureBaseName}_diffuse_2k.jpg"));
+
+            mat.SetTexture("_BumpMap", LoadTexture($"{textureBaseName}_nor_gl_1k.jpg"));
+            mat.EnableKeyword("_NORMALMAP");
+
+            if (withOcclusion)
+            {
+                mat.SetTexture("_OcclusionMap", LoadTexture($"{textureBaseName}_ao_1k.jpg"));
+                mat.SetFloat("_OcclusionStrength", 1f);
+                mat.EnableKeyword("_OCCLUSIONMAP");
+            }
+        }
+
+        private static Texture2D LoadTexture(string fileName)
+        {
+            var path = $"{TextureFolder}/{fileName}";
+            var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+            if (tex == null)
+            {
+                throw new InvalidOperationException($"テクスチャが見つかりません: {path}（Blenderからの書き出し・Refreshを確認してください）");
+            }
+            return tex;
+        }
+
+        private static GameObject LoadModel(string fileName)
+        {
+            var path = $"{ModelFolder}/{fileName}";
+            var model = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            if (model == null)
+            {
+                throw new InvalidOperationException($"FBXモデルが見つかりません: {path}（Blenderからの書き出し・Refreshを確認してください）");
+            }
+            return model;
+        }
+
         // =============================================================
         // プレハブ構築
         // =============================================================
 
-        /// <summary>遺跡の石柱台座プレハブを生成する</summary>
-        private static GameObject BuildRuinPillarPrefab(Material stone, Material moss, Material halo)
+        /// <summary>遺跡の石柱台座プレハブを生成する（見た目は Blender 制作の RuinPillar.fbx）</summary>
+        private static GameObject BuildRuinPillarPrefab(Material ruinStone, Material halo)
         {
             var root = new GameObject("RuinPillar");
             try
@@ -136,13 +209,9 @@ namespace STYLY.TIB_Template.GIPoker
                 var visualRoot = new GameObject("VisualRoot");
                 visualRoot.transform.SetParent(root.transform, false);
 
-                // 土台（Cube）→ 柱（Cylinder）→ 天板（Cube）の3段構成
-                AddPrimitive(visualRoot.transform, PrimitiveType.Cube, "Base",
-                    new Vector3(0f, 0.06f, 0f), Quaternion.identity, new Vector3(0.5f, 0.12f, 0.5f), stone);
-                AddPrimitive(visualRoot.transform, PrimitiveType.Cylinder, "Column",
-                    new Vector3(0f, 0.54f, 0f), Quaternion.identity, new Vector3(0.32f, 0.42f, 0.32f), stone);
-                AddPrimitive(visualRoot.transform, PrimitiveType.Cube, "Cap",
-                    new Vector3(0f, 1.0f, 0f), Quaternion.Euler(0f, 12f, 0f), new Vector3(0.4f, 0.08f, 0.4f), moss);
+                // FBX: 原点=接地面、天板上面 ≈ y1.03、瓦礫込みフットプリント ≈ 0.8m
+                AddModelInstance(LoadModel("RuinPillar.fbx"), visualRoot.transform, Vector3.zero,
+                    renderer => new[] { ruinStone });
 
                 // アイテム出現アンカー（台座上面）。後続Issueが StageSpawnAnchor を後付けする
                 var anchor = new GameObject("AnchorPoint");
@@ -161,8 +230,8 @@ namespace STYLY.TIB_Template.GIPoker
             }
         }
 
-        /// <summary>浮遊岩台座プレハブを生成する</summary>
-        private static GameObject BuildFloatingRockPrefab(Material stone, Material moss, Material halo)
+        /// <summary>浮遊岩台座プレハブを生成する（見た目は Blender 制作の FloatingRock.fbx）</summary>
+        private static GameObject BuildFloatingRockPrefab(Material mossyRock, Material grassTop, Material halo)
         {
             var root = new GameObject("FloatingRock");
             try
@@ -170,11 +239,12 @@ namespace STYLY.TIB_Template.GIPoker
                 var visualRoot = new GameObject("VisualRoot");
                 visualRoot.transform.SetParent(root.transform, false);
 
-                // 傾けたCube2つの重なりで岩らしいシルエットを作る
-                AddPrimitive(visualRoot.transform, PrimitiveType.Cube, "RockA",
-                    new Vector3(0f, 0.85f, 0f), Quaternion.Euler(18f, 40f, 12f), new Vector3(0.34f, 0.26f, 0.30f), stone);
-                AddPrimitive(visualRoot.transform, PrimitiveType.Cube, "RockB",
-                    new Vector3(0.08f, 0.68f, -0.05f), Quaternion.Euler(-12f, 70f, -8f), new Vector3(0.20f, 0.16f, 0.22f), moss);
+                // FBX: 原点=岩の中心（草地上面 +0.16 / 底の尖り -0.34）。デブリ岩2つ付き。
+                // 岩本体（RockMain）はサブメッシュ2つ（0=岩肌 / 1=上面の草地）
+                AddModelInstance(LoadModel("FloatingRock.fbx"), visualRoot.transform, new Vector3(0f, 0.8f, 0f),
+                    renderer => renderer.sharedMaterials.Length >= 2
+                        ? new[] { mossyRock, grassTop }
+                        : new[] { mossyRock });
 
                 var anchor = new GameObject("AnchorPoint");
                 anchor.transform.SetParent(visualRoot.transform, false);
@@ -182,7 +252,7 @@ namespace STYLY.TIB_Template.GIPoker
 
                 var haloRenderer = AddGroundHalo(root.transform, 0.9f, halo);
 
-                // 岩は空中（y≈0.85）に浮くため、地中に完全に隠すには深めに沈める
+                // 岩は空中（y≈0.8）に浮くため、地中に完全に隠すには深めに沈める
                 WirePedestal(root, StagePedestalKind.FloatingRock, anchor.transform, visualRoot.transform, haloRenderer, sunkenDepth: 1.6f);
 
                 return SavePrefab(root, $"{PrefabFolder}/FloatingRock.prefab");
@@ -193,29 +263,25 @@ namespace STYLY.TIB_Template.GIPoker
             }
         }
 
-        /// <summary>プリミティブを生成して装飾用に整える（コライダー除去・影OFF）</summary>
-        private static GameObject AddPrimitive(Transform parent, PrimitiveType type, string name,
-            Vector3 localPos, Quaternion localRot, Vector3 localScale, Material material)
+        /// <summary>
+        /// FBXモデルをネストプレハブとして配置し、装飾用に整える（マテリアル差し替え・影設定）。
+        /// FBXインポートはコライダーを生成しないため、ハンドトラッキングのタッチ判定は汚さない。
+        /// </summary>
+        /// <param name="materialSelector">各Rendererに割り当てるマテリアル配列を返す関数</param>
+        private static GameObject AddModelInstance(GameObject model, Transform parent, Vector3 localPos,
+            Func<Renderer, Material[]> materialSelector)
         {
-            var go = GameObject.CreatePrimitive(type);
-            go.name = name;
-            go.transform.SetParent(parent, false);
-            go.transform.localPosition = localPos;
-            go.transform.localRotation = localRot;
-            go.transform.localScale = localScale;
+            var instance = (GameObject)PrefabUtility.InstantiatePrefab(model);
+            instance.transform.SetParent(parent, false);
+            instance.transform.localPosition = localPos;
 
-            // 装飾のためコライダーは不要（ハンドトラッキングのタッチ判定を汚さない）
-            var collider = go.GetComponent<Collider>();
-            if (collider != null)
+            foreach (var renderer in instance.GetComponentsInChildren<Renderer>())
             {
-                UnityEngine.Object.DestroyImmediate(collider);
+                renderer.sharedMaterials = materialSelector(renderer);
+                // 影は Shadow Catcher（Issue #1）との整合を統合フェーズで確認するまでキャストのみ許可
+                renderer.receiveShadows = false;
             }
-
-            var renderer = go.GetComponent<Renderer>();
-            renderer.sharedMaterial = material;
-            // 影は Shadow Catcher（Issue #1）との整合を統合フェーズで確認するまでキャストのみ許可
-            renderer.receiveShadows = false;
-            return go;
+            return instance;
         }
 
         /// <summary>接地光輪クアッドを追加する（VisualRootの外・床面固定）</summary>
