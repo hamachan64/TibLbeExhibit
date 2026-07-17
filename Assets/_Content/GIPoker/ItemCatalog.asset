@@ -55,3 +55,6 @@ MonoBehaviour:
   - prefab: {fileID: 3303188655164775788, guid: 8229a760347c72b4aa1b7dcf70add827, type: 3}
     initialCount: 1
     maxCount: 3
+  - prefab: {fileID: 3528394941520316022, guid: 79a658e2adf443341aa5958b1dc4dc8e, type: 3}
+    initialCount: 1
+    maxCount: 1
