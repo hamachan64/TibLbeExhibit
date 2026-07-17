@@ -65,3 +65,12 @@ bpy.ops.export_scene.fbx(
 - uloop-execute-dynamic-code 内の `DestroyImmediate` は `using System;` と衝突して CS0104 になる → `UnityEngine.Object.DestroyImmediate(...)` と完全修飾する。
 - パラメトリック生成の中間データ（パス点・フレーム軸・断面プロファイル）は `bpy.app.driver_namespace` に入れると同一Blenderセッション内の後続execute呼び出しから参照できる（目・舌の配置に使用）。
 - **【最重要】bmesh手組みメッシュの法線内向き → Unityで「透過」**: bmeshで面を張ると、ワインディング次第で法線が内向きになることがある。Blenderのビューポートは両面表示なので**一見正常に見える**が、UnityのURP Lit（Opaque）は裏面カリングするため、体の向こう側＝背景が透けて見える（ユーザー報告「透過されて見える」＝マテリアルやアルファではなく法線が犯人）。**エクスポート前に必ず符号付き体積 `Σ dot(face.center, face.normal)*face.area` の符号で外向き（正）を検証**し、負なら `bmesh` で全面 `f.normal_flip()` する。閉じたメッシュ（胴体・舌）が対象。目のような凸球は `create_uvsphere` なので元から正しい。
+
+## 10. 真実の剣（MCPライブ修正×ヘッドレスCLI併用）での追加学習（2026-07）
+※バブルホースのPR（feature/item-c-bubble-horse）にも別の「## 10」があるためマージ時は番号を振り直すこと。
+- **ユーザーのBlender MCPセッションは古い世代のファイルを開いていることがある**。ヘッドレス側で.blendを更新した後にMCPで見ると旧状態のまま→「直っていない」と誤解される。`bpy.ops.wm.revert_mainfile()` でディスク最新を再読込してから検収する。開いている世代の判定は見た目でなく**メッシュ寸法の数値サンプリング**（zスライスごとの最大|x|など）で行うと確実。
+- **ユーザー立ち会いのデザイン修正はMCPライブで実施し、承認後にビルドスクリプトへポートして再生成一致を確認**するワークフローが有効（スクリプトが常に source of truth。tri数とピボットオフセットdzの一致で同一性を確認できる）。
+- **「白カブリ」はテクスチャ破損とは限らない**。EEVEEのリムライト＋フレネルで暗色マット面が白っぽく見えることがある。`image.pixels` の foreach_get/set ラウンドトリップは値を保存する（sRGB二重変換は起きない）ので、保存済みPNGを `images.load(check_existing=False)` で読み直して実ピクセル値を確認してから原因を切り分けること。
+- 既存テクスチャの**部分リペイント**は、UVレイアウトを矩形リージョン分割にしておけば `foreach_get→numpy矩形マスク編集→foreach_set→im.save()` で安全にできる（他リージョンは無変更のまま保たれる）。`im.save()` は `//..\Assets\...` の相対 filepath でもUnityプロジェクト内へ正しく上書きされ、GUIDも維持される。
+- MCPセッション内でのメッシュ差し替えは `obj.data = 新Mesh`（旧メッシュから materials を引き継ぐ）が手堅い。`bpy.ops.object.shade_auto_smooth(angle=...)` はMCP経由でも動作する（要アクティブ選択）。
+- agent-memory等の共有ファイルは**ブランチ切替で内容が世代交代する**。「さっき読んだ内容が消えた」ときはまずブランチ由来を疑う（未マージPRのセクションはマージで合流する）。
