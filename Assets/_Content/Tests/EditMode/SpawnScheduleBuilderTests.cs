@@ -175,6 +175,309 @@ namespace STYLY.TIB_Template.GIPoker.Tests
             Assert.That(schedule, Is.Empty);
         }
 
+        // ---- 専用アンカー（AllowedEntryIndices）と整列回転（AlignRotation）のテスト ----
+
+        private static SpawnAnchorSpec CreateDedicatedAnchor(Vector3 position, int[] allowedEntries, Quaternion rotation, bool alignRotation)
+        {
+            return new SpawnAnchorSpec(position, isElevated: false, allowedEntries, rotation, alignRotation);
+        }
+
+        [Test]
+        public void Build_AllGenericAnchors_MatchesPreviousAnchorAlgorithm()
+        {
+            // 汎用アンカーのみのシーンでは、専用アンカー導入前のアンカー選択実装と
+            // ビット単位で同一の結果になること（後方互換）。
+            var entries = CreateEntries();
+            var anchors = CreateAnchors(4);
+
+            var expected = LegacyGenericAnchorBuild(Seed, entries, anchors, BasePosition, SpawnAreaSize, MinHeight, MaxHeight, MinSpacing, TrickleInterval);
+            var actual = CreateBuilder().Build(Seed, entries, anchors);
+
+            Assert.That(actual.Count, Is.EqualTo(expected.Count));
+            for (var i = 0; i < actual.Count; i++)
+            {
+                Assert.That(actual[i].NetworkId, Is.EqualTo(expected[i].NetworkId));
+                Assert.That(actual[i].EntryIndex, Is.EqualTo(expected[i].EntryIndex));
+                Assert.That(actual[i].Time, Is.EqualTo(expected[i].Time));
+                Assert.That(actual[i].Position, Is.EqualTo(expected[i].Position));
+                Assert.That(actual[i].YawDegrees, Is.EqualTo(expected[i].YawDegrees));
+                Assert.That(actual[i].UsedAnchor, Is.EqualTo(expected[i].UsedAnchor));
+                Assert.That(actual[i].Rotation, Is.EqualTo(Quaternion.Euler(0f, actual[i].YawDegrees, 0f)));
+            }
+        }
+
+        [Test]
+        public void Build_DedicatedAnchor_OnlyAssignedToSpecifiedEntry()
+        {
+            // エントリ1専用アンカー1点のみ（汎用なし）。エントリ0のスポーンには使われないこと。
+            var entries = new List<SpawnEntrySpec>
+            {
+                new(initialCount: 3, maxCount: 3),
+                new(initialCount: 1, maxCount: 1),
+            };
+            var dedicatedPos = new Vector3(9f, 1f, -9f);
+            var anchors = new List<SpawnAnchorSpec>
+            {
+                CreateDedicatedAnchor(dedicatedPos, new[] { 1 }, Quaternion.identity, alignRotation: false),
+            };
+
+            var schedule = CreateBuilder().Build(Seed, entries, anchors);
+
+            foreach (var spawn in schedule)
+            {
+                if (spawn.EntryIndex == 0)
+                {
+                    Assert.That(spawn.UsedAnchor, Is.False, "専用アンカーは指定外エントリに消費されないこと");
+                    Assert.That(spawn.Position, Is.Not.EqualTo(dedicatedPos));
+                }
+            }
+            var entry1Spawn = schedule.Single(s => s.EntryIndex == 1);
+            Assert.That(entry1Spawn.UsedAnchor, Is.True);
+            Assert.That(entry1Spawn.Position, Is.EqualTo(dedicatedPos));
+        }
+
+        [Test]
+        public void Build_DedicatedAnchors_PreferredOverGeneric()
+        {
+            // 専用アンカーがある限り、指定エントリは汎用より専用を優先して使うこと。
+            var entries = new List<SpawnEntrySpec> { new(initialCount: 2, maxCount: 2) };
+            var dedicatedA = new Vector3(10f, 1f, 0f);
+            var dedicatedB = new Vector3(11f, 1f, 0f);
+            var anchors = new List<SpawnAnchorSpec>
+            {
+                new(new Vector3(0f, 1f, 0f), isElevated: false), // 汎用
+                CreateDedicatedAnchor(dedicatedA, new[] { 0 }, Quaternion.identity, alignRotation: false),
+                new(new Vector3(1f, 1f, -1f), isElevated: false), // 汎用
+                CreateDedicatedAnchor(dedicatedB, new[] { 0 }, Quaternion.identity, alignRotation: false),
+            };
+
+            var schedule = CreateBuilder().Build(Seed, entries, anchors);
+
+            Assert.That(schedule.Count, Is.EqualTo(2));
+            var usedPositions = schedule.Select(s => s.Position).ToList();
+            CollectionAssert.AreEquivalent(new[] { dedicatedA, dedicatedB }, usedPositions,
+                "汎用アンカーが残っていても専用アンカーが優先されること");
+        }
+
+        [Test]
+        public void Build_DedicatedExhausted_FallsBackToGenericThenBox()
+        {
+            // 専用1点＋汎用1点でエントリ0を3体出すと、専用→汎用→箱型の順に遷移すること。
+            var entries = new List<SpawnEntrySpec> { new(initialCount: 3, maxCount: 3) };
+            var dedicatedPos = new Vector3(10f, 1f, 0f);
+            var genericPos = new Vector3(0f, 1f, -2f);
+            var anchors = new List<SpawnAnchorSpec>
+            {
+                new(genericPos, isElevated: false),
+                CreateDedicatedAnchor(dedicatedPos, new[] { 0 }, Quaternion.identity, alignRotation: false),
+            };
+
+            var schedule = CreateBuilder().Build(Seed, entries, anchors);
+
+            Assert.That(schedule.Count, Is.EqualTo(3));
+            Assert.That(schedule[0].Position, Is.EqualTo(dedicatedPos), "1体目は専用アンカー");
+            Assert.That(schedule[1].Position, Is.EqualTo(genericPos), "2体目は汎用アンカー");
+            Assert.That(schedule[2].UsedAnchor, Is.False, "3体目は箱型フォールバック");
+        }
+
+        [Test]
+        public void Build_AlignRotationAnchor_UsesAnchorRotation()
+        {
+            var entries = new List<SpawnEntrySpec> { new(initialCount: 2, maxCount: 2) };
+            var anchorRotation = Quaternion.Euler(10f, 200f, 30f); // 木の幹への張り付きを模した回転
+            var alignedPos = new Vector3(10f, 1f, 0f);
+            var anchors = new List<SpawnAnchorSpec>
+            {
+                CreateDedicatedAnchor(alignedPos, new[] { 0 }, anchorRotation, alignRotation: true),
+                new(new Vector3(0f, 1f, -2f), isElevated: false),
+            };
+
+            var schedule = CreateBuilder().Build(Seed, entries, anchors);
+
+            var aligned = schedule.Single(s => s.Position == alignedPos);
+            var randomYaw = schedule.Single(s => s.Position != alignedPos);
+            Assert.That(aligned.Rotation, Is.EqualTo(anchorRotation), "整列アンカーはアンカーの回転を適用すること");
+            Assert.That(randomYaw.Rotation, Is.EqualTo(Quaternion.Euler(0f, randomYaw.YawDegrees, 0f)),
+                "非整列スポーンは従来どおりランダム yaw であること");
+        }
+
+        [Test]
+        public void Build_AlignRotation_DoesNotAffectRandomStream()
+        {
+            // 整列フラグの有無で rng の消費順が変わらないこと
+            // （変わると整列アンカー導入で後続すべてのスポーン位置がズレ、既存配置が激変してしまう）。
+            var entries = CreateEntries();
+            var rotation = Quaternion.Euler(0f, 90f, 45f);
+            List<SpawnAnchorSpec> CreateMixedAnchors(bool align)
+            {
+                return new List<SpawnAnchorSpec>
+                {
+                    CreateDedicatedAnchor(new Vector3(10f, 1f, 0f), new[] { 0 }, rotation, align),
+                    new(new Vector3(0f, 1f, -1f), isElevated: false),
+                    new(new Vector3(1f, 1f, -2f), isElevated: false),
+                };
+            }
+
+            var withAlign = CreateBuilder().Build(Seed, entries, CreateMixedAnchors(align: true));
+            var withoutAlign = CreateBuilder().Build(Seed, entries, CreateMixedAnchors(align: false));
+
+            Assert.That(withAlign.Count, Is.EqualTo(withoutAlign.Count));
+            for (var i = 0; i < withAlign.Count; i++)
+            {
+                Assert.That(withAlign[i].Position, Is.EqualTo(withoutAlign[i].Position));
+                Assert.That(withAlign[i].YawDegrees, Is.EqualTo(withoutAlign[i].YawDegrees));
+            }
+        }
+
+        [Test]
+        public void Build_WithDedicatedAnchors_SameSeedProducesIdenticalSchedule()
+        {
+            var entries = CreateEntries();
+            List<SpawnAnchorSpec> CreateMixed()
+            {
+                var anchors = CreateAnchors(3);
+                anchors.Add(CreateDedicatedAnchor(new Vector3(10f, 1f, 0f), new[] { 1 }, Quaternion.Euler(0f, 45f, 0f), alignRotation: true));
+                return anchors;
+            }
+
+            var scheduleA = CreateBuilder().Build(Seed, entries, CreateMixed());
+            var scheduleB = CreateBuilder().Build(Seed, entries, CreateMixed());
+
+            Assert.That(scheduleA.Count, Is.EqualTo(scheduleB.Count));
+            for (var i = 0; i < scheduleA.Count; i++)
+            {
+                Assert.That(scheduleA[i].Position, Is.EqualTo(scheduleB[i].Position));
+                Assert.That(scheduleA[i].Rotation, Is.EqualTo(scheduleB[i].Rotation));
+                Assert.That(scheduleA[i].UsedAnchor, Is.EqualTo(scheduleB[i].UsedAnchor));
+            }
+        }
+
+        // ---- ResolveAllowedEntryIndices（cardId → エントリインデックス解決）のテスト ----
+
+        private static readonly Dictionary<string, int> CardIdMap = new()
+        {
+            { "d_flower", 0 },
+            { "c_stag_beetle", 1 },
+            { "a_risky_dice", 2 },
+        };
+
+        [Test]
+        public void ResolveAllowedEntryIndices_NullOrEmpty_ReturnsNull()
+        {
+            Assert.That(SpawnScheduleBuilder.ResolveAllowedEntryIndices(null, CardIdMap), Is.Null);
+            Assert.That(SpawnScheduleBuilder.ResolveAllowedEntryIndices(new List<string>(), CardIdMap), Is.Null);
+        }
+
+        [Test]
+        public void ResolveAllowedEntryIndices_ResolvesKnownIdsInOrder()
+        {
+            var result = SpawnScheduleBuilder.ResolveAllowedEntryIndices(
+                new List<string> { "a_risky_dice", "d_flower" }, CardIdMap);
+
+            CollectionAssert.AreEqual(new[] { 2, 0 }, result);
+        }
+
+        [Test]
+        public void ResolveAllowedEntryIndices_UnknownIdsAreIgnoredAndCollected()
+        {
+            var unknown = new List<string>();
+            var result = SpawnScheduleBuilder.ResolveAllowedEntryIndices(
+                new List<string> { "c_stag_beetle", "typo_id" }, CardIdMap, unknown);
+
+            CollectionAssert.AreEqual(new[] { 1 }, result);
+            CollectionAssert.AreEqual(new[] { "typo_id" }, unknown);
+        }
+
+        [Test]
+        public void ResolveAllowedEntryIndices_AllUnknown_ReturnsEmptyNotNull()
+        {
+            // 全件未知（typo）の専用アンカーは「何も出ないアンカー」になる（汎用に落とすと誤配置になるため）
+            var result = SpawnScheduleBuilder.ResolveAllowedEntryIndices(
+                new List<string> { "typo_a", "typo_b" }, CardIdMap);
+
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result, Is.Empty);
+        }
+
+        [Test]
+        public void ResolveAllowedEntryIndices_DuplicateIdsAreDeduplicated()
+        {
+            var result = SpawnScheduleBuilder.ResolveAllowedEntryIndices(
+                new List<string> { "d_flower", "d_flower" }, CardIdMap);
+
+            CollectionAssert.AreEqual(new[] { 0 }, result);
+        }
+
+        /// <summary>
+        /// 専用アンカー導入前の SpawnScheduleBuilder（汎用アンカー選択のみ）のロジックを
+        /// 忠実に再現した参照実装（テスト専用）。全アンカー汎用時のビット互換の担保に使う。
+        /// </summary>
+        private static List<ScheduledSpawn> LegacyGenericAnchorBuild(
+            int seed, IReadOnlyList<SpawnEntrySpec> entries, IReadOnlyList<SpawnAnchorSpec> anchors,
+            Vector3 basePosition, Vector3 spawnAreaSize,
+            float minHeight, float maxHeight, float minSpacing, float trickleInterval)
+        {
+            var schedule = new List<ScheduledSpawn>();
+            var rng = new System.Random(seed);
+            var placedPositions = new List<Vector3>();
+            var availableAnchors = new List<SpawnAnchorSpec>(anchors);
+            var networkId = 0;
+
+            void LegacyAnchorAddSpawn(int entryIndex, float time)
+            {
+                Vector3 position;
+                var usedAnchor = availableAnchors.Count > 0;
+                if (usedAnchor)
+                {
+                    var index = rng.Next(availableAnchors.Count);
+                    position = availableAnchors[index].Position;
+                    var last = availableAnchors.Count - 1;
+                    availableAnchors[index] = availableAnchors[last];
+                    availableAnchors.RemoveAt(last);
+                }
+                else
+                {
+                    position = LegacyFindSpawnPosition(rng, placedPositions, basePosition, spawnAreaSize, minHeight, maxHeight, minSpacing);
+                }
+                placedPositions.Add(position);
+                var yaw = (float)(rng.NextDouble() * 360.0);
+                schedule.Add(new ScheduledSpawn(networkId, entryIndex, position, yaw, time, usedAnchor));
+                networkId++;
+            }
+
+            for (var i = 0; i < entries.Count; i++)
+            {
+                var entry = entries[i];
+                var count = Mathf.Min(entry.InitialCount, entry.MaxCount);
+                for (var n = 0; n < count; n++)
+                {
+                    LegacyAnchorAddSpawn(i, 0f);
+                }
+            }
+
+            var remaining = new List<int>();
+            for (var i = 0; i < entries.Count; i++)
+            {
+                var entry = entries[i];
+                var rest = entry.MaxCount - Mathf.Min(entry.InitialCount, entry.MaxCount);
+                for (var n = 0; n < rest; n++)
+                {
+                    remaining.Add(i);
+                }
+            }
+            for (var i = remaining.Count - 1; i > 0; i--)
+            {
+                var j = rng.Next(i + 1);
+                (remaining[i], remaining[j]) = (remaining[j], remaining[i]);
+            }
+            for (var k = 0; k < remaining.Count; k++)
+            {
+                LegacyAnchorAddSpawn(remaining[k], trickleInterval * (k + 1));
+            }
+
+            return schedule;
+        }
+
         /// <summary>アンカー導入前の ItemSpawnManager.BuildSchedule のロジックを忠実に再現した参照実装（テスト専用）。</summary>
         private static List<ScheduledSpawn> LegacyBoxOnlyBuild(
             int seed, IReadOnlyList<SpawnEntrySpec> entries, Vector3 basePosition, Vector3 spawnAreaSize,

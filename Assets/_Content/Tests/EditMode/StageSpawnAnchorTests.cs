@@ -47,5 +47,50 @@ namespace STYLY.TIB_Template.GIPoker.Tests
 
             Assert.That(anchor.IsElevated, Is.True);
         }
+
+        [Test]
+        public void AllowedCardIds_DefaultsToEmpty_AndAlignDefaultsToFalse()
+        {
+            go = new GameObject("Anchor");
+            var anchor = go.AddComponent<StageSpawnAnchor>();
+
+            Assert.That(anchor.AllowedCardIds, Is.Empty, "デフォルトは汎用アンカー（従来挙動）であること");
+            Assert.That(anchor.AlignToAnchorRotation, Is.False, "デフォルトはランダム yaw（従来挙動）であること");
+        }
+
+        [Test]
+        public void AllowedCardIds_ReflectsSerializedAllowedCardIdsField()
+        {
+            // Editor セットアップスクリプト（GIPokerPropSetup）が SerializedObject 経由で
+            // アンカーへ cardId を書き込む際の結合点のため、フィールド名を契約として検証する。
+            go = new GameObject("Anchor");
+            var anchor = go.AddComponent<StageSpawnAnchor>();
+
+            var so = new SerializedObject(anchor);
+            var prop = so.FindProperty("allowedCardIds");
+            Assert.That(prop, Is.Not.Null, "allowedCardIds という名前の SerializeField が存在すること");
+
+            prop.arraySize = 1;
+            prop.GetArrayElementAtIndex(0).stringValue = "c_stag_beetle";
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            Assert.That(anchor.AllowedCardIds, Is.EqualTo(new[] { "c_stag_beetle" }));
+        }
+
+        [Test]
+        public void AlignToAnchorRotation_ReflectsSerializedField()
+        {
+            go = new GameObject("Anchor");
+            var anchor = go.AddComponent<StageSpawnAnchor>();
+
+            var so = new SerializedObject(anchor);
+            var prop = so.FindProperty("alignToAnchorRotation");
+            Assert.That(prop, Is.Not.Null, "alignToAnchorRotation という名前の SerializeField が存在すること");
+
+            prop.boolValue = true;
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            Assert.That(anchor.AlignToAnchorRotation, Is.True);
+        }
     }
 }
