@@ -1,0 +1,130 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &7758787177907956466
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 20182728a1d29bc42a2bb8cb15ef0324, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 20182728a1d29bc42a2bb8cb15ef0324, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 20182728a1d29bc42a2bb8cb15ef0324, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 20182728a1d29bc42a2bb8cb15ef0324, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 20182728a1d29bc42a2bb8cb15ef0324, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 20182728a1d29bc42a2bb8cb15ef0324, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 20182728a1d29bc42a2bb8cb15ef0324, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 20182728a1d29bc42a2bb8cb15ef0324, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 20182728a1d29bc42a2bb8cb15ef0324, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 20182728a1d29bc42a2bb8cb15ef0324, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 20182728a1d29bc42a2bb8cb15ef0324, type: 3}
+      propertyPath: m_Name
+      value: Prop_MerchantStall
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3977464317933090126, guid: 20182728a1d29bc42a2bb8cb15ef0324, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3724811979579510139}
+    - targetCorrespondingSourceObject: {fileID: -6967968822495930887, guid: 20182728a1d29bc42a2bb8cb15ef0324, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4138803851424146723}
+    - targetCorrespondingSourceObject: {fileID: 2633615938579225573, guid: 20182728a1d29bc42a2bb8cb15ef0324, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7857597192595461143}
+  m_SourcePrefab: {fileID: 100100000, guid: 20182728a1d29bc42a2bb8cb15ef0324, type: 3}
+--- !u!1 &5701773090059284759 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2633615938579225573, guid: 20182728a1d29bc42a2bb8cb15ef0324, type: 3}
+  m_PrefabInstance: {fileID: 7758787177907956466}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7857597192595461143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5701773090059284759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d209390e2e24449ca8cba4898398ba92, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TibLbeExhibit.Content::STYLY.TIB_Template.GIPoker.StageSpawnAnchor
+  isElevated: 1
+  allowedCardIds:
+  - c_pocket_watch
+  alignToAnchorRotation: 0
+--- !u!1 &6673900812483059644 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3977464317933090126, guid: 20182728a1d29bc42a2bb8cb15ef0324, type: 3}
+  m_PrefabInstance: {fileID: 7758787177907956466}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3724811979579510139
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6673900812483059644}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d209390e2e24449ca8cba4898398ba92, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TibLbeExhibit.Content::STYLY.TIB_Template.GIPoker.StageSpawnAnchor
+  isElevated: 1
+  allowedCardIds: []
+  alignToAnchorRotation: 0
+--- !u!1 &8421857276757622539 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -6967968822495930887, guid: 20182728a1d29bc42a2bb8cb15ef0324, type: 3}
+  m_PrefabInstance: {fileID: 7758787177907956466}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4138803851424146723
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8421857276757622539}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d209390e2e24449ca8cba4898398ba92, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TibLbeExhibit.Content::STYLY.TIB_Template.GIPoker.StageSpawnAnchor
+  isElevated: 1
+  allowedCardIds:
+  - b_gallery_fake
+  alignToAnchorRotation: 1
