@@ -52,6 +52,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: Prop_TavernStall
       objectReference: {fileID: 0}
+    - target: {fileID: 2875819888752369692, guid: c1f9c90c3e637484abaad30e8c8d1658, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.55
+      objectReference: {fileID: 0}
+    - target: {fileID: 2875819888752369692, guid: c1f9c90c3e637484abaad30e8c8d1658, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.04
+      objectReference: {fileID: 0}
+    - target: {fileID: 2875819888752369692, guid: c1f9c90c3e637484abaad30e8c8d1658, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.42
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

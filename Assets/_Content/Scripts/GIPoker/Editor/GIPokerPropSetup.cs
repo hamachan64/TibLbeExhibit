@@ -88,33 +88,39 @@ namespace STYLY.TIB_Template.GIPoker
 
         private static readonly PlacementSpec[] Placements =
         {
-            new PlacementSpec { PrefabName = "Prop_BigTree", InstanceName = "BigTree_A", Position = new Vector3(-6.05f, 0f, -1.2f), RotationY = 140f },
-            new PlacementSpec { PrefabName = "Prop_BigTree", InstanceName = "BigTree_B", Position = new Vector3(-3.55f, 0f, 0.2f), RotationY = -60f },
-            new PlacementSpec { PrefabName = "Prop_FallenLog", InstanceName = "FallenLog", Position = new Vector3(-4.1f, 0f, -0.7f), RotationY = 25f },
-            new PlacementSpec { PrefabName = "Prop_FlowerPatch", InstanceName = "FlowerPatch", Position = new Vector3(-5.7f, 0f, -2.7f), RotationY = 0f },
-            new PlacementSpec { PrefabName = "Prop_Bush_A", InstanceName = "Bush_A1", Position = new Vector3(-3.7f, 0f, -1.9f), RotationY = 70f },
-            new PlacementSpec { PrefabName = "Prop_HollowRock", InstanceName = "HollowRock", Position = new Vector3(-3.65f, 0f, -3.6f), RotationY = 180f },
-            new PlacementSpec { PrefabName = "Prop_Bush_B", InstanceName = "Bush_B1", Position = new Vector3(-6.2f, 0f, -3.9f), RotationY = 200f },
+            // 5〜6人同時プレイのため中央空間を最大化する「壁付け」レイアウト:
+            // プロップは東西の境界（VRArea X -2.75 / -7.05）際へ寄せ、
+            // アイテム出現点（アンカー）は境界から0.2m以上内側＝手が届く範囲に収める。
+            // 中央は石畳の道（CobblePath）が森→街→遺跡を貫き、祭壇のみ道の終着点として中央終端に置く。
+            new PlacementSpec { PrefabName = "Prop_BigTree", InstanceName = "BigTree_A", Position = new Vector3(-6.55f, 0f, -1.2f), RotationY = 140f },
+            new PlacementSpec { PrefabName = "Prop_BigTree", InstanceName = "BigTree_B", Position = new Vector3(-3.25f, 0f, 0.2f), RotationY = -60f },
+            new PlacementSpec { PrefabName = "Prop_FallenLog", InstanceName = "FallenLog", Position = new Vector3(-3.3f, 0f, -0.85f), RotationY = 75f },
+            new PlacementSpec { PrefabName = "Prop_FlowerPatch", InstanceName = "FlowerPatch", Position = new Vector3(-6.35f, 0f, -2.7f), RotationY = 0f },
+            new PlacementSpec { PrefabName = "Prop_Bush_A", InstanceName = "Bush_A1", Position = new Vector3(-3.2f, 0f, -1.9f), RotationY = 70f },
+            new PlacementSpec { PrefabName = "Prop_HollowRock", InstanceName = "HollowRock", Position = new Vector3(-3.25f, 0f, -3.6f), RotationY = 180f },
+            new PlacementSpec { PrefabName = "Prop_Bush_B", InstanceName = "Bush_B1", Position = new Vector3(-6.6f, 0f, -3.9f), RotationY = 200f },
             new PlacementSpec { PrefabName = "Prop_CobblePath", InstanceName = "CobblePath_A", Position = new Vector3(-4.85f, 0f, -5.6f), RotationY = 0f },
             new PlacementSpec { PrefabName = "Prop_CobblePath", InstanceName = "CobblePath_B", Position = new Vector3(-4.95f, 0f, -8.4f), RotationY = 90f },
+            // 小屋は背面(-7.2)が既に境界外＝壁付け済み。これ以上下げると作業台のアイテムが到達圏外になるため据え置き
             new PlacementSpec { PrefabName = "Prop_AlchemistHut", InstanceName = "AlchemistHut", Position = new Vector3(-6.3f, 0f, -5.9f), RotationY = 90f },
-            new PlacementSpec { PrefabName = "Prop_WeaponRack", InstanceName = "WeaponRack", Position = new Vector3(-5.9f, 0f, -4.7f), RotationY = 60f },
-            new PlacementSpec { PrefabName = "Prop_TavernStall", InstanceName = "TavernStall", Position = new Vector3(-3.55f, 0f, -6.6f), RotationY = -90f },
-            new PlacementSpec { PrefabName = "Prop_MerchantStall", InstanceName = "MerchantStall", Position = new Vector3(-6.25f, 0f, -8.3f), RotationY = 90f },
-            new PlacementSpec { PrefabName = "Prop_Well", InstanceName = "Well", Position = new Vector3(-4.85f, 0f, -9.8f), RotationY = 15f },
-            new PlacementSpec { PrefabName = "Prop_CrateSet", InstanceName = "CrateSet", Position = new Vector3(-3.5f, 0f, -8.7f), RotationY = 40f },
-            new PlacementSpec { PrefabName = "Prop_LanternPost", InstanceName = "LanternPost_1", Position = new Vector3(-3.8f, 0f, -4.9f), RotationY = 180f },
-            new PlacementSpec { PrefabName = "Prop_LanternPost", InstanceName = "LanternPost_2", Position = new Vector3(-6.0f, 0f, -7.3f), RotationY = 0f },
-            new PlacementSpec { PrefabName = "Prop_LanternPost", InstanceName = "LanternPost_3", Position = new Vector3(-3.9f, 0f, -10.2f), RotationY = 180f },
-            new PlacementSpec { PrefabName = "Prop_SignPost", InstanceName = "SignPost", Position = new Vector3(-4.3f, 0f, -4.35f), RotationY = -30f },
-            new PlacementSpec { PrefabName = "Prop_Fence", InstanceName = "Fence_A", Position = new Vector3(-3.5f, 0f, 0.9f), RotationY = 90f },
-            new PlacementSpec { PrefabName = "Prop_Fence", InstanceName = "Fence_B", Position = new Vector3(-6.15f, 0f, -10.5f), RotationY = 0f },
-            new PlacementSpec { PrefabName = "Prop_Fence", InstanceName = "Fence_C", Position = new Vector3(-3.45f, 0f, -11.2f), RotationY = 0f },
+            new PlacementSpec { PrefabName = "Prop_WeaponRack", InstanceName = "WeaponRack", Position = new Vector3(-6.5f, 0f, -4.7f), RotationY = 60f },
+            new PlacementSpec { PrefabName = "Prop_TavernStall", InstanceName = "TavernStall", Position = new Vector3(-3.2f, 0f, -6.6f), RotationY = -90f },
+            new PlacementSpec { PrefabName = "Prop_MerchantStall", InstanceName = "MerchantStall", Position = new Vector3(-6.6f, 0f, -8.3f), RotationY = 90f },
+            new PlacementSpec { PrefabName = "Prop_Well", InstanceName = "Well", Position = new Vector3(-6.55f, 0f, -10.25f), RotationY = 90f },
+            new PlacementSpec { PrefabName = "Prop_CrateSet", InstanceName = "CrateSet", Position = new Vector3(-3.15f, 0f, -8.7f), RotationY = 40f },
+            // 街灯はアーム（ランタン）を街路側へ向ける（rotY 0=アーム-X / 180=アーム+X）
+            new PlacementSpec { PrefabName = "Prop_LanternPost", InstanceName = "LanternPost_1", Position = new Vector3(-3.3f, 0f, -4.9f), RotationY = 0f },
+            new PlacementSpec { PrefabName = "Prop_LanternPost", InstanceName = "LanternPost_2", Position = new Vector3(-6.6f, 0f, -7.3f), RotationY = 180f },
+            new PlacementSpec { PrefabName = "Prop_LanternPost", InstanceName = "LanternPost_3", Position = new Vector3(-3.3f, 0f, -10.2f), RotationY = 0f },
+            new PlacementSpec { PrefabName = "Prop_SignPost", InstanceName = "SignPost", Position = new Vector3(-3.15f, 0f, -4.3f), RotationY = -30f },
+            new PlacementSpec { PrefabName = "Prop_Fence", InstanceName = "Fence_A", Position = new Vector3(-3.05f, 0f, 0.9f), RotationY = 90f },
+            new PlacementSpec { PrefabName = "Prop_Fence", InstanceName = "Fence_B", Position = new Vector3(-3.05f, 0f, -9.6f), RotationY = 90f },
+            new PlacementSpec { PrefabName = "Prop_Fence", InstanceName = "Fence_C", Position = new Vector3(-3.2f, 0f, -11.2f), RotationY = 0f },
             new PlacementSpec { PrefabName = "Prop_Altar", InstanceName = "Altar", Position = new Vector3(-4.9f, 0f, -13.5f), RotationY = 0f },
-            new PlacementSpec { PrefabName = "Prop_RuinWall", InstanceName = "RuinWall", Position = new Vector3(-6.3f, 0f, -12.4f), RotationY = 90f },
-            new PlacementSpec { PrefabName = "Prop_Pedestal", InstanceName = "Pedestal", Position = new Vector3(-3.6f, 0f, -12.7f), RotationY = 0f },
+            new PlacementSpec { PrefabName = "Prop_RuinWall", InstanceName = "RuinWall", Position = new Vector3(-6.7f, 0f, -12.4f), RotationY = 90f },
+            new PlacementSpec { PrefabName = "Prop_Pedestal", InstanceName = "Pedestal", Position = new Vector3(-3.2f, 0f, -12.7f), RotationY = 0f },
             // 祭壇(-13.5)と重ならないよう西へオフセットし、開口(ローカル-Z)を回廊中心へ向ける
-            new PlacementSpec { PrefabName = "Prop_Shrine", InstanceName = "Shrine", Position = new Vector3(-6.0f, 0f, -14.35f), RotationY = 135f },
+            new PlacementSpec { PrefabName = "Prop_Shrine", InstanceName = "Shrine", Position = new Vector3(-6.3f, 0f, -14.4f), RotationY = 135f },
         };
 
         [MenuItem("GIPoker/Stage/Setup Props")]
@@ -300,6 +306,22 @@ namespace STYLY.TIB_Template.GIPoker
             return result;
         }
 
+        /// <summary>
+        /// FBX内蔵アンカーのローカル位置オーバーライド。
+        /// 壁付けレイアウトで境界外・到達圏外になるアンカー（奥の棚・陳列台）を、
+        /// 手が届く面（作業台・カウンター）へ移す。キー=プレハブ名、ノード名プレフィックスで一致。
+        /// FBXを再エクスポートせずに済み、セットアップ再実行しても失われない。
+        /// </summary>
+        private static readonly Dictionary<string, (string nodePrefix, Vector3 localPosition)[]> AnchorLocalPositionOverrides =
+            new Dictionary<string, (string, Vector3)[]>
+            {
+                // 奥壁の棚(0.75,1.56,-0.8)は境界外(-7.1)のため作業台上へ
+                { "Prop_AlchemistHut", new[] { ("SA__any", new Vector3(0.05f, 0.62f, -0.48f)) } },
+                // 奥の陳列台は壁際に寄せた結果ほぼ境界上になるため、前カウンター上へ
+                { "Prop_TavernStall", new[] { ("SA__any", new Vector3(0.55f, 1.04f, 0.42f)) } },
+                { "Prop_MerchantStall", new[] { ("SA__any", new Vector3(-0.5f, 1.0f, 0.37f)) } },
+            };
+
         private static GameObject BuildPrefab(GameObject model, string propName)
         {
             var instance = (GameObject)PrefabUtility.InstantiatePrefab(model);
@@ -310,9 +332,24 @@ namespace STYLY.TIB_Template.GIPoker
                     .Where(t => t.name.StartsWith("SA__", StringComparison.Ordinal))
                     .ToList();
 
+                AnchorLocalPositionOverrides.TryGetValue(propName, out var overrides);
+
                 foreach (var node in saNodes)
                 {
                     var spec = ParseSpawnAnchorName(node.name);
+
+                    // isElevated 判定より先にローカル位置オーバーライドを適用する
+                    if (overrides != null)
+                    {
+                        foreach (var (nodePrefix, localPosition) in overrides)
+                        {
+                            if (node.name.StartsWith(nodePrefix, StringComparison.Ordinal))
+                            {
+                                node.localPosition = localPosition;
+                                Debug.Log($"[GIPokerPropSetup] {propName}/{node.name} のローカル位置を {localPosition} にオーバーライド");
+                            }
+                        }
+                    }
                     var anchor = node.gameObject.AddComponent<StageSpawnAnchor>();
                     var so = new SerializedObject(anchor);
 
