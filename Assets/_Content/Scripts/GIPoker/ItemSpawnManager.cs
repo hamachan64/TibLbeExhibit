@@ -129,13 +129,52 @@ namespace STYLY.TIB_Template.GIPoker
         {
             var roots = gameObject.scene.GetRootGameObjects();
             var anchors = StageSpawnAnchorEnumerator.EnumerateInHierarchyOrder(roots);
+            var cardIdToEntryIndex = BuildCardIdToEntryIndexMap();
             var specs = new List<SpawnAnchorSpec>(anchors.Count);
+            var unknownCardIds = new List<string>();
             for (var i = 0; i < anchors.Count; i++)
             {
                 var anchor = anchors[i];
-                specs.Add(new SpawnAnchorSpec(anchor.transform.position, anchor.IsElevated));
+                unknownCardIds.Clear();
+                var allowed = SpawnScheduleBuilder.ResolveAllowedEntryIndices(
+                    anchor.AllowedCardIds, cardIdToEntryIndex, unknownCardIds);
+                foreach (var unknown in unknownCardIds)
+                {
+                    Debug.LogWarning($"[ItemSpawnManager] アンカー '{anchor.name}' の allowedCardIds '{unknown}' はカタログに存在しません（無視されます）", anchor);
+                }
+                specs.Add(new SpawnAnchorSpec(
+                    anchor.transform.position,
+                    anchor.IsElevated,
+                    allowed,
+                    anchor.transform.rotation,
+                    anchor.AlignToAnchorRotation));
             }
             return specs;
+        }
+
+        /// <summary>
+        /// カタログの prefab から cardId → エントリインデックスの対応表を作る
+        /// （StageSpawnAnchor.AllowedCardIds の解決用）。
+        /// </summary>
+        private Dictionary<string, int> BuildCardIdToEntryIndexMap()
+        {
+            var map = new Dictionary<string, int>();
+            var entries = catalog.Entries;
+            for (var i = 0; i < entries.Count; i++)
+            {
+                var prefab = entries[i].prefab;
+                if (prefab == null)
+                {
+                    continue;
+                }
+                var item = prefab.GetComponent<CardizableItemBase>();
+                var cardId = item != null && item.Definition != null ? item.Definition.CardId : null;
+                if (!string.IsNullOrEmpty(cardId) && !map.ContainsKey(cardId))
+                {
+                    map.Add(cardId, i);
+                }
+            }
+            return map;
         }
 
         private async UniTask RunScheduleAsync(CancellationToken ct)
@@ -163,7 +202,8 @@ namespace STYLY.TIB_Template.GIPoker
             {
                 return;
             }
-            var go = Instantiate(entry.prefab, spawn.Position, Quaternion.Euler(0f, spawn.YawDegrees, 0f));
+            // 整列アンカー（木の幹・壁龕など）ではアンカーの回転、それ以外はランダム yaw が入っている
+            var go = Instantiate(entry.prefab, spawn.Position, spawn.Rotation);
             var item = go.GetComponent<CardizableItemBase>();
             if (item != null && CardNetworkSync.Instance != null)
             {

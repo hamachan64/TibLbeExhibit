@@ -34,10 +34,55 @@ namespace STYLY.TIB_Template.GIPoker
         /// <summary>台座上（true）か床パッチ上（false）か</summary>
         public readonly bool IsElevated;
 
+        /// <summary>
+        /// このアンカーに出現してよいカタログエントリのインデックス
+        /// （null または空 = 全アイテム可の汎用アンカー。従来の2引数コンストラクタは汎用になる）
+        /// </summary>
+        public readonly IReadOnlyList<int> AllowedEntryIndices;
+
+        /// <summary>アンカーのワールド回転（AlignRotation が true のときスポーンへ適用される）</summary>
+        public readonly Quaternion Rotation;
+
+        /// <summary>スポーン時にアンカーの回転を適用するか（false ならランダム yaw）</summary>
+        public readonly bool AlignRotation;
+
         public SpawnAnchorSpec(Vector3 position, bool isElevated)
+            : this(position, isElevated, null, Quaternion.identity, alignRotation: false)
+        {
+        }
+
+        public SpawnAnchorSpec(
+            Vector3 position,
+            bool isElevated,
+            IReadOnlyList<int> allowedEntryIndices,
+            Quaternion rotation,
+            bool alignRotation)
         {
             Position = position;
             IsElevated = isElevated;
+            AllowedEntryIndices = allowedEntryIndices;
+            Rotation = rotation;
+            AlignRotation = alignRotation;
+        }
+
+        /// <summary>専用アンカー（出現アイテムが cardId 指定で限定されている）かどうか</summary>
+        public bool IsDedicated => AllowedEntryIndices != null && AllowedEntryIndices.Count > 0;
+
+        /// <summary>指定エントリのアイテムがこのアンカーに出現できるか</summary>
+        public bool Accepts(int entryIndex)
+        {
+            if (!IsDedicated)
+            {
+                return true;
+            }
+            for (var i = 0; i < AllowedEntryIndices.Count; i++)
+            {
+                if (AllowedEntryIndices[i] == entryIndex)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
@@ -53,7 +98,18 @@ namespace STYLY.TIB_Template.GIPoker
         /// <summary>StageSpawnAnchor の位置を使用したか（false は箱型ランダム配置へのフォールバック）</summary>
         public readonly bool UsedAnchor;
 
+        /// <summary>
+        /// 適用すべきワールド回転。整列アンカー（AlignRotation）ならアンカーの回転、
+        /// それ以外は Quaternion.Euler(0, YawDegrees, 0) と一致する。
+        /// </summary>
+        public readonly Quaternion Rotation;
+
         public ScheduledSpawn(int networkId, int entryIndex, Vector3 position, float yawDegrees, float time, bool usedAnchor)
+            : this(networkId, entryIndex, position, yawDegrees, time, usedAnchor, Quaternion.Euler(0f, yawDegrees, 0f))
+        {
+        }
+
+        public ScheduledSpawn(int networkId, int entryIndex, Vector3 position, float yawDegrees, float time, bool usedAnchor, Quaternion rotation)
         {
             NetworkId = networkId;
             EntryIndex = entryIndex;
@@ -61,6 +117,7 @@ namespace STYLY.TIB_Template.GIPoker
             YawDegrees = yawDegrees;
             Time = time;
             UsedAnchor = usedAnchor;
+            Rotation = rotation;
         }
     }
 
@@ -71,9 +128,11 @@ namespace STYLY.TIB_Template.GIPoker
     /// 割り当て優先順位:
     /// 1. 呼び出し側が階層順（Transform ルート順→siblingIndex 深さ優先）で渡した
     ///    StageSpawnAnchor 候補から、共有 rng の消費のみで未使用の1点を選び割り当てる
-    ///    （選ばれたアンカーはプールから除去され、同一スケジュール内で二重割り当てされない）
-    /// 2. アンカーが枯渇したら、従来の箱型ランダム配置（spawnAreaSize 内・minSpacing 確保）に
-    ///    フォールバックする（枯渇判定はプールの残数のみで決まるため決定論的）
+    ///    （選ばれたアンカーはプールから除去され、同一スケジュール内で二重割り当てされない）。
+    ///    候補は二段プール: まず「そのアイテム専用のアンカー（AllowedEntryIndices 指定）」を優先し、
+    ///    無ければ「汎用アンカー（指定なし）」から選ぶ。専用アンカーは指定外のアイテムに消費されない
+    /// 2. 使えるアンカーが無ければ、従来の箱型ランダム配置（spawnAreaSize 内・minSpacing 確保）に
+    ///    フォールバックする（枯渇判定はプールの残数と指定のみで決まるため決定論的）
     ///
     /// rng の消費順は「初期出現分をカタログ順→追加出現分をシャッフルして時刻順」という
     /// 従来の ItemSpawnManager.BuildSchedule の消費順をそのまま踏襲する。
@@ -103,6 +162,41 @@ namespace STYLY.TIB_Template.GIPoker
             this.maxHeight = maxHeight;
             this.minSpacing = minSpacing;
             this.trickleInterval = trickleInterval;
+        }
+
+        /// <summary>
+        /// StageSpawnAnchor.AllowedCardIds（cardId 文字列）をカタログエントリのインデックス列へ解決する。
+        /// - allowedCardIds が null/空 → null（＝汎用アンカー）
+        /// - 未知の cardId は無視（unknownCardIds に収集。呼び出し側で警告ログを出す）
+        /// - 非空だが全件未知 → 空リスト（＝どのアイテムにもマッチしない専用アンカー。
+        ///   汎用に落とすと誤配置になるため、あえて「何も出ないアンカー」として扱う）
+        /// </summary>
+        public static IReadOnlyList<int> ResolveAllowedEntryIndices(
+            IReadOnlyList<string> allowedCardIds,
+            IReadOnlyDictionary<string, int> cardIdToEntryIndex,
+            List<string> unknownCardIds = null)
+        {
+            if (allowedCardIds == null || allowedCardIds.Count == 0)
+            {
+                return null;
+            }
+            var indices = new List<int>(allowedCardIds.Count);
+            for (var i = 0; i < allowedCardIds.Count; i++)
+            {
+                var cardId = allowedCardIds[i];
+                if (!string.IsNullOrEmpty(cardId) && cardIdToEntryIndex.TryGetValue(cardId, out var entryIndex))
+                {
+                    if (!indices.Contains(entryIndex))
+                    {
+                        indices.Add(entryIndex);
+                    }
+                }
+                else
+                {
+                    unknownCardIds?.Add(cardId);
+                }
+            }
+            return indices;
         }
 
         /// <summary>
@@ -170,36 +264,75 @@ namespace STYLY.TIB_Template.GIPoker
             List<Vector3> placedPositions,
             List<SpawnAnchorSpec> availableAnchors)
         {
-            var usedAnchor = TryTakeAnchorPosition(availableAnchors, rng, out var position);
-            if (!usedAnchor)
-            {
-                position = FindBoxPosition(rng, placedPositions);
-            }
+            var usedAnchor = TryTakeAnchorFor(entryIndex, availableAnchors, rng, out var anchor);
+            var position = usedAnchor ? anchor.Position : FindBoxPosition(rng, placedPositions);
             placedPositions.Add(position);
+            // yaw の乱数は整列アンカー使用時も必ず消費する（rng 消費順を分岐させないため。
+            // 消費順が分岐すると、整列アンカーの有無で後続すべてのスポーン位置が変わってしまう）
             var yaw = (float)(rng.NextDouble() * 360.0);
-            schedule.Add(new ScheduledSpawn(networkId, entryIndex, position, yaw, time, usedAnchor));
+            var rotation = usedAnchor && anchor.AlignRotation
+                ? anchor.Rotation
+                : Quaternion.Euler(0f, yaw, 0f);
+            schedule.Add(new ScheduledSpawn(networkId, entryIndex, position, yaw, time, usedAnchor, rotation));
             networkId++;
         }
 
         /// <summary>
-        /// 未使用アンカーの中から rng で1点選び、プールから除去して返す。
-        /// アンカーが枯渇している（プールが空の）場合は rng を消費せず false を返す
-        /// （＝アンカー0件のシーンでは本メソッドが一切 rng を消費しないため旧挙動と完全一致する）。
+        /// 未使用アンカーの中から、指定エントリに使えるものを rng で1点選び、プールから除去して返す。
+        ///
+        /// 選択は二段プール:
+        /// 1. 専用アンカー（AllowedEntryIndices に entryIndex を含む）を優先
+        /// 2. 無ければ汎用アンカー（AllowedEntryIndices が null/空）
+        /// 3. どちらも無ければ rng を消費せず false（箱型フォールバックへ）
+        ///
+        /// 全アンカーが汎用のとき、候補列はプール全体と順序・要素数が一致するため、
+        /// rng.Next の引数・選択・swap-remove まで専用アンカー導入前の実装とビット単位で一致する（後方互換）。
         /// </summary>
-        private static bool TryTakeAnchorPosition(List<SpawnAnchorSpec> availableAnchors, System.Random rng, out Vector3 position)
+        private static bool TryTakeAnchorFor(int entryIndex, List<SpawnAnchorSpec> availableAnchors, System.Random rng, out SpawnAnchorSpec anchor)
         {
             if (availableAnchors.Count == 0)
             {
-                position = default;
+                anchor = default;
                 return false;
             }
-            var index = rng.Next(availableAnchors.Count);
-            position = availableAnchors[index].Position;
+
+            var candidates = CollectCandidateIndices(availableAnchors, entryIndex, dedicatedOnly: true);
+            if (candidates.Count == 0)
+            {
+                candidates = CollectCandidateIndices(availableAnchors, entryIndex, dedicatedOnly: false);
+            }
+            if (candidates.Count == 0)
+            {
+                anchor = default;
+                return false;
+            }
+
+            var index = candidates[rng.Next(candidates.Count)];
+            anchor = availableAnchors[index];
             // Swap-remove（O(1)）。以後の選択は毎回 rng.Next で行うため、プール内の残り順序は結果に影響しない
             var last = availableAnchors.Count - 1;
             availableAnchors[index] = availableAnchors[last];
             availableAnchors.RemoveAt(last);
             return true;
+        }
+
+        /// <summary>
+        /// プール内から候補アンカーのインデックス列をプール順で集める。
+        /// dedicatedOnly=true なら「entryIndex を許可する専用アンカー」、
+        /// false なら「汎用アンカー（指定なし）」を集める。
+        /// </summary>
+        private static List<int> CollectCandidateIndices(List<SpawnAnchorSpec> availableAnchors, int entryIndex, bool dedicatedOnly)
+        {
+            var candidates = new List<int>(availableAnchors.Count);
+            for (var i = 0; i < availableAnchors.Count; i++)
+            {
+                var spec = availableAnchors[i];
+                if (dedicatedOnly ? spec.IsDedicated && spec.Accepts(entryIndex) : !spec.IsDedicated)
+                {
+                    candidates.Add(i);
+                }
+            }
+            return candidates;
         }
 
         /// <summary>従来の箱型ランダム配置（spawnAreaSize 内で minSpacing を確保する）。</summary>
