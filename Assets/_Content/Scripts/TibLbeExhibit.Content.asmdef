@@ -14,7 +14,8 @@
         "Unity.XR.CoreUtils",
         "Unity.XR.Hands",
         "Unity.InputSystem",
-        "PICO.TobSupport"
+        "PICO.TobSupport",
+        "jp.keijiro.osc-jack.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

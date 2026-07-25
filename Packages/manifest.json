@@ -20,6 +20,8 @@
     "com.unity.xr.openxr.picoxr": "https://github.com/Pico-Developer/PICO-Unity-OpenXR-SDK.git#release_1.4.0",
     "com.veriorpies.parrelsync": "https://github.com/VeriorPies/ParrelSync.git?path=/ParrelSync",
     "io.github.hatayama.uloopmcp": "2.2.0",
+    "jp.keijiro.abcvfx": "0.0.4",
+    "jp.keijiro.osc-jack": "https://github.com/keijiro/OscJack.git#upm",
     "org.nuget.observablecollections.r3": "3.3.4",
     "com.unity.modules.accessibility": "1.0.0",
     "com.unity.modules.adaptiveperformance": "1.0.0",
@@ -78,6 +80,13 @@
         "com.cysharp",
         "com.styly.styly-netsync-utility",
         "io.github.hatayama.uloopmcp"
+      ]
+    },
+    {
+      "name": "Keijiro",
+      "url": "https://registry.npmjs.com",
+      "scopes": [
+        "jp.keijiro"
       ]
     }
   ]

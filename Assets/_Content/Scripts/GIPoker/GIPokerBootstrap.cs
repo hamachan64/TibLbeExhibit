@@ -1,3 +1,5 @@
+using R3;
+using STYLY.TIB_Template;
 using TMPro;
 using UnityEngine;
 using UnityEngine.XR.Hands;
@@ -77,6 +79,16 @@ namespace STYLY.TIB_Template.GIPoker
             var binder = binderGo.AddComponent<CardBinder>();
             var binderView = binderGo.AddComponent<BinderView>();
             binderView.Init(binder);
+
+            // M5Stackのボタン押下（OSC）でバインダーの出し入れを行う
+            var oscManager = FindFirstObjectByType<OSCManager>();
+            if (oscManager == null)
+            {
+                oscManager = gameObject.AddComponent<OSCManager>();
+            }
+            oscManager.ButtonPressed
+                .Subscribe(_ => binderGo.SetActive(!binderGo.activeSelf))
+                .AddTo(binderGo);
 
             // タイトル
             var titleGo = new GameObject("GIPoker_TitleView");
