@@ -426,7 +426,7 @@ PrefabInstance:
       objectReference: {fileID: 7715607727795320353, guid: 3467ae9e2333e434f97fad8094f439cc, type: 3}
     - target: {fileID: 5729049226429455924, guid: e143c37e2b0944c278fd43733d72fa3b, type: 3}
       propertyPath: _serverDiscoveryPort
-      value: 64000
+      value: 6400
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
