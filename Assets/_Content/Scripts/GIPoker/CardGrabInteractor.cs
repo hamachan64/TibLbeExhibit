@@ -118,7 +118,8 @@ namespace STYLY.TIB_Template.GIPoker
             }
 
             // 保持中に消滅（1分ルール）した場合などは参照を手放す
-            if (card.State.CurrentValue != CardizableState.Held)
+            var cardState = card.State.CurrentValue;
+            if (cardState != CardizableState.Held && cardState != CardizableState.GainedHeld)
             {
                 heldCard.Value = null;
                 return;

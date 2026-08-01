@@ -50,6 +50,8 @@ namespace STYLY.TIB_Template.GIPoker
         Stored,
         /// <summary>ゲイン済み（アイテムに戻った状態。二度と再カード化できない）</summary>
         Gained,
+        /// <summary>ゲイン後のオブジェクトを再びピンチジェスチャーで掴んでいる状態</summary>
+        GainedHeld,
         /// <summary>1分ルールにより破壊（消滅）された</summary>
         Expired,
     }

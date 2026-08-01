@@ -15,6 +15,8 @@ namespace STYLY.TIB_Template.GIPoker
     /// - カード化から cardLifetimeSeconds（既定60秒 = 1分ルール）以内に
     ///   バインダーへ収納されなければ消滅する
     /// - 一度ゲイン（具現化）したオブジェクトは二度とカード化できない
+    /// - ゲイン後のオブジェクトは再びピンチで掴めるが、離すと重力に従って落下・接地する
+    ///   通常の物理オブジェクトになる（トリガーだったコライダーも実体コライダーに切り替わる）
     ///
     /// 個別アイテム固有の演出・効果は本クラスを継承して
     /// OnCardified / OnGained / OnExpired をオーバーライドする。
@@ -81,8 +83,9 @@ namespace STYLY.TIB_Template.GIPoker
 
         public bool CanCardify => state.Value == CardizableState.Item && !hasBeenGained;
 
-        /// <summary>浮遊中のカードのみ掴める（Held や Stored のカードは掴めない）</summary>
-        public bool CanBeGrabbed => state.Value == CardizableState.FloatingCard;
+        /// <summary>浮遊中のカード、またはゲイン済みアイテムを掴める（Held/GainedHeld/Stored は掴めない）</summary>
+        public bool CanBeGrabbed =>
+            state.Value == CardizableState.FloatingCard || state.Value == CardizableState.Gained;
 
         private Renderer[] fallbackRenderers;
 
@@ -204,20 +207,36 @@ namespace STYLY.TIB_Template.GIPoker
             {
                 return false;
             }
+            if (state.Value == CardizableState.Gained)
+            {
+                // ゲイン後は手の動きに追従させたいので、落下中でも運動学に戻して手元に固定する
+                SetKinematic(true);
+                state.Value = CardizableState.GainedHeld;
+                return true;
+            }
             KillFloatingTweens();
             state.Value = CardizableState.Held;
             return true;
         }
 
-        /// <summary>掴んでいたカードを離す（バインダー圏外で離した場合はその場で再浮遊）</summary>
+        /// <summary>
+        /// 掴んでいたものを離す。
+        /// カードの場合はバインダー圏外で離した場合その場で再浮遊し、
+        /// ゲイン後のアイテムの場合は以後重力に従って落下する物理オブジェクトになる。
+        /// </summary>
         public void Release()
         {
-            if (state.Value != CardizableState.Held)
+            switch (state.Value)
             {
-                return;
+                case CardizableState.Held:
+                    state.Value = CardizableState.FloatingCard;
+                    PlayFloatingAnimation();
+                    break;
+                case CardizableState.GainedHeld:
+                    state.Value = CardizableState.Gained;
+                    DropWithGravity();
+                    break;
             }
-            state.Value = CardizableState.FloatingCard;
-            PlayFloatingAnimation();
         }
 
         /// <summary>
@@ -357,6 +376,39 @@ namespace STYLY.TIB_Template.GIPoker
             floatTween = null;
             rotateTween?.Kill();
             rotateTween = null;
+        }
+
+        /// <summary>手に追従させるため運動学に固定する（重力オフ）</summary>
+        private void SetKinematic(bool kinematic)
+        {
+            var rb = EnsureRigidbody();
+            rb.isKinematic = kinematic;
+            rb.useGravity = false;
+        }
+
+        /// <summary>以後は物理エンジンに委ねて落下・接地させる</summary>
+        private void DropWithGravity()
+        {
+            var rb = EnsureRigidbody();
+            rb.isKinematic = false;
+            rb.useGravity = true;
+
+            // タッチ/掴み判定用のトリガーだったコライダーを、床等と衝突する実体コライダーに切り替える
+            var col = GetComponent<Collider>();
+            if (col != null)
+            {
+                col.isTrigger = false;
+            }
+        }
+
+        private Rigidbody EnsureRigidbody()
+        {
+            var rb = GetComponent<Rigidbody>();
+            if (rb == null)
+            {
+                rb = gameObject.AddComponent<Rigidbody>();
+            }
+            return rb;
         }
 
         /// <summary>カード化した瞬間の演出フック（パーティクル・SE など）</summary>
