@@ -268,3 +268,23 @@
 - 実機（ヘッドセット）での重力落下の見た目・地面への接地は未確認。落下先の環境コライダーとの
   当たり判定（レイヤー衝突マトリクス等）に問題があれば床を貫通する可能性があるため、実機確認時は
   ゲイン→再度掴む→離す→床に着地するか、を必ず目視確認すること。
+
+## EditModeテストでR3の型（ReadOnlyReactiveProperty等）を使うとCS0012になる（2026-08-01 解決済み）
+- 症状: `TibLbeExhibit.Tests.EditMode` 配下の新規テストで `ReadOnlyReactiveProperty<T>.CurrentValue` 等を
+  使うと `error CS0012: ... 'R3, Version=1.3.0.0...' を参照してください` でコンパイルエラーになる。
+  Tests asmdef の `references` に `"R3.Unity"` を追加しても直らない。
+- 原因: `R3.Unity.asmdef` は `autoReferenced: true` だが、Tests asmdef 側が
+  `"overrideReferences": true` を設定しているため、Unity の「自動参照されるプリコンパイル済みDLL」の
+  暗黙追加が無効化され、`R3.Unity` を references に足しても中身（実体は `R3.dll`）までは
+  引き込まれない。`TibLbeExhibit.Content.asmdef` は `overrideReferences: false` なので
+  `R3.Unity` 参照だけで動いており、比較すると原因が分かりにくい。
+- 対策: `TibLbeExhibit.Tests.EditMode.asmdef` の `precompiledReferences` に
+  `"R3.dll"`, `"Microsoft.Bcl.TimeProvider.dll"`, `"Microsoft.Bcl.AsyncInterfaces.dll"`
+  （`R3.Unity.asmdef` 自身の precompiledReferences と同じ内容）を追加すると解決する。
+  DOTween（`Assets/Plugins/Demigiant` の素のDLL、asmdef無し）は逆に "auto-referenced プラグインDLL"
+  として `overrideReferences: true` でも自動では入らない可能性があるため、DOTweenの型をテストで
+  直接使う場合も同様の確認が必要（今回はテスト側でDOTween型を直接参照しなかったため未検証）。
+- 副次的な学び: `uloop-execute-dynamic-code` で `AssetDatabase.Refresh()` を呼んだり
+  スクリプトを再コンパイルしたりすると、変更していないシーン（例: OperatorClient.unity /
+  UserClient.unity）が isDirty になることがある。実際にYAML差分があるか `git diff` で必ず確認し、
+  意図しない差分が無ければ保存して `run-tests` の「未保存の変更あり」ブロックを解除してよい。

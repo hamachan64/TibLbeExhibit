@@ -438,6 +438,7 @@ MonoBehaviour:
   diceBlessVfx: {fileID: 8791802859087666345, guid: ae07f2a45f14a82428409cfe410e6002, type: 3}
   diceCurseVfx: {fileID: 5985634496115995773, guid: 463cf9f7af4680240898f6aeba3fe3e6, type: 3}
   cardBinderModelPrefab: {fileID: 919132149155446097, guid: 2090ae7d51701434cac7d670e3c1ae64, type: 3}
+  binderSmokeVfx: {fileID: 9157105887711914197, guid: c4f829cb7dd4b864caf8832ec5b1ee55, type: 3}
 --- !u!114 &2082618858
 MonoBehaviour:
   m_ObjectHideFlags: 0

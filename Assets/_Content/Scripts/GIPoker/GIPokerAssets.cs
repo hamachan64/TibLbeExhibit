@@ -34,14 +34,25 @@ namespace STYLY.TIB_Template.GIPoker
         /// <summary>バインダーの3Dモデル（ページめくり可能な本、Blender製FBX）</summary>
         public static GameObject CardBinderModelPrefab;
 
-        /// <summary>VFXプレハブを生成して一定時間後に破棄する（null安全）</summary>
-        public static GameObject SpawnVfx(GameObject prefab, Vector3 position, float lifetime = 5f)
+        /// <summary>バインダー出し入れ（Lサインジェスチャー）時の煙VFX</summary>
+        public static GameObject BinderSmokeVfx;
+
+        /// <summary>
+        /// VFXプレハブを生成して一定時間後に破棄する（null安全）。
+        /// scale はプレハブ既定の1倍から変更したい場合のみ指定する
+        /// （例: 汎用VFXアセットを手のひらサイズの小物向けに控えめなスケールへ縮小する）。
+        /// </summary>
+        public static GameObject SpawnVfx(GameObject prefab, Vector3 position, float lifetime = 5f, float scale = 1f)
         {
             if (prefab == null)
             {
                 return null;
             }
             var vfx = Object.Instantiate(prefab, position, Quaternion.identity);
+            if (!Mathf.Approximately(scale, 1f))
+            {
+                vfx.transform.localScale *= scale;
+            }
             Object.Destroy(vfx, lifetime);
             return vfx;
         }

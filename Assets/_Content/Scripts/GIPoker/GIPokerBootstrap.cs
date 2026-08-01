@@ -1,3 +1,5 @@
+using System;
+using R3;
 using TMPro;
 using UnityEngine;
 using UnityEngine.XR.Hands;
@@ -12,9 +14,11 @@ namespace STYLY.TIB_Template.GIPoker
     /// シーンに事前配置が必要なのはこの Bootstrap（＋アセット参照）だけ。
     ///
     /// 生成するもの:
-    /// - 左右の手: HandPinchTracker / CardGrabInteractor / FingertipTouchCollider
+    /// - 左右の手: HandPinchTracker / CardGrabInteractor / FingertipTouchCollider / BinderSummonGestureDetector
     /// - ゲイン判定: GainGestureDetector（両手引き裂きジェスチャー）
-    /// - バインダー: CardBinder ＋ BinderView（腰元に追従する見開きブック）
+    /// - バインダー呼び出し: どちらかの手のLサイン（フィンガーガン）ポーズで BinderView.Toggle() を実行
+    ///   （煙VFX付きで出し入れ。連打・両手同時成立によるチャタリングは ThrottleFirst で抑止）
+    /// - バインダー: CardBinder ＋ BinderView（腰元に追従する見開きブック。既定は非表示）
     /// - タイトル: TitleView（開始待ち中に表示するタイトル画面）
     /// - VR空間: TutorialSpaceDirector（チュートリアル中だけ包む「ゲーム開始の間」）
     /// - MR⇔VR遷移: TransitionDirector（白フェード＋VR空間の表示制御。ScreenFaderは内部生成）
@@ -23,6 +27,9 @@ namespace STYLY.TIB_Template.GIPoker
     [DefaultExecutionOrder(-40)]
     public class GIPokerBootstrap : MonoBehaviour
     {
+        /// <summary>Lサインジェスチャーによるバインダー出し入れの連打・チャタリング防止クールダウン</summary>
+        private static readonly TimeSpan BinderSummonCooldown = TimeSpan.FromSeconds(0.6);
+
         [Header("共有アセット（GIPokerAssets へ流し込む）")]
         [SerializeField, Tooltip("日本語対応TMPフォント（Noto Sans JP SDF）")]
         private TMP_FontAsset japaneseFont;
@@ -40,6 +47,8 @@ namespace STYLY.TIB_Template.GIPoker
         private GameObject diceCurseVfx;
         [SerializeField, Tooltip("バインダーの3Dモデル（ページめくり可能な本、Blender製FBX）")]
         private GameObject cardBinderModelPrefab;
+        [SerializeField, Tooltip("バインダー出し入れ時の煙VFX")]
+        private GameObject binderSmokeVfx;
 
         private void Awake()
         {
@@ -51,6 +60,7 @@ namespace STYLY.TIB_Template.GIPoker
             GIPokerAssets.DiceBlessVfx = diceBlessVfx;
             GIPokerAssets.DiceCurseVfx = diceCurseVfx;
             GIPokerAssets.CardBinderModelPrefab = cardBinderModelPrefab;
+            GIPokerAssets.BinderSmokeVfx = binderSmokeVfx;
         }
 
         private void Start()
@@ -59,8 +69,8 @@ namespace STYLY.TIB_Template.GIPoker
             var session = GameSession.Instance != null ? GameSession.Instance : gameObject.AddComponent<GameSession>();
 
             // 左右の手
-            var (leftTracker, leftGrab) = CreateHand(Handedness.Left);
-            var (rightTracker, rightGrab) = CreateHand(Handedness.Right);
+            var (leftTracker, leftGrab, leftSummon) = CreateHand(Handedness.Left);
+            var (rightTracker, rightGrab, rightSummon) = CreateHand(Handedness.Right);
 
             // ゲイン（引き裂き）ジェスチャー
             var gainDetector = gameObject.AddComponent<GainGestureDetector>();
@@ -80,6 +90,13 @@ namespace STYLY.TIB_Template.GIPoker
             var binder = binderGo.AddComponent<CardBinder>();
             var binderView = binderGo.AddComponent<BinderView>();
             binderView.Init(binder);
+
+            // バインダー呼び出し（Lサイン＝フィンガーガンポーズ）。
+            // 両手同時成立や連打でも1回のトグルに収まるよう ThrottleFirst でクールダウンを設ける。
+            Observable.Merge(leftSummon.PoseEntered, rightSummon.PoseEntered)
+                .ThrottleFirst(BinderSummonCooldown)
+                .Subscribe(_ => binderView.Toggle())
+                .AddTo(this);
 
             // タイトル
             var titleGo = new GameObject("GIPoker_TitleView");
@@ -109,7 +126,7 @@ namespace STYLY.TIB_Template.GIPoker
             networkSync.Initialize(effectService, binder);
         }
 
-        private (HandPinchTracker tracker, CardGrabInteractor grab) CreateHand(Handedness handedness)
+        private (HandPinchTracker tracker, CardGrabInteractor grab, BinderSummonGestureDetector summonGesture) CreateHand(Handedness handedness)
         {
             // SetActive(false) の状態でコンポーネントを揃えて Initialize してから
             // 有効化することで、Awake 前に handedness を確定させる
@@ -125,8 +142,11 @@ namespace STYLY.TIB_Template.GIPoker
             var fingertip = go.AddComponent<FingertipTouchCollider>();
             fingertip.Initialize(handedness);
 
+            var summonGesture = go.AddComponent<BinderSummonGestureDetector>();
+            summonGesture.Initialize(handedness);
+
             go.SetActive(true);
-            return (tracker, grab);
+            return (tracker, grab, summonGesture);
         }
     }
 }
