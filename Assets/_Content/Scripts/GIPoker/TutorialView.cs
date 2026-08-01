@@ -503,7 +503,7 @@ namespace STYLY.TIB_Template.GIPoker
             }
 
             var targetPos = cam.transform.position + flatForward * followDistance + Vector3.down * heightBelowHead;
-            var targetRot = Quaternion.LookRotation(flatForward) * Quaternion.Euler(-15f, 0f, 0f);
+            var targetRot = Quaternion.LookRotation(flatForward) * Quaternion.Euler(5f, 0f, 0f);
 
             var t = Mathf.Clamp01(Time.deltaTime * followSpeed);
             transform.SetPositionAndRotation(

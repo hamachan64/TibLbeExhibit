@@ -30,9 +30,9 @@ namespace STYLY.TIB_Template.GIPoker
         private const float GridZOffset = -0.02f;
 
         [SerializeField, Tooltip("プレイヤー正面からの距離（m）")]
-        private float followDistance = 0.5f;
+        private float followDistance = 0.3f;
         [SerializeField, Tooltip("頭からどれだけ下に置くか（m）")]
-        private float heightBelowHead = 0.38f;
+        private float heightBelowHead = 0.52f;
         [SerializeField, Tooltip("追従の速さ")]
         private float followSpeed = 3.5f;
 
@@ -209,7 +209,7 @@ namespace STYLY.TIB_Template.GIPoker
             }
 
             var targetPos = cam.transform.position + flatForward * followDistance + Vector3.down * heightBelowHead;
-            var targetRot = Quaternion.LookRotation(flatForward) * Quaternion.Euler(-30f, 0f, 0f);
+            var targetRot = Quaternion.LookRotation(flatForward) * Quaternion.Euler(30f, 0f, 0f);
 
             var t = Mathf.Clamp01(Time.deltaTime * followSpeed);
             transform.SetPositionAndRotation(
