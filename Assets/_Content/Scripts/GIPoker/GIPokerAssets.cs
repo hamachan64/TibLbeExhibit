@@ -31,6 +31,9 @@ namespace STYLY.TIB_Template.GIPoker
         /// <summary>リスキーダイス「大凶」演出VFX</summary>
         public static GameObject DiceCurseVfx;
 
+        /// <summary>バインダーの3Dモデル（ページめくり可能な本、Blender製FBX）</summary>
+        public static GameObject CardBinderModelPrefab;
+
         /// <summary>VFXプレハブを生成して一定時間後に破棄する（null安全）</summary>
         public static GameObject SpawnVfx(GameObject prefab, Vector3 position, float lifetime = 5f)
         {

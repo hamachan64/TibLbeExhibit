@@ -21,6 +21,14 @@ namespace STYLY.TIB_Template.GIPoker
         private const float CellHeight = 0.062f;
         private const float MiniCardScale = 0.62f;
 
+        // CardBinder.fbx の実測値（表紙/ページ中心X ≈ ±0.14m）に合わせた配置定数。
+        // モデルはBlender上で「開いた本を上から見た」姿勢（X=見開き幅, Y=ページ積層厚み, Z=ページ縦）
+        // で作られているため、X-90°回転で「プレイヤーに正対する縦向きの本」に変換する。
+        private const float ModelPageCenterX = 0.14f;
+        private const float HeaderHeightY = 0.19f;
+        private const float HeaderZOffset = -0.01f;
+        private const float GridZOffset = -0.02f;
+
         [SerializeField, Tooltip("プレイヤー正面からの距離（m）")]
         private float followDistance = 0.5f;
         [SerializeField, Tooltip("頭からどれだけ下に置くか（m）")]
@@ -53,22 +61,25 @@ namespace STYLY.TIB_Template.GIPoker
 
         private void BuildBook()
         {
-            // 表紙（濃緑）
-            var cover = CreateBox("Cover", new Vector3(0f, 0f, 0.006f), new Vector3(0.45f, 0.32f, 0.008f),
-                new Color(0.10f, 0.28f, 0.16f), new Color(0.02f, 0.08f, 0.04f));
-            // 左右ページ（アイボリー）
-            CreateBox("PageL", new Vector3(-0.11f, 0f, 0f), new Vector3(0.21f, 0.29f, 0.004f),
-                new Color(0.92f, 0.89f, 0.80f), Color.black);
-            CreateBox("PageR", new Vector3(0.11f, 0f, 0f), new Vector3(0.21f, 0.29f, 0.004f),
-                new Color(0.92f, 0.89f, 0.80f), Color.black);
-            // 背表紙の金ライン
-            CreateBox("Spine", new Vector3(0f, 0f, 0.001f), new Vector3(0.012f, 0.30f, 0.006f),
-                new Color(0.95f, 0.78f, 0.25f), new Color(0.6f, 0.45f, 0.1f));
+            var modelPrefab = GIPokerAssets.CardBinderModelPrefab;
+            if (modelPrefab != null)
+            {
+                var model = Instantiate(modelPrefab, transform);
+                model.name = "Model";
+                model.transform.localPosition = Vector3.zero;
+                model.transform.localRotation = Quaternion.Euler(-90f, 0f, 0f);
+                model.transform.localScale = Vector3.one;
+            }
+            else
+            {
+                Debug.LogWarning("[BinderView] CardBinderModelPrefab が未設定のため、プレースホルダーの箱で代用します");
+                BuildPlaceholderBook();
+            }
 
             // ヘッダーテキスト（本の上）
             var headerGo = new GameObject("Header");
             headerGo.transform.SetParent(transform, false);
-            headerGo.transform.localPosition = new Vector3(0f, 0.225f, 0f);
+            headerGo.transform.localPosition = new Vector3(0f, HeaderHeightY, HeaderZOffset);
             headerGo.transform.localScale = Vector3.one * 0.01f;
             headerText = headerGo.AddComponent<TextMeshPro>();
             if (GIPokerAssets.JapaneseFont != null)
@@ -82,12 +93,23 @@ namespace STYLY.TIB_Template.GIPoker
             // ミニカードのグリッド親（ページのわずかに手前）
             var grid = new GameObject("CardGrid");
             grid.transform.SetParent(transform, false);
-            grid.transform.localPosition = new Vector3(0f, 0f, -0.006f);
+            grid.transform.localPosition = new Vector3(0f, 0f, GridZOffset);
             gridRoot = grid.transform;
 
             UpdateHeader();
+        }
 
-            _ = cover; // 現状は装飾のみ
+        /// <summary>CardBinderModelPrefab 未設定時のフォールバック（旧プリミティブ構築）</summary>
+        private void BuildPlaceholderBook()
+        {
+            CreateBox("Cover", new Vector3(0f, 0f, 0.006f), new Vector3(0.45f, 0.32f, 0.008f),
+                new Color(0.10f, 0.28f, 0.16f), new Color(0.02f, 0.08f, 0.04f));
+            CreateBox("PageL", new Vector3(-0.11f, 0f, 0f), new Vector3(0.21f, 0.29f, 0.004f),
+                new Color(0.92f, 0.89f, 0.80f), Color.black);
+            CreateBox("PageR", new Vector3(0.11f, 0f, 0f), new Vector3(0.21f, 0.29f, 0.004f),
+                new Color(0.92f, 0.89f, 0.80f), Color.black);
+            CreateBox("Spine", new Vector3(0f, 0f, 0.001f), new Vector3(0.012f, 0.30f, 0.006f),
+                new Color(0.95f, 0.78f, 0.25f), new Color(0.6f, 0.45f, 0.1f));
         }
 
         private GameObject CreateBox(string name, Vector3 localPos, Vector3 size, Color color, Color emission)
@@ -166,7 +188,7 @@ namespace STYLY.TIB_Template.GIPoker
             var col = i % ColumnsPerPage;
             var row = i / ColumnsPerPage;
 
-            var pageCenterX = page == 0 ? -0.11f : 0.11f;
+            var pageCenterX = page == 0 ? -ModelPageCenterX : ModelPageCenterX;
             var x = pageCenterX + (col - (ColumnsPerPage - 1) * 0.5f) * CellWidth;
             var y = ((RowsPerPage - 1) * 0.5f - row) * CellHeight;
             return new Vector3(x, y, 0f);

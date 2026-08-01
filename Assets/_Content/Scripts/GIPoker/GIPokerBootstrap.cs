@@ -38,6 +38,8 @@ namespace STYLY.TIB_Template.GIPoker
         private GameObject diceBlessVfx;
         [SerializeField, Tooltip("リスキーダイス大凶VFX")]
         private GameObject diceCurseVfx;
+        [SerializeField, Tooltip("バインダーの3Dモデル（ページめくり可能な本、Blender製FBX）")]
+        private GameObject cardBinderModelPrefab;
 
         private void Awake()
         {
@@ -48,6 +50,7 @@ namespace STYLY.TIB_Template.GIPoker
             GIPokerAssets.ExpireVfx = expireVfx;
             GIPokerAssets.DiceBlessVfx = diceBlessVfx;
             GIPokerAssets.DiceCurseVfx = diceCurseVfx;
+            GIPokerAssets.CardBinderModelPrefab = cardBinderModelPrefab;
         }
 
         private void Start()
