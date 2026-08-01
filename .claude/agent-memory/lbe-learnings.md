@@ -133,3 +133,47 @@
 - **教訓**: 台座やアイテムの見た目モデルを差し替えるPRでは、「アンカー/接地点などモデル形状に
   依存する固定オフセット値」を横断的に検索し、コメントに書かれた新しい実測値と実際の設定値が
   一致しているか diff で確認すること。ビルドが通ってもテストが通っても、この種のズレは検出されない。
+
+## PICO実機ビルドでMRパススルー無効・ハンドトラッキング不動作（2026-08-01）
+- 症状: PICO実機に`UserClient`をビルドすると、フルカラーパススルー（MR）が有効にならず、
+  ハンドトラッキングも認識されない。
+- 原因: `Assets/XR/Settings/OpenXRPackageSettings.asset` のAndroidビルドターゲット向け機能セットが、
+  **Initial commit時点から一貫して「Meta Quest向け」のまま**だった
+  （`MetaQuestFeature Android`のみ`m_enabled: 1`、`PICOFeature Android`＝PICO Support本体・
+  `PassthroughFeature Android`＝`XR_FB_passthrough`・`HandTracking Android`＝
+  `XR_EXT_hand_tracking`は全て`m_enabled: 0`）。本プロジェクトはPICO＋ハンドトラッキング専用のはずだが、
+  対応するOpenXR機能が有効化されていなかったため、パススルー起動コード
+  （STYLY XR Rig同梱の`PassthroughManager.EnablePassthroughAPI()`、`StylyXrRig.cs`から自動呼出）は
+  存在するが`PassthroughFeature.isExtensionEnable`がfalseで実質no-opだった。
+  `UserClient.cs`自体にはパススルー関連コードはなく、Enterprise初期化・Recenter・ジェスチャー無効化のみ。
+- 検知方法: `git blame`で該当機能の`m_enabled`値がいつから0だったかを遡って確認（直近の
+  `chore: Android向けXRビルド設定を更新`コミットはOpenXR Loader登録に伴うfileID再シリアライズ
+  （diffが巨大化する）が主目的で、機能の有効/無効自体は変えていなかった）。
+- 対策: `uloop-execute-dynamic-code`経由で`OpenXRSettings.GetSettingsForBuildTargetGroup(BuildTargetGroup.Android)`
+  → `settings.GetFeatures<T>()`（`T`=`Unity.XR.OpenXR.Features.PICOSupport.PICOFeature` /
+  `PassthroughFeature` / `UnityEngine.XR.Hands.OpenXR.HandTracking`）でEditor API経由で
+  `enabled = true`に変更（YAML直接編集は`.claude/rules/unity_asset_rules.md`で禁止）。
+  `OpenXRFeature.nameUi`は`internal`でアクセス不可、ログには`GetType().Name`を使うこと。
+  `MetaQuestFeature Android`など他機能には触れずピンポイントで3行のみ変更できた
+  （`git diff`で`m_enabled: 0→1`が3ヶ所のみであることを確認）。
+- **未解決の関連疑い**: 「ゲームが開始しない」症状は今回のハンドトラッキング無効化が絡む可能性が
+  あるが未確定。もう一つの候補として、実機ビルドが`Assets/Settings/Build Profiles/UserClient.asset`
+  （`UserClient.unity`+`Environment.unity`を正しく含む）経由ではなく旧来のFile > Build Settings
+  （`ProjectSettings/EditorBuildSettings.asset`には`Environment.unity`のみ登録）経由で行われた場合、
+  `UserClient.unity`自体がビルドから漏れ、両症状を同時に説明できる。実機再ビルド時は
+  Build Profilesウィンドウで`UserClient`プロファイルが選択されているか必ず確認すること。
+
+## uloop-execute-dynamic-code内のAssetDatabase.SaveAssets()が無関係アセットを巻き込む（2026-08-01）
+- 症状: 上記OpenXR機能修正のスクリプト実行後、意図していない
+  `M_Prop_Lantern.mat` / `M_Prop_Water.mat` の `m_ValidKeywords` から `_EMISSION` が消える差分が発生した。
+  両マテリアルとも `_EmissionColor` は non-black（Lantern: {2, 1.5, 0.7}, Water: {0.05, 0.15, 0.2}）で
+  `_EMISSION` があるのが正しい状態であり、これはEditor側の何らかの自動再検証（URPマテリアルの
+  バージョンアップグレード処理等）でdirty化されていたものと推測される。
+- 原因: 修正スクリプトが `AssetDatabase.SaveAssets()`（引数なし・プロジェクト全体対象）を呼んでおり、
+  その時点でEditor内にdirty状態で残っていた無関係アセットまで一緒に保存してしまった。
+  対象を絞った `EditorUtility.SetDirty(settings)` は正しいが、保存呼び出しが全体スコープだった。
+- **今後のルール**: `uloop-execute-dynamic-code`でアセットを保存する際は、
+  `AssetDatabase.SaveAssets()`ではなく対象アセットのパスを指定した
+  `AssetDatabase.SaveAssetIfDirty(AssetDatabase.GetAssetPath(target))`（Unity 2021.3+で利用可）を使い、
+  意図した1アセットだけを保存対象にすること。修正後は必ず `git status` で意図しないファイルが
+  一緒に変更されていないか確認してからコミットする。
