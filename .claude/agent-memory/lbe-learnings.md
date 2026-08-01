@@ -177,3 +177,94 @@
   `AssetDatabase.SaveAssetIfDirty(AssetDatabase.GetAssetPath(target))`（Unity 2021.3+で利用可）を使い、
   意図した1アセットだけを保存対象にすること。修正後は必ず `git status` で意図しないファイルが
   一緒に変更されていないか確認してからコミットする。
+
+## 実機ビルドは成功するのにハンドトラッキングが全く反応しない（2026-08-01 調査済み・未修正）
+- 症状: OpenXRビルドエラー（PICO Touch Interaction Profile必須違反）を`HandInteractionProfile`有効化で
+  解消し実機ビルド・インストールに成功した後、ハンドが一切トラッキングされず（ピンチ等のジェスチャーに
+  完全に無反応）。
+- 静的設定は全て正常だったことを確認済み（＝原因ではない）:
+  - `OpenXRPackageSettings.asset`: Android向け`HandTracking`(XR_EXT_hand_tracking)・`PICOFeature`・
+    `HandInteractionProfile`はいずれも`m_enabled: 1`。
+  - `Assets/Resources/PICOProjectSetting.asset`: `isHandTracking: 1`。
+  - `Assets/XR/XRGeneralSettingsPerBuildTarget.asset`: AndroidのLoaderは`OpenXRLoader`が正しく設定。
+  - ビルド済みAPK（`Build/Build.apk`）の`AndroidManifest.xml`を`unzip -p ... | python3 (utf-16le decode)`で
+    直接確認し、`com.picovr.permission.HAND_TRACKING`パーミッションと`handtracking`/`controller`の
+    meta-dataが実際に注入されていることを確認済み（マニフェスト注入自体は成功している）。
+  - `HandPinchTracker.cs`（`GIPokerBootstrap`から生成）は`SubsystemManager.GetSubsystems<XRHandSubsystem>`を
+    ポーリングする実装で、コード上の明らかな欠陥は見当たらない。
+- **真因（実機adbで確定）**: `com.picovr.permission.HAND_TRACKING`は`protectionLevel: dangerous`の
+  **Android実行時（ランタイム）パーミッション**であり、マニフェストに宣言されていても自動では付与されない。
+  実機接続中に
+  `adb shell dumpsys package <applicationId>` を実行したところ、
+  `requested permissions`には載っているが `runtime permissions: com.picovr.permission.HAND_TRACKING: granted=false`
+  だった（同じdangerous permissionである`READ_MEDIA_IMAGES`等は付与済み＝OS側の個別許可管理が機能している）。
+  加えて `grep -rln "RequestPermission\|HasUserAuthorizedPermission\|AndroidRuntimePermissions" Assets/_Content/Scripts`
+  は0件で、**アプリ内でこのパーミッションをランタイムに要求するコードが存在しない**ことも確認済み。
+  → OSがハンドトラッキング（カメラ由来のプライバシー系機能）へのアクセスを許可していないため、
+  OpenXRランタイムが関節データを配信せず、`XRHandSubsystem`の`isTracked`が常にfalseになっていたと推測される。
+- 検知に使ったコマンド（実機adb必須。`adb devices`でオンラインか確認してから）:
+  ```
+  adb shell pm list permissions -f | grep -A4 "com.picovr.permission.HAND_TRACKING"  # protectionLevel確認
+  adb shell dumpsys package <applicationId> | grep -B2 -A2 "HAND_TRACKING"           # granted状態確認
+  ```
+- **未実施（次回の修正候補）**: `UnityEngine.Android.Permission.RequestUserPermission("com.picovr.permission.HAND_TRACKING")`
+  等でアプリ起動時に明示的にランタイム許可を要求するコードを追加する必要がある（Unity標準API・カスタム
+  パーミッション文字列でも動作する想定）。あるいはPICO SDK側に専用のヘルパーAPIがないか
+  `Unity.XR.PICO.TOBSupport` / OpenXR PICOサポートパッケージを確認すること。追加後は必ず実機で
+  `dumpsys package`のgranted状態を再確認してから「直った」と判断すること（ビルド成功≠権限付与）。
+- 副次的に発見した未確定の疑い（今回の主因ではないが要確認）: `ProjectSettings/EditorBuildSettings.asset`
+  （File > Build Settings）には`Environment.unity`のみ登録され`UserClient.unity`が無い。正しいシーン構成は
+  `Assets/Settings/Build Profiles/UserClient.asset`（`UserClient.unity`+`Environment.unity`両方enabled）
+  経由でのビルドのはず。今回の実機ビルドは`adb`ログ上`com.hamachan.tib`プロセスが実際に起動していたため
+  致命的ではなさそうだが、Build Profileが正しく選択されているかは実機ビルドのたびに確認すること。
+- **恒久対応（2026-08-01 実装済み）**: `UserClient.cs`の`Awake()`で`UnityEngine.Android.Permission`を使い
+  `com.picovr.permission.HAND_TRACKING`をランタイムリクエストするコードを追加（`#if UNITY_ANDROID`ガード、
+  `HasUserAuthorizedPermission`で既許可ならスキップ）。`PermissionCallbacks.PermissionDeniedAndDontAskAgain`は
+  Unity側でobsolete（"Unreliable. Query ShouldShowRequestPermissionRationale and use PermissionDenied event."）
+  なので使わないこと。
+  - 検証: `adb shell pm grant <applicationId> com.picovr.permission.HAND_TRACKING` →
+    `adb shell am force-stop <applicationId>` → 再起動、で`dumpsys package`上`granted=true`が
+    プロセス再起動後も維持されることを確認済み（＝許可は再起動すれば有効化される可能性が高い）。
+    ただし「初回起動時にダイアログが出た直後、OpenXRセッションが既に作成済みの状態でも動的に
+    ハンドトラッキングが有効化されるか」は未検証。もし初回ダイアログ許可直後は反応せず、
+    アプリの完全再起動（force-stop→再起動）が必要な場合は、展示設営時に
+    「初回起動→権限ダイアログ許可→アプリ再起動」を運用手順に含めること。
+  - コンパイルは`uloop-compile --force-recompile`でエラー0件・警告0件を確認済み。実機での
+    ハンドトラッキング動作自体（ヘッドセット装着しての目視確認）はまだ未実施。
+
+## ゲイン後のオブジェクトは元々「二度と掴めない」仕様だった（2026-08-01 仕様変更・実装済み）
+- 発端: ユーザーから「ゲイン後のオブジェクト持てなくない？」と指摘。調査したところ
+  `CardizableItemBase.CanBeGrabbed => state.Value == CardizableState.FloatingCard` のみで、
+  `TryGain()`後の`Gained`状態には戻り経路がなく、`CardGrabInteractor`のピンチ掴み候補から
+  恒久的に除外される実装だった（意図か考慮漏れか不明だったため設計判断をユーザーに確認）。
+- `CardEffectService.cs`を確認した限り、剣の錬金やリスキーダイス等の効果は全て**ゲインの瞬間に
+  一括発動**する実装（例: 剣はゲイン位置の半径2.5m以内のDランクを即座に錬金）で、ゲイン後に
+  オブジェクトを持ち運んで使う効果は現状存在しない。なので「掴めない」ことによる効果面の不具合は無かった。
+- ユーザーの要望: 「再び掴めるようにして。一度つかんだらそのあとは重力働くようにして」
+  → ゲイン後は再グラブ可能にし、離したら物理的に落下する通常オブジェクトにする、という仕様に変更。
+- 実装（`CardizableState`に`GainedHeld`を追加する形）:
+  - `CanBeGrabbed`に`Gained`状態も追加。
+  - `TryGrab()`: `Gained`から掴んだ場合は`GainedHeld`に遷移し、Rigidbodyを
+    `isKinematic=true, useGravity=false`にして手の動きに追従できるようにする
+    （`FollowPinchPose`のTransform直接操作と物理エンジンを衝突させないため）。
+  - `Release()`: `GainedHeld`から離した場合は`Gained`に戻しつつ`isKinematic=false, useGravity=true`
+    にして重力に委ね、素手タッチ/掴み判定用だった`Collider.isTrigger`も`false`に切り替えて
+    床等と実際に衝突する物理オブジェクトにする（`DropWithGravity()`）。
+  - `CardGrabInteractor.FollowPinchPose()`の「保持継続判定」を`Held`だけでなく`GainedHeld`も
+    許容するよう修正（これをしないとゲイン後に掴んでも手に追従しない）。
+- **既存コードとの整合性（変更不要だったことを確認済み）**:
+  - `CardBinder.TryStore()`は`Held`/`FloatingCard`以外を弾くガードが既にあるため、
+    `GainedHeld`なオブジェクトをバインダー圏内で離してもスコア用カードとして誤収納されない
+    （＝ゲイン済みは二度とスコアにならない、というG.I.のルールと自動的に整合する）。
+  - `GainGestureDetector.UpdateTear()`は`tearingCard.State.CurrentValue != Held`で毎フレーム
+    ガードしているため、`GainedHeld`なオブジェクトを両手で引き裂こうとしても`Held`ではない
+    ことで自動的にキャンセルされる（＝ゲイン済みの再ゲインは自然に不可能なまま）。
+  - `CardNetworkSync.cs`の`OnLocalStateChanged`は`case CardizableState.Gained:`が
+    prev状態を問わず`Rpc.GiGain`を送るため、`GainedHeld→Gained`の再遷移でも自動的に
+    位置だけ再送される。リモート側の`TryGain()`は既に`Gained`状態のため呼んでも無音で失敗するのみ
+    （二重ゲイン効果は発生しない）。ただし**重力で落下していくアニメーション自体はネットワーク
+    同期されない**（既存の「掴んでいる間の位置は同期しない」制限と同じ）ため、リモートから見ると
+    ドロップ直後の位置に静止して見える点は既知の限界として許容。
+- 実機（ヘッドセット）での重力落下の見た目・地面への接地は未確認。落下先の環境コライダーとの
+  当たり判定（レイヤー衝突マトリクス等）に問題があれば床を貫通する可能性があるため、実機確認時は
+  ゲイン→再度掴む→離す→床に着地するか、を必ず目視確認すること。
