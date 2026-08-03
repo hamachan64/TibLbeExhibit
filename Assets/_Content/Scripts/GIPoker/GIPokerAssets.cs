@@ -34,7 +34,7 @@ namespace STYLY.TIB_Template.GIPoker
         /// <summary>バインダーの3Dモデル（ページめくり可能な本、Blender製FBX）</summary>
         public static GameObject CardBinderModelPrefab;
 
-        /// <summary>バインダー出し入れ（Lサインジェスチャー）時の煙VFX</summary>
+        /// <summary>バインダー出し入れ（Lサインジェスチャー）時の白煙＋衝撃波VFX（VFX_BinderSummonPoof）</summary>
         public static GameObject BinderSmokeVfx;
 
         /// <summary>

@@ -15,7 +15,8 @@ namespace STYLY.TIB_Template.GIPoker
     ///   ページ上のミニカード一覧を自動更新する
     /// - Show/Hide/Toggle で表示・非表示を切り替えられる（Lサインジェスチャーでの呼び出し用）。
     ///   見た目（VisualRoot）だけを DOTween でポップイン／アウトさせ、CardBinder のロジックは
-    ///   非表示中も生き続ける（GameObject 自体は無効化しない）
+    ///   非表示中も生き続ける（GameObject 自体は無効化しない）。出し入れの瞬間には
+    ///   白煙＋衝撃波リングのVFX（VFX_BinderSummonPoof）を再生する
     /// </summary>
     public class BinderView : MonoBehaviour
     {
@@ -29,8 +30,10 @@ namespace STYLY.TIB_Template.GIPoker
         private const float ShowDuration = 0.35f;
         private const float HideDuration = 0.25f;
 
-        // 煙VFX（汎用アセットを想定）を実機バインダーサイズ（幅約0.45m）に合わせて控えめに縮小する倍率
-        private const float SmokeVfxScale = 0.4f;
+        // 煙＋衝撃波VFX（VFX_BinderSummonPoof）の再生時間（秒）。プレハブ自体が実機バインダーサイズ
+        // （幅約0.45m）に合わせて作り込み済みのため、ここでの追加スケーリングは行わない。
+        // Smoke(startLifetime 1s) / ShockWave(startLifetime 0.5s) が再生し切るまでの余裕を持たせた値。
+        private const float SmokeVfxLifetime = 1.5f;
 
         // CardBinder.fbx の実測値（表紙/ページ中心X ≈ ±0.14m）に合わせた配置定数。
         // モデルはBlender上で「開いた本を上から見た」姿勢（X=見開き幅, Y=ページ積層厚み, Z=ページ縦）
@@ -41,7 +44,7 @@ namespace STYLY.TIB_Template.GIPoker
         private const float GridZOffset = -0.02f;
 
         [SerializeField, Tooltip("プレイヤー正面からの距離（m）")]
-        private float followDistance = 0.3f;
+        private float followDistance = 0.4f;
         [SerializeField, Tooltip("頭からどれだけ下に置くか（m）")]
         private float heightBelowHead = 0.52f;
         [SerializeField, Tooltip("追従の速さ")]
@@ -135,7 +138,7 @@ namespace STYLY.TIB_Template.GIPoker
                 .OnComplete(() => root.gameObject.SetActive(false));
         }
 
-        /// <summary>煙VFXを再生する。未設定なら警告のみで演出をスキップする（機能自体は動く）</summary>
+        /// <summary>煙＋衝撃波VFXを再生する。未設定なら警告のみで演出をスキップする（機能自体は動く）</summary>
         private void PlaySmokeVfx(Vector3 position)
         {
             if (GIPokerAssets.BinderSmokeVfx == null)
@@ -143,7 +146,7 @@ namespace STYLY.TIB_Template.GIPoker
                 Debug.LogWarning("[BinderView] BinderSmokeVfx が未設定のため、出し入れの煙演出をスキップします");
                 return;
             }
-            GIPokerAssets.SpawnVfx(GIPokerAssets.BinderSmokeVfx, position, scale: SmokeVfxScale);
+            GIPokerAssets.SpawnVfx(GIPokerAssets.BinderSmokeVfx, position, lifetime: SmokeVfxLifetime);
         }
 
         private void BuildBook()

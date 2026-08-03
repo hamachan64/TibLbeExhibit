@@ -3,6 +3,9 @@ using R3;
 using TMPro;
 using UnityEngine;
 using UnityEngine.XR.Hands;
+#if UNITY_EDITOR
+using UnityEngine.InputSystem;
+#endif
 
 namespace STYLY.TIB_Template.GIPoker
 {
@@ -17,7 +20,8 @@ namespace STYLY.TIB_Template.GIPoker
     /// - 左右の手: HandPinchTracker / CardGrabInteractor / FingertipTouchCollider / BinderSummonGestureDetector
     /// - ゲイン判定: GainGestureDetector（両手引き裂きジェスチャー）
     /// - バインダー呼び出し: どちらかの手のLサイン（フィンガーガン）ポーズで BinderView.Toggle() を実行
-    ///   （煙VFX付きで出し入れ。連打・両手同時成立によるチャタリングは ThrottleFirst で抑止）
+    ///   （白煙＋衝撃波VFX付きで出し入れ。連打・両手同時成立によるチャタリングは ThrottleFirst で抑止）
+    ///   ＋ エディタ実行時限定のデバッグ用: Spaceキーでも BinderView.Toggle() を実行可能
     /// - バインダー: CardBinder ＋ BinderView（腰元に追従する見開きブック。既定は非表示）
     /// - タイトル: TitleView（開始待ち中に表示するタイトル画面）
     /// - VR空間: TutorialSpaceDirector（チュートリアル中だけ包む「ゲーム開始の間」）
@@ -47,7 +51,7 @@ namespace STYLY.TIB_Template.GIPoker
         private GameObject diceCurseVfx;
         [SerializeField, Tooltip("バインダーの3Dモデル（ページめくり可能な本、Blender製FBX）")]
         private GameObject cardBinderModelPrefab;
-        [SerializeField, Tooltip("バインダー出し入れ時の煙VFX")]
+        [SerializeField, Tooltip("バインダー出し入れ時の白煙＋衝撃波VFX（VFX_BinderSummonPoof）")]
         private GameObject binderSmokeVfx;
 
         private void Awake()
@@ -97,6 +101,16 @@ namespace STYLY.TIB_Template.GIPoker
                 .ThrottleFirst(BinderSummonCooldown)
                 .Subscribe(_ => binderView.Toggle())
                 .AddTo(this);
+
+#if UNITY_EDITOR
+            // エディタ実行時のデバッグ用: Spaceキーでバインダーを出し入れする（Playモード上での動作確認専用）。
+            // 実機（PICO / Meta Quest）はハンドトラッキング専用でキーボードが無いためビルドには含めない。
+            // Lサインジェスチャー側のクールダウン購読とは独立させ、互いの挙動に影響しないようにする。
+            Observable.EveryUpdate()
+                .Where(_ => Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
+                .Subscribe(_ => binderView.Toggle())
+                .AddTo(this);
+#endif
 
             // タイトル
             var titleGo = new GameObject("GIPoker_TitleView");

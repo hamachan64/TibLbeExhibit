@@ -288,3 +288,32 @@
   スクリプトを再コンパイルしたりすると、変更していないシーン（例: OperatorClient.unity /
   UserClient.unity）が isDirty になることがある。実際にYAML差分があるか `git diff` で必ず確認し、
   意図しない差分が無ければ保存して `run-tests` の「未保存の変更あり」ブロックを解除してよい。
+
+## CFXR（Cartoon FX Remaster）のVFXが配線済みなのに何も描画されない（2026-08-02 解決済み）
+- 症状: `GIPokerAssets.SpawnVfx` で正しいprefab参照を渡してInstantiateしているのに、
+  シーン上に何も見えない。エラーもマゼンタ（シェーダー欠損の警告色）も出ない、完全な無描画。
+  バインダー出し入れ（Lサインジェスチャー）の煙VFXで発生。カード化・ゲイン・消滅・リスキーダイス
+  大吉/大凶など、他のCFXR依存VFXでも理屈上は同じ条件で起こり得る。
+- 原因: `.cfxrshader`（`Assets/JMO Assets/Cartoon FX Remaster/CFXR Assets/Shaders/*.cfxrshader`）は
+  カスタム `ScriptedImporter`（`CFXR_ShaderImporter.cs`）で、**インポート実行時点の
+  `GraphicsSettings.currentRenderPipeline` を見てURP用/Built-in用のどちらか一方だけ**を焼き込み、
+  結果を `.meta` の `detectedRenderPipeline` にキャッシュする（既定 `renderPipelineDetection: Auto`）。
+  このマシンでは本プロジェクトのURP整備前にCFXRを取り込んだ形跡があり、`detectedRenderPipeline`が
+  `Built-In Render Pipeline` のまま古いバイクで固まっていた。Built-in用ビルドには
+  `LightMode=UniversalForward` パスが存在しないため、URPのForward Rendererは**エラーを出さず
+  黙って描画をスキップする**（マゼンタにすらならない）。
+- 重要: `Assets/JMO Assets/` は `.gitignore:119` で**フォルダごと完全に除外**されている。
+  つまりこの `.meta` キャッシュはマシンローカルの状態であり、**gitで修正を配布できない**。
+  新規クローンでゼロからインポートする分には、その時点で既にURPが `ProjectSettings`
+  （こちらはgit管理下）に設定されているため `Auto` 検出で正しく焼かれるはずだが、
+  「URP整備前にインポート済み → その後キャッシュが再評価されないまま残る」という
+  履歴的な事故は他のマシンでも再現し得る。
+- 対策（再発時）:
+  1. 対象の `.cfxrshader.meta` を開き `detectedRenderPipeline` を確認する
+     （`Universal Render Pipeline` であるべき）。
+  2. `Built-In Render Pipeline` のままなら、`Assets/JMO Assets/Cartoon FX Remaster/CFXR Assets/Shaders/`
+     をProjectウィンドウで選択し右クリック→Reimport（`renderPipelineDetection: Auto` のままなら
+     現在のURP設定を正しく再検出して焼き直される）。
+  3. 併せて `CardifyVfx` / `GainVfx` / `ExpireVfx` / `DiceBlessVfx` / `DiceCurseVfx` など、
+     他のCFXR依存VFXも同じマシンで一度は目視確認しておくとよい（同じキャッシュ汚染の影響を
+     受けている可能性があるため）。
