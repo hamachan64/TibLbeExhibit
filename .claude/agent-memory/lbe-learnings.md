@@ -177,6 +177,15 @@
   `AssetDatabase.SaveAssetIfDirty(AssetDatabase.GetAssetPath(target))`（Unity 2021.3+で利用可）を使い、
   意図した1アセットだけを保存対象にすること。修正後は必ず `git status` で意図しないファイルが
   一緒に変更されていないか確認してからコミットする。
+- **2026-08-03再発・原因の再整理**: `AssetDatabase.SaveAssets()`を使わず`EditorSceneManager.SaveScene()`
+  （シーン単体の保存）だけを呼んだ場合でも、`M_Prop_Lantern.mat`/`M_Prop_Water.mat`の
+  `_EMISSION`キーワード消失が再発した。つまり原因は「保存APIの呼び方（全体 vs 個別）」ではなく、
+  **この2マテリアルがEditor起動時から常にdirty状態のまま放置されている**こと自体にあり、
+  Unityの何らかの保存トリガー（シーン保存を含む）に巻き込まれて毎回書き出されてしまう。
+  `SaveAssetIfDirty`で保存対象を絞ってもこの2ファイルの発火は防げないため、
+  **uloopでシーン/アセットを保存する操作をした後は毎回 `git diff --stat` でこの2ファイルが
+  紛れ込んでいないか確認し、混入していたら `git checkout --` で個別に差し戻す**運用を徹底すること
+  （今回のPRでは2回連続で発生・2回とも差し戻し済み）。根本修正（なぜ常にdirtyなのか）は未調査。
 
 ## 実機ビルドは成功するのにハンドトラッキングが全く反応しない（2026-08-01 調査済み・未修正）
 - 症状: OpenXRビルドエラー（PICO Touch Interaction Profile必須違反）を`HandInteractionProfile`有効化で
@@ -317,3 +326,42 @@
   3. 併せて `CardifyVfx` / `GainVfx` / `ExpireVfx` / `DiceBlessVfx` / `DiceCurseVfx` など、
      他のCFXR依存VFXも同じマシンで一度は目視確認しておくとよい（同じキャッシュ汚染の影響を
      受けている可能性があるため）。
+
+## STYLY NetSync: アバタープレファブ未設定（ステルスモード）でも接続イベントは取れる（2026-08-03 PR #25調査）
+- 「複数プレイヤーの接続一覧・スコアを集計する運営PC側スクリプト」を作る際、`NetSyncManager`に
+  `_localAvatarPrefab`/`_remoteAvatarPrefab`を設定しない（＝ステルスモード。`OperatorClient.unity`が
+  この状態）でも、`OnAvatarConnected`/`OnAvatarDisconnected`は正常に発火することを
+  `MessageProcessor.cs`のソースで確認済み（`ProcessMessageQueue`内、"Announce connection
+  regardless of avatar prefab" とコメントあり）。`AvatarManager.SpawnRemoteAvatar`は
+  `remoteAvatarPrefab == null`で即returnするが、接続イベント自体はそれとは独立した経路
+  （`_knownConnectedClients`ベース）で飛ぶため心配不要。
+- 既に接続済みのクライアント一覧を後から取得するAPIとして
+  `NetSyncManager.GetAliveClients(bool includeStealthClients = false)`（`int[]`を返す）が存在する。
+  `LeaderboardTracker`のようなトラッカーを`Start()`で初期化する場合、`OnAvatarConnected`の購読を
+  張るより前に既に接続済みだったクライアント（例: 運営PCアプリを日中に再起動したケース）は
+  二度とイベントを受け取れず集計から漏れるバグになりやすい。**購読を張る前に必ず
+  `GetAliveClients(includeStealthClients: true)`で現在の接続済み一覧を取得し、初期状態をシードする
+  こと。** これはcode-reviewerエージェントによる指摘で発覚した（実装時点では見落とされていた）。
+- `VariableManagerBase<TGlobal,TUser>.AsObservableOnChanged(TUserVariable)`は
+  `Observable<UserVariableData<string>>`（型変換版は`<T>`ジェネリック）を返すR3ネイティブAPIで、
+  `NetSyncManager.OnClientVariableChanged`（UnityEvent）を独自にラップし直す必要はない
+  （`Library/PackageCache/com.styly.styly-netsync.utility@.../VariableManagerBase.cs`に実装済み）。
+  ただし「変更時のみ」流れる仕様で、購読開始時点の現在値は流れない点に注意
+  （初期値が要る場合は`Get<T>(variable, clientNo, default)`で明示的に補完する）。
+
+## `STYLY Default Avatar A.prefab`のBodyTransformSolverが既にドリフトして無効化されている（2026-08-03 発見・未修正）
+- `BodyTransformSolver`（`Library/.../Util Scripts/BodyTransformSolver.cs`）は現在のクラス定義で
+  `netSyncAvatar`（`NetSyncAvatar`参照）フィールドを必須とし、`LateUpdate`冒頭
+  `if (netSyncAvatar == null) return;`で即座に何もしなくなる。
+  しかし`Assets/_Content/Prefabs/STYLY Default Avatar A.prefab`のシリアライズ済みYAMLには
+  この`netSyncAvatar`フィールドが存在せず、代わりに現在のクラスには存在しない`head:`という
+  古いフィールド名が残っていた（パッケージ側でフィールド名が`head`→`netSyncAvatar`+`groundCenter`に
+  変更された過去のリファクタの影響で、プレファブ側が追従できていなかった）。
+  つまり**このコンポーネントは今回発見する以前から実質的に無効（アバターのBodyメッシュが
+  頭部に追従しない）だった可能性が高い**。`uloop-execute-dynamic-code`でプレファブに別の
+  コンポーネントを追加してPrefabUtility経由で保存すると、Unityが現在のクラス定義に合わせて
+  再シリアライズし、`netSyncAvatar: {fileID: 0}`（null）として可視化される。
+- 対応: 今回のPR（#25、スコアモニター機能追加）ではスコープ外として据え置いた。
+  次にこのプレファブを触る機会があれば、`netSyncAvatar`フィールドに同一GameObjectの
+  `NetSyncAvatar`コンポーネントを設定し直し、Bodyメッシュが頭部に追従するか実機/PlayModeで
+  確認すること。

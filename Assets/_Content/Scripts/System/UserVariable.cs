@@ -42,5 +42,12 @@ namespace STYLY.TIB_Template
         /// バインダーの内容が変わるたびに CardNetworkSync が更新する
         /// </summary>
         GiScore,
+
+        /// <summary>
+        /// 具現化ポーカーのセッション残り時間（秒, float）
+        /// CardNetworkSync が GameSession.RemainingTime を約1秒間隔で共有する
+        /// （運営PCのスコアモニターの「残り時間」表示に使う）
+        /// </summary>
+        GiRemainingTime,
     }
 }

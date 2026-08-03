@@ -61,7 +61,7 @@ namespace STYLY.TIB_Template.GIPoker
         }
 
         /// <summary>GIPokerBootstrap から結線する</summary>
-        public void Initialize(CardEffectService effects, CardBinder binder)
+        public void Initialize(CardEffectService effects, CardBinder binder, GameSession session)
         {
             effectService = effects;
 
@@ -118,6 +118,27 @@ namespace STYLY.TIB_Template.GIPoker
             // 自分のスコアを UserVariable として共有
             binder.Score
                 .Subscribe(score => VariableManager.Instance?.SetSelf(UserVariable.GiScore, score.TotalScore))
+                .AddTo(this);
+
+            // 残り時間を UserVariable として共有（運営PCのスコアモニター用。秒単位の更新で十分なため間引く）
+            session.RemainingTime
+                .ThrottleLast(System.TimeSpan.FromSeconds(1))
+                .Subscribe(remaining => VariableManager.Instance?.SetSelf(UserVariable.GiRemainingTime, remaining))
+                .AddTo(this);
+
+            // セッション終了のエッジ（Finished へ遷移した瞬間）でのみ最終スコアを配信する
+            // （本日通算トップ3の記録用。運営PCの LeaderboardTracker が受信する）
+            var previousSessionState = session.State.CurrentValue;
+            session.State
+                .Subscribe(current =>
+                {
+                    var prev = previousSessionState;
+                    previousSessionState = current;
+                    if (prev != SessionState.Finished && current == SessionState.Finished)
+                    {
+                        Send(Rpc.GiSessionFinished, binder.Score.CurrentValue.TotalScore.ToString(CultureInfo.InvariantCulture));
+                    }
+                })
                 .AddTo(this);
         }
 

@@ -25,5 +25,7 @@ namespace STYLY.TIB_Template
         GiDice,
         /// <summary>SSカード出現（引数: [0]=itemId, [1..3]=位置xyz）</summary>
         GiSpawnSS,
+        /// <summary>セッション終了（引数: [0]=最終TotalScore）。運営PCの本日通算トップ3記録に使う</summary>
+        GiSessionFinished,
     }
 }
