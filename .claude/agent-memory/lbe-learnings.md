@@ -317,3 +317,42 @@
   3. 併せて `CardifyVfx` / `GainVfx` / `ExpireVfx` / `DiceBlessVfx` / `DiceCurseVfx` など、
      他のCFXR依存VFXも同じマシンで一度は目視確認しておくとよい（同じキャッシュ汚染の影響を
      受けている可能性があるため）。
+
+## STYLY NetSync: アバタープレファブ未設定（ステルスモード）でも接続イベントは取れる（2026-08-03 PR #25調査）
+- 「複数プレイヤーの接続一覧・スコアを集計する運営PC側スクリプト」を作る際、`NetSyncManager`に
+  `_localAvatarPrefab`/`_remoteAvatarPrefab`を設定しない（＝ステルスモード。`OperatorClient.unity`が
+  この状態）でも、`OnAvatarConnected`/`OnAvatarDisconnected`は正常に発火することを
+  `MessageProcessor.cs`のソースで確認済み（`ProcessMessageQueue`内、"Announce connection
+  regardless of avatar prefab" とコメントあり）。`AvatarManager.SpawnRemoteAvatar`は
+  `remoteAvatarPrefab == null`で即returnするが、接続イベント自体はそれとは独立した経路
+  （`_knownConnectedClients`ベース）で飛ぶため心配不要。
+- 既に接続済みのクライアント一覧を後から取得するAPIとして
+  `NetSyncManager.GetAliveClients(bool includeStealthClients = false)`（`int[]`を返す）が存在する。
+  `LeaderboardTracker`のようなトラッカーを`Start()`で初期化する場合、`OnAvatarConnected`の購読を
+  張るより前に既に接続済みだったクライアント（例: 運営PCアプリを日中に再起動したケース）は
+  二度とイベントを受け取れず集計から漏れるバグになりやすい。**購読を張る前に必ず
+  `GetAliveClients(includeStealthClients: true)`で現在の接続済み一覧を取得し、初期状態をシードする
+  こと。** これはcode-reviewerエージェントによる指摘で発覚した（実装時点では見落とされていた）。
+- `VariableManagerBase<TGlobal,TUser>.AsObservableOnChanged(TUserVariable)`は
+  `Observable<UserVariableData<string>>`（型変換版は`<T>`ジェネリック）を返すR3ネイティブAPIで、
+  `NetSyncManager.OnClientVariableChanged`（UnityEvent）を独自にラップし直す必要はない
+  （`Library/PackageCache/com.styly.styly-netsync.utility@.../VariableManagerBase.cs`に実装済み）。
+  ただし「変更時のみ」流れる仕様で、購読開始時点の現在値は流れない点に注意
+  （初期値が要る場合は`Get<T>(variable, clientNo, default)`で明示的に補完する）。
+
+## `STYLY Default Avatar A.prefab`のBodyTransformSolverが既にドリフトして無効化されている（2026-08-03 発見・未修正）
+- `BodyTransformSolver`（`Library/.../Util Scripts/BodyTransformSolver.cs`）は現在のクラス定義で
+  `netSyncAvatar`（`NetSyncAvatar`参照）フィールドを必須とし、`LateUpdate`冒頭
+  `if (netSyncAvatar == null) return;`で即座に何もしなくなる。
+  しかし`Assets/_Content/Prefabs/STYLY Default Avatar A.prefab`のシリアライズ済みYAMLには
+  この`netSyncAvatar`フィールドが存在せず、代わりに現在のクラスには存在しない`head:`という
+  古いフィールド名が残っていた（パッケージ側でフィールド名が`head`→`netSyncAvatar`+`groundCenter`に
+  変更された過去のリファクタの影響で、プレファブ側が追従できていなかった）。
+  つまり**このコンポーネントは今回発見する以前から実質的に無効（アバターのBodyメッシュが
+  頭部に追従しない）だった可能性が高い**。`uloop-execute-dynamic-code`でプレファブに別の
+  コンポーネントを追加してPrefabUtility経由で保存すると、Unityが現在のクラス定義に合わせて
+  再シリアライズし、`netSyncAvatar: {fileID: 0}`（null）として可視化される。
+- 対応: 今回のPR（#25、スコアモニター機能追加）ではスコープ外として据え置いた。
+  次にこのプレファブを触る機会があれば、`netSyncAvatar`フィールドに同一GameObjectの
+  `NetSyncAvatar`コンポーネントを設定し直し、Bodyメッシュが頭部に追従するか実機/PlayModeで
+  確認すること。
