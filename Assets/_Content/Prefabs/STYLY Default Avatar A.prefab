@@ -107,6 +107,7 @@ GameObject:
   - component: {fileID: 400821959810210929}
   - component: {fileID: -6173700704778759366}
   - component: {fileID: 8542497368658491722}
+  - component: {fileID: 2706952290667168388}
   m_Layer: 0
   m_Name: STYLY Default Avatar A
   m_TagString: Untagged
@@ -148,7 +149,7 @@ MonoBehaviour:
   _deviceId: 
   _clientNo: 0
   PhysicalPosition: {x: 0, y: 0, z: 0}
-  PhysicalRotation: {x: 0, y: 0, z: 0}
+  PhysicalRotation: {x: 0, y: 0, z: 0, w: 0}
   _head: {fileID: 2041796224729081718}
   _rightHand: {fileID: 8259009603360022221}
   _leftHand: {fileID: 6992804918366304625}
@@ -174,9 +175,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfac97f15ac5b4b66978c8dca79a5a3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  netSyncAvatar: {fileID: 0}
   body: {fileID: 6481340575715535886}
-  head: {fileID: 2041796224729081718}
   offsetY: 0.4
+  groundCenter: {fileID: 0}
+--- !u!114 &2706952290667168388
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7715607727795320353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43fee444349974f4b9052ac7be04c57a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TibLbeExhibit.Content::STYLY.TIB_Template.GIPoker.PlayerNameTagView
 --- !u!1 &7927846321792083688
 GameObject:
   m_ObjectHideFlags: 0

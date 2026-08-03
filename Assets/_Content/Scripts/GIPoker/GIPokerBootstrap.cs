@@ -137,7 +137,7 @@ namespace STYLY.TIB_Template.GIPoker
 
             // カード状態のマルチユーザー同期
             var networkSync = gameObject.AddComponent<CardNetworkSync>();
-            networkSync.Initialize(effectService, binder);
+            networkSync.Initialize(effectService, binder, session);
         }
 
         private (HandPinchTracker tracker, CardGrabInteractor grab, BinderSummonGestureDetector summonGesture) CreateHand(Handedness handedness)
