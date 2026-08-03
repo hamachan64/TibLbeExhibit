@@ -177,6 +177,15 @@
   `AssetDatabase.SaveAssetIfDirty(AssetDatabase.GetAssetPath(target))`（Unity 2021.3+で利用可）を使い、
   意図した1アセットだけを保存対象にすること。修正後は必ず `git status` で意図しないファイルが
   一緒に変更されていないか確認してからコミットする。
+- **2026-08-03再発・原因の再整理**: `AssetDatabase.SaveAssets()`を使わず`EditorSceneManager.SaveScene()`
+  （シーン単体の保存）だけを呼んだ場合でも、`M_Prop_Lantern.mat`/`M_Prop_Water.mat`の
+  `_EMISSION`キーワード消失が再発した。つまり原因は「保存APIの呼び方（全体 vs 個別）」ではなく、
+  **この2マテリアルがEditor起動時から常にdirty状態のまま放置されている**こと自体にあり、
+  Unityの何らかの保存トリガー（シーン保存を含む）に巻き込まれて毎回書き出されてしまう。
+  `SaveAssetIfDirty`で保存対象を絞ってもこの2ファイルの発火は防げないため、
+  **uloopでシーン/アセットを保存する操作をした後は毎回 `git diff --stat` でこの2ファイルが
+  紛れ込んでいないか確認し、混入していたら `git checkout --` で個別に差し戻す**運用を徹底すること
+  （今回のPRでは2回連続で発生・2回とも差し戻し済み）。根本修正（なぜ常にdirtyなのか）は未調査。
 
 ## 実機ビルドは成功するのにハンドトラッキングが全く反応しない（2026-08-01 調査済み・未修正）
 - 症状: OpenXRビルドエラー（PICO Touch Interaction Profile必須違反）を`HandInteractionProfile`有効化で

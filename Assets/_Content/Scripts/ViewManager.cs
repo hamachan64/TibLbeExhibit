@@ -18,10 +18,10 @@ namespace STYLY.TIB_Template
             toggleAction.action.performed += OnToggle;
             
             vrArea.OnPlayerEnter
-                .Subscribe(_ => informationObj.SetActive(false))
+                .Subscribe(_ => informationObj?.SetActive(false))
                 .AddTo(this);
             vrArea.OnPlayerExit
-                .Subscribe(_ => informationObj.SetActive(true))
+                .Subscribe(_ => informationObj?.SetActive(true))
                 .AddTo(this);
         }
 
