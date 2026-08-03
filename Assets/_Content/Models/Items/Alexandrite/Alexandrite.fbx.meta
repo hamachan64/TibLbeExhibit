@@ -3,7 +3,12 @@ guid: 6e2626e88fa3ce748ad929cf74d9e73d
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_ALX_Gem
+    second: {fileID: 2100000, guid: 4702a913a47204a06b7162415d728af7, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
