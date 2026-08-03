@@ -341,7 +341,7 @@ namespace STYLY.TIB_Template.GIPoker
             }
 
             targetPos = cam.transform.position + flatForward * followDistance + Vector3.down * heightBelowHead;
-            targetRot = Quaternion.LookRotation(flatForward) * Quaternion.Euler(30f, 0f, 0f);
+            targetRot = Quaternion.LookRotation(flatForward) * Quaternion.Euler(30f, 0f, 180f);
             return true;
         }
 
