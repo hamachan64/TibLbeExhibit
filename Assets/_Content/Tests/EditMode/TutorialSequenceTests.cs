@@ -6,8 +6,10 @@ namespace STYLY.TIB_Template.GIPoker.Tests
 {
     /// <summary>
     /// TutorialSequence（チュートリアルのステップ進行状態機械）のEditModeテスト。
-    /// ステップ構成・達成による進行・タイムアウト自動送りの仕様は
-    /// GI_POKER_PLAN.md のコアメカニクスおよび Issue #2 に準拠する。
+    /// ステップ構成（新7ステップ: ルール／バインダーを出してみよう／カード化してみよう／
+    /// バインダーに収納してみよう／カードをアイテムにしてみよう／注意事項／準備はいいか？）・
+    /// 達成による進行・タイムアウト自動送りの仕様は GI_POKER_PLAN.md のコアメカニクスおよび
+    /// .claude/loops/20260804-tutorial-7steps-voice.md に準拠する。
     /// </summary>
     public class TutorialSequenceTests
     {
@@ -21,8 +23,8 @@ namespace STYLY.TIB_Template.GIPoker.Tests
         {
             return new TutorialSequence(new List<TutorialStep>
             {
-                new(TutorialStepKind.Cardify, "触れる", 10f, requiresAchievement: true),
-                new(TutorialStepKind.Grab, "掴む", 10f, requiresAchievement: true),
+                new(TutorialStepKind.Cardify, "カード化してみよう", "触れる", 10f, requiresAchievement: true),
+                new(TutorialStepKind.Store, "バインダーに収納してみよう", "収納する", 10f, requiresAchievement: true),
             });
         }
 
@@ -34,28 +36,59 @@ namespace STYLY.TIB_Template.GIPoker.Tests
         }
 
         [Test]
-        public void DefaultSteps_ComposedOfSixStepsInOrder()
+        public void DefaultSteps_ComposedOfSevenStepsInOrder()
         {
             var steps = TutorialSequence.CreateDefaultSteps();
 
-            Assert.That(steps.Count, Is.EqualTo(6));
+            Assert.That(steps.Count, Is.EqualTo(7));
             Assert.That(steps[0].Kind, Is.EqualTo(TutorialStepKind.Intro));
-            Assert.That(steps[1].Kind, Is.EqualTo(TutorialStepKind.Cardify));
-            Assert.That(steps[2].Kind, Is.EqualTo(TutorialStepKind.Grab));
+            Assert.That(steps[1].Kind, Is.EqualTo(TutorialStepKind.BinderShow));
+            Assert.That(steps[2].Kind, Is.EqualTo(TutorialStepKind.Cardify));
             Assert.That(steps[3].Kind, Is.EqualTo(TutorialStepKind.Store));
             Assert.That(steps[4].Kind, Is.EqualTo(TutorialStepKind.Gain));
-            Assert.That(steps[5].Kind, Is.EqualTo(TutorialStepKind.Rules));
+            Assert.That(steps[5].Kind, Is.EqualTo(TutorialStepKind.Caution));
+            Assert.That(steps[6].Kind, Is.EqualTo(TutorialStepKind.Ready));
 
-            // イントロとルール確認は自動送り専用、中間4ステップは達成判定を持つ
+            // 自動送り専用（Intro/Caution/Ready）以外は達成判定を持つ
             Assert.That(steps[0].RequiresAchievement, Is.False);
             Assert.That(steps[1].RequiresAchievement, Is.True);
             Assert.That(steps[2].RequiresAchievement, Is.True);
             Assert.That(steps[3].RequiresAchievement, Is.True);
             Assert.That(steps[4].RequiresAchievement, Is.True);
             Assert.That(steps[5].RequiresAchievement, Is.False);
+            Assert.That(steps[6].RequiresAchievement, Is.False);
+        }
 
-            // 最終ステップは Playing 遷移（GameSession の固定時間）まで留まる
-            Assert.That(float.IsPositiveInfinity(steps[5].TimeoutSeconds), Is.True);
+        [Test]
+        public void DefaultSteps_TitlesAndInstructionsMatchSpec()
+        {
+            var steps = TutorialSequence.CreateDefaultSteps();
+
+            Assert.That(steps[0].Title, Is.EqualTo("ルール"));
+            Assert.That(steps[0].Instruction,
+                Is.EqualTo("アイテムに触れて得られたカードをバインダーに集めるゲーム\nレアリティの高いカードほど、高得点だぞ！"));
+
+            Assert.That(steps[1].Title, Is.EqualTo("バインダーを出してみよう"));
+            Assert.That(steps[1].Instruction,
+                Is.EqualTo("右のように、L字のポーズを顔の前ですると、バインダーが現れるぞ！"));
+
+            Assert.That(steps[2].Title, Is.EqualTo("カード化してみよう"));
+            Assert.That(steps[2].Instruction, Is.EqualTo("目の前のアイテムに手で触れるとカードになるぞ"));
+
+            Assert.That(steps[3].Title, Is.EqualTo("バインダーに収納してみよう"));
+            Assert.That(steps[3].Instruction,
+                Is.EqualTo("カードをバインダーに近づけると収納して、ポイントをゲットできるぞ！"));
+
+            Assert.That(steps[4].Title, Is.EqualTo("カードをアイテムにしてみよう"));
+            Assert.That(steps[4].Instruction,
+                Is.EqualTo("カードの中には、効果を持つものがある。\nカードを両手で引き裂くと元のアイテムに戻りそのカード効果を使えるぞ！\nカードはアイテムにしたらカードに戻せないから気をつけろ！"));
+
+            Assert.That(steps[5].Title, Is.EqualTo("注意事項"));
+            Assert.That(steps[5].Instruction,
+                Is.EqualTo("最後に注意事項だ。\n・カードはアイテムにしたらカードに戻せないから気をつけろ！\n・カード化から1分放置で消滅するぞ！"));
+
+            Assert.That(steps[6].Title, Is.EqualTo("準備はいいか？"));
+            Assert.That(steps[6].Instruction, Is.EqualTo("制限時間5分でハイスコアを狙え！"));
         }
 
         [Test]
@@ -97,7 +130,8 @@ namespace STYLY.TIB_Template.GIPoker.Tests
         {
             var sequence = CreateDefault();
 
-            // 2秒×3回 = 6秒 > イントロの5秒
+            // 2秒×回数を重ね、イントロのフォールバックタイムアウト（8秒）を超えたら進む
+            Assert.That(sequence.Tick(2f), Is.False);
             Assert.That(sequence.Tick(2f), Is.False);
             Assert.That(sequence.Tick(2f), Is.False);
             Assert.That(sequence.Tick(2f), Is.True);
@@ -129,12 +163,12 @@ namespace STYLY.TIB_Template.GIPoker.Tests
         public void NotifyAchieved_OnAchievementStep_Advances()
         {
             var sequence = CreateDefault();
-            sequence.Tick(TutorialSequence.IntroDurationSeconds); // → Cardify
+            sequence.Tick(TutorialSequence.IntroDurationSeconds); // → BinderShow
 
             var advanced = sequence.NotifyAchieved();
 
             Assert.That(advanced, Is.True);
-            Assert.That(sequence.CurrentStep.Kind, Is.EqualTo(TutorialStepKind.Grab));
+            Assert.That(sequence.CurrentStep.Kind, Is.EqualTo(TutorialStepKind.Cardify));
         }
 
         [Test]
@@ -142,7 +176,7 @@ namespace STYLY.TIB_Template.GIPoker.Tests
         {
             var sequence = CreateDefault();
 
-            // イントロは自動送り専用のため達成通知では進まない
+            // イントロ（ルール）は自動送り専用のため達成通知では進まない
             var advanced = sequence.NotifyAchieved();
 
             Assert.That(advanced, Is.False);
@@ -153,23 +187,23 @@ namespace STYLY.TIB_Template.GIPoker.Tests
         public void Timeout_OnAchievementStep_AutoAdvances()
         {
             var sequence = CreateDefault();
-            sequence.Tick(TutorialSequence.IntroDurationSeconds); // → Cardify
+            sequence.Tick(TutorialSequence.IntroDurationSeconds); // → BinderShow
 
             // 達成できなくても既定タイムアウトで自動送りされる（展示で詰まらせない）
             var advanced = sequence.Tick(TutorialSequence.DefaultStepTimeoutSeconds);
 
             Assert.That(advanced, Is.True);
-            Assert.That(sequence.CurrentStep.Kind, Is.EqualTo(TutorialStepKind.Grab));
+            Assert.That(sequence.CurrentStep.Kind, Is.EqualTo(TutorialStepKind.Cardify));
         }
 
         [Test]
         public void NotifyAchieved_ResetsElapsedForNextStep()
         {
             var sequence = CreateDefault();
-            sequence.Tick(TutorialSequence.IntroDurationSeconds); // → Cardify
-            sequence.Tick(10f); // Cardify で10秒経過
+            sequence.Tick(TutorialSequence.IntroDurationSeconds); // → BinderShow
+            sequence.Tick(10f); // BinderShow で10秒経過
 
-            sequence.NotifyAchieved(); // → Grab
+            sequence.NotifyAchieved(); // → Cardify
 
             // 前ステップの経過時間は持ち越されない
             Assert.That(sequence.StepElapsedSeconds, Is.EqualTo(0f));
@@ -177,20 +211,42 @@ namespace STYLY.TIB_Template.GIPoker.Tests
         }
 
         [Test]
-        public void LastStep_WithInfiniteTimeout_NeverAdvancesByTick()
+        public void AllSteps_CanProgressThroughAchievementToReadyStep()
         {
             var sequence = CreateDefault();
-            sequence.Tick(TutorialSequence.IntroDurationSeconds); // → Cardify
-            sequence.NotifyAchieved(); // → Grab
+            sequence.Tick(TutorialSequence.IntroDurationSeconds); // → BinderShow
+            sequence.NotifyAchieved(); // → Cardify
             sequence.NotifyAchieved(); // → Store
             sequence.NotifyAchieved(); // → Gain
-            sequence.NotifyAchieved(); // → Rules
+            sequence.NotifyAchieved(); // → Caution（自動送り専用のため無視されるが呼び出し自体は安全）
 
-            Assert.That(sequence.CurrentStep.Kind, Is.EqualTo(TutorialStepKind.Rules));
+            Assert.That(sequence.CurrentStep.Kind, Is.EqualTo(TutorialStepKind.Caution));
 
-            // 最終ステップは GameSession の固定時間タイマーが終わるまで留まり続ける
-            Assert.That(sequence.Tick(99999f), Is.False);
+            sequence.Tick(TutorialSequence.CautionDurationSeconds); // → Ready
+            Assert.That(sequence.CurrentStep.Kind, Is.EqualTo(TutorialStepKind.Ready));
             Assert.That(sequence.IsFinished, Is.False);
+        }
+
+        [Test]
+        public void ReadyStep_TimesOutAndFinishesSequence()
+        {
+            var sequence = CreateDefault();
+            sequence.Tick(TutorialSequence.IntroDurationSeconds); // → BinderShow
+            sequence.NotifyAchieved(); // → Cardify
+            sequence.NotifyAchieved(); // → Store
+            sequence.NotifyAchieved(); // → Gain
+            sequence.NotifyAchieved(); // → Caution
+            sequence.Tick(TutorialSequence.CautionDurationSeconds); // → Ready
+
+            Assert.That(sequence.CurrentStep.Kind, Is.EqualTo(TutorialStepKind.Ready));
+
+            // Ready ステップはタイムアウトでシーケンス自体を終了させる
+            // （本編開始までの最終5秒カウントダウンは GameSession 側の固定時間タイマーが担う）
+            var advanced = sequence.Tick(TutorialSequence.ReadyDurationSeconds);
+
+            Assert.That(advanced, Is.True);
+            Assert.That(sequence.IsFinished, Is.True);
+            Assert.That(sequence.CurrentStep, Is.Null);
         }
 
         [Test]
@@ -221,6 +277,23 @@ namespace STYLY.TIB_Template.GIPoker.Tests
             Assert.That(sequence.CurrentIndex, Is.EqualTo(1));
             Assert.That(sequence.NotifyAchieved(), Is.True);
             Assert.That(sequence.IsFinished, Is.True);
+        }
+
+        [Test]
+        public void WithTimeoutSeconds_ReplacesOnlyTimeout_KeepsOtherFieldsImmutable()
+        {
+            var original = new TutorialStep(TutorialStepKind.Cardify, "カード化してみよう", "触れる", 10f, requiresAchievement: true);
+
+            var replaced = original.WithTimeoutSeconds(99f);
+
+            Assert.That(replaced.TimeoutSeconds, Is.EqualTo(99f));
+            Assert.That(replaced.Kind, Is.EqualTo(original.Kind));
+            Assert.That(replaced.Title, Is.EqualTo(original.Title));
+            Assert.That(replaced.Instruction, Is.EqualTo(original.Instruction));
+            Assert.That(replaced.RequiresAchievement, Is.EqualTo(original.RequiresAchievement));
+
+            // 元インスタンスは変更されない（イミュータブル）
+            Assert.That(original.TimeoutSeconds, Is.EqualTo(10f));
         }
     }
 }

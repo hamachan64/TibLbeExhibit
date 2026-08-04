@@ -55,6 +55,13 @@ namespace STYLY.TIB_Template.GIPoker
         private Material dotCurrentMaterial;
         private Material dotPendingMaterial;
 
+        // 各ステップの指示音声（Step1.mp3〜Step7.mp3）再生用。ノイズの多い展示環境でも
+        // 聞き取りやすいよう2D再生（spatialBlend=0）にする
+        private AudioSource voiceAudioSource;
+        // クリップ未設定なら常に true。設定済みは Play() 呼び出し直後に false へ落とし、
+        // 再生完了（!isPlaying）を検知したフレームで true に戻す
+        private bool voiceFinished = true;
+
         private Vector3 instructionBasePos;
         private Tween instructionFadeTween;
 
@@ -78,24 +85,32 @@ namespace STYLY.TIB_Template.GIPoker
                 .AddTo(this);
         }
 
+        /// <summary>
+        /// 現在ステップの音声読み上げが完了しているか。
+        /// 音声クリップが未設定（GIPokerAssets.TutorialStepVoiceClips が null / 該当要素が null）なら
+        /// 常に true（展示で詰まらせないため、タイムアウトのみで進行できる）。
+        /// </summary>
+        public bool IsVoiceFinished => voiceFinished;
+
         /// <summary>現在ステップの指示テキストと進行ドットを更新する</summary>
         public void ShowStep(int stepIndex, TutorialStep step)
         {
             UpdateInstruction(step);
             UpdateDots(stepIndex);
+            PlayVoice(stepIndex);
 
             if (step.Kind == TutorialStepKind.Intro)
             {
-                PlayIntroFlourish();
+                PlayIntroFlourish(step.Title);
             }
             else
             {
                 if (titleText != null)
                 {
-                    titleText.text = "チュートリアル";
+                    titleText.text = step.Title;
                 }
 
-                // 実践ステップ（Cardify/Grab/Store/Gain）を1つ終えて次へ進んだ瞬間だけ
+                // 実践ステップ（BinderShow/Cardify/Store/Gain）を1つ終えて次へ進んだ瞬間だけ
                 // 称賛演出を出す（Introからの自動送りは対象外）
                 if (lastStepKind.HasValue && lastStepKind.Value != TutorialStepKind.Intro && stepIndex > 0)
                 {
@@ -114,8 +129,42 @@ namespace STYLY.TIB_Template.GIPoker
             lastStepKind = step.Kind;
         }
 
+        /// <summary>
+        /// ステップに対応する音声（Step1.mp3〜Step7.mp3）を再生する。
+        /// 再生中のクリップがあれば即座に止めて切り替える。
+        /// クリップが未設定なら「読み上げ完了」を即時 true として扱う。
+        /// </summary>
+        private void PlayVoice(int stepIndex)
+        {
+            if (voiceAudioSource == null)
+            {
+                voiceFinished = true;
+                return;
+            }
+
+            voiceAudioSource.Stop();
+
+            var clips = GIPokerAssets.TutorialStepVoiceClips;
+            var clip = clips != null && stepIndex >= 0 && stepIndex < clips.Length ? clips[stepIndex] : null;
+            voiceAudioSource.clip = clip;
+
+            if (clip == null)
+            {
+                voiceFinished = true;
+                return;
+            }
+
+            // Play() 直後の1フレーム目で誤って true にならないよう、ここで明示的に false にする
+            voiceFinished = false;
+            voiceAudioSource.Play();
+        }
+
         private void BuildPanel(int stepCount)
         {
+            voiceAudioSource = gameObject.AddComponent<AudioSource>();
+            voiceAudioSource.playOnAwake = false;
+            voiceAudioSource.spatialBlend = 0f; // 2D再生（ノイズの多い展示環境でも聞き取りやすくする）
+
             var root = new GameObject("Panel");
             root.transform.SetParent(transform, false);
             panelRoot = root.transform;
@@ -149,8 +198,8 @@ namespace STYLY.TIB_Template.GIPoker
             divider.transform.localScale = new Vector3(PanelWidth - 0.05f, 0.0015f, 0.004f);
             divider.GetComponent<Renderer>().sharedMaterial = CreateTrackedMaterial(GoldColor, GoldEmission);
 
-            // タイトル
-            titleText = CreateText("Title", "チュートリアル", new Vector3(0f, 0.075f, -0.002f), 5.5f,
+            // タイトル（初期値は空。ShowStep で各ステップの Title に差し替わる）
+            titleText = CreateText("Title", string.Empty, new Vector3(0f, 0.075f, -0.002f), 5.5f,
                 GoldColor, FontStyles.Bold);
 
             // 指示テキスト（中央・少し大きめ＆行間広めで一読しやすく）
@@ -264,9 +313,10 @@ namespace STYLY.TIB_Template.GIPoker
         /// <summary>
         /// Introステップに入った瞬間だけ再生する、世界観提示の大見出しフラッシュ。
         /// パネル上部に一時的に大きく「具現化ポーカー」を掲げ、しばらくしてから
-        /// 通常のタイトル表示（「チュートリアル」）へ収束する。
+        /// 通常のタイトル表示（ステップ1の Title＝「ルール」）へ収束する。
         /// </summary>
-        private void PlayIntroFlourish()
+        /// <param name="firstStepTitle">フラッシュ終了後に表示するステップ1のタイトル</param>
+        private void PlayIntroFlourish(string firstStepTitle)
         {
             if (panelRoot == null)
             {
@@ -311,7 +361,7 @@ namespace STYLY.TIB_Template.GIPoker
                 Destroy(flourishRoot);
                 if (titleText != null)
                 {
-                    titleText.text = "チュートリアル";
+                    titleText.text = firstStepTitle;
                 }
             });
         }
@@ -476,6 +526,8 @@ namespace STYLY.TIB_Template.GIPoker
         /// </summary>
         private void OnDestroy()
         {
+            voiceAudioSource?.Stop();
+
             foreach (var mat in createdMaterials)
             {
                 if (mat != null)
@@ -485,6 +537,18 @@ namespace STYLY.TIB_Template.GIPoker
                 }
             }
             createdMaterials.Clear();
+        }
+
+        /// <summary>
+        /// 音声再生完了を毎フレーム監視し、再生が終わったフレームで IsVoiceFinished を true に戻す。
+        /// Play() 直後は voiceFinished=false から始まるため、誤って即座に true になることはない。
+        /// </summary>
+        private void Update()
+        {
+            if (!voiceFinished && voiceAudioSource != null && !voiceAudioSource.isPlaying)
+            {
+                voiceFinished = true;
+            }
         }
 
         private void LateUpdate()

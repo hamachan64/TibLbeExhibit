@@ -483,6 +483,14 @@ MonoBehaviour:
   diceCurseVfx: {fileID: 5985634496115995773, guid: 463cf9f7af4680240898f6aeba3fe3e6, type: 3}
   cardBinderModelPrefab: {fileID: 919132149155446097, guid: 2090ae7d51701434cac7d670e3c1ae64, type: 3}
   binderSmokeVfx: {fileID: 4417224938205195587, guid: 715061b12e0ee4c9d936e727932c99ae, type: 3}
+  tutorialStepVoiceClips:
+  - {fileID: 8300000, guid: 7ab1af3a3b09149959b1062f0ea305f5, type: 3}
+  - {fileID: 8300000, guid: f6141d053d7c141c98fd40f0876cef9b, type: 3}
+  - {fileID: 8300000, guid: 6d6184539b4cf48cbb8a4ca4b86aa5a0, type: 3}
+  - {fileID: 8300000, guid: d76008655728d42bba82439967c570bb, type: 3}
+  - {fileID: 8300000, guid: 93262778fa1354bde827678c7821a889, type: 3}
+  - {fileID: 8300000, guid: da32e991b063d4e02a0f782b57d59527, type: 3}
+  - {fileID: 8300000, guid: e100109397d934a14a36e6ba77e7a2b3, type: 3}
 --- !u!114 &2082618858
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -522,7 +530,7 @@ MonoBehaviour:
   sessionDurationSeconds: 300
   autoStartInEditorDelay: 3
   skipTutorial: 0
-  tutorialDurationSeconds: 60
+  tutorialDurationSeconds: 110
 --- !u!4 &2082618860
 Transform:
   m_ObjectHideFlags: 0

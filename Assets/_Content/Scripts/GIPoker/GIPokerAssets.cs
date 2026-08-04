@@ -38,6 +38,12 @@ namespace STYLY.TIB_Template.GIPoker
         public static GameObject BinderSmokeVfx;
 
         /// <summary>
+        /// チュートリアル各ステップの読み上げ音声（Step1.mp3〜Step7.mp3、7要素、null許容）。
+        /// 配列の並びは TutorialSequence.CreateDefaultSteps() のステップ順と1対1で対応する。
+        /// </summary>
+        public static AudioClip[] TutorialStepVoiceClips;
+
+        /// <summary>
         /// VFXプレハブを生成して一定時間後に破棄する（null安全）。
         /// scale はプレハブ既定の1倍から変更したい場合のみ指定する
         /// （例: 汎用VFXアセットを手のひらサイズの小物向けに控えめなスケールへ縮小する）。

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using R3;
 using UnityEngine;
 
@@ -18,6 +19,9 @@ namespace STYLY.TIB_Template.GIPoker
     ///   CardBinder.Clear() で空へ戻す（本番スコアを汚さない）
     /// - 達成判定は「一度でも到達したか」の単調フラグで持ち、練習アイテムの State 変化と
     ///   ステップ切り替えの両方のタイミングで評価する（先回り操作にも対応）
+    /// - 達成判定を持つステップ（BinderShow/Cardify/Store/Gain）は「音声読み上げ完了 かつ 達成」の
+    ///   両方が揃うまで次へ進まない（読み上げ中に達成しても読み上げ完了を待つ）。
+    ///   ただしタイムアウト（音声長+バッファ秒）による自動送りは常に有効で、展示で詰まらせない
     /// - ステップのタイムアウト自動送りにより、達成できない体験者がいても詰まらない
     /// </summary>
     public class TutorialDirector : MonoBehaviour
@@ -28,11 +32,26 @@ namespace STYLY.TIB_Template.GIPoker
         [SerializeField, Tooltip("練習アイテムを出す位置: 頭からどれだけ下か（m）")]
         private float itemHeightBelowHead = 0.15f;
 
+        /// <summary>達成判定を持たないステップ（Intro/Caution）の音声完了後の追加待機秒数</summary>
+        private const float AutoAdvanceStepVoiceBufferSeconds = 1f;
+
+        /// <summary>最終ステップ（Ready）の音声完了後の追加待機秒数（この後 GameSession 側の5秒カウントダウンへ続く）</summary>
+        private const float ReadyStepVoiceBufferSeconds = 2f;
+
+        /// <summary>
+        /// 達成判定を持つステップ（BinderShow/Cardify/Store/Gain）の音声完了後に確保する、
+        /// ジェスチャー実行のための安全側タイムアウトバッファ秒。
+        /// 通常はこのタイムアウトより先に達成＋読み上げ完了で次へ進む想定で、
+        /// あくまで「体験者が達成できなかった場合に詰まらせない」ための保険値。
+        /// </summary>
+        private const float AchievementStepVoiceBufferSeconds = 12f;
+
         private GameSession session;
         private CardBinder binder;
+        private BinderView binderView;
         private TutorialSequence sequence;
         private TutorialView view;
-        private TutorialPracticeItem practiceItem1; // カード化→掴む→収納の練習用
+        private TutorialPracticeItem practiceItem1; // カード化→収納の練習用
         private TutorialPracticeItem practiceItem2; // ゲイン（引き裂き）の練習用
         private IDisposable tickSubscription;
 
@@ -41,15 +60,15 @@ namespace STYLY.TIB_Template.GIPoker
 
         // 練習アイテムの到達状況（一度達成したら true のままの単調フラグ）
         private bool practiceCardified;
-        private bool practiceHeld;
         private bool practiceStored;
         private bool practiceGained;
 
         /// <summary>GIPokerBootstrap から結線する</summary>
-        public void Init(GameSession gameSession, CardBinder cardBinder)
+        public void Init(GameSession gameSession, CardBinder cardBinder, BinderView cardBinderView)
         {
             session = gameSession;
             binder = cardBinder;
+            binderView = cardBinderView;
 
             session.State
                 .Subscribe(s =>
@@ -66,6 +85,15 @@ namespace STYLY.TIB_Template.GIPoker
                     }
                 })
                 .AddTo(this);
+
+            // バインダー表示状態は「BinderShow ステップの達成判定」の再評価トリガーとしてのみ使う
+            // （フラグとして保持せず、評価時に binderView.IsVisible.CurrentValue を直接参照する）
+            if (binderView != null)
+            {
+                binderView.IsVisible
+                    .Subscribe(_ => EvaluateAchievement())
+                    .AddTo(this);
+            }
         }
 
         private void StartTutorial()
@@ -76,11 +104,10 @@ namespace STYLY.TIB_Template.GIPoker
             }
             tutorialActive = true;
             practiceCardified = false;
-            practiceHeld = false;
             practiceStored = false;
             practiceGained = false;
 
-            sequence = new TutorialSequence(TutorialSequence.CreateDefaultSteps());
+            sequence = new TutorialSequence(BuildStepsWithVoiceTimeouts());
 
             var viewGo = new GameObject("GIPoker_TutorialView");
             view = viewGo.AddComponent<TutorialView>();
@@ -93,6 +120,37 @@ namespace STYLY.TIB_Template.GIPoker
             OnStepEntered();
         }
 
+        /// <summary>
+        /// TutorialSequence.CreateDefaultSteps() をベースに、GIPokerAssets の音声クリップ長を使って
+        /// 各ステップの TimeoutSeconds を「音声長 + バッファ秒」で上書きした新しいステップ列を組み立てる。
+        /// 対応する音声クリップが無いステップはフォールバック値（CreateDefaultSteps の既定値）のまま。
+        /// TutorialStep はイミュータブルなため、WithTimeoutSeconds で新インスタンスに差し替える。
+        /// </summary>
+        private static IReadOnlyList<TutorialStep> BuildStepsWithVoiceTimeouts()
+        {
+            var baseSteps = TutorialSequence.CreateDefaultSteps();
+            var clips = GIPokerAssets.TutorialStepVoiceClips;
+            var result = new List<TutorialStep>(baseSteps.Count);
+
+            for (var i = 0; i < baseSteps.Count; i++)
+            {
+                var step = baseSteps[i];
+                var clip = clips != null && i < clips.Length ? clips[i] : null;
+                if (clip != null)
+                {
+                    var buffer = step.RequiresAchievement
+                        ? AchievementStepVoiceBufferSeconds
+                        : step.Kind == TutorialStepKind.Ready
+                            ? ReadyStepVoiceBufferSeconds
+                            : AutoAdvanceStepVoiceBufferSeconds;
+                    step = step.WithTimeoutSeconds(clip.length + buffer);
+                }
+                result.Add(step);
+            }
+
+            return result;
+        }
+
         private void TickSequence()
         {
             if (sequence == null)
@@ -102,6 +160,12 @@ namespace STYLY.TIB_Template.GIPoker
             if (sequence.Tick(Time.deltaTime))
             {
                 OnStepEntered();
+            }
+            else
+            {
+                // 達成条件は満たしているが読み上げ完了待ちのケースを、
+                // 読み上げが完了したフレームで確実に拾うための毎フレーム再評価
+                EvaluateAchievement();
             }
         }
 
@@ -119,8 +183,8 @@ namespace STYLY.TIB_Template.GIPoker
                 case TutorialStepKind.Cardify:
                     SpawnPracticeItem1();
                     break;
-                case TutorialStepKind.Grab:
-                    // 触れられずタイムアウトした場合でも掴む練習ができるよう強制カード化する
+                case TutorialStepKind.Store:
+                    // 触れられずタイムアウトした場合でも収納の練習ができるよう強制カード化する
                     EnsureItem1Cardified();
                     break;
                 case TutorialStepKind.Gain:
@@ -137,7 +201,10 @@ namespace STYLY.TIB_Template.GIPoker
             EvaluateAchievement();
         }
 
-        /// <summary>現在のステップの達成条件を評価し、満たしていれば次のステップへ進める</summary>
+        /// <summary>
+        /// 現在のステップの達成条件を評価し、「達成 かつ 読み上げ完了」であれば次のステップへ進める。
+        /// 達成判定を持たないステップでは何もしない（タイムアウトのみで進む）。
+        /// </summary>
         private void EvaluateAchievement()
         {
             var step = sequence?.CurrentStep;
@@ -145,11 +212,16 @@ namespace STYLY.TIB_Template.GIPoker
             {
                 return;
             }
+            if (view == null || !view.IsVoiceFinished)
+            {
+                // 達成が先に起きても読み上げ完了までは進めない（音声を打ち切らない）
+                return;
+            }
 
             var achieved = step.Kind switch
             {
+                TutorialStepKind.BinderShow => binderView != null && binderView.IsVisible.CurrentValue,
                 TutorialStepKind.Cardify => practiceCardified,
-                TutorialStepKind.Grab => practiceHeld,
                 TutorialStepKind.Store => practiceStored,
                 TutorialStepKind.Gain => practiceGained,
                 _ => false,
@@ -204,11 +276,9 @@ namespace STYLY.TIB_Template.GIPoker
                     break;
                 case CardizableState.Held:
                     practiceCardified = true;
-                    practiceHeld = true;
                     break;
                 case CardizableState.Stored:
                     practiceCardified = true;
-                    practiceHeld = true;
                     practiceStored = true;
                     break;
                 case CardizableState.Gained:
@@ -289,5 +359,30 @@ namespace STYLY.TIB_Template.GIPoker
                 binder.Clear();
             }
         }
+
+#if UNITY_EDITOR
+        /// <summary>
+        /// エディタ実行時限定のデバッグ機能: 現在のチュートリアルステップを強制的にスキップする
+        /// （読み上げ完了待ち・達成条件を無視して次のステップへ進める）。検証時間短縮用で、
+        /// 実機ビルドには含めない。GIPokerBootstrap から N キー押下時に呼び出される想定。
+        /// </summary>
+        public void SkipCurrentStep()
+        {
+            if (sequence == null || sequence.IsFinished)
+            {
+                return;
+            }
+
+            var advanced = sequence.NotifyAchieved();
+            if (!advanced)
+            {
+                advanced = sequence.Tick(sequence.CurrentStep.TimeoutSeconds);
+            }
+            if (advanced)
+            {
+                OnStepEntered();
+            }
+        }
+#endif
     }
 }

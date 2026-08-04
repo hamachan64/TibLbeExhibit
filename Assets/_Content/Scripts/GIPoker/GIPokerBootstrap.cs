@@ -53,6 +53,8 @@ namespace STYLY.TIB_Template.GIPoker
         private GameObject cardBinderModelPrefab;
         [SerializeField, Tooltip("バインダー出し入れ時の白煙＋衝撃波VFX（VFX_BinderSummonPoof）")]
         private GameObject binderSmokeVfx;
+        [SerializeField, Tooltip("チュートリアル各ステップの読み上げ音声（7要素、Step1.mp3〜Step7.mp3を順に設定）")]
+        private AudioClip[] tutorialStepVoiceClips;
 
         private void Awake()
         {
@@ -65,6 +67,7 @@ namespace STYLY.TIB_Template.GIPoker
             GIPokerAssets.DiceCurseVfx = diceCurseVfx;
             GIPokerAssets.CardBinderModelPrefab = cardBinderModelPrefab;
             GIPokerAssets.BinderSmokeVfx = binderSmokeVfx;
+            GIPokerAssets.TutorialStepVoiceClips = tutorialStepVoiceClips;
         }
 
         private void Start()
@@ -120,7 +123,18 @@ namespace STYLY.TIB_Template.GIPoker
             // チュートリアル（本編開始前の操作説明。Tutorial 状態の間だけ動作する）
             var tutorialGo = new GameObject("GIPoker_Tutorial");
             var tutorialDirector = tutorialGo.AddComponent<TutorialDirector>();
-            tutorialDirector.Init(session, binder);
+            tutorialDirector.Init(session, binder, binderView);
+
+#if UNITY_EDITOR
+            // エディタ実行時のデバッグ用: Nキーで現在のチュートリアルステップを強制スキップする
+            // （読み上げ完了待ち・達成条件を無視して次へ進める。検証時間短縮用）。
+            // Spaceキー（バインダートグル用）とは独立させ、互いの挙動に影響しないようにする。
+            // 実機（PICO / Meta Quest）はハンドトラッキング専用でキーボードが無いためビルドには含めない。
+            Observable.EveryUpdate()
+                .Where(_ => Keyboard.current != null && Keyboard.current.nKey.wasPressedThisFrame)
+                .Subscribe(_ => tutorialDirector.SkipCurrentStep())
+                .AddTo(this);
+#endif
 
             // VR空間（チュートリアル中だけプレイヤーを包む「ゲーム開始の間」。Issue #13）
             var tutorialSpace = TutorialSpaceDirector.Create();
