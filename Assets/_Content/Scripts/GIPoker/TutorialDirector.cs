@@ -49,6 +49,7 @@ namespace STYLY.TIB_Template.GIPoker
         private GameSession session;
         private CardBinder binder;
         private BinderView binderView;
+        private TransitionDirector transitionDirector;
         private TutorialSequence sequence;
         private TutorialView view;
         private TutorialPracticeItem practiceItem1; // カード化→収納の練習用
@@ -64,11 +65,12 @@ namespace STYLY.TIB_Template.GIPoker
         private bool practiceGained;
 
         /// <summary>GIPokerBootstrap から結線する</summary>
-        public void Init(GameSession gameSession, CardBinder cardBinder, BinderView cardBinderView)
+        public void Init(GameSession gameSession, CardBinder cardBinder, BinderView cardBinderView, TransitionDirector transition)
         {
             session = gameSession;
             binder = cardBinder;
             binderView = cardBinderView;
+            transitionDirector = transition;
 
             session.State
                 .Subscribe(s =>
@@ -112,6 +114,30 @@ namespace STYLY.TIB_Template.GIPoker
             var viewGo = new GameObject("GIPoker_TutorialView");
             view = viewGo.AddComponent<TutorialView>();
             view.Init(session, sequence.Steps.Count);
+
+            // 白フェードが完全に終わってからステップ1（音声含む）を開始する。
+            // TransitionDirector未設定（単体テスト等）ならフェードを待たず即開始する。
+            if (transitionDirector != null)
+            {
+                transitionDirector.TutorialShown
+                    .Take(1)
+                    .Subscribe(_ => BeginStepProgression())
+                    .AddTo(this);
+            }
+            else
+            {
+                BeginStepProgression();
+            }
+        }
+
+        /// <summary>ステップ進行（タイムアウト計測・ステップ1表示）を開始する</summary>
+        private void BeginStepProgression()
+        {
+            if (!tutorialActive || sequence == null)
+            {
+                // 白フェード完了より先に CleanupTutorial が走った場合の防御（通常到達しない）
+                return;
+            }
 
             tickSubscription = Observable.EveryUpdate()
                 .Subscribe(_ => TickSequence())
@@ -188,7 +214,13 @@ namespace STYLY.TIB_Template.GIPoker
                     EnsureItem1Cardified();
                     break;
                 case TutorialStepKind.Gain:
+                    // Storeステップの練習アイテムは収納済み・未収納を問わず次のステップに残さない
+                    DestroyPracticeItem1();
                     SpawnPracticeItem2();
+                    break;
+                case TutorialStepKind.Caution:
+                    // Gainステップの練習アイテムはゲイン済み・未ゲインを問わず次のステップに残さない
+                    DestroyPracticeItem2();
                     break;
             }
 
@@ -264,6 +296,35 @@ namespace STYLY.TIB_Template.GIPoker
 
             // 引き裂き（ゲイン）の練習に集中できるよう、最初からカード化しておく
             practiceItem2.TryCardify();
+        }
+
+        /// <summary>
+        /// Storeステップの練習アイテム1を撤去する（Gainステップに入る直前に呼ぶ）。
+        /// 収納済み（MarkStored 済みで非表示）でも未収納（浮遊したまま）でも、
+        /// 次のステップに前ステップの実体を残さない。収納済みの場合、CardInstance.Source は
+        /// 破棄後 Unity のフェイクnull判定により CardBinder.Clear() 側でも安全に無視される。
+        /// </summary>
+        private void DestroyPracticeItem1()
+        {
+            if (practiceItem1 != null)
+            {
+                Destroy(practiceItem1.gameObject);
+                practiceItem1 = null;
+            }
+        }
+
+        /// <summary>
+        /// Gainステップの練習アイテム2を撤去する（Cautionステップに入る直前に呼ぶ）。
+        /// ゲイン済み（実体アイテムとして残り続ける）でも未ゲイン（カードのまま浮遊）でも、
+        /// 次のステップに前ステップの実体を残さない。
+        /// </summary>
+        private void DestroyPracticeItem2()
+        {
+            if (practiceItem2 != null)
+            {
+                Destroy(practiceItem2.gameObject);
+                practiceItem2 = null;
+            }
         }
 
         /// <summary>練習アイテムの状態変化から到達フラグを更新する（両アイテム共通）</summary>
@@ -368,8 +429,9 @@ namespace STYLY.TIB_Template.GIPoker
         /// </summary>
         public void SkipCurrentStep()
         {
-            if (sequence == null || sequence.IsFinished)
+            if (sequence == null || sequence.IsFinished || tickSubscription == null)
             {
+                // tickSubscription が無い＝白フェード完了待ちでステップ1がまだ開始していない
                 return;
             }
 

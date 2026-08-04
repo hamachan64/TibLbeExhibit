@@ -38,6 +38,15 @@ namespace STYLY.TIB_Template.GIPoker
         private SessionState? previousState;
         private CancellationTokenSource transitionCts;
 
+        private readonly Subject<Unit> tutorialShown = new();
+
+        /// <summary>
+        /// Tutorial状態への遷移演出（白フェードアウト→VR空間表示→白フェードイン）が
+        /// キャンセルされずに完了した瞬間に1回だけ発火する。
+        /// TutorialDirector がステップ1（音声含む）の開始をこれに合わせるために使う。
+        /// </summary>
+        public Observable<Unit> TutorialShown => tutorialShown;
+
         /// <summary>GIPokerBootstrap から結線する。ScreenFader はここで内部生成する</summary>
         public void Init(GameSession session, TutorialSpaceDirector spaceDirector)
         {
@@ -71,10 +80,10 @@ namespace STYLY.TIB_Template.GIPoker
             }
 
             RestartTransitionCts();
-            RunPlanAsync(plan, transitionCts.Token).Forget();
+            RunPlanAsync(plan, next, transitionCts.Token).Forget();
         }
 
-        private async UniTask RunPlanAsync(IReadOnlyList<TransitionStep> plan, CancellationToken ct)
+        private async UniTask RunPlanAsync(IReadOnlyList<TransitionStep> plan, SessionState targetState, CancellationToken ct)
         {
             try
             {
@@ -82,6 +91,13 @@ namespace STYLY.TIB_Template.GIPoker
                 {
                     ct.ThrowIfCancellationRequested();
                     await RunStepAsync(step, ct);
+                }
+
+                // キャンセルされずに最後まで完了した場合のみ通知する
+                // （途中でキャンセルされた遷移では「フェードが完全に終わった」とは言えないため）
+                if (targetState == SessionState.Tutorial)
+                {
+                    tutorialShown.OnNext(Unit.Default);
                 }
             }
             catch (OperationCanceledException)
@@ -119,6 +135,7 @@ namespace STYLY.TIB_Template.GIPoker
         {
             transitionCts?.Cancel();
             transitionCts?.Dispose();
+            tutorialShown.Dispose();
         }
     }
 }

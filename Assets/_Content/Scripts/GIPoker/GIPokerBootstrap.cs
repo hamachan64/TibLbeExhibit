@@ -120,10 +120,20 @@ namespace STYLY.TIB_Template.GIPoker
             var titleView = titleGo.AddComponent<TitleView>();
             titleView.Init(session);
 
+            // VR空間（チュートリアル中だけプレイヤーを包む「ゲーム開始の間」。Issue #13）
+            var tutorialSpace = TutorialSpaceDirector.Create();
+
+            // MR⇔VR遷移（白フェード＋VR空間の表示/非表示をオーケストレーション。Issue #14）
+            var transitionGo = new GameObject("GIPoker_Transition");
+            var transitionDirector = transitionGo.AddComponent<TransitionDirector>();
+            transitionDirector.Init(session, tutorialSpace);
+
             // チュートリアル（本編開始前の操作説明。Tutorial 状態の間だけ動作する）
+            // TransitionDirector を渡し、白フェードが完全に終わってからステップ1（音声含む）が
+            // 始まるようにする（フェード中に音声が鳴り始めるのを防ぐ）
             var tutorialGo = new GameObject("GIPoker_Tutorial");
             var tutorialDirector = tutorialGo.AddComponent<TutorialDirector>();
-            tutorialDirector.Init(session, binder, binderView);
+            tutorialDirector.Init(session, binder, binderView, transitionDirector);
 
 #if UNITY_EDITOR
             // エディタ実行時のデバッグ用: Nキーで現在のチュートリアルステップを強制スキップする
@@ -135,14 +145,6 @@ namespace STYLY.TIB_Template.GIPoker
                 .Subscribe(_ => tutorialDirector.SkipCurrentStep())
                 .AddTo(this);
 #endif
-
-            // VR空間（チュートリアル中だけプレイヤーを包む「ゲーム開始の間」。Issue #13）
-            var tutorialSpace = TutorialSpaceDirector.Create();
-
-            // MR⇔VR遷移（白フェード＋VR空間の表示/非表示をオーケストレーション。Issue #14）
-            var transitionGo = new GameObject("GIPoker_Transition");
-            var transitionDirector = transitionGo.AddComponent<TransitionDirector>();
-            transitionDirector.Init(session, tutorialSpace);
 
             // リザルト
             var resultGo = new GameObject("GIPoker_ResultView");
