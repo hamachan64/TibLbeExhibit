@@ -19,14 +19,20 @@ namespace STYLY.TIB_Template.GIPoker
     /// </summary>
     public class CardBinder : MonoBehaviour
     {
+        /// <summary>バインダーの総ページ数（BinderLayout.PageCount と同一。実測値の単一のソースは BinderLayout）</summary>
+        public const int PageCount = BinderLayout.PageCount;
+
+        /// <summary>1ページあたりの収納スロット数（3×3）</summary>
+        public const int SlotsPerPage = BinderLayout.SlotsPerPage;
+
         [SerializeField, Tooltip("収納判定の中心（未設定なら自身の Transform）")]
         private Transform storePoint;
 
         [SerializeField, Tooltip("この半径（m）内でカードを離すと収納される")]
         private float storeRadius = 0.2f;
 
-        [SerializeField, Tooltip("バインダーの最大収納枚数")]
-        private int capacity = 40;
+        [SerializeField, Tooltip("バインダーの最大収納枚数（PageCount × SlotsPerPage = 8 × 9 = 72 で算出）")]
+        private int capacity = PageCount * SlotsPerPage;
 
         private static readonly List<CardBinder> activeBinders = new();
 
@@ -111,19 +117,26 @@ namespace STYLY.TIB_Template.GIPoker
 
         /// <summary>
         /// カードの取り出し（ゲイン準備など）を試みる。成功するとカードの実体が
-        /// 指定位置で再浮遊し、1分ルールのカウントダウンが仕切り直しで再開する。
+        /// 指定位置で再浮遊し、1分ルールのカウントダウンが一時停止した状態で再開準備される
+        /// （実際に再開されるのは、ゲインも再収納もせず手放したタイミング。
+        /// CardizableItemBase.ReleaseFromBinder / Release 参照）。
+        ///
+        /// StoreCopy（「錬金キット」等の複製収納。Source == null）で追加されたカードには
+        /// 実体（Source）が無いため取り出しできない。誤って呼ぶとカードがバインダーから
+        /// 消えるだけで実体化できず消滅してしまうため、ここで拒否する（バグ修正1）。
         /// </summary>
         public bool TryTakeOut(CardInstance instance, Vector3 position)
         {
-            if (instance == null || !cards.Remove(instance))
+            if (instance == null || instance.Source == null)
+            {
+                return false;
+            }
+            if (!cards.Remove(instance))
             {
                 return false;
             }
 
-            if (instance.Source != null)
-            {
-                instance.Source.ReleaseFromBinder(position);
-            }
+            instance.Source.ReleaseFromBinder(position);
             cardTakenOut.OnNext(instance);
             return true;
         }

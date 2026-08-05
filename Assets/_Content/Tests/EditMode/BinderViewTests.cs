@@ -103,5 +103,39 @@ namespace STYLY.TIB_Template.GIPoker.Tests
 
             Assert.That(binderView.IsVisible.CurrentValue, Is.False);
         }
+
+        // --- 収納OKハイライトのON/OFF状態遷移（20260805-binder-card-storage-fix.md 受け入れ基準） ---
+
+        [Test]
+        public void SetHighlighted_Default_IsFalse()
+        {
+            Assert.That(binderView.IsHighlighted.CurrentValue, Is.False);
+        }
+
+        [Test]
+        public void SetHighlighted_True_TurnsOn()
+        {
+            binderView.SetHighlighted(true);
+
+            Assert.That(binderView.IsHighlighted.CurrentValue, Is.True);
+        }
+
+        [Test]
+        public void SetHighlighted_TrueThenFalse_TurnsOffAgain()
+        {
+            binderView.SetHighlighted(true);
+            binderView.SetHighlighted(false);
+
+            Assert.That(binderView.IsHighlighted.CurrentValue, Is.False);
+        }
+
+        [Test]
+        public void SetHighlighted_SameValueTwice_IsIdempotent()
+        {
+            binderView.SetHighlighted(true);
+            binderView.SetHighlighted(true);
+
+            Assert.That(binderView.IsHighlighted.CurrentValue, Is.True);
+        }
     }
 }
