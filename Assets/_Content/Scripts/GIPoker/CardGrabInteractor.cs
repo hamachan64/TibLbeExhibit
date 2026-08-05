@@ -50,6 +50,9 @@ namespace STYLY.TIB_Template.GIPoker
         /// <summary>収納OKハイライトを点けている対象バインダー（未通知なら null）</summary>
         private CardBinder highlightedBinder;
 
+        /// <summary>highlightedBinder の BinderView キャッシュ（対象が変わったときだけ GetComponent する）</summary>
+        private BinderView highlightedBinderView;
+
         /// <summary>現在掴んでいるカード（未保持なら null）</summary>
         public ReadOnlyReactiveProperty<CardizableItemBase> HeldCard => heldCard;
 
@@ -100,13 +103,25 @@ namespace STYLY.TIB_Template.GIPoker
                 return;
             }
 
-            if (TryGrabFloatingCard(pinchPosition) || TryTakeOutMiniCard(pinchPosition))
+            if (TryGrabFloatingCard(pinchPosition))
             {
                 return;
             }
 
+            // ミニカードの取り出し・ページ角タブは同じ「最寄りの表示中バインダー」を参照するため、
+            // CardBinder.FindNearest の走査を1回にまとめる
             var binderView = FindVisibleBinderView(pinchPosition);
-            if (binderView != null && binderView.TryBeginPageTurn(pinchPosition))
+            if (binderView == null)
+            {
+                return;
+            }
+
+            if (TryTakeOutMiniCard(binderView, pinchPosition))
+            {
+                return;
+            }
+
+            if (binderView.TryBeginPageTurn(pinchPosition))
             {
                 turningPageBinderView = binderView;
             }
@@ -137,13 +152,8 @@ namespace STYLY.TIB_Template.GIPoker
             return GrabCard(nearest);
         }
 
-        private bool TryTakeOutMiniCard(Vector3 pinchPosition)
+        private bool TryTakeOutMiniCard(BinderView binderView, Vector3 pinchPosition)
         {
-            var binderView = FindVisibleBinderView(pinchPosition);
-            if (binderView == null)
-            {
-                return false;
-            }
             return binderView.TryTakeOutNearestMiniCard(pinchPosition, out var card) && GrabCard(card);
         }
 
@@ -220,8 +230,12 @@ namespace STYLY.TIB_Template.GIPoker
 
             if (nearest != null && nearest.IsInStoreRange(position))
             {
-                highlightedBinder = nearest;
-                highlightedBinder.GetComponent<BinderView>()?.SetHighlighted(this, true);
+                if (highlightedBinder != nearest)
+                {
+                    highlightedBinder = nearest;
+                    highlightedBinderView = nearest.GetComponent<BinderView>();
+                }
+                highlightedBinderView?.SetHighlighted(this, true);
             }
             else
             {
@@ -235,8 +249,9 @@ namespace STYLY.TIB_Template.GIPoker
             {
                 return;
             }
-            highlightedBinder.GetComponent<BinderView>()?.SetHighlighted(this, false);
+            highlightedBinderView?.SetHighlighted(this, false);
             highlightedBinder = null;
+            highlightedBinderView = null;
         }
 
         private void OnPinchEnded(Vector3 releasePosition)

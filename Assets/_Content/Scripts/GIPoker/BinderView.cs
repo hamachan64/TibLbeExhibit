@@ -151,6 +151,7 @@ namespace STYLY.TIB_Template.GIPoker
                 return;
             }
             isVisible.Value = false;
+            CancelPageTurnOnHide();
             PlaySmokeVfx(transform.position);
 
             visualTween?.Kill();
@@ -459,6 +460,29 @@ namespace STYLY.TIB_Template.GIPoker
         }
 
         /// <summary>
+        /// Hide() 時にページめくりドラッグが進行中だった場合、非表示のバインダーに対して
+        /// 後からアニメーション・currentPageIndex更新が走らないよう、即座に元の静止角へ
+        /// スナップして中断する（もう一方の手のLサインで Toggle() された場合など、
+        /// ページ端を掴んでいる最中に非表示化されるケースへの対策）。
+        /// ドラッグ中だった手の CardGrabInteractor は turningPageBinderView 参照を握ったままだが、
+        /// 以後の UpdatePageTurn/EndPageTurn は IsTurningPage==false により安全に no-op になる。
+        /// </summary>
+        private void CancelPageTurnOnHide()
+        {
+            if (!IsTurningPage)
+            {
+                return;
+            }
+            pageTurnTween?.Kill();
+            var page = pages[turningPageIndex];
+            if (page != null)
+            {
+                page.localRotation = Quaternion.AngleAxis(turningForward ? 0f : 180f, Vector3.forward);
+            }
+            turningPageIndex = -1;
+        }
+
+        /// <summary>
         /// ページめくりドラッグ中、ピンチ位置の動きにヒンジ回転（背表紙軸＝モデルローカルZ軸）を
         /// 追従させる。回転角は、ページの親（Modelの回転していないローカル座標系）における
         /// ピンチ位置の「背表紙を中心とした角度」（atan2）をそのまま採用する
@@ -494,11 +518,10 @@ namespace STYLY.TIB_Template.GIPoker
             var page = pages[pageIndex];
 
             // 最終角度が180側に寄っていれば「開いた（左へ倒れた）」状態に収束させる。
-            // ページが実際に切り替わる（currentPageIndex が進む/戻る）条件は、前めくりと
-            // 後ろめくりで逆になる点に注意: 前めくりは開ききった場合に進み、後ろめくりは
-            // 閉じきった場合に戻る（開ききったまま指を離した場合はキャンセル＝バネで180°へ戻る）。
+            // ページが実際に切り替わるかどうかの非対称な判定は BinderLayout.ShouldAdvancePage
+            // に切り出してあり（EditModeテストで直接検証済み）、ここではそれを呼ぶだけにする。
             var settleOpen = BinderLayout.ShouldCommitPageTurn(turningAngleDeg);
-            var indexChanges = forward ? settleOpen : !settleOpen;
+            var indexChanges = BinderLayout.ShouldAdvancePage(forward, turningAngleDeg);
             turningPageIndex = -1;
 
             var targetAngle = settleOpen ? 180f : 0f;
@@ -573,6 +596,10 @@ namespace STYLY.TIB_Template.GIPoker
                 if (isHighlighted.Value)
                 {
                     mat.EnableKeyword("_EMISSION");
+                }
+                else
+                {
+                    mat.DisableKeyword("_EMISSION");
                 }
                 mat.SetColor(EmissionColorId, color);
             }

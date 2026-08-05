@@ -130,6 +130,26 @@ namespace STYLY.TIB_Template.GIPoker.Tests
             Assert.That(BinderLayout.ShouldCommitPageTurn(angleDegrees), Is.EqualTo(expectedCommit));
         }
 
+        // 前めくり（forward=true, 0°→180°方向）は「開ききった（角度>=しきい値）」場合にのみ進む。
+        [TestCase(true, 0f, false)]
+        [TestCase(true, 45f, false)]
+        [TestCase(true, 89.9f, false)]
+        [TestCase(true, 90f, true)]
+        [TestCase(true, 180f, true)]
+        // 後ろめくり（forward=false, 180°→0°方向）は「閉じきった（角度<しきい値）」場合にのみ戻る。
+        // 前めくりと判定が非対称であることの回帰防止テスト（実際にここで前後の判定を
+        // 取り違えるバグが混入していた）。
+        [TestCase(false, 0f, true)]
+        [TestCase(false, 45f, true)]
+        [TestCase(false, 89.9f, true)]
+        [TestCase(false, 90f, false)]
+        [TestCase(false, 120f, false)]
+        [TestCase(false, 180f, false)]
+        public void ShouldAdvancePage_IsAsymmetricBetweenForwardAndBackward(bool forward, float finalAngleDegrees, bool expectedAdvance)
+        {
+            Assert.That(BinderLayout.ShouldAdvancePage(forward, finalAngleDegrees), Is.EqualTo(expectedAdvance));
+        }
+
         [Test]
         public void MiniCardScale_FitsWithinCell_AndIsNotTooSmall()
         {

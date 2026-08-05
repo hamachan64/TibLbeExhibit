@@ -120,7 +120,21 @@ namespace STYLY.TIB_Template.GIPoker
             return new Vector3(x, MiniCardSurfaceOffset, z);
         }
 
-        /// <summary>ピンチ終了時の回転角から、めくり切り（コミット）すべきかどうかを判定する</summary>
+        /// <summary>ピンチ終了時の回転角から、めくり切り（180°側に収束）すべきかどうかを判定する</summary>
         public static bool ShouldCommitPageTurn(float angleDegrees) => angleDegrees >= PageTurnCommitThresholdDegrees;
+
+        /// <summary>
+        /// ページめくりドラッグ終了時、実際に currentPageIndex を切り替える（次/前のページへ進める）
+        /// べきかどうかを判定する。
+        /// 前めくり（forward=true、0°→180°方向）は開ききった場合に次のページへ進み、
+        /// 後ろめくり（forward=false、180°→0°方向）は閉じきった場合に前のページへ戻る、
+        /// という非対称な条件になる点に注意（開ききったまま／閉じたままキャンセルした場合は
+        /// バネで元の角度に戻るだけで、ページは切り替わらない）。
+        /// </summary>
+        public static bool ShouldAdvancePage(bool forward, float finalAngleDegrees)
+        {
+            var settleOpen = ShouldCommitPageTurn(finalAngleDegrees);
+            return forward ? settleOpen : !settleOpen;
+        }
     }
 }
