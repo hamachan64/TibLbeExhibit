@@ -3,43 +3,62 @@ using System.Collections.Generic;
 
 namespace STYLY.TIB_Template.GIPoker
 {
-    /// <summary>チュートリアルのステップ種別。</summary>
+    /// <summary>チュートリアルのステップ種別（新7ステップ構成）。</summary>
     public enum TutorialStepKind
     {
-        /// <summary>イントロ（自動送りのみ）</summary>
+        /// <summary>ルール説明（自動送りのみ）</summary>
         Intro,
-        /// <summary>カード化: 練習アイテムに素手で触れる</summary>
+        /// <summary>バインダーを出してみよう: Lサインでバインダーを表示する</summary>
+        BinderShow,
+        /// <summary>カード化してみよう: 練習アイテムに素手で触れる</summary>
         Cardify,
-        /// <summary>掴む: カードをピンチ（つまむ）で掴む</summary>
-        Grab,
-        /// <summary>収納: バインダーの圏内で指を離して収納する</summary>
+        /// <summary>バインダーに収納してみよう: カードをバインダーに収納する</summary>
         Store,
-        /// <summary>ゲイン: カードを両手で引き裂いて効果を発動する</summary>
+        /// <summary>カードをアイテムにしてみよう: カードを両手で引き裂いてゲインする</summary>
         Gain,
-        /// <summary>ルール確認（以降は本編開始までカウントダウン表示）</summary>
-        Rules,
+        /// <summary>注意事項（自動送りのみ）</summary>
+        Caution,
+        /// <summary>準備はいいか？（読み上げ完了後、本編開始までの最終ステップ）</summary>
+        Ready,
     }
 
-    /// <summary>チュートリアル1ステップ分の定義（指示テキスト＋タイムアウト＋達成判定の有無）。</summary>
+    /// <summary>チュートリアル1ステップ分の定義（タイトル＋指示テキスト＋タイムアウト＋達成判定の有無）。</summary>
     public sealed class TutorialStep
     {
         public TutorialStepKind Kind { get; }
 
+        /// <summary>体験者へ表示するタイトル</summary>
+        public string Title { get; }
+
         /// <summary>体験者への指示テキスト</summary>
         public string Instruction { get; }
 
-        /// <summary>達成できなくても自動送りするまでの秒数（PositiveInfinity で自動送りなし）</summary>
+        /// <summary>
+        /// 達成できなくても自動送りするまでの秒数（PositiveInfinity で自動送りなし）。
+        /// 音声クリップが設定されている場合、TutorialDirector が「音声長 + バッファ秒」で
+        /// 上書きしたインスタンスに差し替える（本値はクリップ未設定時のフォールバック）。
+        /// </summary>
         public float TimeoutSeconds { get; }
 
         /// <summary>達成判定を持つステップか（false は自動送り専用のステップ）</summary>
         public bool RequiresAchievement { get; }
 
-        public TutorialStep(TutorialStepKind kind, string instruction, float timeoutSeconds, bool requiresAchievement)
+        public TutorialStep(TutorialStepKind kind, string title, string instruction, float timeoutSeconds, bool requiresAchievement)
         {
             Kind = kind;
+            Title = title;
             Instruction = instruction;
             TimeoutSeconds = timeoutSeconds;
             RequiresAchievement = requiresAchievement;
+        }
+
+        /// <summary>
+        /// TimeoutSeconds だけ差し替えた新インスタンスを作る（イミュータブルなため）。
+        /// 音声長ベースのタイムアウト上書きに使う。
+        /// </summary>
+        public TutorialStep WithTimeoutSeconds(float timeoutSeconds)
+        {
+            return new TutorialStep(Kind, Title, Instruction, timeoutSeconds, RequiresAchievement);
         }
     }
 
@@ -49,16 +68,24 @@ namespace STYLY.TIB_Template.GIPoker
     /// - 達成通知（NotifyAchieved）またはタイムアウト（Tick）で次のステップへ進む
     /// - 展示で詰まらせないため、達成判定を持つステップもタイムアウトで必ず自動送りされる
     /// - 1回の Tick で進むステップは最大1つ（フレーム駆動が前提）
-    /// - チュートリアル全体の終了は本クラスではなく GameSession の固定時間タイマーが決める
-    ///   （最終ステップは TimeoutSeconds を PositiveInfinity にして Playing 遷移まで留まる）
+    /// - 達成判定を持たないステップ（Intro/Caution/Ready）は TimeoutSeconds のみで自動送りされる
+    ///   （TutorialDirector が音声長+バッファ秒で TimeoutSeconds を都度上書きする）
+    /// - 最終ステップ（Ready）を消化した後の「本編開始までの5秒カウントダウン」は本クラスの
+    ///   範囲外で、GameSession の固定時間タイマー（tutorialDurationSeconds）が担う
     /// </summary>
     public sealed class TutorialSequence
     {
-        /// <summary>達成型ステップの既定タイムアウト（秒）。達成できなくてもこの時間で自動送りする</summary>
+        /// <summary>ステップ1（ルール）の音声未設定時フォールバック表示時間（秒）</summary>
+        public const float IntroDurationSeconds = 8f;
+
+        /// <summary>達成型ステップ（2〜5）の音声未設定時フォールバックタイムアウト（秒）</summary>
         public const float DefaultStepTimeoutSeconds = 15f;
 
-        /// <summary>イントロステップの表示時間（秒）</summary>
-        public const float IntroDurationSeconds = 5f;
+        /// <summary>ステップ6（注意事項）の音声未設定時フォールバック表示時間（秒）</summary>
+        public const float CautionDurationSeconds = 10f;
+
+        /// <summary>ステップ7（準備はいいか？）の音声未設定時フォールバック表示時間（秒）</summary>
+        public const float ReadyDurationSeconds = 6f;
 
         public IReadOnlyList<TutorialStep> Steps { get; }
 
@@ -88,30 +115,43 @@ namespace STYLY.TIB_Template.GIPoker
         }
 
         /// <summary>
-        /// 既定のステップ構成（GI_POKER_PLAN.md のコアメカニクスに対応する6ステップ）を生成する。
+        /// 既定のステップ構成（新7ステップ: ルール／バインダーを出してみよう／カード化してみよう／
+        /// バインダーに収納してみよう／カードをアイテムにしてみよう／注意事項／準備はいいか？）を生成する。
+        /// ここでの TimeoutSeconds はすべて「音声アセットが無い場合のフォールバック値」であり、
+        /// 実際の音声長を使った上書きは TutorialDirector.StartTutorial() が行う。
         /// </summary>
         public static IReadOnlyList<TutorialStep> CreateDefaultSteps()
         {
             return new List<TutorialStep>
             {
                 new(TutorialStepKind.Intro,
-                    "素手でアイテムに触れてカードに変え、\nバインダーへ集めよう！",
+                    "ルール",
+                    "アイテムに触れて得られたカードをバインダーに集めるゲーム\nレアリティの高いカードほど、高得点だぞ！",
                     IntroDurationSeconds, requiresAchievement: false),
-                new(TutorialStepKind.Cardify,
-                    "まずは目の前のアイテムに\n素手で触れてみよう",
+                new(TutorialStepKind.BinderShow,
+                    "バインダーを出してみよう",
+                    "右のように、L字のポーズを顔の前ですると、バインダーが現れるぞ！",
                     DefaultStepTimeoutSeconds, requiresAchievement: true),
-                new(TutorialStepKind.Grab,
-                    "指でそっとつまんで\nカードを掴もう",
+                new(TutorialStepKind.Cardify,
+                    "カード化してみよう",
+                    "目の前のアイテムに手で触れるとカードになるぞ",
                     DefaultStepTimeoutSeconds, requiresAchievement: true),
                 new(TutorialStepKind.Store,
-                    "カードをバインダーに近づけて\n指を離すと収納されるよ",
+                    "バインダーに収納してみよう",
+                    "カードをバインダーに近づけると収納して、ポイントをゲットできるぞ！",
                     DefaultStepTimeoutSeconds, requiresAchievement: true),
                 new(TutorialStepKind.Gain,
-                    "両手でカードを引き裂こう（ゲイン）\n元のアイテムに戻り、効果が発動する",
+                    "カードをアイテムにしてみよう",
+                    "カードの中には、効果を持つものがある。\nカードを両手で引き裂くと元のアイテムに戻りそのカード効果を使えるぞ！\nカードはアイテムにしたらカードに戻せないから気をつけろ！",
                     DefaultStepTimeoutSeconds, requiresAchievement: true),
-                new(TutorialStepKind.Rules,
-                    "カード化して1分放置すると消滅する！\n制限時間5分でハイスコアを狙おう",
-                    float.PositiveInfinity, requiresAchievement: false),
+                new(TutorialStepKind.Caution,
+                    "注意事項",
+                    "最後に注意事項だ。\n・カードはアイテムにしたらカードに戻せないから気をつけろ！\n・カード化から1分放置で消滅するぞ！",
+                    CautionDurationSeconds, requiresAchievement: false),
+                new(TutorialStepKind.Ready,
+                    "準備はいいか？",
+                    "制限時間5分でハイスコアを狙え！",
+                    ReadyDurationSeconds, requiresAchievement: false),
             };
         }
 
