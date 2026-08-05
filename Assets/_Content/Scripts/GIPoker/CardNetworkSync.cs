@@ -100,6 +100,16 @@ namespace STYLY.TIB_Template.GIPoker
                 })
                 .AddTo(this);
 
+            // リスキーダイスが転がり始めた（「転がっている最中」のVFXをリモートにも見せる）。
+            // PrepareRiskyDiceRoll の State 購読は「最初にこのダイスをゲインしたクライアント」にしか
+            // 存在しないため、DiceRollStarted が発火するクライアントは常にこのダイスの結果配信の
+            // 権威を持つ側になる。他プレイヤー操作（B→A の GiGrab/GiRelease RPC）の適用中
+            // （applyingRemote=true）に同期的にこのイベントが発火するケースも送信対象に含める必要が
+            // あるため、他のRPC送信と異なり applyingRemote ガードを外して常に送信する。
+            effects.DiceRollStarted
+                .Subscribe(pos => Send(Rpc.GiDiceRoll, F(pos.x), F(pos.y), F(pos.z)))
+                .AddTo(this);
+
             // 大吉によるSS出現を配信
             effects.SsSpawned
                 .Subscribe(item =>
@@ -269,12 +279,16 @@ namespace STYLY.TIB_Template.GIPoker
                 if (isBless)
                 {
                     GIPokerAssets.SpawnVfx(GIPokerAssets.DiceBlessVfx, pos, 8f);
+                    DiceResultLabel.ShowAt(pos, "大吉");
                 }
                 else if (isCurse)
                 {
                     GIPokerAssets.SpawnVfx(GIPokerAssets.DiceCurseVfx, pos, 8f);
                 }
             });
+
+            Subscribe(Rpc.GiDiceRoll, args =>
+                GIPokerAssets.SpawnVfx(GIPokerAssets.CardSparkleVfx, V3(args, 0), CardEffectService.DiceRollVfxLifetimeSeconds));
 
             Subscribe(Rpc.GiSpawnSS, args =>
             {
