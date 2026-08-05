@@ -39,8 +39,10 @@ namespace STYLY.TIB_Template.GIPoker
     /// - 彷徨うよろい（PauseCountdown）: 一定時間、全カードの1分ルールを停止
     /// - リスキーダイス（RiskyDice）: ゲイン後、掴んで離した瞬間に転がる演出を再生し、
     ///   演出終了時に必ず大吉として解決する（ロール自体はダイス個体ごとに初回の1回のみ発火）。
-    ///   ただしSSカードの実出現は、このクライアントの空間で最初の1回の大吉解決時に限定する
-    ///   （同一クライアント内に複数個体出現しうるSS出現上限「1枚」を守るため）
+    ///   ただしSSカードは直接出現させない。「①（カードを1枚出現させる効果。未実装）を使うと
+    ///   必ずSSが出る」という権利フラグ（HasPendingDiceJackpot / ConsumeDiceJackpot）を立てる
+    ///   だけに留め、実出現は①側が消費するタイミングに委ねる（同一クライアント内に複数個体
+    ///   出現しうるSS出現上限「1枚」を、この権利フラグ自体を初回のみに限定することで守る）
     /// </summary>
     public class CardEffectService : MonoBehaviour
     {
@@ -84,10 +86,14 @@ namespace STYLY.TIB_Template.GIPoker
         /// <summary>再生中の転がり演出Tween（再グラブ時に止めるため個体ごとに保持する）</summary>
         private readonly Dictionary<CardizableItemBase, Tween> activeRollTweens = new();
 
-        /// <summary>このクライアントで既にSS（大吉のジャックポット）を確定させたか。
-        /// リスキーダイスは1クライアントの空間に複数個体出現しうるため、演出自体は個体ごとに毎回発生させるが、
-        /// SSカードの実出現はセッション全体（このクライアント内）で最初の1回に限定する</summary>
-        private bool ssJackpotClaimed;
+        /// <summary>大吉により「①（カードを1枚出現させる効果。未実装）を使うと必ずSSが出る」権利が
+        /// 有効な間だけ true。①側が消費するまで有効で、消費されると false に戻る</summary>
+        private bool riskyDiceJackpotPending;
+
+        /// <summary>クライアント内で一度でも大吉の権利を立てたことがあるか。
+        /// 一度trueになったら以後は二度と riskyDiceJackpotPending を立てない
+        /// （SSカード出現上限「1枚」を守るためのガード）</summary>
+        private bool riskyDiceJackpotEverGranted;
 
         /// <summary>ダイスの結果イベント（演出側・ネットワーク同期が購読する）</summary>
         public Observable<DiceResult> DiceRolled => diceRolled;
@@ -100,6 +106,22 @@ namespace STYLY.TIB_Template.GIPoker
 
         /// <summary>リスキーダイスが転がり始めたイベント（位置。ネットワーク同期・演出用）</summary>
         public Observable<Vector3> DiceRollStarted => diceRollStarted;
+
+        /// <summary>
+        /// 大吉により「次に①（カードを1枚出現させる効果。未実装）を使うと必ずSSが出る」権利が
+        /// 有効かどうか。①実装時に、このプロパティが true なら `SpawnSsCardAt(...)` を呼んだ上で
+        /// `ConsumeDiceJackpot()` を呼ぶ使い方を想定している。
+        /// </summary>
+        public bool HasPendingDiceJackpot => riskyDiceJackpotPending;
+
+        /// <summary>
+        /// ①側が大吉の権利を消費してSSを出現させたときに呼ぶ。
+        /// 以後は同じ権利は二度と立たない（SS出現上限「1枚」を守るため）。
+        /// </summary>
+        public void ConsumeDiceJackpot()
+        {
+            riskyDiceJackpotPending = false;
+        }
 
         private void OnDestroy()
         {
@@ -388,15 +410,13 @@ namespace STYLY.TIB_Template.GIPoker
 
             GIPokerAssets.SpawnVfx(GIPokerAssets.DiceBlessVfx, resolvePosition, 8f);
 
-            // SSカードの実出現はこのクライアントで最初の1回のみ（大吉の演出・文字自体は毎回出す）
-            if (!ssJackpotClaimed)
+            // SSカードはここでは直接出現させない。「①（カードを1枚出現させる効果。未実装）を
+            // 使うと必ずSSが出る」権利フラグを立てるだけに留める（実出現は①側が消費するタイミングに委ねる）。
+            // クライアント内で一度でも権利を立てたら、以後は二度と立てない（SS出現上限「1枚」を守るため）
+            if (!riskyDiceJackpotEverGranted)
             {
-                ssJackpotClaimed = true;
-                var cam = Camera.main;
-                var ssSpawnPosition = cam != null
-                    ? cam.transform.position + cam.transform.forward * 0.8f
-                    : resolvePosition + Vector3.up * 0.5f;
-                SpawnSsCardAt(ssSpawnPosition, announce: true);
+                riskyDiceJackpotPending = true;
+                riskyDiceJackpotEverGranted = true;
             }
 
             DiceResultLabel.ShowAt(resolvePosition, "大吉");
