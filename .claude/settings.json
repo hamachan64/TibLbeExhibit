@@ -60,6 +60,10 @@
       "Bash(npx --yes uloop-cli:*)",
       "Bash(npx uloop-cli:*)",
       "Bash(uloop:*)",
+      "Bash(npx --yes uloop-cli@*:*)",
+      "Bash(npx uloop-cli@*:*)",
+      "Bash(npx --yes uloop-cli@2.2.0:*)",
+      "Bash(npx uloop-cli@2.2.0:*)",
 
       "Bash(git status:*)",
       "Bash(git diff:*)",
@@ -128,6 +132,7 @@
       "Bash(chmod +x:*)",
       "Bash(python3:*)",
       "Bash(date:*)",
+      "Bash(sleep:*)",
 
       "Read(//Users/hamachan/UnityApp/**)",
       "Read(//private/tmp/claude-501/**)",
