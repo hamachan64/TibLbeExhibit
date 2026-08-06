@@ -29,6 +29,20 @@ namespace STYLY.TIB_Template.GIPoker
         }
     }
 
+    /// <summary>宝籤（ロトリー）のランク別抽選重み（インスペクタ調整用）</summary>
+    [Serializable]
+    public struct LotteryRankWeight
+    {
+        public CardRank rank;
+        public float weight;
+
+        public LotteryRankWeight(CardRank rank, float weight)
+        {
+            this.rank = rank;
+            this.weight = weight;
+        }
+    }
+
     /// <summary>
     /// ゲイン成立時にカード効果を発動するサービス。
     /// GainGestureDetector.GainPerformed を購読して CardEffectType に応じた処理を行う。
@@ -39,10 +53,14 @@ namespace STYLY.TIB_Template.GIPoker
     /// - 彷徨うよろい（PauseCountdown）: 一定時間、全カードの1分ルールを停止
     /// - リスキーダイス（RiskyDice）: ゲイン後、掴んで離した瞬間に転がる演出を再生し、
     ///   演出終了時に必ず大吉として解決する（ロール自体はダイス個体ごとに初回の1回のみ発火）。
-    ///   ただしSSカードは直接出現させない。「①（カードを1枚出現させる効果。未実装）を使うと
-    ///   必ずSSが出る」という権利フラグ（HasPendingDiceJackpot / ConsumeDiceJackpot）を立てる
-    ///   だけに留め、実出現は①側が消費するタイミングに委ねる（同一クライアント内に複数個体
-    ///   出現しうるSS出現上限「1枚」を、この権利フラグ自体を初回のみに限定することで守る）
+    ///   ただしSSカードは直接出現させない。「宝籤（ロトリー）を使うと必ずSSが出る」という
+    ///   権利フラグ（HasPendingDiceJackpot / ConsumeDiceJackpot）を立てるだけに留め、実出現は
+    ///   宝籤側が消費するタイミングに委ねる（同一クライアント内に複数個体出現しうるSS出現上限
+    ///   「1枚」を、この権利フラグ自体を初回のみに限定することで守る）
+    /// - 宝籤（Lottery）: ゲインすると宝箱が「開く→崩れて消える」演出の間に、代わりの
+    ///   アイテムカードを1枚出現させる。HasPendingDiceJackpot が立っていれば必ずSSを、
+    ///   そうでなければランク別重み付き抽選（出現上限に達していないランクのみ対象）で
+    ///   決めたランクのアイテムを出現させる（ResolveLotteryRank / SpawnLotteryCardAt 参照）
     /// </summary>
     public class CardEffectService : MonoBehaviour
     {
@@ -71,10 +89,37 @@ namespace STYLY.TIB_Template.GIPoker
         /// <summary>「転がっている最中」VFXの生存時間（秒）。ローカル発火／リモートRPC受信の両方で同じ値を使う</summary>
         public const float DiceRollVfxLifetimeSeconds = 2.5f;
 
+        [Header("宝籤（ロトリー）")]
+        [SerializeField, Tooltip("宝籤の再現候補を探すカタログ（ItemSpawnManager に設定したものと同じ ItemCatalog を設定する）")]
+        private ItemCatalog catalog;
+        [SerializeField, Tooltip("宝箱が開く演出にかける時間（秒）")]
+        private float lotteryChestOpenSeconds = 0.9f;
+        [SerializeField, Tooltip("宝箱が崩れて消えるまでの時間（秒）")]
+        private float lotteryChestCrumbleSeconds = 0.5f;
+        [SerializeField, Tooltip("宝籤で再現するカードのランク別抽選重み（SSは対象に含めないこと。合計100が目安）")]
+        private LotteryRankWeight[] lotteryRankWeights =
+        {
+            new(CardRank.D, 40f),
+            new(CardRank.C, 24f),
+            new(CardRank.B, 16f),
+            new(CardRank.A, 12f),
+            new(CardRank.S, 8f),
+        };
+
+        /// <summary>宝箱の蓋ボーン名（treasure_chest.fbx の階層に合わせる）。見つかった場合のみ実際に開閉回転させる</summary>
+        private const string LidHingeName = "lid_hinge";
+
+        /// <summary>treasure_chest.fbx の chest_open_anim の先頭キーフレームに一致する「閉じた」蓋の局所回転</summary>
+        private static readonly Quaternion LotteryChestLidClosedRotation = new(-0.5000001f, 0.5f, 0.5f, 0.5000001f);
+
+        /// <summary>treasure_chest.fbx の chest_open_anim の終端キーフレームに一致する「開いた」蓋の局所回転</summary>
+        private static readonly Quaternion LotteryChestLidOpenRotation = new(-0.6889986f, 0.6889986f, -0.1589998f, -0.1589997f);
+
         private readonly Subject<DiceResult> diceRolled = new();
         private readonly Subject<(CardEffectType effect, CardizableItemBase card)> effectActivated = new();
         private readonly Subject<CardizableItemBase> ssSpawned = new();
         private readonly Subject<Vector3> diceRollStarted = new();
+        private readonly Subject<CardizableItemBase> lotterySpawned = new();
 
         /// <summary>既に1回ロール済みのリスキーダイス個体（1回制限。演出は個体ごとに1度きり）</summary>
         private readonly HashSet<CardizableItemBase> rolledRiskyDice = new();
@@ -107,10 +152,13 @@ namespace STYLY.TIB_Template.GIPoker
         /// <summary>リスキーダイスが転がり始めたイベント（位置。ネットワーク同期・演出用）</summary>
         public Observable<Vector3> DiceRollStarted => diceRollStarted;
 
+        /// <summary>宝籤によるカード出現イベント（ネットワーク同期用）</summary>
+        public Observable<CardizableItemBase> LotterySpawned => lotterySpawned;
+
         /// <summary>
-        /// 大吉により「次に①（カードを1枚出現させる効果。未実装）を使うと必ずSSが出る」権利が
-        /// 有効かどうか。①実装時に、このプロパティが true なら `SpawnSsCardAt(...)` を呼んだ上で
-        /// `ConsumeDiceJackpot()` を呼ぶ使い方を想定している。
+        /// 大吉により「次に宝籤（ロトリー）を使うと必ずSSが出る」権利が有効かどうか。
+        /// このプロパティが true のとき、宝籤の効果（ExecuteLottery）は
+        /// `SpawnSsCardAt(...)` を呼んだ上で `ConsumeDiceJackpot()` を呼ぶ。
         /// </summary>
         public bool HasPendingDiceJackpot => riskyDiceJackpotPending;
 
@@ -129,6 +177,7 @@ namespace STYLY.TIB_Template.GIPoker
             effectActivated.Dispose();
             ssSpawned.Dispose();
             diceRollStarted.Dispose();
+            lotterySpawned.Dispose();
         }
 
         /// <summary>GainGestureDetector と結線する</summary>
@@ -167,6 +216,9 @@ namespace STYLY.TIB_Template.GIPoker
                     break;
                 case CardEffectType.DuplicateCard:
                     ExecuteDuplicateCard(gainedCard);
+                    break;
+                case CardEffectType.Lottery:
+                    ExecuteLottery(gainedCard);
                     break;
                 case CardEffectType.None:
                 default:
@@ -482,6 +534,309 @@ namespace STYLY.TIB_Template.GIPoker
                 }
             }
             return item;
+        }
+
+        // ========== 宝籤（ロトリー） ==========
+
+        /// <summary>宝籤: ゲインすると宝箱が開き、代わりのアイテムカードが出現し、宝箱は崩れて消える</summary>
+        private void ExecuteLottery(CardizableItemBase chest)
+        {
+            ExecuteLotteryAsync(chest, destroyCancellationToken).Forget();
+        }
+
+        private async UniTask ExecuteLotteryAsync(CardizableItemBase chest, CancellationToken ct)
+        {
+            if (chest == null)
+            {
+                return;
+            }
+
+            // ①宝箱が開くアニメーション
+            await PlayChestOpenAnimation(chest, ct);
+
+            if (chest == null)
+            {
+                return;
+            }
+
+            // ②新しいカードが出現（宝箱が消える前に必ず出現させる。同時処理はしない）
+            var position = chest.transform.position;
+            var availableWeights = BuildAvailableWeights();
+            var rank = ResolveLotteryRank(HasPendingDiceJackpot, availableWeights, UnityEngine.Random.value);
+            if (rank == CardRank.SS)
+            {
+                SpawnSsCardAt(position, announce: true);
+                ConsumeDiceJackpot();
+            }
+            else if (rank.HasValue)
+            {
+                var definition = PickCandidateDefinition(rank.Value);
+                if (definition != null)
+                {
+                    SpawnLotteryCardAt(definition, position, announce: true);
+                }
+                // definition が見つからない（レース等）場合も含め、候補が無ければ不発として扱う
+            }
+
+            // ③宝箱が崩れて消える
+            await PlayChestCrumbleAndDestroy(chest, ct);
+        }
+
+        /// <summary>
+        /// リモート側（ゲインした本人以外）で宝箱の「開く→崩れて消える」演出だけを再生する。
+        /// カード出現は含まない（GiSpawnLottery 受信側が別途担当する）。
+        /// CardNetworkSync の GiGain 受信処理から呼ばれる。
+        /// </summary>
+        public async UniTaskVoid PlayChestOpenAndCrumbleSequence(CardizableItemBase chest)
+        {
+            if (chest == null)
+            {
+                return;
+            }
+            var ct = destroyCancellationToken;
+            await PlayChestOpenAnimation(chest, ct);
+            if (chest == null)
+            {
+                return;
+            }
+            await PlayChestCrumbleAndDestroy(chest, ct);
+        }
+
+        /// <summary>
+        /// 宝箱が開く演出。treasure_chest.fbx に独立した蓋ボーン（lid_hinge）が見つかれば
+        /// DOTweenでその局所回転を「閉」→「開」へ回転させる。見つからない場合（代替プレハブ等）は
+        /// バウンド＋キラキラVFXで「開く」ことを感じさせる代替演出を行う。
+        /// </summary>
+        private async UniTask PlayChestOpenAnimation(CardizableItemBase chest, CancellationToken ct)
+        {
+            var lidHinge = FindLidHinge(chest.transform);
+            if (lidHinge != null)
+            {
+                lidHinge.localRotation = LotteryChestLidClosedRotation;
+                lidHinge.DOLocalRotateQuaternion(LotteryChestLidOpenRotation, lotteryChestOpenSeconds)
+                    .SetEase(Ease.OutBack)
+                    .SetLink(lidHinge.gameObject);
+            }
+            else
+            {
+                GIPokerAssets.SpawnVfx(GIPokerAssets.CardSparkleVfx, chest.transform.position, lotteryChestOpenSeconds + 0.5f);
+                chest.transform.DOPunchScale(Vector3.one * 0.12f, lotteryChestOpenSeconds, 6, 0.6f)
+                    .SetLink(chest.gameObject);
+            }
+            await UniTask.Delay(TimeSpan.FromSeconds(lotteryChestOpenSeconds), cancellationToken: ct);
+        }
+
+        /// <summary>宝箱が崩れて消える演出（VFX＋DOScaleでの縮小）を再生し、完了後に破棄する</summary>
+        private async UniTask PlayChestCrumbleAndDestroy(CardizableItemBase chest, CancellationToken ct)
+        {
+            if (chest == null)
+            {
+                return;
+            }
+            GIPokerAssets.SpawnVfx(GIPokerAssets.ExpireVfx, chest.transform.position, lotteryChestCrumbleSeconds + 1f);
+            chest.transform.DOScale(Vector3.zero, lotteryChestCrumbleSeconds)
+                .SetEase(Ease.InBack)
+                .SetLink(chest.gameObject);
+            await UniTask.Delay(TimeSpan.FromSeconds(lotteryChestCrumbleSeconds), cancellationToken: ct);
+            if (chest != null)
+            {
+                Destroy(chest.gameObject);
+            }
+        }
+
+        /// <summary>chest 以下の階層から蓋ボーン（lid_hinge）を探す。見つからなければ null</summary>
+        private static Transform FindLidHinge(Transform root)
+        {
+            if (root == null)
+            {
+                return null;
+            }
+            foreach (var t in root.GetComponentsInChildren<Transform>(true))
+            {
+                if (t.name == LidHingeName)
+                {
+                    return t;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 宝籤の再現先ランクを解決する純粋関数（EditModeテストから直接呼べる）。
+        ///
+        /// - hasPendingDiceJackpot が true のときは必ず CardRank.SS を返す
+        ///   （availableWeights の内容は無視される）
+        /// - false のときは availableWeights（出現上限に達していないランクのみで構成される想定）
+        ///   から重み付き抽選で1つ選ぶ。availableWeights が空、または合計重みが0以下なら
+        ///   候補なし（不発）として null を返す
+        /// - availableWeights に SS を含めない限り、false のときに SS が選ばれることはない
+        /// </summary>
+        public static CardRank? ResolveLotteryRank(
+            bool hasPendingDiceJackpot,
+            IReadOnlyList<(CardRank rank, float weight)> availableWeights,
+            float randomValue01)
+        {
+            if (hasPendingDiceJackpot)
+            {
+                return CardRank.SS;
+            }
+
+            if (availableWeights == null || availableWeights.Count == 0)
+            {
+                return null;
+            }
+
+            var totalWeight = 0f;
+            for (var i = 0; i < availableWeights.Count; i++)
+            {
+                totalWeight += Mathf.Max(0f, availableWeights[i].weight);
+            }
+            if (totalWeight <= 0f)
+            {
+                return null;
+            }
+
+            var target = Mathf.Clamp01(randomValue01) * totalWeight;
+            var cumulative = 0f;
+            for (var i = 0; i < availableWeights.Count; i++)
+            {
+                cumulative += Mathf.Max(0f, availableWeights[i].weight);
+                if (target < cumulative)
+                {
+                    return availableWeights[i].rank;
+                }
+            }
+            // 浮動小数の誤差で漏れた場合は最後の候補にフォールバック
+            return availableWeights[availableWeights.Count - 1].rank;
+        }
+
+        /// <summary>
+        /// lotteryRankWeights のうち、出現上限に達していない候補が1つ以上存在するランクだけを集める。
+        /// SS は意図的に含めない（宝籤の通常抽選ではSSは絶対に選ばれない）。
+        /// </summary>
+        private List<(CardRank rank, float weight)> BuildAvailableWeights()
+        {
+            var list = new List<(CardRank rank, float weight)>(lotteryRankWeights.Length);
+            foreach (var entry in lotteryRankWeights)
+            {
+                // SSはインスペクタの設定ミスがあっても通常抽選の対象にしない
+                // （SSはHasPendingDiceJackpot経由でのみ出現させる）
+                if (entry.weight <= 0f || entry.rank == CardRank.SS)
+                {
+                    continue;
+                }
+                if (HasAnyCandidate(entry.rank))
+                {
+                    list.Add((entry.rank, entry.weight));
+                }
+            }
+            return list;
+        }
+
+        /// <summary>指定ランクに、出現上限に達していない候補（カタログ内・宝籤自身を除く）が1つでもあるか</summary>
+        private bool HasAnyCandidate(CardRank rank)
+        {
+            if (catalog == null)
+            {
+                return false;
+            }
+            foreach (var entry in catalog.Entries)
+            {
+                var definition = ResolveDefinition(entry.prefab);
+                if (!IsEligibleCandidate(definition, rank))
+                {
+                    continue;
+                }
+                if (ItemSpawnManager.Instance == null || ItemSpawnManager.Instance.HasRemainingCapacity(definition))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>指定ランクの候補定義（出現上限に達していないもの）からランダムに1つ選ぶ。無ければ null</summary>
+        private CardDefinition PickCandidateDefinition(CardRank rank)
+        {
+            if (catalog == null)
+            {
+                return null;
+            }
+            var candidates = new List<CardDefinition>();
+            foreach (var entry in catalog.Entries)
+            {
+                var definition = ResolveDefinition(entry.prefab);
+                if (!IsEligibleCandidate(definition, rank))
+                {
+                    continue;
+                }
+                if (ItemSpawnManager.Instance == null || ItemSpawnManager.Instance.HasRemainingCapacity(definition))
+                {
+                    candidates.Add(definition);
+                }
+            }
+            if (candidates.Count == 0)
+            {
+                return null;
+            }
+            return candidates[UnityEngine.Random.Range(0, candidates.Count)];
+        }
+
+        /// <summary>候補として扱ってよい定義か（ランク一致・宝籤自身は除外）</summary>
+        private static bool IsEligibleCandidate(CardDefinition definition, CardRank rank)
+        {
+            return definition != null
+                && definition.Rank == rank
+                && definition.EffectType != CardEffectType.Lottery;
+        }
+
+        private static CardDefinition ResolveDefinition(GameObject prefab)
+        {
+            if (prefab == null)
+            {
+                return null;
+            }
+            var item = prefab.GetComponent<CardizableItemBase>();
+            return item != null ? item.Definition : null;
+        }
+
+        /// <summary>
+        /// 宝籤: 指定の定義（ランク）のアイテムをカード化済み状態で出現させる。
+        /// ローカル発動時は announce=true（LotterySpawned が流れ、CardNetworkSync が配信する）、
+        /// リモートの GiSpawnLottery 受信適用時は announce=false で呼ぶ（SpawnLotteryCardById 経由）。
+        /// </summary>
+        public CardizableItemBase SpawnLotteryCardAt(CardDefinition definition, Vector3 position, bool announce)
+        {
+            if (definition == null)
+            {
+                return null;
+            }
+            var prefab = catalog != null ? catalog.FindPrefabByCardId(definition.CardId) : null;
+            if (prefab == null)
+            {
+                Debug.LogWarning($"[CardEffectService] cardId={definition.CardId} に対応するプレハブが見つかりません");
+                return null;
+            }
+            var go = Instantiate(prefab, position, Quaternion.identity);
+            var item = go.GetComponent<CardizableItemBase>();
+            if (item != null)
+            {
+                item.TryCardify();
+                ItemSpawnManager.Instance?.NotifySpawned(definition);
+                if (announce)
+                {
+                    lotterySpawned.OnNext(item);
+                }
+            }
+            return item;
+        }
+
+        /// <summary>cardId から定義を検索して宝籤カードを出現させる（GiSpawnLottery 受信用）</summary>
+        public CardizableItemBase SpawnLotteryCardById(string cardId, Vector3 position, bool announce)
+        {
+            var prefab = catalog != null ? catalog.FindPrefabByCardId(cardId) : null;
+            var definition = prefab != null ? prefab.GetComponent<CardizableItemBase>()?.Definition : null;
+            return definition != null ? SpawnLotteryCardAt(definition, position, announce) : null;
         }
     }
 }

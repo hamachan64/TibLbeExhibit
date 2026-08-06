@@ -29,5 +29,7 @@ namespace STYLY.TIB_Template
         GiSpawnSS,
         /// <summary>セッション終了（引数: [0]=最終TotalScore）。運営PCの本日通算トップ3記録に使う</summary>
         GiSessionFinished,
+        /// <summary>宝籤（ロトリー）による新カード出現（引数: [0]=newItemId, [1]=cardId, [2..4]=位置xyz）</summary>
+        GiSpawnLottery,
     }
 }

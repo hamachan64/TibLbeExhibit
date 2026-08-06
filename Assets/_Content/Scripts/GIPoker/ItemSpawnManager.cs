@@ -29,6 +29,9 @@ namespace STYLY.TIB_Template.GIPoker
     /// </summary>
     public class ItemSpawnManager : MonoBehaviour
     {
+        /// <summary>シーン上に1つだけ存在する想定のシングルトン（宝籤の出現上限チェック等から参照する）</summary>
+        public static ItemSpawnManager Instance { get; private set; }
+
         [SerializeField, Tooltip("出現アイテムのカタログ")]
         private ItemCatalog catalog;
 
@@ -50,9 +53,97 @@ namespace STYLY.TIB_Template.GIPoker
         private readonly List<ScheduledSpawn> schedule = new();
         private int nextSpawnIndex;
 
+        /// <summary>cardId ごとの出現上限（ItemCatalog.Entry.maxCount）。カタログを基に一度だけ構築する</summary>
+        private readonly Dictionary<string, int> maxCountByCardId = new();
+
+        /// <summary>cardId ごとの累計出現数（1分ルールでの消滅やゲイン後も減らない、生涯出現数）</summary>
+        private readonly Dictionary<string, int> spawnedCountByCardId = new();
+
+        private void Awake()
+        {
+            Instance = this;
+            BuildCapacityMaps();
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
+            }
+        }
+
         private void Start()
         {
             WaitAndRunAsync(destroyCancellationToken).Forget();
+        }
+
+        /// <summary>
+        /// カタログから cardId ごとの出現上限を構築する。
+        /// セッション開始（BuildSchedule）を待たずに HasRemainingCapacity が使えるよう、
+        /// Awake の時点で構築しておく。
+        /// </summary>
+        private void BuildCapacityMaps()
+        {
+            maxCountByCardId.Clear();
+            spawnedCountByCardId.Clear();
+            if (catalog == null)
+            {
+                return;
+            }
+            foreach (var entry in catalog.Entries)
+            {
+                var cardId = ResolveCardId(entry.prefab);
+                if (string.IsNullOrEmpty(cardId))
+                {
+                    continue;
+                }
+                maxCountByCardId[cardId] = entry.maxCount;
+                spawnedCountByCardId[cardId] = 0;
+            }
+        }
+
+        private static string ResolveCardId(GameObject prefab)
+        {
+            if (prefab == null)
+            {
+                return null;
+            }
+            var item = prefab.GetComponent<CardizableItemBase>();
+            return item != null && item.Definition != null ? item.Definition.CardId : null;
+        }
+
+        /// <summary>
+        /// この定義がカタログの出現上限（maxCount）にまだ達していないかどうか。
+        /// カタログに存在しない定義は対象外（false）とする。
+        /// </summary>
+        public bool HasRemainingCapacity(CardDefinition definition)
+        {
+            if (definition == null || string.IsNullOrEmpty(definition.CardId))
+            {
+                return false;
+            }
+            if (!maxCountByCardId.TryGetValue(definition.CardId, out var max))
+            {
+                return false;
+            }
+            spawnedCountByCardId.TryGetValue(definition.CardId, out var current);
+            return current < max;
+        }
+
+        /// <summary>
+        /// この定義のアイテムが1つ出現したことをカウントに加算する。
+        /// スケジュールされた通常出現（Spawn）だけでなく、宝籤等による動的な出現
+        /// （CardEffectService.SpawnLotteryCardAt）からも呼ばれる。
+        /// </summary>
+        public void NotifySpawned(CardDefinition definition)
+        {
+            if (definition == null || string.IsNullOrEmpty(definition.CardId))
+            {
+                return;
+            }
+            spawnedCountByCardId.TryGetValue(definition.CardId, out var current);
+            spawnedCountByCardId[definition.CardId] = current + 1;
         }
 
         private async UniTask WaitAndRunAsync(CancellationToken ct)
@@ -202,6 +293,16 @@ namespace STYLY.TIB_Template.GIPoker
             {
                 return;
             }
+            // 宝籤等の動的出現（NotifySpawned）で、このスケジュール分が生成される前に
+            // 既に出現上限（maxCount）へ達している場合はスキップする。
+            // spawnedCountByCardId を「通常出現・宝籤出現の両方を合算した唯一の真実のソース」として扱うことで、
+            // 出現上限（カード化限度枚数）が二重にカウントされて超過するのを防ぐ
+            // （例: Sランクは maxCount=1 のため、宝籤が先に引いた後にスケジュール分も出現すると2枚になってしまう）
+            var definition = ResolveCardId(entry.prefab) != null ? entry.prefab.GetComponent<CardizableItemBase>().Definition : null;
+            if (definition != null && !HasRemainingCapacity(definition))
+            {
+                return;
+            }
             // 整列アンカー（木の幹・壁龕など）ではアンカーの回転、それ以外はランダム yaw が入っている
             var go = Instantiate(entry.prefab, spawn.Position, spawn.Rotation);
             var item = go.GetComponent<CardizableItemBase>();
@@ -210,6 +311,7 @@ namespace STYLY.TIB_Template.GIPoker
                 // 全クライアントで同一のIDが振られる（スケジュールが決定論的なため）
                 CardNetworkSync.Instance.Register(spawn.NetworkId, item);
             }
+            NotifySpawned(item != null ? item.Definition : null);
         }
 
         private void OnDrawGizmosSelected()
