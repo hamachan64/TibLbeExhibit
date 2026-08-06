@@ -92,10 +92,16 @@ namespace STYLY.TIB_Template.GIPoker
         [Header("宝籤（ロトリー）")]
         [SerializeField, Tooltip("宝籤の再現候補を探すカタログ（ItemSpawnManager に設定したものと同じ ItemCatalog を設定する）")]
         private ItemCatalog catalog;
+        [SerializeField, Tooltip("宝箱が現れてから開き始めるまでの溜め時間（秒）")]
+        private float lotteryChestAppearDelaySeconds = 1.5f;
         [SerializeField, Tooltip("宝箱が開く演出にかける時間（秒）")]
-        private float lotteryChestOpenSeconds = 0.9f;
+        private float lotteryChestOpenSeconds = 1.0f;
         [SerializeField, Tooltip("宝箱が崩れて消えるまでの時間（秒）")]
         private float lotteryChestCrumbleSeconds = 0.5f;
+        [SerializeField, Tooltip("出現したカードが宝箱の中からせり上がってくる高さ（m）")]
+        private float lotteryCardRiseHeight = 0.15f;
+        [SerializeField, Tooltip("カードがせり上がるのにかける時間（秒）")]
+        private float lotteryCardRiseSeconds = 0.5f;
         [SerializeField, Tooltip("宝籤で再現するカードのランク別抽選重み（SSは対象に含めないこと。合計100が目安）")]
         private LotteryRankWeight[] lotteryRankWeights =
         {
@@ -565,7 +571,8 @@ namespace STYLY.TIB_Template.GIPoker
             var rank = ResolveLotteryRank(HasPendingDiceJackpot, availableWeights, UnityEngine.Random.value);
             if (rank == CardRank.SS)
             {
-                SpawnSsCardAt(position, announce: true);
+                var ssItem = SpawnSsCardAt(position, announce: true);
+                PlayCardRiseFromChest(ssItem, position);
                 ConsumeDiceJackpot();
             }
             else if (rank.HasValue)
@@ -613,6 +620,17 @@ namespace STYLY.TIB_Template.GIPoker
             if (lidHinge != null)
             {
                 lidHinge.localRotation = LotteryChestLidClosedRotation;
+            }
+
+            // 宝箱が現れてから開き始めるまでの溜め（閉じたまま静止させる）
+            await UniTask.Delay(TimeSpan.FromSeconds(lotteryChestAppearDelaySeconds), cancellationToken: ct);
+            if (chest == null)
+            {
+                return;
+            }
+
+            if (lidHinge != null)
+            {
                 lidHinge.DOLocalRotateQuaternion(LotteryChestLidOpenRotation, lotteryChestOpenSeconds)
                     .SetEase(Ease.OutBack)
                     .SetLink(lidHinge.gameObject);
@@ -822,6 +840,7 @@ namespace STYLY.TIB_Template.GIPoker
             if (item != null)
             {
                 item.TryCardify();
+                PlayCardRiseFromChest(item, position);
                 ItemSpawnManager.Instance?.NotifySpawned(definition);
                 if (announce)
                 {
@@ -829,6 +848,23 @@ namespace STYLY.TIB_Template.GIPoker
                 }
             }
             return item;
+        }
+
+        /// <summary>
+        /// 宝箱の中からカードがせり上がって出てくる演出。呼び出し時点のアイテムの位置から
+        /// targetPosition まで、少し低い位置から上昇するようDOTweenで移動させる。
+        /// リモートのSS出現受信（GiSpawnSS）からも呼べるよう public にしている。
+        /// </summary>
+        public void PlayCardRiseFromChest(CardizableItemBase item, Vector3 targetPosition)
+        {
+            if (item == null)
+            {
+                return;
+            }
+            item.transform.position = targetPosition + Vector3.down * lotteryCardRiseHeight;
+            item.transform.DOMove(targetPosition, lotteryCardRiseSeconds)
+                .SetEase(Ease.OutCubic)
+                .SetLink(item.gameObject);
         }
 
         /// <summary>cardId から定義を検索して宝籤カードを出現させる（GiSpawnLottery 受信用）</summary>

@@ -319,9 +319,12 @@ namespace STYLY.TIB_Template.GIPoker
                 {
                     return;
                 }
-                var item = effectService.SpawnSsCardAt(V3(args, 1), announce: false);
+                var position = V3(args, 1);
+                var item = effectService.SpawnSsCardAt(position, announce: false);
                 if (item != null)
                 {
+                    // 現状 GiSpawnSS は宝籤のSS分岐からのみ送られるため、宝箱からせり上がる演出を合わせて再生する
+                    effectService.PlayCardRiseFromChest(item, position);
                     Register(id, item);
                 }
             });
