@@ -512,9 +512,24 @@ MonoBehaviour:
   slowFloatingDuration: 12
   pauseCountdownDuration: 15
   ssItemPrefab: {fileID: 2315935463545943883, guid: d014d27fd335c453f93eed928cee636e, type: 3}
-  blessThreshold: 18
-  curseThreshold: 3
-  curseDiscardCount: 3
+  diceRollAnimationSeconds: 2.2
+  catalog: {fileID: 11400000, guid: 02f215a47d1e841eca6f4f42c7bef037, type: 2}
+  lotteryChestAppearDelaySeconds: 1.5
+  lotteryChestOpenSeconds: 1
+  lotteryChestCrumbleSeconds: 0.5
+  lotteryCardRiseHeight: 0.15
+  lotteryCardRiseSeconds: 0.5
+  lotteryRankWeights:
+  - rank: 0
+    weight: 40
+  - rank: 1
+    weight: 24
+  - rank: 2
+    weight: 16
+  - rank: 3
+    weight: 12
+  - rank: 4
+    weight: 8
 --- !u!114 &2082618859
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -33,6 +33,8 @@ namespace STYLY.TIB_Template.GIPoker
         RiskyDice,
         /// <summary>ギャラリーフェイク: バインダー内のカード1枚を複製する</summary>
         DuplicateCard,
+        /// <summary>宝籤（ロトリー）: 宝箱が崩れ、代わりに別のアイテムカードがランダムに具現化する</summary>
+        Lottery,
     }
 
     /// <summary>

@@ -28,5 +28,30 @@ namespace STYLY.TIB_Template.GIPoker
         private List<Entry> entries = new();
 
         public IReadOnlyList<Entry> Entries => entries;
+
+        /// <summary>
+        /// cardId からエントリのプレハブを逆引きする（宝籤の候補選定・
+        /// リモートRPC受信でのアイテム解決に使う）。見つからなければ null。
+        /// </summary>
+        public GameObject FindPrefabByCardId(string cardId)
+        {
+            if (string.IsNullOrEmpty(cardId))
+            {
+                return null;
+            }
+            foreach (var entry in entries)
+            {
+                if (entry.prefab == null)
+                {
+                    continue;
+                }
+                var item = entry.prefab.GetComponent<CardizableItemBase>();
+                if (item != null && item.Definition != null && item.Definition.CardId == cardId)
+                {
+                    return entry.prefab;
+                }
+            }
+            return null;
+        }
     }
 }

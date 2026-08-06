@@ -125,6 +125,21 @@ namespace STYLY.TIB_Template.GIPoker
                 })
                 .AddTo(this);
 
+            // 宝籤によるカード出現を配信
+            effects.LotterySpawned
+                .Subscribe(item =>
+                {
+                    if (applyingRemote || item == null || item.Definition == null)
+                    {
+                        return;
+                    }
+                    var id = DynamicIdBase + SelfClientNo * 100 + dynamicIdCounter++;
+                    Register(id, item);
+                    var p = item.transform.position;
+                    Send(Rpc.GiSpawnLottery, id.ToString(), item.Definition.CardId, F(p.x), F(p.y), F(p.z));
+                })
+                .AddTo(this);
+
             // 自分のスコアを UserVariable として共有
             binder.Score
                 .Subscribe(score => VariableManager.Instance?.SetSelf(UserVariable.GiScore, score.TotalScore))
@@ -251,7 +266,15 @@ namespace STYLY.TIB_Template.GIPoker
             {
                 item.transform.position = V3(args, 1);
                 item.TryGain();
-                // 効果の実行はしない。ゲインした本人が結果（GiConvert/GiEffect/GiDice等）を配信する
+                // 効果の実行はしない。ゲインした本人が結果（GiConvert/GiEffect/GiDice等）を配信する。
+                // ただし宝籤（ロトリー）の「宝箱が開く→崩れて消える」演出だけは、専用RPCを増やさず
+                // ここから決定論的に再生する。発動者側は開くアニメーション完了後にカード出現RPC
+                // （GiSpawnLottery）を送るため、多少のズレはあっても概ね同じタイミングで
+                // 他クライアントにも新カードが出現する
+                if (effectService != null && item.Definition != null && item.Definition.EffectType == CardEffectType.Lottery)
+                {
+                    _ = effectService.PlayChestOpenAndCrumbleSequence(item);
+                }
             }));
 
             Subscribe(Rpc.GiConvert, args => WithItem(args[0], item =>
@@ -296,7 +319,23 @@ namespace STYLY.TIB_Template.GIPoker
                 {
                     return;
                 }
-                var item = effectService.SpawnSsCardAt(V3(args, 1), announce: false);
+                var position = V3(args, 1);
+                var item = effectService.SpawnSsCardAt(position, announce: false);
+                if (item != null)
+                {
+                    // 現状 GiSpawnSS は宝籤のSS分岐からのみ送られるため、宝箱からせり上がる演出を合わせて再生する
+                    effectService.PlayCardRiseFromChest(item, position);
+                    Register(id, item);
+                }
+            });
+
+            Subscribe(Rpc.GiSpawnLottery, args =>
+            {
+                if (effectService == null || !int.TryParse(args[0], out var id))
+                {
+                    return;
+                }
+                var item = effectService.SpawnLotteryCardById(args[1], V3(args, 2), announce: false);
                 if (item != null)
                 {
                     Register(id, item);
