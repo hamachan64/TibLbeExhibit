@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine;
 
@@ -56,6 +58,13 @@ namespace STYLY.TIB_Template.GIPoker
         private TutorialPracticeItem practiceItem2; // ゲイン（引き裂き）の練習用
         private IDisposable tickSubscription;
 
+        /// <summary>
+        /// チュートリアル進行（前振り音声待機〜ステップ進行）の生存期間を tutorialActive と
+        /// 一致させるためのキャンセルトークン源。CleanupTutorial 発生時（Playing/Finished への
+        /// 遷移）に即座にキャンセルし、Step0.mp3 の再生完了待機中でも安全に中断できるようにする。
+        /// </summary>
+        private CancellationTokenSource tutorialCts;
+
         /// <summary>チュートリアルが進行中か（撤去処理を1回だけ走らせるためのガード）</summary>
         private bool tutorialActive;
 
@@ -109,6 +118,10 @@ namespace STYLY.TIB_Template.GIPoker
             practiceStored = false;
             practiceGained = false;
 
+            tutorialCts?.Cancel();
+            tutorialCts?.Dispose();
+            tutorialCts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+
             sequence = new TutorialSequence(BuildStepsWithVoiceTimeouts());
 
             var viewGo = new GameObject("GIPoker_TutorialView");
@@ -130,12 +143,42 @@ namespace STYLY.TIB_Template.GIPoker
             }
         }
 
-        /// <summary>ステップ進行（タイムアウト計測・ステップ1表示）を開始する</summary>
+        /// <summary>
+        /// ステップ進行（タイムアウト計測・ステップ1表示）を開始する。
+        /// ステップ1（Step1.mp3）の読み上げより前に、前振り音声（Step0.mp3）の再生完了を待つ。
+        /// </summary>
         private void BeginStepProgression()
         {
-            if (!tutorialActive || sequence == null)
+            if (!tutorialActive || sequence == null || tutorialCts == null)
             {
                 // 白フェード完了より先に CleanupTutorial が走った場合の防御（通常到達しない）
+                return;
+            }
+
+            BeginStepProgressionAsync(tutorialCts.Token).Forget();
+        }
+
+        private async UniTask BeginStepProgressionAsync(CancellationToken ct)
+        {
+            // Step0.mp3（前振り音声）の再生完了を待ってからステップ1を開始する。
+            // クリップ未設定なら待たずに即座に進む（展示で詰まらせない既存方針を踏襲）。
+            var preambleClip = GIPokerAssets.TutorialIntroVoiceClip;
+            if (preambleClip != null && view != null)
+            {
+                try
+                {
+                    await view.PlayPreambleAsync(preambleClip, ct);
+                }
+                catch (OperationCanceledException)
+                {
+                    // tutorialActive が途中で false になった（Cleanup発生）場合の正常系
+                    return;
+                }
+            }
+
+            if (!tutorialActive || sequence == null)
+            {
+                // 前振り音声の待機中に CleanupTutorial が走った場合の防御
                 return;
             }
 
@@ -394,6 +437,11 @@ namespace STYLY.TIB_Template.GIPoker
             }
             tutorialActive = false;
 
+            // 前振り音声（Step0.mp3）の再生完了待機中でも即座に中断できるようにする
+            tutorialCts?.Cancel();
+            tutorialCts?.Dispose();
+            tutorialCts = null;
+
             tickSubscription?.Dispose();
             tickSubscription = null;
             sequence = null;
@@ -419,6 +467,13 @@ namespace STYLY.TIB_Template.GIPoker
             {
                 binder.Clear();
             }
+        }
+
+        private void OnDestroy()
+        {
+            tutorialCts?.Cancel();
+            tutorialCts?.Dispose();
+            tutorialCts = null;
         }
 
 #if UNITY_EDITOR

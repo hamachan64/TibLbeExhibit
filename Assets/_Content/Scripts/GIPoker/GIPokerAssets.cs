@@ -43,6 +43,18 @@ namespace STYLY.TIB_Template.GIPoker
         /// </summary>
         public static AudioClip[] TutorialStepVoiceClips;
 
+        /// <summary>チュートリアル冒頭（ステップ1/Step1.mp3より前）の前振り音声（Step0.mp3）</summary>
+        public static AudioClip TutorialIntroVoiceClip;
+
+        /// <summary>チュートリアル中にループ再生するBGM（BGM_Tutorial.mp3）</summary>
+        public static AudioClip TutorialBgmClip;
+
+        /// <summary>Tutorial→Playing遷移時に1回再生する開始の掛け声（Start.mp3）</summary>
+        public static AudioClip SessionStartVoiceClip;
+
+        /// <summary>本編（Playing）中にループ再生するBGM（BGM_Play.mp3）</summary>
+        public static AudioClip MainBgmClip;
+
         /// <summary>
         /// VFXプレハブを生成して一定時間後に破棄する（null安全）。
         /// scale はプレハブ既定の1倍から変更したい場合のみ指定する

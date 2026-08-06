@@ -21,6 +21,12 @@ namespace STYLY.TIB_Template.GIPoker
     ///   （ポップイン/アウト禁止、MR_STAGE_PLAN.md §4-5）
     /// - 台座の迫り上がり/沈み込みは個体ごとに発生をずらし（pedestalStagger）、
     ///   「島が順に目覚めていく」印象を作る
+    /// - <c>GIPokerProps</c>（木・岩・家・祭壇などの村/遺跡プロップ一式ルート。
+    ///   GIPokerPropSetup.cs がEnvironmentシーンへ生成する固定オブジェクト）は
+    ///   StagePedestal のような迫り上がり演出を持たないため、Reality（開始待機中）は
+    ///   非アクティブ、それ以外は単純にアクティブへトグルするだけに留める
+    ///   （WaitingForStart→Tutorial遷移時はTransitionDirectorの白フェードで隠れ、
+    ///   Tutorial中も共有ルームの壁がプロップを覆い隠すため、追加のポップイン対策は不要）
     /// </summary>
     public class StageDecorationDirector : MonoBehaviour
     {
@@ -32,6 +38,9 @@ namespace STYLY.TIB_Template.GIPoker
 
         [SerializeField, Tooltip("制御対象の環境パーティクル（未設定の場合は子階層から自動収集）")]
         private AmbientMotes ambientMotes;
+
+        [SerializeField, Tooltip("村/遺跡プロップ一式ルート（未設定の場合は GameObject.Find(\"GIPokerProps\") でフォールバック）")]
+        private GameObject props;
 
         [SerializeField, Tooltip("台座の演出開始を個体ごとにずらす間隔（秒）")]
         private float pedestalStagger = 0.15f;
@@ -52,6 +61,10 @@ namespace STYLY.TIB_Template.GIPoker
             if (ambientMotes == null)
             {
                 ambientMotes = GetComponentInChildren<AmbientMotes>(includeInactive: true);
+            }
+            if (props == null)
+            {
+                props = GameObject.Find("GIPokerProps");
             }
         }
 
@@ -99,6 +112,13 @@ namespace STYLY.TIB_Template.GIPoker
             if (ambientMotes != null)
             {
                 ambientMotes.EnterPhase(phase, immediate);
+            }
+
+            if (props != null)
+            {
+                // 単純な表示/非表示トグルのみ（DOTweenアニメーションは付けない。
+                // Reality＝開始待機中のみ非表示、それ以外の全フェーズでは表示する）
+                props.SetActive(phase != StagePhase.Reality);
             }
         }
     }

@@ -93,6 +93,10 @@ namespace STYLY.TIB_Template.GIPoker
                 return;
             }
 
+            // パススルーMRには実世界床によるオクルージョンが無いため、地中に沈めるだけでは
+            // 実際には見えてしまう。起動直後は visualRoot ごと非アクティブ化しておく。
+            visualRoot.gameObject.SetActive(false);
+
             // プレハブ上の配置＝「迫り上がった後」の最終姿勢として記録し、
             // 起動直後は地中に沈めておく（ここでの位置移動はロード直後の初期化であり、
             // プレイヤーに見えている状態でのポップイン/アウトではない）。
@@ -132,6 +136,7 @@ namespace STYLY.TIB_Template.GIPoker
                         visualRoot.localPosition = sunkenLocalPos;
                         visualRoot.localScale = grownScale * 0.85f;
                         SetHaloAlphaImmediate(0f);
+                        visualRoot.gameObject.SetActive(false);
                     }
                     else
                     {
@@ -160,6 +165,10 @@ namespace STYLY.TIB_Template.GIPoker
         {
             StopUnstableFlicker();
             KillAllTweens();
+
+            // 沈んだ状態のまま非表示→アクティブ化→迫り上がりトゥイーン、の順で見た目が
+            // 破綻しないよう、アニメーション開始前（immediate/非immediate問わず）に再アクティブ化する。
+            visualRoot.gameObject.SetActive(true);
 
             if (immediate)
             {
@@ -192,7 +201,16 @@ namespace STYLY.TIB_Template.GIPoker
             positionTween = visualRoot
                 .DOLocalMoveY(sunkenLocalPos.y, sinkDuration)
                 .SetDelay(delay)
-                .SetEase(Ease.InCubic);
+                .SetEase(Ease.InCubic)
+                .OnComplete(() =>
+                {
+                    // パススルーMRには実世界床のオクルージョンが無いため、沈めるだけでは
+                    // 実際には見えてしまう。沈み込み完了時に非アクティブ化して確実に隠す。
+                    if (visualRoot != null)
+                    {
+                        visualRoot.gameObject.SetActive(false);
+                    }
+                });
 
             scaleTween = visualRoot
                 .DOScale(grownScale * 0.85f, sinkDuration)
