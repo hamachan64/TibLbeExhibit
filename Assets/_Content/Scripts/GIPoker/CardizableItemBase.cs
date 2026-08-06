@@ -229,6 +229,11 @@ namespace STYLY.TIB_Template.GIPoker
             switch (state.Value)
             {
                 case CardizableState.Held:
+                    // バインダーから取り出した直後は1分ルールのカウントダウンを一時停止しているため
+                    // （ReleaseFromBinder 参照）、ゲインも再収納もせず手放したこのタイミングで再開する
+                    // （バグ修正2）。バインダー経由でない通常のカード化直後の掴み・解放では
+                    // 既に停止していないため、この呼び出しは実質的な no-op になる。
+                    ResumeCountdown();
                     state.Value = CardizableState.FloatingCard;
                     PlayFloatingAnimation();
                     break;
@@ -254,7 +259,11 @@ namespace STYLY.TIB_Template.GIPoker
 
         /// <summary>
         /// バインダーから取り出されたときに CardBinder から呼ばれる。
-        /// 指定位置で再浮遊し、1分ルールのカウントダウンは仕切り直しで再開する。
+        /// 指定位置で再浮遊するが、1分ルールのカウントダウンは仕切り直した上で
+        /// 一時停止した状態にする（バグ修正2）。
+        /// 取り出してすぐゲインしようとしているだけなのに、もたついたら消滅するのは
+        /// 理不尽なため、掴んでいる間は停止のままにし、ゲインもバインダーへの再収納もせず
+        /// 手放した場合のみ Release() 内で再開する。
         /// </summary>
         public void ReleaseFromBinder(Vector3 position)
         {
@@ -268,6 +277,7 @@ namespace STYLY.TIB_Template.GIPoker
             ApplyVisual(isCard: true);
             PlayFloatingAnimation();
             RestartLifetimeCountdown();
+            PauseCountdown();
         }
 
         /// <summary>

@@ -103,5 +103,71 @@ namespace STYLY.TIB_Template.GIPoker.Tests
 
             Assert.That(binderView.IsVisible.CurrentValue, Is.False);
         }
+
+        // --- 収納OKハイライトのON/OFF状態遷移（20260805-binder-card-storage-fix.md 受け入れ基準） ---
+
+        [Test]
+        public void SetHighlighted_Default_IsFalse()
+        {
+            Assert.That(binderView.IsHighlighted.CurrentValue, Is.False);
+        }
+
+        [Test]
+        public void SetHighlighted_True_TurnsOn()
+        {
+            binderView.SetHighlighted(true);
+
+            Assert.That(binderView.IsHighlighted.CurrentValue, Is.True);
+        }
+
+        [Test]
+        public void SetHighlighted_TrueThenFalse_TurnsOffAgain()
+        {
+            binderView.SetHighlighted(true);
+            binderView.SetHighlighted(false);
+
+            Assert.That(binderView.IsHighlighted.CurrentValue, Is.False);
+        }
+
+        [Test]
+        public void SetHighlighted_SameValueTwice_IsIdempotent()
+        {
+            binderView.SetHighlighted(true);
+            binderView.SetHighlighted(true);
+
+            Assert.That(binderView.IsHighlighted.CurrentValue, Is.True);
+        }
+
+        // 両手が別々に同じバインダーの収納圏内に入っているケースの回帰テスト
+        // （参照カウント化する前は、片手が離れるともう片手の分も消灯してしまうバグがあった）。
+        [Test]
+        public void SetHighlighted_TwoRequesters_StaysOnUntilBothRelease()
+        {
+            var handA = new object();
+            var handB = new object();
+
+            binderView.SetHighlighted(handA, true);
+            binderView.SetHighlighted(handB, true);
+            Assert.That(binderView.IsHighlighted.CurrentValue, Is.True);
+
+            binderView.SetHighlighted(handA, false);
+            Assert.That(binderView.IsHighlighted.CurrentValue, Is.True, "もう片方の手がまだ圏内なら消灯しないべき");
+
+            binderView.SetHighlighted(handB, false);
+            Assert.That(binderView.IsHighlighted.CurrentValue, Is.False, "両方の手が離れたら消灯するべき");
+        }
+
+        [Test]
+        public void SetHighlighted_SameRequesterTwice_IsIdempotent()
+        {
+            var hand = new object();
+
+            binderView.SetHighlighted(hand, true);
+            binderView.SetHighlighted(hand, true);
+            Assert.That(binderView.IsHighlighted.CurrentValue, Is.True);
+
+            binderView.SetHighlighted(hand, false);
+            Assert.That(binderView.IsHighlighted.CurrentValue, Is.False);
+        }
     }
 }

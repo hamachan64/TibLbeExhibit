@@ -6,10 +6,21 @@ namespace STYLY.TIB_Template.GIPoker
     /// <summary>
     /// HandPinchTracker のピンチ開始/終了を購読して、浮遊カードの
     /// 「掴む → 追従 → 離す（バインダー収納 or その場で再浮遊）」を行うインタラクター。
+    /// あわせて、バインダー内ミニカードの取り出しと、バインダーのページめくりも扱う。
     ///
-    /// - ピンチ開始: ピンチ位置の近傍（grabRadius）にある浮遊カードのうち最も近いものを掴む
-    /// - ピンチ中: カードがピンチ位置に追従する
-    /// - ピンチ終了: バインダーの収納圏内なら収納、圏外ならその場で再浮遊
+    /// ピンチ開始時のヒット判定の優先順位（優先度の高い順）:
+    ///   1. 浮遊カード（既存。Physics.OverlapSphereNonAlloc）
+    ///   2. バインダー内ミニカード（新規。距離判定のみ、Colliderは使わない。ヒットしたら
+    ///      CardBinder.TryTakeOut → その場で TryGrab() して実寸カードとしてHeldにする）
+    ///   3. ページの角タブ（新規。ヒットしたらページめくりドラッグを開始する）
+    /// ミニカードが優先的にマッチした場合はページめくり判定を行わない（BinderView側の
+    /// 角タブ非重なり設計により、通常はそもそも競合しない想定の保険）。
+    ///
+    /// ピンチ中: カードを保持していれば追従させつつ、最寄りのバインダーの収納圏内に
+    /// 入ったかどうかを毎フレーム通知してハイライトを制御する。ページめくり中なら
+    /// ヒンジ回転をピンチ位置に追従させる。
+    /// ピンチ終了: 保持中カードならバインダー収納圏内で収納、圏外ならその場で再浮遊。
+    /// ページめくり中ならしきい値判定でめくり切り／バネで元に戻す。
     ///
     /// HandPinchTracker と同じ GameObject（左右の手それぞれ）にアタッチする。
     /// </summary>
@@ -32,6 +43,15 @@ namespace STYLY.TIB_Template.GIPoker
         private readonly ReactiveProperty<CardizableItemBase> heldCard = new(null);
         private readonly Subject<CardizableItemBase> cardGrabbed = new();
         private readonly Subject<CardizableItemBase> cardReleased = new();
+
+        /// <summary>ページめくりドラッグ中のバインダー（未操作なら null）</summary>
+        private BinderView turningPageBinderView;
+
+        /// <summary>収納OKハイライトを点けている対象バインダー（未通知なら null）</summary>
+        private CardBinder highlightedBinder;
+
+        /// <summary>highlightedBinder の BinderView キャッシュ（対象が変わったときだけ GetComponent する）</summary>
+        private BinderView highlightedBinderView;
 
         /// <summary>現在掴んでいるカード（未保持なら null）</summary>
         public ReadOnlyReactiveProperty<CardizableItemBase> HeldCard => heldCard;
@@ -60,16 +80,17 @@ namespace STYLY.TIB_Template.GIPoker
                 .AddTo(this);
 
             pinchTracker.PinchEnded
-                .Subscribe(pose => ReleaseHeldCard(pose.position))
+                .Subscribe(pose => OnPinchEnded(pose.position))
                 .AddTo(this);
 
             Observable.EveryUpdate()
-                .Subscribe(_ => FollowPinchPose())
+                .Subscribe(_ => OnEveryUpdate())
                 .AddTo(this);
         }
 
         private void OnDestroy()
         {
+            ClearHighlight();
             heldCard.Dispose();
             cardGrabbed.Dispose();
             cardReleased.Dispose();
@@ -77,11 +98,37 @@ namespace STYLY.TIB_Template.GIPoker
 
         private void TryGrabNearestCard(Vector3 pinchPosition)
         {
-            if (heldCard.Value != null)
+            if (heldCard.Value != null || turningPageBinderView != null)
             {
                 return;
             }
 
+            if (TryGrabFloatingCard(pinchPosition))
+            {
+                return;
+            }
+
+            // ミニカードの取り出し・ページ角タブは同じ「最寄りの表示中バインダー」を参照するため、
+            // CardBinder.FindNearest の走査を1回にまとめる
+            var binderView = FindVisibleBinderView(pinchPosition);
+            if (binderView == null)
+            {
+                return;
+            }
+
+            if (TryTakeOutMiniCard(binderView, pinchPosition))
+            {
+                return;
+            }
+
+            if (binderView.TryBeginPageTurn(pinchPosition))
+            {
+                turningPageBinderView = binderView;
+            }
+        }
+
+        private bool TryGrabFloatingCard(Vector3 pinchPosition)
+        {
             var hitCount = Physics.OverlapSphereNonAlloc(
                 pinchPosition, grabRadius, overlapBuffer, cardLayerMask, QueryTriggerInteraction.Collide);
 
@@ -102,11 +149,45 @@ namespace STYLY.TIB_Template.GIPoker
                 }
             }
 
-            if (nearest != null && nearest.TryGrab())
+            return GrabCard(nearest);
+        }
+
+        private bool TryTakeOutMiniCard(BinderView binderView, Vector3 pinchPosition)
+        {
+            return binderView.TryTakeOutNearestMiniCard(pinchPosition, out var card) && GrabCard(card);
+        }
+
+        private bool GrabCard(CardizableItemBase card)
+        {
+            if (card == null || !card.TryGrab())
             {
-                heldCard.Value = nearest;
-                cardGrabbed.OnNext(nearest);
+                return false;
             }
+            heldCard.Value = card;
+            cardGrabbed.OnNext(card);
+            return true;
+        }
+
+        /// <summary>指定位置に最も近い「表示中の」バインダーの BinderView を返す（存在しなければ null）</summary>
+        private static BinderView FindVisibleBinderView(Vector3 position)
+        {
+            var binder = CardBinder.FindNearest(position);
+            if (binder == null)
+            {
+                return null;
+            }
+            var view = binder.GetComponent<BinderView>();
+            return view != null && view.IsVisible.CurrentValue ? view : null;
+        }
+
+        private void OnEveryUpdate()
+        {
+            if (turningPageBinderView != null)
+            {
+                turningPageBinderView.UpdatePageTurn(pinchTracker.PinchPose.CurrentValue.position);
+                return;
+            }
+            FollowPinchPose();
         }
 
         private void FollowPinchPose()
@@ -122,6 +203,7 @@ namespace STYLY.TIB_Template.GIPoker
             if (cardState != CardizableState.Held && cardState != CardizableState.GainedHeld)
             {
                 heldCard.Value = null;
+                ClearHighlight();
                 return;
             }
 
@@ -130,6 +212,58 @@ namespace STYLY.TIB_Template.GIPoker
             card.transform.SetPositionAndRotation(
                 Vector3.Lerp(card.transform.position, target.position, t),
                 Quaternion.Slerp(card.transform.rotation, target.rotation, t));
+
+            NotifyNearestBinder(card.transform.position);
+        }
+
+        /// <summary>
+        /// 保持中カードの位置を最寄りのバインダーへ通知し、収納圏内かどうかに応じて
+        /// そのバインダーの収納OKハイライトをON/OFFする。
+        /// </summary>
+        private void NotifyNearestBinder(Vector3 position)
+        {
+            var nearest = CardBinder.FindNearest(position);
+            if (nearest != highlightedBinder)
+            {
+                ClearHighlight();
+            }
+
+            if (nearest != null && nearest.IsInStoreRange(position))
+            {
+                if (highlightedBinder != nearest)
+                {
+                    highlightedBinder = nearest;
+                    highlightedBinderView = nearest.GetComponent<BinderView>();
+                }
+                highlightedBinderView?.SetHighlighted(this, true);
+            }
+            else
+            {
+                ClearHighlight();
+            }
+        }
+
+        private void ClearHighlight()
+        {
+            if (highlightedBinder == null)
+            {
+                return;
+            }
+            highlightedBinderView?.SetHighlighted(this, false);
+            highlightedBinder = null;
+            highlightedBinderView = null;
+        }
+
+        private void OnPinchEnded(Vector3 releasePosition)
+        {
+            if (turningPageBinderView != null)
+            {
+                turningPageBinderView.EndPageTurn(releasePosition);
+                turningPageBinderView = null;
+                return;
+            }
+
+            ReleaseHeldCard(releasePosition);
         }
 
         private void ReleaseHeldCard(Vector3 releasePosition)
@@ -140,6 +274,7 @@ namespace STYLY.TIB_Template.GIPoker
                 return;
             }
             heldCard.Value = null;
+            ClearHighlight();
 
             // バインダーの収納圏内で離したら収納、それ以外はその場で再浮遊
             var binder = CardBinder.FindNearest(releasePosition);

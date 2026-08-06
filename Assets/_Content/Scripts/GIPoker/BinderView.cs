@@ -20,12 +20,6 @@ namespace STYLY.TIB_Template.GIPoker
     /// </summary>
     public class BinderView : MonoBehaviour
     {
-        private const int ColumnsPerPage = 4;
-        private const int RowsPerPage = 5;
-        private const float CellWidth = 0.048f;
-        private const float CellHeight = 0.062f;
-        private const float MiniCardScale = 0.62f;
-
         // 出し入れ演出（DOTween）の所要時間
         private const float ShowDuration = 0.35f;
         private const float HideDuration = 0.25f;
@@ -35,13 +29,16 @@ namespace STYLY.TIB_Template.GIPoker
         // Smoke(startLifetime 1s) / ShockWave(startLifetime 0.5s) が再生し切るまでの余裕を持たせた値。
         private const float SmokeVfxLifetime = 1.5f;
 
-        // CardBinder.fbx の実測値（表紙/ページ中心X ≈ ±0.14m）に合わせた配置定数。
-        // モデルはBlender上で「開いた本を上から見た」姿勢（X=見開き幅, Y=ページ積層厚み, Z=ページ縦）
-        // で作られているため、X-90°回転で「プレイヤーに正対する縦向きの本」に変換する。
-        private const float ModelPageCenterX = 0.14f;
         private const float HeaderHeightY = 0.19f;
         private const float HeaderZOffset = -0.01f;
-        private const float GridZOffset = -0.02f;
+
+        // ページめくりの補完アニメーション（DOTween）の所要時間
+        private const float PageTurnCommitDuration = 0.3f;
+        private const float PageTurnSpringBackDuration = 0.2f;
+
+        // 収納OKハイライトの発光色（シアン系。パススルーMR環境下でも視認しやすいよう強めに設定）
+        private static readonly Color HighlightEmissionColor = new Color(0.25f, 0.85f, 1f) * 3f;
+        private static readonly int EmissionColorId = Shader.PropertyToID("_EmissionColor");
 
         [SerializeField, Tooltip("プレイヤー正面からの距離（m）")]
         private float followDistance = 0.4f;
@@ -52,14 +49,41 @@ namespace STYLY.TIB_Template.GIPoker
 
         private CardBinder binder;
         private Transform visualRoot;
-        private Transform gridRoot;
         private TextMeshPro headerText;
         private Tween visualTween;
+        private Tween pageTurnTween;
         private readonly List<GameObject> miniCards = new();
+        private readonly List<CardInstance> miniCardInstances = new();
+        private readonly List<Renderer> placeholderRenderers = new();
         private readonly ReactiveProperty<bool> isVisible = new(false);
+        private readonly ReactiveProperty<bool> isHighlighted = new(false);
+        private readonly HashSet<object> highlightRequesters = new();
+
+        /// <summary>Page_01〜Page_08 の Transform（モデル未設定・見つからない場合は要素が null になりうる）</summary>
+        private Transform[] pages;
+
+        /// <summary>現在最前面に開いているページの配列インデックス（0始まり）</summary>
+        private int currentPageIndex;
+
+        /// <summary>現在ドラッグでめくっているページの配列インデックス（-1 ならめくり操作なし）</summary>
+        private int turningPageIndex = -1;
+
+        /// <summary>true: currentPageIndex のページを 0°→180° 方向にめくっている（次のページへ進む）</summary>
+        private bool turningForward;
+
+        /// <summary>ドラッグ中の現在の回転角（度、0〜180にクランプ）</summary>
+        private float turningAngleDeg;
+
+        private Renderer[] modelRenderers;
 
         /// <summary>バインダーが表示されているか（既定は非表示。Lサインジェスチャーで呼び出す仕様のため）</summary>
         public ReadOnlyReactiveProperty<bool> IsVisible => isVisible;
+
+        /// <summary>収納OKハイライト表示中かどうか（発光/アウトライン表示のON/OFF）</summary>
+        public ReadOnlyReactiveProperty<bool> IsHighlighted => isHighlighted;
+
+        /// <summary>ページめくりのドラッグ操作中かどうか</summary>
+        public bool IsTurningPage => turningPageIndex >= 0;
 
         /// <summary>バインダーロジックと結線し、見た目を構築する</summary>
         public void Init(CardBinder targetBinder)
@@ -127,6 +151,7 @@ namespace STYLY.TIB_Template.GIPoker
                 return;
             }
             isVisible.Value = false;
+            CancelPageTurnOnHide();
             PlaySmokeVfx(transform.position);
 
             visualTween?.Kill();
@@ -168,11 +193,15 @@ namespace STYLY.TIB_Template.GIPoker
                 model.transform.localPosition = Vector3.zero;
                 model.transform.localRotation = Quaternion.Euler(-90f, 0f, 0f);
                 model.transform.localScale = Vector3.one;
+                LoadPages(model.transform);
+                modelRenderers = model.GetComponentsInChildren<Renderer>(true);
             }
             else
             {
                 Debug.LogWarning("[BinderView] CardBinderModelPrefab が未設定のため、プレースホルダーの箱で代用します");
+                pages = null;
                 BuildPlaceholderBook();
+                modelRenderers = placeholderRenderers.ToArray();
             }
 
             // ヘッダーテキスト（本の上）
@@ -189,13 +218,35 @@ namespace STYLY.TIB_Template.GIPoker
             headerText.alignment = TextAlignmentOptions.Center;
             headerText.rectTransform.sizeDelta = new Vector2(48f, 8f);
 
-            // ミニカードのグリッド親（ページのわずかに手前）
-            var grid = new GameObject("CardGrid");
-            grid.transform.SetParent(visualRoot, false);
-            grid.transform.localPosition = new Vector3(0f, 0f, GridZOffset);
-            gridRoot = grid.transform;
-
             UpdateHeader();
+        }
+
+        /// <summary>
+        /// モデル階層から Page_01〜Page_08 の Transform を取得する。
+        /// CardBinderModelPrefab は「Model直下にCover_Front/Cover_Back/Spine/Binder_Rings/
+        /// Page_01〜Page_08が並ぶ」標準的なFBXインポート階層を前提とする。
+        /// 見つからないページがあっても例外にはせず、そのページのグリッド・ページめくりが
+        /// 機能しないだけに留める（プレースホルダー代用時などを想定）。
+        /// </summary>
+        private void LoadPages(Transform modelRoot)
+        {
+            pages = new Transform[BinderLayout.PageCount];
+            var missingCount = 0;
+            for (var i = 0; i < BinderLayout.PageCount; i++)
+            {
+                var pageName = $"Page_{i + 1:00}";
+                pages[i] = modelRoot.Find(pageName);
+                if (pages[i] == null)
+                {
+                    missingCount++;
+                }
+            }
+            if (missingCount > 0)
+            {
+                Debug.LogWarning(
+                    $"[BinderView] モデル内に Page_01〜Page_08 のうち {missingCount} 枚が見つかりません" +
+                    "（該当ページのカードグリッド・ページめくりが機能しません）");
+            }
         }
 
         /// <summary>CardBinderModelPrefab 未設定時のフォールバック（旧プリミティブ構築）</summary>
@@ -219,7 +270,9 @@ namespace STYLY.TIB_Template.GIPoker
             box.transform.SetParent(visualRoot, false);
             box.transform.localPosition = localPos;
             box.transform.localScale = size;
-            box.GetComponent<Renderer>().sharedMaterial = CardVisualFactory.CreateLitMaterial(color, emission);
+            var renderer = box.GetComponent<Renderer>();
+            renderer.sharedMaterial = CardVisualFactory.CreateLitMaterial(color, emission);
+            placeholderRenderers.Add(renderer);
             return box;
         }
 
@@ -247,6 +300,14 @@ namespace STYLY.TIB_Template.GIPoker
                 $"<color=#9AD1FF>{count}枚</color>";
         }
 
+        /// <summary>
+        /// 現在ページ（currentPageIndex）に属するカードのみを、実測値ベースの3×3グリッドで
+        /// そのページの Transform の子として再構築する。ページごとに親を変えることで、
+        /// ページめくりのヒンジ回転にミニカードが追従する。
+        /// カードの挿入順インデックス（binder.Cards内の並び順）から index/9=ページ、
+        /// index%9=スロットを都度算出するため、取り出しで配列が詰まった結果、
+        /// 後続カードのページ表示が変わることを許容する（仕様どおり）。
+        /// </summary>
         private void RebuildMiniCards()
         {
             foreach (var mini in miniCards)
@@ -257,40 +318,291 @@ namespace STYLY.TIB_Template.GIPoker
                 }
             }
             miniCards.Clear();
+            miniCardInstances.Clear();
 
-            if (binder == null)
+            if (binder == null || pages == null || currentPageIndex < 0 || currentPageIndex >= pages.Length)
+            {
+                return;
+            }
+
+            var pageTransform = pages[currentPageIndex];
+            if (pageTransform == null)
             {
                 return;
             }
 
             var index = 0;
-            var capacityShown = ColumnsPerPage * RowsPerPage * 2;
             foreach (var instance in binder.Cards)
             {
-                if (index >= capacityShown)
+                var pageOfCard = BinderLayout.PageIndexOf(index);
+                if (pageOfCard == currentPageIndex)
                 {
+                    var slot = BinderLayout.SlotIndexOf(index);
+                    var mini = CardVisualFactory.Create(pageTransform, instance.Definition, BinderLayout.MiniCardScale, withSparkle: false);
+                    mini.transform.localPosition = BinderLayout.SlotLocalPosition(slot);
+                    mini.SetActive(true);
+                    miniCards.Add(mini);
+                    miniCardInstances.Add(instance);
+                }
+                else if (pageOfCard > currentPageIndex)
+                {
+                    // binder.Cards は挿入順であり、pageOfCard は index の増加に対して単調非減少のため、
+                    // 現在ページを追い越した時点で以降のカードもすべて後続ページ確定であり探索を打ち切れる
                     break;
                 }
-                var mini = CardVisualFactory.Create(gridRoot, instance.Definition, MiniCardScale, withSparkle: false);
-                mini.transform.localPosition = GridPosition(index);
-                mini.SetActive(true);
-                miniCards.Add(mini);
                 index++;
             }
         }
 
-        private Vector3 GridPosition(int index)
+        /// <summary>
+        /// 現在ページに表示中のミニカードのうち、指定位置に最も近いものを検出する
+        /// （取り出しのための距離判定。ミニカード自体にColliderは付けない）。
+        /// バインダーが非表示のときは常に false を返す。
+        /// </summary>
+        public bool TryFindNearestMiniCard(Vector3 worldPosition, out CardInstance instance)
         {
-            var perPage = ColumnsPerPage * RowsPerPage;
-            var page = index / perPage;           // 0=左ページ 1=右ページ
-            var i = index % perPage;
-            var col = i % ColumnsPerPage;
-            var row = i / ColumnsPerPage;
+            instance = null;
+            if (!isVisible.Value || miniCards.Count == 0)
+            {
+                return false;
+            }
 
-            var pageCenterX = page == 0 ? -ModelPageCenterX : ModelPageCenterX;
-            var x = pageCenterX + (col - (ColumnsPerPage - 1) * 0.5f) * CellWidth;
-            var y = ((RowsPerPage - 1) * 0.5f - row) * CellHeight;
-            return new Vector3(x, y, 0f);
+            var nearestIndex = -1;
+            var nearestSqrDistance = float.MaxValue;
+            for (var i = 0; i < miniCards.Count; i++)
+            {
+                if (miniCards[i] == null)
+                {
+                    continue;
+                }
+                var sqrDistance = (miniCards[i].transform.position - worldPosition).sqrMagnitude;
+                if (sqrDistance < nearestSqrDistance)
+                {
+                    nearestSqrDistance = sqrDistance;
+                    nearestIndex = i;
+                }
+            }
+
+            var grabRadius = BinderLayout.MiniCardGrabRadius;
+            if (nearestIndex < 0 || nearestSqrDistance > grabRadius * grabRadius)
+            {
+                return false;
+            }
+
+            instance = miniCardInstances[nearestIndex];
+            return true;
+        }
+
+        /// <summary>
+        /// 指定位置に最も近いミニカードの取り出しを試みる（CardBinder.TryTakeOut への橋渡し）。
+        /// StoreCopy（Source == null）カードは CardBinder.TryTakeOut 側で拒否される。
+        /// </summary>
+        public bool TryTakeOutNearestMiniCard(Vector3 worldPosition, out CardizableItemBase card)
+        {
+            card = null;
+            if (binder == null || !TryFindNearestMiniCard(worldPosition, out var instance))
+            {
+                return false;
+            }
+            if (!binder.TryTakeOut(instance, worldPosition))
+            {
+                return false;
+            }
+            card = instance.Source;
+            return true;
+        }
+
+        /// <summary>
+        /// ピンチ開始位置が、現在操作可能な2枚（最前面ページ／直前にめくって左側にある1枚）の
+        /// 角タブ近傍かどうかを判定し、該当すればページめくりのドラッグを開始する。
+        /// </summary>
+        public bool TryBeginPageTurn(Vector3 pinchWorldPosition)
+        {
+            if (!isVisible.Value || pages == null || IsTurningPage)
+            {
+                return false;
+            }
+
+            // 最前面ページ（0°→180°方向にめくって次のページへ進む）
+            if (TryMatchTab(currentPageIndex, pinchWorldPosition))
+            {
+                BeginTurn(currentPageIndex, forward: true);
+                return true;
+            }
+
+            // 直前にめくって左側にある1枚（180°→0°方向に戻して前のページへ戻る）
+            var previousIndex = currentPageIndex - 1;
+            if (previousIndex >= 0 && TryMatchTab(previousIndex, pinchWorldPosition))
+            {
+                BeginTurn(previousIndex, forward: false);
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool TryMatchTab(int pageIndex, Vector3 pinchWorldPosition)
+        {
+            if (pages == null || pageIndex < 0 || pageIndex >= pages.Length || pages[pageIndex] == null)
+            {
+                return false;
+            }
+            var local = pages[pageIndex].InverseTransformPoint(pinchWorldPosition);
+            return Vector3.Distance(local, BinderLayout.PageTabLocalPosition) <= BinderLayout.PageTabRadius;
+        }
+
+        private void BeginTurn(int pageIndex, bool forward)
+        {
+            pageTurnTween?.Kill();
+            turningPageIndex = pageIndex;
+            turningForward = forward;
+            turningAngleDeg = forward ? 0f : 180f;
+        }
+
+        /// <summary>
+        /// Hide() 時にページめくりドラッグが進行中だった場合、非表示のバインダーに対して
+        /// 後からアニメーション・currentPageIndex更新が走らないよう、即座に元の静止角へ
+        /// スナップして中断する（もう一方の手のLサインで Toggle() された場合など、
+        /// ページ端を掴んでいる最中に非表示化されるケースへの対策）。
+        /// ドラッグ中だった手の CardGrabInteractor は turningPageBinderView 参照を握ったままだが、
+        /// 以後の UpdatePageTurn/EndPageTurn は IsTurningPage==false により安全に no-op になる。
+        /// </summary>
+        private void CancelPageTurnOnHide()
+        {
+            if (!IsTurningPage)
+            {
+                return;
+            }
+            pageTurnTween?.Kill();
+            var page = pages[turningPageIndex];
+            if (page != null)
+            {
+                page.localRotation = Quaternion.AngleAxis(turningForward ? 0f : 180f, Vector3.forward);
+            }
+            turningPageIndex = -1;
+        }
+
+        /// <summary>
+        /// ページめくりドラッグ中、ピンチ位置の動きにヒンジ回転（背表紙軸＝モデルローカルZ軸）を
+        /// 追従させる。回転角は、ページの親（Modelの回転していないローカル座標系）における
+        /// ピンチ位置の「背表紙を中心とした角度」（atan2）をそのまま採用する
+        /// （ページ静止時の角タブが角度0の位置にあるため、そのまま角度として使える）。
+        /// </summary>
+        public void UpdatePageTurn(Vector3 pinchWorldPosition)
+        {
+            if (!IsTurningPage || pages[turningPageIndex] == null)
+            {
+                return;
+            }
+            var page = pages[turningPageIndex];
+            var modelLocal = page.parent != null ? page.parent.InverseTransformPoint(pinchWorldPosition) : pinchWorldPosition;
+            turningAngleDeg = Mathf.Clamp(Mathf.Atan2(modelLocal.y, modelLocal.x) * Mathf.Rad2Deg, 0f, 180f);
+            page.localRotation = Quaternion.AngleAxis(turningAngleDeg, Vector3.forward);
+        }
+
+        /// <summary>
+        /// ページめくりドラッグを終了する。指を離した時点の回転角がしきい値を超えていれば
+        /// 180°まで自動補完してめくり切り currentPageIndex を更新し、しきい値未満なら
+        /// バネで元の状態に戻す（いずれも DOTween によるアニメーション）。
+        /// </summary>
+        public void EndPageTurn(Vector3 pinchWorldPosition)
+        {
+            if (!IsTurningPage)
+            {
+                return;
+            }
+            UpdatePageTurn(pinchWorldPosition);
+
+            var pageIndex = turningPageIndex;
+            var forward = turningForward;
+            var page = pages[pageIndex];
+
+            // 最終角度が180側に寄っていれば「開いた（左へ倒れた）」状態に収束させる。
+            // ページが実際に切り替わるかどうかの非対称な判定は BinderLayout.ShouldAdvancePage
+            // に切り出してあり（EditModeテストで直接検証済み）、ここではそれを呼ぶだけにする。
+            var settleOpen = BinderLayout.ShouldCommitPageTurn(turningAngleDeg);
+            var indexChanges = BinderLayout.ShouldAdvancePage(forward, turningAngleDeg);
+            turningPageIndex = -1;
+
+            var targetAngle = settleOpen ? 180f : 0f;
+            if (page != null)
+            {
+                var startAngle = turningAngleDeg;
+                pageTurnTween?.Kill();
+                pageTurnTween = DOTween.To(
+                        () => startAngle,
+                        a =>
+                        {
+                            startAngle = a;
+                            page.localRotation = Quaternion.AngleAxis(a, Vector3.forward);
+                        },
+                        targetAngle,
+                        indexChanges ? PageTurnCommitDuration : PageTurnSpringBackDuration)
+                    .SetEase(Ease.OutCubic)
+                    .SetLink(gameObject);
+            }
+
+            if (indexChanges)
+            {
+                currentPageIndex = forward ? pageIndex + 1 : pageIndex;
+                RebuildMiniCards();
+            }
+        }
+
+        /// <summary>
+        /// 収納OKハイライトのON/OFFを、呼び出し元（通常は各手のCardGrabInteractor）ごとに
+        /// 参照カウントして切り替える。両手がそれぞれ別のカードを持って同じバインダーの
+        /// 収納圏内に入っている場合など、片方の手が圏外に出てももう片方が圏内である限り
+        /// ハイライトは消灯しない。
+        /// </summary>
+        public void SetHighlighted(object requester, bool highlighted)
+        {
+            var changed = highlighted ? highlightRequesters.Add(requester) : highlightRequesters.Remove(requester);
+            if (!changed)
+            {
+                return;
+            }
+            var newValue = highlightRequesters.Count > 0;
+            if (isHighlighted.Value == newValue)
+            {
+                return;
+            }
+            isHighlighted.Value = newValue;
+            ApplyHighlight();
+        }
+
+        /// <summary>単一の呼び出し元しか想定しない簡易版（テスト・単一呼び出し元向け）</summary>
+        public void SetHighlighted(bool highlighted) => SetHighlighted(this, highlighted);
+
+        /// <summary>
+        /// renderer.material（インスタンス化）でエミッションカラーを切り替える。
+        /// sharedMaterial は直接書き換えない（マルチプレイヤーで他プレイヤーのバインダーに
+        /// 影響しないため）。
+        /// </summary>
+        private void ApplyHighlight()
+        {
+            if (modelRenderers == null)
+            {
+                return;
+            }
+            var color = isHighlighted.Value ? HighlightEmissionColor : Color.black;
+            foreach (var renderer in modelRenderers)
+            {
+                if (renderer == null)
+                {
+                    continue;
+                }
+                var mat = renderer.material;
+                if (isHighlighted.Value)
+                {
+                    mat.EnableKeyword("_EMISSION");
+                }
+                else
+                {
+                    mat.DisableKeyword("_EMISSION");
+                }
+                mat.SetColor(EmissionColorId, color);
+            }
         }
 
         private void LateUpdate()
@@ -348,7 +660,9 @@ namespace STYLY.TIB_Template.GIPoker
         private void OnDestroy()
         {
             visualTween?.Kill();
+            pageTurnTween?.Kill();
             isVisible.Dispose();
+            isHighlighted.Dispose();
         }
     }
 }
