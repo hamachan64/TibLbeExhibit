@@ -408,6 +408,177 @@ namespace STYLY.TIB_Template.GIPoker.Tests
             CollectionAssert.AreEqual(new[] { 0 }, result);
         }
 
+        // ---- ボーナスタイム（終盤の出現率・レア度アップ）のテスト ----
+
+        /// <summary>D/C/B/A/S 各ランク1種ずつ・追加出現20件ずつを模したカタログ（重み付き抽選の検証用）。</summary>
+        private static List<SpawnEntrySpec> CreateRankedEntries(int maxCountPerRank = 20)
+        {
+            return new List<SpawnEntrySpec>
+            {
+                new(initialCount: 0, maxCount: maxCountPerRank, rank: CardRank.D),
+                new(initialCount: 0, maxCount: maxCountPerRank, rank: CardRank.C),
+                new(initialCount: 0, maxCount: maxCountPerRank, rank: CardRank.B),
+                new(initialCount: 0, maxCount: maxCountPerRank, rank: CardRank.A),
+                new(initialCount: 0, maxCount: maxCountPerRank, rank: CardRank.S),
+            };
+        }
+
+        private static readonly Dictionary<CardRank, float> UniformRankWeights = new()
+        {
+            { CardRank.D, 1f }, { CardRank.C, 1f }, { CardRank.B, 1f }, { CardRank.A, 1f }, { CardRank.S, 1f }, { CardRank.SS, 1f },
+        };
+
+        private static readonly Dictionary<CardRank, float> HighRankSkewedWeights = new()
+        {
+            { CardRank.D, 1.0f }, { CardRank.C, 1.4f }, { CardRank.B, 2.2f }, { CardRank.A, 3.2f }, { CardRank.S, 4.5f }, { CardRank.SS, 4.5f },
+        };
+
+        [Test]
+        public void Build_WithBonusParameters_SameSeed_ProducesIdenticalSchedule()
+        {
+            var entries = CreateRankedEntries();
+
+            var scheduleA = CreateBuilder().Build(Seed, entries, CreateAnchors(4), 10f, 3f, UniformRankWeights, HighRankSkewedWeights);
+            var scheduleB = CreateBuilder().Build(Seed, entries, CreateAnchors(4), 10f, 3f, UniformRankWeights, HighRankSkewedWeights);
+
+            Assert.That(scheduleA.Count, Is.EqualTo(scheduleB.Count));
+            for (var i = 0; i < scheduleA.Count; i++)
+            {
+                Assert.That(scheduleA[i].NetworkId, Is.EqualTo(scheduleB[i].NetworkId));
+                Assert.That(scheduleA[i].EntryIndex, Is.EqualTo(scheduleB[i].EntryIndex));
+                Assert.That(scheduleA[i].Time, Is.EqualTo(scheduleB[i].Time));
+                Assert.That(scheduleA[i].UsedAnchor, Is.EqualTo(scheduleB[i].UsedAnchor));
+                Assert.That(scheduleA[i].Position, Is.EqualTo(scheduleB[i].Position));
+                Assert.That(scheduleA[i].YawDegrees, Is.EqualTo(scheduleB[i].YawDegrees));
+            }
+        }
+
+        [Test]
+        public void Build_BonusWindow_SwitchesToBonusTrickleIntervalAfterThreshold()
+        {
+            // 単一エントリのみ（重み付き抽選は常にそのエントリを選ぶため、時刻の挙動だけを純粋に検証できる）。
+            var entries = new List<SpawnEntrySpec> { new(initialCount: 0, maxCount: 6, rank: CardRank.D) };
+            const float bonusWindowStart = 20f;
+            const float bonusInterval = 4f;
+
+            var schedule = CreateBuilder().Build(Seed, entries, null, bonusWindowStart, bonusInterval, UniformRankWeights, UniformRankWeights);
+
+            var times = schedule.Select(s => s.Time).ToList();
+            Assert.That(times.Count, Is.EqualTo(6));
+            // 通常間隔（TrickleInterval=12）で 12, 24 まで進み、24 の時点でボーナスタイム開始(20)を跨いでいるため、
+            // 以降は bonusInterval(4) 刻みになる。
+            Assert.That(times[0], Is.EqualTo(TrickleInterval));
+            Assert.That(times[1], Is.EqualTo(TrickleInterval * 2));
+            Assert.That(times[1], Is.GreaterThanOrEqualTo(bonusWindowStart));
+            for (var i = 2; i < times.Count; i++)
+            {
+                Assert.That(times[i] - times[i - 1], Is.EqualTo(bonusInterval).Within(0.0001f));
+            }
+        }
+
+        [Test]
+        public void Build_BonusWeightsSkewedToHighRank_IncreasesAverageRankInBonusWindow()
+        {
+            // Build() は while (pool.Count > 0) でプールを完全に空にするまで出現させ切るため、
+            // 重みは「出現する順番」だけを左右し、「最終的に出現する総数」（＝各ランクの出現数）は
+            // 変えない。そのため schedule 全体（このカタログでは合計100件）の平均ランクを比較すると、
+            // 重みに関わらず必ず D,C,B,A,S 各20件ずつを含む同一の多重集合になり、平均ランクは常に
+            // ちょうど2.0で完全一致してしまう（差が出ない＝このテストが検証したい効果を測れない）。
+            // 「重みが高ランクを出やすくする」効果は時系列の先頭（早い時刻）に集中して現れるため、
+            // 時刻昇順の先頭 prefixSize 件（全体100件よりも十分小さい範囲）だけを比較する。
+            var entries = CreateRankedEntries();
+            const float bonusWindowStart = 0f; // 最初のトリクルからボーナス扱いにして差を最大化する
+            const int prefixSize = 15; // 合計100件に対し、重みの影響がまだ強く残っている先頭範囲
+
+            var uniformSchedule = CreateBuilder().Build(Seed, entries, null, bonusWindowStart, TrickleInterval, UniformRankWeights, UniformRankWeights);
+            var skewedSchedule = CreateBuilder().Build(Seed, entries, null, bonusWindowStart, TrickleInterval, UniformRankWeights, HighRankSkewedWeights);
+
+            Assert.That(uniformSchedule.Count, Is.EqualTo(skewedSchedule.Count));
+
+            double PrefixAverageRank(List<ScheduledSpawn> schedule) =>
+                schedule.Take(prefixSize).Average(s => (int)entries[s.EntryIndex].Rank);
+
+            var uniformAverage = PrefixAverageRank(uniformSchedule);
+            var skewedAverage = PrefixAverageRank(skewedSchedule);
+
+            Assert.That(skewedAverage, Is.GreaterThan(uniformAverage),
+                "ボーナス重みを高ランクに寄せた場合、時系列の先頭付近（ボーナス時間帯の出現）の平均ランクが上がること");
+        }
+
+        [Test]
+        public void Build_WithBonusWeights_NeverExceedsMaxCountPerEntry()
+        {
+            var entries = CreateRankedEntries(maxCountPerRank: 7);
+            const float bonusWindowStart = 15f;
+            const float bonusInterval = 3f;
+
+            var schedule = CreateBuilder().Build(Seed, entries, CreateAnchors(3), bonusWindowStart, bonusInterval, UniformRankWeights, HighRankSkewedWeights);
+
+            var countsByEntry = new int[entries.Count];
+            foreach (var spawn in schedule)
+            {
+                countsByEntry[spawn.EntryIndex]++;
+            }
+            for (var i = 0; i < entries.Count; i++)
+            {
+                Assert.That(countsByEntry[i], Is.LessThanOrEqualTo(entries[i].MaxCount),
+                    $"エントリ{i}（{entries[i].Rank}）が maxCount を超えて出現していないこと");
+            }
+        }
+
+        [Test]
+        public void Build_NewOverloadWithBonusDisabled_MatchesLegacyBoxOnlyAlgorithm()
+        {
+            // normalWeights/bonusWeights を両方 null にした新オーバーロード呼び出しは、
+            // 既存の Fisher-Yates コードパス（LegacyBoxOnlyBuild と同一）を使うこと（後方互換の再確認）。
+            var entries = CreateEntries();
+
+            var expected = LegacyBoxOnlyBuild(Seed, entries, BasePosition, SpawnAreaSize, MinHeight, MaxHeight, MinSpacing, TrickleInterval);
+            var actual = CreateBuilder().Build(Seed, entries, null, float.PositiveInfinity, TrickleInterval, null, null);
+
+            Assert.That(actual.Count, Is.EqualTo(expected.Count));
+            for (var i = 0; i < actual.Count; i++)
+            {
+                Assert.That(actual[i].NetworkId, Is.EqualTo(expected[i].NetworkId));
+                Assert.That(actual[i].EntryIndex, Is.EqualTo(expected[i].EntryIndex));
+                Assert.That(actual[i].Time, Is.EqualTo(expected[i].Time));
+                Assert.That(actual[i].Position, Is.EqualTo(expected[i].Position));
+                Assert.That(actual[i].YawDegrees, Is.EqualTo(expected[i].YawDegrees));
+                Assert.That(actual[i].UsedAnchor, Is.False);
+            }
+        }
+
+        [Test]
+        public void Build_NewOverloadWithBonusDisabled_MatchesLegacyGenericAnchorAlgorithm()
+        {
+            // normalWeights/bonusWeights を両方 null にした新オーバーロード呼び出しは、
+            // 既存のアンカー選択込み Fisher-Yates コードパス（LegacyGenericAnchorBuild と同一）を使うこと。
+            var entries = CreateEntries();
+            var anchors = CreateAnchors(4);
+
+            var expected = LegacyGenericAnchorBuild(Seed, entries, anchors, BasePosition, SpawnAreaSize, MinHeight, MaxHeight, MinSpacing, TrickleInterval);
+            var actual = CreateBuilder().Build(Seed, entries, anchors, float.PositiveInfinity, TrickleInterval, null, null);
+
+            Assert.That(actual.Count, Is.EqualTo(expected.Count));
+            for (var i = 0; i < actual.Count; i++)
+            {
+                Assert.That(actual[i].NetworkId, Is.EqualTo(expected[i].NetworkId));
+                Assert.That(actual[i].EntryIndex, Is.EqualTo(expected[i].EntryIndex));
+                Assert.That(actual[i].Time, Is.EqualTo(expected[i].Time));
+                Assert.That(actual[i].Position, Is.EqualTo(expected[i].Position));
+                Assert.That(actual[i].YawDegrees, Is.EqualTo(expected[i].YawDegrees));
+                Assert.That(actual[i].UsedAnchor, Is.EqualTo(expected[i].UsedAnchor));
+            }
+        }
+
+        [Test]
+        public void SpawnEntrySpec_TwoArgConstructor_DefaultsRankToD()
+        {
+            var spec = new SpawnEntrySpec(initialCount: 1, maxCount: 3);
+
+            Assert.That(spec.Rank, Is.EqualTo(CardRank.D));
+        }
+
         /// <summary>
         /// 専用アンカー導入前の SpawnScheduleBuilder（汎用アンカー選択のみ）のロジックを
         /// 忠実に再現した参照実装（テスト専用）。全アンカー汎用時のビット互換の担保に使う。

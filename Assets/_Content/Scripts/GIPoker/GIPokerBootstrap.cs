@@ -27,6 +27,7 @@ namespace STYLY.TIB_Template.GIPoker
     /// - VR空間: TutorialSpaceDirector（チュートリアル中だけ包む「ゲーム開始の間」）
     /// - MR⇔VR遷移: TransitionDirector（白フェード＋VR空間の表示制御。ScreenFaderは内部生成）
     /// - リザルト: ResultView（タイムアップで表示）
+    /// - ボーナスタイム告知: BonusTimeAnnouncementView（終盤の出現率アップをローカルに告知するポップアップ）
     /// </summary>
     [DefaultExecutionOrder(-40)]
     public class GIPokerBootstrap : MonoBehaviour
@@ -150,6 +151,11 @@ namespace STYLY.TIB_Template.GIPoker
             var resultGo = new GameObject("GIPoker_ResultView");
             var resultView = resultGo.AddComponent<ResultView>();
             resultView.Init(session, binder);
+
+            // ボーナスタイム告知（終盤の出現率アップをプレイヤーへローカルに告知するポップアップ）
+            var bonusTimeAnnouncementGo = new GameObject("GIPoker_BonusTimeAnnouncement");
+            var bonusTimeAnnouncementView = bonusTimeAnnouncementGo.AddComponent<BonusTimeAnnouncementView>();
+            bonusTimeAnnouncementView.Init(session);
 
             // カード状態のマルチユーザー同期
             var networkSync = gameObject.AddComponent<CardNetworkSync>();

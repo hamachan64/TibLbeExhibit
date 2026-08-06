@@ -50,6 +50,56 @@ namespace STYLY.TIB_Template.GIPoker
         [SerializeField, Tooltip("追加出現の間隔（秒）")]
         private float trickleInterval = 12f;
 
+        /// <summary>ランクごとの追加出現抽選重み（Inspectorで見やすいよう List で公開する）</summary>
+        [System.Serializable]
+        private class RankSpawnWeight
+        {
+            public CardRank rank;
+            public float weight = 1f;
+
+            public RankSpawnWeight(CardRank rank, float weight)
+            {
+                this.rank = rank;
+                this.weight = weight;
+            }
+        }
+
+        [Header("ボーナスタイム")]
+        [SerializeField, Min(0f), Tooltip("セッション終了までの残り秒数がこの値を下回るとボーナスタイムが始まる")]
+        private float bonusTimeSeconds = 30f;
+
+        [SerializeField, Min(0.1f), Tooltip("ボーナスタイム中の追加出現の間隔（秒）。通常の trickleInterval より短い値を推奨")]
+        private float bonusTrickleInterval = 4f;
+
+        [SerializeField, Tooltip("通常時（ボーナスタイム前）の追加出現でのランク別抽選重み")]
+        private List<RankSpawnWeight> normalRankWeights = new()
+        {
+            new RankSpawnWeight(CardRank.D, 1.0f),
+            new RankSpawnWeight(CardRank.C, 1.0f),
+            new RankSpawnWeight(CardRank.B, 0.85f),
+            new RankSpawnWeight(CardRank.A, 0.6f),
+            new RankSpawnWeight(CardRank.S, 0.4f),
+            new RankSpawnWeight(CardRank.SS, 0.4f),
+        };
+
+        [SerializeField, Tooltip("ボーナスタイム中の追加出現でのランク別抽選重み（高ランクほど大きい値にすると出やすくなる）")]
+        private List<RankSpawnWeight> bonusRankWeights = new()
+        {
+            new RankSpawnWeight(CardRank.D, 1.0f),
+            new RankSpawnWeight(CardRank.C, 1.4f),
+            new RankSpawnWeight(CardRank.B, 2.2f),
+            new RankSpawnWeight(CardRank.A, 3.2f),
+            new RankSpawnWeight(CardRank.S, 4.5f),
+            new RankSpawnWeight(CardRank.SS, 4.5f),
+        };
+
+        /// <summary>
+        /// セッション終了までの残り秒数がこの値を下回るとボーナスタイムが始まる。
+        /// 告知UI（BonusTimeAnnouncementView）が出現率アップと同じタイミングで告知するために参照する
+        /// （二重定義を避け、しきい値のズレを防ぐための読み取り専用の公開プロパティ）。
+        /// </summary>
+        public float BonusTimeSeconds => bonusTimeSeconds;
+
         private readonly List<ScheduledSpawn> schedule = new();
         private int nextSpawnIndex;
 
@@ -180,8 +230,13 @@ namespace STYLY.TIB_Template.GIPoker
             var anchors = CollectAnchorSpecs();
             var builder = new SpawnScheduleBuilder(transform.position, spawnAreaSize, minHeight, maxHeight, minSpacing, trickleInterval);
 
+            var sessionDurationSeconds = GameSession.Instance != null ? GameSession.Instance.SessionDurationSeconds : 0f;
+            var bonusWindowStartSeconds = Mathf.Max(0f, sessionDurationSeconds - bonusTimeSeconds);
+            var normalWeights = ToWeightDictionary(normalRankWeights);
+            var bonusWeights = ToWeightDictionary(bonusRankWeights);
+
             schedule.Clear();
-            schedule.AddRange(builder.Build(seed, entries, anchors));
+            schedule.AddRange(builder.Build(seed, entries, anchors, bonusWindowStartSeconds, bonusTrickleInterval, normalWeights, bonusWeights));
             nextSpawnIndex = 0;
 
             if (anchors.Count > 0)
@@ -205,9 +260,41 @@ namespace STYLY.TIB_Template.GIPoker
             var specs = new List<SpawnEntrySpec>(entries.Count);
             for (var i = 0; i < entries.Count; i++)
             {
-                specs.Add(new SpawnEntrySpec(entries[i].initialCount, entries[i].maxCount));
+                specs.Add(new SpawnEntrySpec(entries[i].initialCount, entries[i].maxCount, ResolveCardRank(entries[i].prefab)));
             }
             return specs;
+        }
+
+        private static CardRank ResolveCardRank(GameObject prefab)
+        {
+            if (prefab == null)
+            {
+                return CardRank.D;
+            }
+            var item = prefab.GetComponent<CardizableItemBase>();
+            if (item == null || item.Definition == null)
+            {
+                Debug.LogWarning(
+                    $"[ItemSpawnManager] '{prefab.name}' に CardizableItemBase / Definition が設定されていないため、" +
+                    "ボーナスタイムの重み付き抽選ではランクD相当として扱われます", prefab);
+                return CardRank.D;
+            }
+            return item.Definition.Rank;
+        }
+
+        /// <summary>ランク別抽選重みリスト（Inspector用）を Build() が要求する Dictionary へ変換する。</summary>
+        private static Dictionary<CardRank, float> ToWeightDictionary(List<RankSpawnWeight> source)
+        {
+            var dict = new Dictionary<CardRank, float>();
+            if (source == null)
+            {
+                return dict;
+            }
+            foreach (var entry in source)
+            {
+                dict[entry.rank] = entry.weight;
+            }
+            return dict;
         }
 
         /// <summary>
