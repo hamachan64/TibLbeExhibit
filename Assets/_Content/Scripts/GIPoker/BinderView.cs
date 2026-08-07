@@ -41,7 +41,7 @@ namespace STYLY.TIB_Template.GIPoker
         private static readonly int EmissionColorId = Shader.PropertyToID("_EmissionColor");
 
         [SerializeField, Tooltip("プレイヤー正面からの距離（m）")]
-        private float followDistance = 0.4f;
+        private float followDistance = 0.25f;
         [SerializeField, Tooltip("頭からどれだけ下に置くか（m）")]
         private float heightBelowHead = 0.52f;
         [SerializeField, Tooltip("追従の速さ")]

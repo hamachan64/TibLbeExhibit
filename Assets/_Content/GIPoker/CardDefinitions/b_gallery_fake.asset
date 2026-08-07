@@ -15,7 +15,7 @@ MonoBehaviour:
   cardId: b_gallery_fake
   displayName: "\u30AE\u30E3\u30E9\u30EA\u30FC\u30D5\u30A7\u30A4\u30AF"
   rank: 2
-  effectType: 6
+  effectType: 0
   description: "\u30B2\u30A4\u30F3\u3059\u308B\u3068\u30D0\u30A4\u30F3\u30C0\u30FC\u5185\u306E\u30AB\u30FC\u30C91\u679A\u3092\u8907\u88FD\u3059\u308B\uFF08A\u30FBSS\u306F\u8907\u88FD\u4E0D\u53EF\uFF09\u3002"
   prefab: {fileID: 5879412345328350527, guid: 8a1597d53131d4901840985280e54adc, type: 3}
   initialCount: 0

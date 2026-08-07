@@ -15,7 +15,7 @@ MonoBehaviour:
   cardId: b_armor
   displayName: "\u5F77\u5FA8\u3046\u3088\u308D\u3044"
   rank: 2
-  effectType: 4
+  effectType: 0
   description: "\u30B2\u30A4\u30F3\u3059\u308B\u3068\u4E00\u5B9A\u6642\u9593\u3001\u5168\u30AB\u30FC\u30C9\u306E1\u5206\u30EB\u30FC\u30EB\u306E\u9032\u884C\u3092\u505C\u6B62\u3059\u308B\u3002"
   prefab: {fileID: 4073931999581502406, guid: 800dca63087fa42e29ff97e25725103d, type: 3}
   initialCount: 1
