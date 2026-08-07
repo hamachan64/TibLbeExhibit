@@ -31,7 +31,9 @@ namespace STYLY.TIB_Template.GIPoker
             }
             label.text.fontSize = 5f;
             label.text.alignment = TextAlignmentOptions.Center;
-            label.text.rectTransform.sizeDelta = new Vector2(2f, 1f);
+            label.text.textWrappingMode = TextWrappingModes.NoWrap;
+            label.text.overflowMode = TextOverflowModes.Overflow;
+            label.text.rectTransform.sizeDelta = new Vector2(10f, 2f);
 
             item.RemainingLifetime
                 .CombineLatest(item.IsCountdownPaused, (remaining, paused) => (remaining, paused))

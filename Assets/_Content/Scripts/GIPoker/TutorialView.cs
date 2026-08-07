@@ -230,6 +230,8 @@ namespace STYLY.TIB_Template.GIPoker
             // 指示テキスト（中央・少し大きめ＆行間広めで一読しやすく）
             instructionText = CreateText("Instruction", string.Empty, new Vector3(0f, 0.006f, -0.002f), 14f,
                 Color.white, FontStyles.Bold);
+            instructionText.textWrappingMode = TextWrappingModes.Normal;
+            instructionText.rectTransform.sizeDelta = new Vector2(48f, 12f);
             instructionText.lineSpacing = 8f;
             instructionBasePos = instructionText.transform.localPosition;
 
@@ -491,7 +493,9 @@ namespace STYLY.TIB_Template.GIPoker
             tmp.color = color;
             tmp.fontStyle = style;
             tmp.alignment = TextAlignmentOptions.Center;
-            tmp.rectTransform.sizeDelta = new Vector2(42f, 8f);
+            tmp.textWrappingMode = TextWrappingModes.NoWrap;
+            tmp.overflowMode = TextOverflowModes.Overflow;
+            tmp.rectTransform.sizeDelta = new Vector2(100f, 15f);
             return tmp;
         }
 

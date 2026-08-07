@@ -109,7 +109,8 @@ namespace STYLY.TIB_Template.GIPoker
                 popup.text.color = new Color(0.95f, 0.78f, 0.25f);
                 popup.text.fontStyle = FontStyles.Bold;
                 popup.text.alignment = TextAlignmentOptions.Center;
-                popup.text.rectTransform.sizeDelta = new Vector2(6f, 2f);
+                popup.text.overflowMode = TextOverflowModes.Overflow;
+                popup.text.rectTransform.sizeDelta = new Vector2(30f, 6f);
 
                 popup.FaceCamera();
                 popup.PlayAndDestroy();

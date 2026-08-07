@@ -235,7 +235,9 @@ namespace STYLY.TIB_Template.GIPoker
             }
             headerText.fontSize = 18f;
             headerText.alignment = TextAlignmentOptions.Center;
-            headerText.rectTransform.sizeDelta = new Vector2(48f, 8f);
+            headerText.textWrappingMode = TextWrappingModes.NoWrap;
+            headerText.overflowMode = TextOverflowModes.Overflow;
+            headerText.rectTransform.sizeDelta = new Vector2(100f, 10f);
 
             UpdateHeader();
         }

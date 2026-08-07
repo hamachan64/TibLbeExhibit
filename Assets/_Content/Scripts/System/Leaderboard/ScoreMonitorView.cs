@@ -50,6 +50,8 @@ namespace STYLY.TIB_Template.Leaderboard
             {
                 return;
             }
+            remainingTimeText.textWrappingMode = TextWrappingModes.NoWrap;
+            remainingTimeText.overflowMode = TextOverflowModes.Overflow;
             var clamped = Mathf.Max(0f, seconds);
             var minutes = Mathf.FloorToInt(clamped / 60f);
             var secs = Mathf.FloorToInt(clamped % 60f);
@@ -62,6 +64,8 @@ namespace STYLY.TIB_Template.Leaderboard
             {
                 return;
             }
+            text.textWrappingMode = TextWrappingModes.NoWrap;
+            text.overflowMode = TextOverflowModes.Overflow;
             if (entries == null || entries.Count == 0)
             {
                 text.text = "-";
