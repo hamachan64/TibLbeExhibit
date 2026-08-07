@@ -17,6 +17,7 @@ MonoBehaviour:
   rank: 3
   effectType: 5
   description: "\u30B2\u30A4\u30F3\u3059\u308B\u3068d20\u3092\u632F\u308B\u3002\u5927\u5409\u306A\u3089SS\u30AB\u30FC\u30C9\u51FA\u73FE\u3001\u5927\u51F6\u306A\u3089\u30D0\u30A4\u30F3\u30C0\u30FC\u306E\u30AB\u30FC\u30C9\u304C\u7834\u58CA\u3055\u308C\u308B\u3002"
+  cardTexture: {fileID: 2800000, guid: c28a8f6cb580c4d85a7939429f2ae8c2, type: 3}
   prefab: {fileID: 1971816625895685670, guid: 01b6a9f8d755e45f89f923ca2262a424, type: 3}
   initialCount: 1
   maxCount: 3

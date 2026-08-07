@@ -116,7 +116,7 @@ namespace STYLY.TIB_Template.GIPoker
         public const float FirstCardZ = -0.09f;
 
         /// <summary>カードの横方向間隔（列ピッチ）</summary>
-        public const float CardSpacingX = 0.033f;
+        public const float CardSpacingX = -0.066f;
 
         /// <summary>カードの縦方向間隔（行ピッチ）</summary>
         public const float CardSpacingZ = 0.09f;

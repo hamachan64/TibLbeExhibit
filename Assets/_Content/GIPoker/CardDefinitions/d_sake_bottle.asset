@@ -17,6 +17,7 @@ MonoBehaviour:
   rank: 0
   effectType: 0
   description: "\u5E74\u4EE3\u7269\u306E\u9152\u74F6\u3002\u98F2\u3093\u3067\u306F\u3044\u3051\u306A\u3044\u3002"
+  cardTexture: {fileID: 2800000, guid: 00601b4c12c544f3483de0ad4934cbe8, type: 3}
   prefab: {fileID: 7865410730902295892, guid: 28c19d5a955254582a2823e908cdc71d, type: 3}
   initialCount: 1
   maxCount: 2

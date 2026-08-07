@@ -105,7 +105,7 @@ namespace STYLY.TIB_Template.GIPoker
                     popup.text.font = GIPokerAssets.JapaneseFont;
                 }
                 popup.text.text = AnnouncementMessage;
-                popup.text.fontSize = 8f;
+                popup.text.fontSize = 16f;
                 popup.text.color = new Color(0.95f, 0.78f, 0.25f);
                 popup.text.fontStyle = FontStyles.Bold;
                 popup.text.alignment = TextAlignmentOptions.Center;

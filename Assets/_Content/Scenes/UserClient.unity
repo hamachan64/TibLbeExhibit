@@ -288,6 +288,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1956381348160497358, guid: 8ea6960e82d7c419c93a7f4f18e7b06e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.30000007
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -538,7 +542,7 @@ MonoBehaviour:
   sessionDurationSeconds: 120
   autoStartInEditorDelay: 3
   skipTutorial: 0
-  tutorialDurationSeconds: 110
+  tutorialDurationSeconds: 60
 --- !u!4 &2082618860
 Transform:
   m_ObjectHideFlags: 0

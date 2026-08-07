@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: c_pocket_watch
   m_EditorClassIdentifier: Assembly-CSharp::STYLY.TIB_Template.GIPoker.CardDefinition
   cardId: c_pocket_watch
-  displayName: "\u9280\u306E\u61D0\u4E2D\u6642\u8A08"
+  displayName: "\u5FC3\u5EA6\u8A08"
   rank: 1
   effectType: 0
-  description: "\u7CBE\u5DE7\u306A\u7D30\u5DE5\u306E\u61D0\u4E2D\u6642\u8A08\u3002\u6642\u3092\u523B\u307F\u7D9A\u3051\u3066\u3044\u308B\u3002"
+  description: "\u3042\u306A\u305F\u306E\u4ECA\u306E\u7CBE\u795E\u72B6\u614B\u3092\u6E2C\u3063\u3066\u304F\u308C\u308B\u6642\u8A08\u3002"
+  cardTexture: {fileID: 2800000, guid: 373af85e6854246b69e21fdab6df3101, type: 3}
   prefab: {fileID: 6664451449951062524, guid: 67490b281ea8d4a8a9ed4b34796d79f0, type: 3}
   initialCount: 1
   maxCount: 3

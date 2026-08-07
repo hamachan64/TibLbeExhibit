@@ -130,7 +130,7 @@ namespace STYLY.TIB_Template.GIPoker
                     IntroDurationSeconds, requiresAchievement: false),
                 new(TutorialStepKind.BinderShow,
                     "バインダーを出してみよう",
-                    "右のように、L字のポーズを顔の前ですると、バインダーが現れるぞ！",
+                    "L字のポーズを顔の前ですると、バインダーが現れるぞ！",
                     DefaultStepTimeoutSeconds, requiresAchievement: true),
                 new(TutorialStepKind.Cardify,
                     "カード化してみよう",
@@ -150,7 +150,7 @@ namespace STYLY.TIB_Template.GIPoker
                     CautionDurationSeconds, requiresAchievement: false),
                 new(TutorialStepKind.Ready,
                     "準備はいいか？",
-                    "制限時間5分でハイスコアを狙え！",
+                    "制限時間2分でハイスコアを狙え！",
                     ReadyDurationSeconds, requiresAchievement: false),
             };
         }

@@ -44,6 +44,15 @@ namespace STYLY.TIB_Template.GIPoker
         // RebuildMiniCards() 参照。
         private static readonly Quaternion MiniCardPageRotation = Quaternion.Euler(90f, 180f, 0f);
 
+        // 角タブ発光デカール（初見でもページめくりの掴み位置がわかるよう常時表示する平たい発光板）。
+        // 収納OKハイライト（HighlightEmissionColor、シアン系）と混同しないよう暖色（琥珀）にする。
+        // Quadプリミティブの既定法線（-Z）をPageの+Y（浮かせる＝視認者側）に向けるため、
+        // MiniCardPageRotation と同じX=90°回転を使う（平板の色は無地なのでY回転は不要）。
+        private static readonly Color PageTabDecalColor = new Color(0.35f, 0.22f, 0.05f);
+        private static readonly Color PageTabDecalEmission = new Color(1f, 0.75f, 0.15f) * 2.5f;
+        private static readonly Quaternion PageTabDecalRotation = Quaternion.Euler(90f, 0f, 0f);
+        private const float PageTabDecalDiameter = BinderLayout.PageTabRadius * 1.6f;
+
         [SerializeField, Tooltip("プレイヤー正面からの距離（m）")]
         private float followDistance = 0.25f;
         [SerializeField, Tooltip("頭からどれだけ下に置くか（m）")]
@@ -71,6 +80,12 @@ namespace STYLY.TIB_Template.GIPoker
 
         /// <summary>現在ドラッグでめくっているページの配列インデックス（-1 ならめくり操作なし）</summary>
         private int turningPageIndex = -1;
+
+        /// <summary>現在ページの角タブ（前めくり用）の発光デカール</summary>
+        private GameObject forwardPageTabDecal;
+
+        /// <summary>直前ページの角タブ（後ろめくり用）の発光デカール。currentPageIndex==0のときは無し</summary>
+        private GameObject backwardPageTabDecal;
 
         /// <summary>true: currentPageIndex のページを 0°→180° 方向にめくっている（次のページへ進む）</summary>
         private bool turningForward;
@@ -362,6 +377,51 @@ namespace STYLY.TIB_Template.GIPoker
                 }
                 index++;
             }
+
+            UpdatePageTabDecals();
+        }
+
+        /// <summary>
+        /// 現在操作可能な2枚（現在ページの前めくり用／直前ページの後ろめくり用）の角タブに、
+        /// 常時発光するデカールを表示する。TryBeginPageTurn が判定に使う位置・対象ページと一致させる。
+        /// </summary>
+        private void UpdatePageTabDecals()
+        {
+            forwardPageTabDecal = EnsurePageTabDecal(forwardPageTabDecal, currentPageIndex);
+            backwardPageTabDecal = EnsurePageTabDecal(backwardPageTabDecal, currentPageIndex - 1);
+        }
+
+        private GameObject EnsurePageTabDecal(GameObject decal, int pageIndex)
+        {
+            if (pages == null || pageIndex < 0 || pageIndex >= pages.Length || pages[pageIndex] == null)
+            {
+                if (decal != null)
+                {
+                    decal.SetActive(false);
+                }
+                return decal;
+            }
+
+            if (decal == null)
+            {
+                decal = CreatePageTabDecal();
+            }
+            decal.transform.SetParent(pages[pageIndex], false);
+            decal.transform.localPosition = new Vector3(
+                BinderLayout.PageTabLocalPosition.x, BinderLayout.MiniCardSurfaceOffset, BinderLayout.PageTabLocalPosition.z);
+            decal.transform.localRotation = PageTabDecalRotation;
+            decal.SetActive(true);
+            return decal;
+        }
+
+        private GameObject CreatePageTabDecal()
+        {
+            var decal = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            decal.name = "PageTabDecal";
+            Destroy(decal.GetComponent<Collider>());
+            decal.transform.localScale = Vector3.one * PageTabDecalDiameter;
+            decal.GetComponent<Renderer>().sharedMaterial = CardVisualFactory.CreateLitMaterial(PageTabDecalColor, PageTabDecalEmission);
+            return decal;
         }
 
         /// <summary>
