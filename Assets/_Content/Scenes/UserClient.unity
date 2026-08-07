@@ -535,7 +535,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 328fd29decd7e40cb986e14cb21e36e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::STYLY.TIB_Template.GIPoker.GameSession
-  sessionDurationSeconds: 300
+  sessionDurationSeconds: 120
   autoStartInEditorDelay: 3
   skipTutorial: 0
   tutorialDurationSeconds: 110
