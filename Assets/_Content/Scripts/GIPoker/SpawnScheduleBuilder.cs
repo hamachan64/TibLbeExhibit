@@ -15,10 +15,20 @@ namespace STYLY.TIB_Template.GIPoker
         /// <summary>セッション全体での出現上限（カード化限度枚数）</summary>
         public readonly int MaxCount;
 
+        /// <summary>このエントリのカードランク（ボーナスタイムの重み付き抽選に使用）</summary>
+        public readonly CardRank Rank;
+
+        /// <summary>後方互換コンストラクタ。Rank 未指定時は D 扱い（重み付き抽選を使わない既存呼び出し向け）</summary>
         public SpawnEntrySpec(int initialCount, int maxCount)
+            : this(initialCount, maxCount, CardRank.D)
+        {
+        }
+
+        public SpawnEntrySpec(int initialCount, int maxCount, CardRank rank)
         {
             InitialCount = initialCount;
             MaxCount = maxCount;
+            Rank = rank;
         }
     }
 
@@ -206,7 +216,42 @@ namespace STYLY.TIB_Template.GIPoker
         /// <param name="seed">GameSession.SessionSeed（全クライアント共有）</param>
         /// <param name="entries">カタログの出現エントリ一覧（カタログ順）</param>
         /// <param name="anchors">階層順に列挙済みの StageSpawnAnchor 候補（呼び出し側が順序を保証する）</param>
+        /// <remarks>
+        /// ボーナスタイム（終盤の出現率・レア度アップ）を使わない従来呼び出し。
+        /// 内部では新オーバーロードへ「重み未指定」（＝ボーナス無効）で委譲するだけなので、
+        /// 追加出現分は必ず既存の Fisher-Yates シャッフルのコードパスで決定される（後方互換）。
+        /// </remarks>
         public List<ScheduledSpawn> Build(int seed, IReadOnlyList<SpawnEntrySpec> entries, IReadOnlyList<SpawnAnchorSpec> anchors)
+        {
+            return Build(seed, entries, anchors, float.PositiveInfinity, trickleInterval, null, null);
+        }
+
+        /// <summary>
+        /// ボーナスタイム（終盤の出現率・レア度アップ）に対応したオーバーロード。
+        /// </summary>
+        /// <param name="seed">GameSession.SessionSeed（全クライアント共有）</param>
+        /// <param name="entries">カタログの出現エントリ一覧（カタログ順）</param>
+        /// <param name="anchors">階層順に列挙済みの StageSpawnAnchor 候補（呼び出し側が順序を保証する）</param>
+        /// <param name="bonusWindowStartSeconds">
+        /// ボーナスタイム開始時刻（セッション経過秒）。この時刻以降にスケジュールされる追加出現は
+        /// bonusTrickleInterval・bonusWeights に従う。
+        /// </param>
+        /// <param name="bonusTrickleInterval">ボーナスタイム中の追加出現間隔（秒）</param>
+        /// <param name="normalWeights">通常時（ボーナスタイム前）のランク別抽選重み。null ならランク均等（重み1.0）</param>
+        /// <param name="bonusWeights">ボーナスタイム中のランク別抽選重み。null ならランク均等（重み1.0）</param>
+        /// <remarks>
+        /// normalWeights と bonusWeights がどちらも null（＝重み付け機能が実際には呼ばれていない）場合は、
+        /// bonusWindowStartSeconds・bonusTrickleInterval の値に関わらず既存の Fisher-Yates コードパスを
+        /// 1行も変更せずそのまま使う。重み付き抽選は、どちらか一方でも指定されたときだけ通る別コードパス。
+        /// </remarks>
+        public List<ScheduledSpawn> Build(
+            int seed,
+            IReadOnlyList<SpawnEntrySpec> entries,
+            IReadOnlyList<SpawnAnchorSpec> anchors,
+            float bonusWindowStartSeconds,
+            float bonusTrickleInterval,
+            IReadOnlyDictionary<CardRank, float> normalWeights,
+            IReadOnlyDictionary<CardRank, float> bonusWeights)
         {
             var schedule = new List<ScheduledSpawn>();
             if (entries == null || entries.Count == 0)
@@ -241,18 +286,98 @@ namespace STYLY.TIB_Template.GIPoker
                     remaining.Add(i);
                 }
             }
-            // Fisher-Yates シャッフル（rng の消費順もクライアント間で一致する）
-            for (var i = remaining.Count - 1; i > 0; i--)
+
+            // 重み付け機能が実際に有効（normalWeights / bonusWeights のいずれかが指定されている）でなければ、
+            // 既存の Fisher-Yates コードパスをそのまま使う（後方互換・ビット単位一致）。
+            var weightingEnabled = normalWeights != null || bonusWeights != null;
+            if (!weightingEnabled)
             {
-                var j = rng.Next(i + 1);
-                (remaining[i], remaining[j]) = (remaining[j], remaining[i]);
+                // Fisher-Yates シャッフル（rng の消費順もクライアント間で一致する）
+                for (var i = remaining.Count - 1; i > 0; i--)
+                {
+                    var j = rng.Next(i + 1);
+                    (remaining[i], remaining[j]) = (remaining[j], remaining[i]);
+                }
+                for (var k = 0; k < remaining.Count; k++)
+                {
+                    AddSpawn(schedule, ref networkId, remaining[k], trickleInterval * (k + 1), rng, placedPositions, availableAnchors);
+                }
             }
-            for (var k = 0; k < remaining.Count; k++)
+            else
             {
-                AddSpawn(schedule, ref networkId, remaining[k], trickleInterval * (k + 1), rng, placedPositions, availableAnchors);
+                // 重み付き抽選（ボーナスタイム対応）。remaining をプールとして、時刻が進むごとに
+                // 重み付き乱数で1件ずつ選んで除去する。プールに残る要素数はエントリごとに変わらないため、
+                // maxCount 上限は Fisher-Yates 版と同様に構造的に守られる。
+                //
+                // 間隔(interval)は「加算前」の currentTime で、重み(weights)は「加算後」の currentTime で
+                // 判定しているため、ボーナスタイム開始をまたぐ1件だけは「間隔は通常ペースのまま・
+                // 抽選重みはボーナス扱い」という非対称な挙動になる（意図的な仕様。境界の1件だけを
+                // 特別扱いすると分岐が増え、決定論性の検証も複雑になるため許容している）。
+                var currentTime = 0f;
+                var pool = remaining;
+                while (pool.Count > 0)
+                {
+                    var interval = currentTime >= bonusWindowStartSeconds ? bonusTrickleInterval : trickleInterval;
+                    currentTime += interval;
+                    var weights = currentTime >= bonusWindowStartSeconds ? bonusWeights : normalWeights;
+                    var selectedEntryIndex = WeightedPick(pool, entries, weights, rng);
+                    AddSpawn(schedule, ref networkId, selectedEntryIndex, currentTime, rng, placedPositions, availableAnchors);
+                }
             }
 
             return schedule;
+        }
+
+        /// <summary>
+        /// pool（エントリインデックスの多重集合）から、ランク別重みに従って1件を重み付き乱択で選び、
+        /// pool から除去して返す。weights が null、または該当ランクの重みが未定義の場合は 1.0 として扱う。
+        /// 全要素の重み合計が0以下（異常値）の場合は先頭要素を選ぶ（決定論性を維持したフォールバック）。
+        /// </summary>
+        private static int WeightedPick(
+            List<int> pool,
+            IReadOnlyList<SpawnEntrySpec> entries,
+            IReadOnlyDictionary<CardRank, float> weights,
+            System.Random rng)
+        {
+            var total = 0.0;
+            for (var i = 0; i < pool.Count; i++)
+            {
+                total += GetWeight(entries[pool[i]].Rank, weights);
+            }
+
+            if (total <= 0.0)
+            {
+                var fallbackIndex = pool[0];
+                pool.RemoveAt(0);
+                return fallbackIndex;
+            }
+
+            var roll = rng.NextDouble() * total;
+            var cumulative = 0.0;
+            for (var i = 0; i < pool.Count; i++)
+            {
+                cumulative += GetWeight(entries[pool[i]].Rank, weights);
+                if (roll < cumulative)
+                {
+                    var selected = pool[i];
+                    pool.RemoveAt(i);
+                    return selected;
+                }
+            }
+
+            // 浮動小数点誤差で累積和がわずかに roll を下回らなかった場合の保険（最後の要素を選ぶ）
+            var lastIndex = pool[pool.Count - 1];
+            pool.RemoveAt(pool.Count - 1);
+            return lastIndex;
+        }
+
+        private static float GetWeight(CardRank rank, IReadOnlyDictionary<CardRank, float> weights)
+        {
+            if (weights != null && weights.TryGetValue(rank, out var weight))
+            {
+                return Mathf.Max(0f, weight);
+            }
+            return 1f;
         }
 
         private void AddSpawn(
