@@ -17,3 +17,6 @@ MonoBehaviour:
   rank: 1
   effectType: 0
   description: "\u7D14\u767D\u306E\u6FC0\u30EC\u30A2\u30AF\u30EF\u30AC\u30BF\u3002\u30B3\u30EC\u30AF\u30BF\u30FC\u5782\u6D8E\u306E\u4E00\u54C1\u3002"
+  prefab: {fileID: 399138583121217589, guid: 480ec20dc24a2463b8d276cffdec1d5e, type: 3}
+  initialCount: 1
+  maxCount: 4

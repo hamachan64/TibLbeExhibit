@@ -495,6 +495,7 @@ MonoBehaviour:
   tutorialBgmClip: {fileID: 8300000, guid: 1e1d255e12dd94240a7fed02e8ec1948, type: 3}
   sessionStartVoiceClip: {fileID: 8300000, guid: 1d6c32ed4938c4646b36e2cfce12b559, type: 3}
   mainBgmClip: {fileID: 8300000, guid: 4cbc5ed3841eb4398bd4ad5e8fc54c4f, type: 3}
+  rankConfig: {fileID: 11400000, guid: 014639dcfb40f4803a31dd879eb71320, type: 2}
 --- !u!114 &2082618858
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -515,7 +516,6 @@ MonoBehaviour:
   slowFloatingScale: 0.3
   slowFloatingDuration: 12
   pauseCountdownDuration: 15
-  ssItemPrefab: {fileID: 2315935463545943883, guid: d014d27fd335c453f93eed928cee636e, type: 3}
   diceRollAnimationSeconds: 2.2
   catalog: {fileID: 11400000, guid: 02f215a47d1e841eca6f4f42c7bef037, type: 2}
   lotteryChestAppearDelaySeconds: 1.5
@@ -523,17 +523,6 @@ MonoBehaviour:
   lotteryChestCrumbleSeconds: 0.5
   lotteryCardRiseHeight: 0.15
   lotteryCardRiseSeconds: 0.5
-  lotteryRankWeights:
-  - rank: 0
-    weight: 40
-  - rank: 1
-    weight: 24
-  - rank: 2
-    weight: 16
-  - rank: 3
-    weight: 12
-  - rank: 4
-    weight: 8
 --- !u!114 &2082618859
 MonoBehaviour:
   m_ObjectHideFlags: 0

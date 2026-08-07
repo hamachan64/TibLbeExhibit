@@ -57,10 +57,11 @@ namespace STYLY.TIB_Template.GIPoker
     public static class PokerHandEvaluator
     {
         /// <summary>
-        /// ランクごとの単体得点。
+        /// ランクごとの単体得点のフォールバック値。
+        /// GIPokerAssets.RankConfig（CardRankConfig.BasePoints）が未設定のときに Evaluate から使われる。
         /// SS はイベント（リスキーダイス大吉）限定の特別報酬のため S を超える 300 点とする。
         /// </summary>
-        public static readonly IReadOnlyDictionary<CardRank, int> BasePoints = new Dictionary<CardRank, int>
+        public static readonly IReadOnlyDictionary<CardRank, int> DefaultBasePoints = new Dictionary<CardRank, int>
         {
             { CardRank.D, 1 },
             { CardRank.C, 2 },
@@ -86,15 +87,23 @@ namespace STYLY.TIB_Template.GIPoker
             CardRank.D, CardRank.C, CardRank.B, CardRank.A, CardRank.S,
         };
 
-        /// <summary>ランクの一覧からスコアを計算する。</summary>
-        public static ScoreResult Evaluate(IEnumerable<CardRank> ranks)
+        /// <summary>
+        /// ランクの一覧からスコアを計算する。
+        /// </summary>
+        /// <param name="ranks">評価対象のカードランク一覧</param>
+        /// <param name="basePoints">
+        /// ランクごとの単体得点。未指定（null）の場合は DefaultBasePoints にフォールバックする
+        /// （CardBinder からは GIPokerAssets.RankConfig?.BasePoints を渡す想定）。
+        /// </param>
+        public static ScoreResult Evaluate(IEnumerable<CardRank> ranks, IReadOnlyDictionary<CardRank, int> basePoints = null)
         {
+            basePoints ??= DefaultBasePoints;
             var counts = new Dictionary<CardRank, int>();
             var baseScore = 0;
             foreach (var rank in ranks)
             {
                 counts[rank] = counts.TryGetValue(rank, out var n) ? n + 1 : 1;
-                baseScore += BasePoints.TryGetValue(rank, out var point) ? point : 0;
+                baseScore += basePoints.TryGetValue(rank, out var point) ? point : 0;
             }
 
             var combos = new List<AchievedCombo>();

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 
@@ -136,6 +137,66 @@ namespace STYLY.TIB_Template.GIPoker.Tests
             Assert.That(result.BaseScore, Is.EqualTo(18));
             Assert.That(result.BonusScore, Is.EqualTo(100));
             Assert.That(result.Combos.Count, Is.EqualTo(2));
+        }
+
+        // ========== basePoints 注入オーバーロード（GIPokerAssets.RankConfig?.BasePoints 想定） ==========
+
+        [Test]
+        public void Evaluate_BasePointsOmitted_FallsBackToDefaultBasePoints()
+        {
+            // 引数省略時（null）は DefaultBasePoints を使う想定。既存の単一引数呼び出しと結果が一致すること。
+            var withDefault = PokerHandEvaluator.Evaluate(new[] { CardRank.D, CardRank.S });
+            var withExplicitNull = PokerHandEvaluator.Evaluate(new[] { CardRank.D, CardRank.S }, null);
+
+            Assert.That(withExplicitNull.BaseScore, Is.EqualTo(withDefault.BaseScore));
+            Assert.That(withExplicitNull.TotalScore, Is.EqualTo(101));
+        }
+
+        [Test]
+        public void Evaluate_CustomBasePoints_OverridesDefaultValues()
+        {
+            // CardRankConfig.BasePoints 相当のカスタム辞書を渡すと、そちらが使われる（Default 側は無視される）
+            var customBasePoints = new Dictionary<CardRank, int>
+            {
+                { CardRank.D, 10 },
+                { CardRank.C, 20 },
+            };
+
+            var result = PokerHandEvaluator.Evaluate(new[] { CardRank.D, CardRank.C }, customBasePoints);
+
+            Assert.That(result.BaseScore, Is.EqualTo(30));
+        }
+
+        [Test]
+        public void Evaluate_CustomBasePoints_RankMissingFromDictionary_TreatedAsZero()
+        {
+            // 渡された辞書にランクが無い場合は0点扱い（DefaultBasePointsへはフォールバックしない）
+            var customBasePoints = new Dictionary<CardRank, int>
+            {
+                { CardRank.D, 10 },
+            };
+
+            var result = PokerHandEvaluator.Evaluate(new[] { CardRank.D, CardRank.S }, customBasePoints);
+
+            Assert.That(result.BaseScore, Is.EqualTo(10));
+        }
+
+        [Test]
+        public void Evaluate_CustomBasePoints_BonusComboCalculationUnaffected()
+        {
+            // basePoints を差し替えてもボーナス役（組み合わせ）判定ロジック自体はランクの数だけで決まる
+            var customBasePoints = new Dictionary<CardRank, int>
+            {
+                { CardRank.D, 1 }, { CardRank.C, 1 }, { CardRank.B, 1 }, { CardRank.A, 1 }, { CardRank.S, 1 },
+            };
+
+            var result = PokerHandEvaluator.Evaluate(new[]
+            {
+                CardRank.D, CardRank.C, CardRank.B, CardRank.A, CardRank.S,
+            }, customBasePoints);
+
+            Assert.That(result.BaseScore, Is.EqualTo(5));
+            Assert.That(result.BonusScore, Is.EqualTo(200));
         }
     }
 }

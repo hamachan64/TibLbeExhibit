@@ -14,14 +14,17 @@ namespace STYLY.TIB_Template.GIPoker
         [Serializable]
         public class Entry
         {
-            [Tooltip("アイテムのプレハブ（CardizableItemBase 付き）")]
-            public GameObject prefab;
+            [Tooltip("このエントリのカード定義（プレハブ・初期出現数・出現上限は CardDefinition 側で保持する）")]
+            public CardDefinition definition;
 
-            [Tooltip("セッション開始時に出現する数")]
-            public int initialCount = 1;
+            /// <summary>アイテムのプレハブ（CardizableItemBase 付き）</summary>
+            public GameObject Prefab => definition != null ? definition.Prefab : null;
 
-            [Tooltip("セッション全体での出現上限（カード化限度枚数）")]
-            public int maxCount = 1;
+            /// <summary>セッション開始時に出現する数</summary>
+            public int InitialCount => definition != null ? definition.InitialCount : 0;
+
+            /// <summary>セッション全体での出現上限（カード化限度枚数）</summary>
+            public int MaxCount => definition != null ? definition.MaxCount : 0;
         }
 
         [SerializeField]
@@ -41,14 +44,25 @@ namespace STYLY.TIB_Template.GIPoker
             }
             foreach (var entry in entries)
             {
-                if (entry.prefab == null)
+                if (entry.definition != null && entry.definition.CardId == cardId)
                 {
-                    continue;
+                    return entry.definition.Prefab;
                 }
-                var item = entry.prefab.GetComponent<CardizableItemBase>();
-                if (item != null && item.Definition != null && item.Definition.CardId == cardId)
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// ランクからエントリの定義を逆引きする（SS等、ランクごとに1種類しかないカードの解決に使う）。
+        /// 同ランクが複数ある場合は最初に見つかったものを返す。見つからなければ null。
+        /// </summary>
+        public CardDefinition FindDefinitionByRank(CardRank rank)
+        {
+            foreach (var entry in entries)
+            {
+                if (entry.definition != null && entry.definition.Rank == rank)
                 {
-                    return entry.prefab;
+                    return entry.definition;
                 }
             }
             return null;

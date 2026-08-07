@@ -29,20 +29,6 @@ namespace STYLY.TIB_Template.GIPoker
         }
     }
 
-    /// <summary>宝籤（ロトリー）のランク別抽選重み（インスペクタ調整用）</summary>
-    [Serializable]
-    public struct LotteryRankWeight
-    {
-        public CardRank rank;
-        public float weight;
-
-        public LotteryRankWeight(CardRank rank, float weight)
-        {
-            this.rank = rank;
-            this.weight = weight;
-        }
-    }
-
     /// <summary>
     /// ゲイン成立時にカード効果を発動するサービス。
     /// GainGestureDetector.GainPerformed を購読して CardEffectType に応じた処理を行う。
@@ -81,8 +67,6 @@ namespace STYLY.TIB_Template.GIPoker
         private float pauseCountdownDuration = 15f;
 
         [Header("リスキーダイス")]
-        [SerializeField, Tooltip("大吉時に出現するSSランクアイテムのプレハブ")]
-        private GameObject ssItemPrefab;
         [SerializeField, Tooltip("ゲイン後のダイスを離してから大吉が確定するまでの演出時間（秒）")]
         private float diceRollAnimationSeconds = 2.2f;
 
@@ -102,14 +86,18 @@ namespace STYLY.TIB_Template.GIPoker
         private float lotteryCardRiseHeight = 0.15f;
         [SerializeField, Tooltip("カードがせり上がるのにかける時間（秒）")]
         private float lotteryCardRiseSeconds = 0.5f;
-        [SerializeField, Tooltip("宝籤で再現するカードのランク別抽選重み（SSは対象に含めないこと。合計100が目安）")]
-        private LotteryRankWeight[] lotteryRankWeights =
+
+        /// <summary>
+        /// 宝籤で再現するカードのランク別抽選重みのフォールバック値（SSは対象に含めないこと。合計100が目安）。
+        /// GIPokerAssets.RankConfig（CardRankConfig.LotteryWeight）が未設定のランクにのみ使用する。
+        /// </summary>
+        private static readonly (CardRank rank, float weight)[] DefaultLotteryRankWeights =
         {
-            new(CardRank.D, 40f),
-            new(CardRank.C, 24f),
-            new(CardRank.B, 16f),
-            new(CardRank.A, 12f),
-            new(CardRank.S, 8f),
+            (CardRank.D, 40f),
+            (CardRank.C, 24f),
+            (CardRank.B, 16f),
+            (CardRank.A, 12f),
+            (CardRank.S, 8f),
         };
 
         /// <summary>宝箱の蓋ボーン名（treasure_chest.fbx の階層に合わせる）。見つかった場合のみ実際に開閉回転させる</summary>
@@ -519,17 +507,20 @@ namespace STYLY.TIB_Template.GIPoker
 
         /// <summary>
         /// 大吉: SSランクアイテムをカード化済み状態で出現させる。
+        /// プレハブはカタログ内の Rank == CardRank.SS な CardDefinition から解決する
+        /// （ItemCatalog.FindDefinitionByRank）。
         /// ローカル発動時は announce=true（SsSpawned が流れ、CardNetworkSync が配信する）、
         /// リモートの GiSpawnSS 受信適用時は announce=false で呼ぶ。
         /// </summary>
         public CardizableItemBase SpawnSsCardAt(Vector3 position, bool announce)
         {
-            if (ssItemPrefab == null)
+            var ssPrefab = catalog != null ? catalog.FindDefinitionByRank(CardRank.SS)?.Prefab : null;
+            if (ssPrefab == null)
             {
                 Debug.LogWarning("[CardEffectService] SSアイテムプレハブが未設定です");
                 return null;
             }
-            var go = Instantiate(ssItemPrefab, position, Quaternion.identity);
+            var go = Instantiate(ssPrefab, position, Quaternion.identity);
             var item = go.GetComponent<CardizableItemBase>();
             if (item != null)
             {
@@ -729,26 +720,38 @@ namespace STYLY.TIB_Template.GIPoker
         }
 
         /// <summary>
-        /// lotteryRankWeights のうち、出現上限に達していない候補が1つ以上存在するランクだけを集める。
+        /// 宝籤の抽選重み（GIPokerAssets.RankConfig.LotteryWeight。未設定時は DefaultLotteryRankWeights）
+        /// のうち、出現上限に達していない候補が1つ以上存在するランクだけを集める。
         /// SS は意図的に含めない（宝籤の通常抽選ではSSは絶対に選ばれない）。
         /// </summary>
         private List<(CardRank rank, float weight)> BuildAvailableWeights()
         {
-            var list = new List<(CardRank rank, float weight)>(lotteryRankWeights.Length);
-            foreach (var entry in lotteryRankWeights)
+            var list = new List<(CardRank rank, float weight)>(DefaultLotteryRankWeights.Length);
+            foreach (var (rank, fallbackWeight) in DefaultLotteryRankWeights)
             {
-                // SSはインスペクタの設定ミスがあっても通常抽選の対象にしない
+                var weight = ResolveLotteryWeight(rank, fallbackWeight);
+                // SSは設定ミスがあっても通常抽選の対象にしない
                 // （SSはHasPendingDiceJackpot経由でのみ出現させる）
-                if (entry.weight <= 0f || entry.rank == CardRank.SS)
+                if (weight <= 0f || rank == CardRank.SS)
                 {
                     continue;
                 }
-                if (HasAnyCandidate(entry.rank))
+                if (HasAnyCandidate(rank))
                 {
-                    list.Add((entry.rank, entry.weight));
+                    list.Add((rank, weight));
                 }
             }
             return list;
+        }
+
+        /// <summary>指定ランクの宝籤抽選重みを解決する（GIPokerAssets.RankConfig優先、未設定時はfallback）</summary>
+        private static float ResolveLotteryWeight(CardRank rank, float fallback)
+        {
+            if (GIPokerAssets.RankConfig != null && GIPokerAssets.RankConfig.TryGetEntry(rank, out var entry))
+            {
+                return entry.lotteryWeight;
+            }
+            return fallback;
         }
 
         /// <summary>指定ランクに、出現上限に達していない候補（カタログ内・宝籤自身を除く）が1つでもあるか</summary>
@@ -760,7 +763,7 @@ namespace STYLY.TIB_Template.GIPoker
             }
             foreach (var entry in catalog.Entries)
             {
-                var definition = ResolveDefinition(entry.prefab);
+                var definition = entry.definition;
                 if (!IsEligibleCandidate(definition, rank))
                 {
                     continue;
@@ -783,7 +786,7 @@ namespace STYLY.TIB_Template.GIPoker
             var candidates = new List<CardDefinition>();
             foreach (var entry in catalog.Entries)
             {
-                var definition = ResolveDefinition(entry.prefab);
+                var definition = entry.definition;
                 if (!IsEligibleCandidate(definition, rank))
                 {
                     continue;
@@ -806,16 +809,6 @@ namespace STYLY.TIB_Template.GIPoker
             return definition != null
                 && definition.Rank == rank
                 && definition.EffectType != CardEffectType.Lottery;
-        }
-
-        private static CardDefinition ResolveDefinition(GameObject prefab)
-        {
-            if (prefab == null)
-            {
-                return null;
-            }
-            var item = prefab.GetComponent<CardizableItemBase>();
-            return item != null ? item.Definition : null;
         }
 
         /// <summary>

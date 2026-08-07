@@ -13,63 +13,24 @@ MonoBehaviour:
   m_Name: ItemCatalog
   m_EditorClassIdentifier: Assembly-CSharp::STYLY.TIB_Template.GIPoker.ItemCatalog
   entries:
-  - prefab: {fileID: 1074135787501850522, guid: 28634fcbcb8d1459f8dc1a393824f2eb, type: 3}
-    initialCount: 1
-    maxCount: 2
-  - prefab: {fileID: 564759478411386829, guid: 65f6893da931143b3995d9ec48ad667f, type: 3}
-    initialCount: 1
-    maxCount: 2
-  - prefab: {fileID: 7865410730902295892, guid: 28c19d5a955254582a2823e908cdc71d, type: 3}
-    initialCount: 1
-    maxCount: 2
-  - prefab: {fileID: 6782413943811159487, guid: 6da46aabeb6974f098d5585cca560f28, type: 3}
-    initialCount: 1
-    maxCount: 2
-  - prefab: {fileID: 1188994891695246850, guid: 496336c96f8f94c60b0b47b5c954fec6, type: 3}
-    initialCount: 1
-    maxCount: 2
-  - prefab: {fileID: 399138583121217589, guid: 480ec20dc24a2463b8d276cffdec1d5e, type: 3}
-    initialCount: 1
-    maxCount: 4
-  - prefab: {fileID: 7870577625336352021, guid: 20b55a2a2d93a4fa3aa32a861452d50e, type: 3}
-    initialCount: 1
-    maxCount: 3
-  - prefab: {fileID: 6664451449951062524, guid: 67490b281ea8d4a8a9ed4b34796d79f0, type: 3}
-    initialCount: 1
-    maxCount: 3
-  - prefab: {fileID: 108424064200036609, guid: f42fd8e3f19b44779a151d1be8eaffab, type: 3}
-    initialCount: 1
-    maxCount: 2
-  - prefab: {fileID: 4073931999581502406, guid: 800dca63087fa42e29ff97e25725103d, type: 3}
-    initialCount: 1
-    maxCount: 2
-  - prefab: {fileID: 5879412345328350527, guid: 8a1597d53131d4901840985280e54adc, type: 3}
-    initialCount: 0
-    maxCount: 1
-  - prefab: {fileID: 1971816625895685670, guid: 01b6a9f8d755e45f89f923ca2262a424, type: 3}
-    initialCount: 1
-    maxCount: 3
-  - prefab: {fileID: 7701388986691374717, guid: a0b09aeada3c9496c99db65b1c2290b7, type: 3}
-    initialCount: 0
-    maxCount: 1
-  - prefab: {fileID: 3303188655164775788, guid: 8229a760347c72b4aa1b7dcf70add827, type: 3}
-    initialCount: 1
-    maxCount: 3
-  - prefab: {fileID: 3528394941520316022, guid: 79a658e2adf443341aa5958b1dc4dc8e, type: 3}
-    initialCount: 1
-    maxCount: 1
-  - prefab: {fileID: 5724221601684022789, guid: 47bc223e0760b534a892d393c4121890, type: 3}
-    initialCount: 1
-    maxCount: 2
-  - prefab: {fileID: 4025340060837285716, guid: 48de65515fd986745a2a77a43bbdc6e4, type: 3}
-    initialCount: 1
-    maxCount: 3
-  - prefab: {fileID: 6083013644402818948, guid: fffcd460b683b6545acb9d3025065c6a, type: 3}
-    initialCount: 1
-    maxCount: 2
-  - prefab: {fileID: 2828655145975503643, guid: 6c021ecb1837efc42b4c90486335ea00, type: 3}
-    initialCount: 1
-    maxCount: 3
-  - prefab: {fileID: 7594151308432142195, guid: 2ba448b92069c470da3b2849e46da849, type: 3}
-    initialCount: 1
-    maxCount: 2
+  - definition: {fileID: 11400000, guid: 492adaa37a341487a842545fcec50707, type: 2}
+  - definition: {fileID: 11400000, guid: 8f9ce09e6d1b2468ba4c7acdb33f908e, type: 2}
+  - definition: {fileID: 11400000, guid: a9d8ba506519845f79ce9f805f643862, type: 2}
+  - definition: {fileID: 11400000, guid: b5e3e4c44e5a3448ba0690f6575d2581, type: 2}
+  - definition: {fileID: 11400000, guid: cdd14de4728db4a508a01369b765d7d9, type: 2}
+  - definition: {fileID: 11400000, guid: f503843b2d665489eb9e8e27ed074ec4, type: 2}
+  - definition: {fileID: 11400000, guid: cadd105a6f0724d93b18df11b99ba0a4, type: 2}
+  - definition: {fileID: 11400000, guid: 5a77f5d29b6e348c8920390b388ca0ce, type: 2}
+  - definition: {fileID: 11400000, guid: f5542c47d1c2a49e58ed908c133c3152, type: 2}
+  - definition: {fileID: 11400000, guid: ceabc38a3c87d4733a57200b11e8aedd, type: 2}
+  - definition: {fileID: 11400000, guid: 5f38df014cf484fb293fc5e967beeb6e, type: 2}
+  - definition: {fileID: 11400000, guid: 55b026895e36841daaadc16354acd759, type: 2}
+  - definition: {fileID: 11400000, guid: c426bc901996d4c4a8125004017efbe1, type: 2}
+  - definition: {fileID: 11400000, guid: 75dfce7a3e8ebf0458caec2e0960cea8, type: 2}
+  - definition: {fileID: 11400000, guid: 84dec95b8a1f146479079a04190ca9a4, type: 2}
+  - definition: {fileID: 11400000, guid: 61268d32367a4db42a1cffc14070d3ea, type: 2}
+  - definition: {fileID: 11400000, guid: 873b4a357a61fea4dbaa64c5378bb022, type: 2}
+  - definition: {fileID: 11400000, guid: c3ad7ad892e87e243a6280032a9ecccf, type: 2}
+  - definition: {fileID: 11400000, guid: 2c0da6174787634498ce989a3e38cc1d, type: 2}
+  - definition: {fileID: 11400000, guid: 19974e82afb164b89a86af986cd2e27a, type: 2}
+  - definition: {fileID: 11400000, guid: b9ce81b6afec246c5aaae974fec02db3, type: 2}

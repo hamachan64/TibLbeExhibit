@@ -234,7 +234,7 @@ namespace STYLY.TIB_Template.GIPoker
 
         private void RecalculateScore()
         {
-            score.Value = PokerHandEvaluator.Evaluate(cards.Select(c => c.Rank));
+            score.Value = PokerHandEvaluator.Evaluate(cards.Select(c => c.Rank), GIPokerAssets.RankConfig?.BasePoints);
         }
     }
 }
