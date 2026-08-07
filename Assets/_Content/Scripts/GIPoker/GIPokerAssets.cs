@@ -34,7 +34,11 @@ namespace STYLY.TIB_Template.GIPoker
         /// <summary>バインダーの3Dモデル（ページめくり可能な本、Blender製FBX）</summary>
         public static GameObject CardBinderModelPrefab;
 
-        /// <summary>バインダー出し入れ（Lサインジェスチャー）時の白煙＋衝撃波VFX（VFX_BinderSummonPoof）</summary>
+        /// <summary>
+        /// 白煙＋衝撃波VFX（VFX_BinderSummonPoof）。バインダー出し入れ（Lサインジェスチャー）時に加え、
+        /// カード化・ゲイン（アイテム化）の瞬間にもカードサイズへ縮小して再生する
+        /// （CardizableItemBase.PlayCardSizedSmokeVfx を参照）。
+        /// </summary>
         public static GameObject BinderSmokeVfx;
 
         /// <summary>

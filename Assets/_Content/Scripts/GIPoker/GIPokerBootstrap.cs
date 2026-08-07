@@ -53,7 +53,7 @@ namespace STYLY.TIB_Template.GIPoker
         private GameObject diceCurseVfx;
         [SerializeField, Tooltip("バインダーの3Dモデル（ページめくり可能な本、Blender製FBX）")]
         private GameObject cardBinderModelPrefab;
-        [SerializeField, Tooltip("バインダー出し入れ時の白煙＋衝撃波VFX（VFX_BinderSummonPoof）")]
+        [SerializeField, Tooltip("白煙＋衝撃波VFX（VFX_BinderSummonPoof）。バインダー出し入れ、カード化・ゲイン時に使用")]
         private GameObject binderSmokeVfx;
         [SerializeField, Tooltip("チュートリアル各ステップの読み上げ音声（7要素、Step1.mp3〜Step7.mp3を順に設定）")]
         private AudioClip[] tutorialStepVoiceClips;
