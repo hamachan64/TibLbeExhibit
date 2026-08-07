@@ -474,7 +474,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2e41e9d11b284e05ad320291d27cf04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::STYLY.TIB_Template.GIPoker.GIPokerBootstrap
-  japaneseFont: {fileID: 11400000, guid: ab041cb34e0c84558b8359ca7a47eff9, type: 2}
+  japaneseFont: {fileID: 11400000, guid: 1633e64c790e64dbe8a7c693e2bdb8f5, type: 2}
   cardSparkleVfx: {fileID: 2694810411924874915, guid: 678b6a07af7a44900bc846dea3d2afcf, type: 3}
   cardifyVfx: {fileID: 9157105887711914197, guid: c4f829cb7dd4b864caf8832ec5b1ee55, type: 3}
   gainVfx: {fileID: 8771972552311404799, guid: bbf9e36a48d6c5648a13889afab076fd, type: 3}
