@@ -40,6 +40,10 @@ namespace STYLY.TIB_Template.GIPoker
         private static readonly Color HighlightEmissionColor = new Color(0.25f, 0.85f, 1f) * 3f;
         private static readonly int EmissionColorId = Shader.PropertyToID("_EmissionColor");
 
+        // ミニカードをPageのローカル座標系（幅=X/積層の厚み方向=Y/縦方向=Z）に正しく寝かせるための補正回転。
+        // RebuildMiniCards() 参照。
+        private static readonly Quaternion MiniCardPageRotation = Quaternion.Euler(90f, 180f, 0f);
+
         [SerializeField, Tooltip("プレイヤー正面からの距離（m）")]
         private float followDistance = 0.25f;
         [SerializeField, Tooltip("頭からどれだけ下に置くか（m）")]
@@ -191,7 +195,7 @@ namespace STYLY.TIB_Template.GIPoker
                 var model = Instantiate(modelPrefab, visualRoot);
                 model.name = "Model";
                 model.transform.localPosition = Vector3.zero;
-                model.transform.localRotation = Quaternion.Euler(-90f, 0f, 0f);
+                model.transform.localEulerAngles = new Vector3(-270f, 90f, -90f);
                 model.transform.localScale = Vector3.one;
                 LoadPages(model.transform);
                 modelRenderers = model.GetComponentsInChildren<Renderer>(true);
@@ -340,6 +344,12 @@ namespace STYLY.TIB_Template.GIPoker
                     var slot = BinderLayout.SlotIndexOf(index);
                     var mini = CardVisualFactory.Create(pageTransform, instance.Definition, BinderLayout.MiniCardScale, withSparkle: false);
                     mini.transform.localPosition = BinderLayout.SlotLocalPosition(slot);
+                    // CardVisualFactory が作るカード本体は「幅=ローカルX/高さ=ローカルY/厚み=ローカルZ」だが、
+                    // Page自体のローカル軸は「幅=X/積層の厚み方向=Y/縦方向=Z」（実測値、BinderLayoutのコメント参照）
+                    // であり、そのままではカードの高さ(88mm)がページの薄い積層方向(Y)に乗って垂直に飛び出してしまう。
+                    // ローカルX軸まわりに90°回転させ、カードの高さをPageのZ軸（縦方向）に、
+                    // カードの前面（-Z向き）をPageの+Y（ページ面から浮かせる＝視認者側）に合わせる。
+                    mini.transform.localRotation = MiniCardPageRotation;
                     mini.SetActive(true);
                     miniCards.Add(mini);
                     miniCardInstances.Add(instance);
@@ -653,7 +663,10 @@ namespace STYLY.TIB_Template.GIPoker
             }
 
             targetPos = cam.transform.position + flatForward * followDistance + Vector3.down * heightBelowHead;
-            targetRot = Quaternion.LookRotation(flatForward) * Quaternion.Euler(30f, 0f, 180f);
+            // 本の表裏（プレイヤーに正対させるか）を反転させたい場合はY軸（ヨー）で回すこと。
+            // Z軸（ロール）の180°回転は表裏を変えず、ヘッダーテキストやページ内容が上下反転する
+            // 副作用だけを生むため使わない（過去にZ軸で反転を「修正」していたのがテキスト逆表示の原因）。
+            targetRot = Quaternion.LookRotation(flatForward) * Quaternion.Euler(30f, 0f, 0f);
             return true;
         }
 
