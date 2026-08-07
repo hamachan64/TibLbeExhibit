@@ -56,6 +56,13 @@ namespace STYLY.TIB_Template.GIPoker
         public static AudioClip MainBgmClip;
 
         /// <summary>
+        /// ランク単位の数値バランス設定（得点・出現重み・宝籤重み・テーマカラー）。
+        /// 未設定（null）でも各参照元（PokerHandEvaluator/ItemSpawnManager/CardEffectService/CardVisualFactory）は
+        /// 現行と同じ値へフォールバックする。
+        /// </summary>
+        public static CardRankConfig RankConfig;
+
+        /// <summary>
         /// VFXプレハブを生成して一定時間後に破棄する（null安全）。
         /// scale はプレハブ既定の1倍から変更したい場合のみ指定する
         /// （例: 汎用VFXアセットを手のひらサイズの小物向けに控えめなスケールへ縮小する）。

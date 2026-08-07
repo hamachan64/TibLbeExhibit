@@ -17,3 +17,6 @@ MonoBehaviour:
   rank: 5
   effectType: 0
   description: "\u5927\u5409\u306E\u8A3C\u3002\u624B\u306E\u3072\u3089\u30B5\u30A4\u30BA\u306E\u6D77\u5CB8\u7DDA\u3002300\u70B9\u306E\u7279\u5225\u5831\u916C\u3002"
+  prefab: {fileID: 2315935463545943883, guid: d014d27fd335c453f93eed928cee636e, type: 3}
+  initialCount: 0
+  maxCount: 0

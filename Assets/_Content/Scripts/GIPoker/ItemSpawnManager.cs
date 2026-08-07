@@ -50,20 +50,6 @@ namespace STYLY.TIB_Template.GIPoker
         [SerializeField, Tooltip("追加出現の間隔（秒）")]
         private float trickleInterval = 12f;
 
-        /// <summary>ランクごとの追加出現抽選重み（Inspectorで見やすいよう List で公開する）</summary>
-        [System.Serializable]
-        private class RankSpawnWeight
-        {
-            public CardRank rank;
-            public float weight = 1f;
-
-            public RankSpawnWeight(CardRank rank, float weight)
-            {
-                this.rank = rank;
-                this.weight = weight;
-            }
-        }
-
         [Header("ボーナスタイム")]
         [SerializeField, Min(0f), Tooltip("セッション終了までの残り秒数がこの値を下回るとボーナスタイムが始まる")]
         private float bonusTimeSeconds = 30f;
@@ -71,26 +57,19 @@ namespace STYLY.TIB_Template.GIPoker
         [SerializeField, Min(0.1f), Tooltip("ボーナスタイム中の追加出現の間隔（秒）。通常の trickleInterval より短い値を推奨")]
         private float bonusTrickleInterval = 4f;
 
-        [SerializeField, Tooltip("通常時（ボーナスタイム前）の追加出現でのランク別抽選重み")]
-        private List<RankSpawnWeight> normalRankWeights = new()
+        /// <summary>
+        /// 通常時／ボーナスタイム中のランク別追加出現抽選重みのフォールバック値。
+        /// GIPokerAssets.RankConfig（CardRankConfig.NormalSpawnWeight/BonusSpawnWeight）が
+        /// 未設定のランクにのみ使用する。
+        /// </summary>
+        private static readonly (CardRank rank, float normalWeight, float bonusWeight)[] DefaultRankWeights =
         {
-            new RankSpawnWeight(CardRank.D, 1.0f),
-            new RankSpawnWeight(CardRank.C, 1.0f),
-            new RankSpawnWeight(CardRank.B, 0.85f),
-            new RankSpawnWeight(CardRank.A, 0.6f),
-            new RankSpawnWeight(CardRank.S, 0.4f),
-            new RankSpawnWeight(CardRank.SS, 0.4f),
-        };
-
-        [SerializeField, Tooltip("ボーナスタイム中の追加出現でのランク別抽選重み（高ランクほど大きい値にすると出やすくなる）")]
-        private List<RankSpawnWeight> bonusRankWeights = new()
-        {
-            new RankSpawnWeight(CardRank.D, 1.0f),
-            new RankSpawnWeight(CardRank.C, 1.4f),
-            new RankSpawnWeight(CardRank.B, 2.2f),
-            new RankSpawnWeight(CardRank.A, 3.2f),
-            new RankSpawnWeight(CardRank.S, 4.5f),
-            new RankSpawnWeight(CardRank.SS, 4.5f),
+            (CardRank.D, 1.0f, 1.0f),
+            (CardRank.C, 1.0f, 1.4f),
+            (CardRank.B, 0.85f, 2.2f),
+            (CardRank.A, 0.6f, 3.2f),
+            (CardRank.S, 0.4f, 4.5f),
+            (CardRank.SS, 0.4f, 4.5f),
         };
 
         /// <summary>
@@ -103,7 +82,7 @@ namespace STYLY.TIB_Template.GIPoker
         private readonly List<ScheduledSpawn> schedule = new();
         private int nextSpawnIndex;
 
-        /// <summary>cardId ごとの出現上限（ItemCatalog.Entry.maxCount）。カタログを基に一度だけ構築する</summary>
+        /// <summary>cardId ごとの出現上限（ItemCatalog.Entry.MaxCount）。カタログを基に一度だけ構築する</summary>
         private readonly Dictionary<string, int> maxCountByCardId = new();
 
         /// <summary>cardId ごとの累計出現数（1分ルールでの消滅やゲイン後も減らない、生涯出現数）</summary>
@@ -143,24 +122,20 @@ namespace STYLY.TIB_Template.GIPoker
             }
             foreach (var entry in catalog.Entries)
             {
-                var cardId = ResolveCardId(entry.prefab);
+                var cardId = ResolveCardId(entry);
                 if (string.IsNullOrEmpty(cardId))
                 {
                     continue;
                 }
-                maxCountByCardId[cardId] = entry.maxCount;
+                maxCountByCardId[cardId] = entry.MaxCount;
                 spawnedCountByCardId[cardId] = 0;
             }
         }
 
-        private static string ResolveCardId(GameObject prefab)
+        /// <summary>カタログエントリの CardDefinition から cardId を解決する（definition が無ければ null）。</summary>
+        private static string ResolveCardId(ItemCatalog.Entry entry)
         {
-            if (prefab == null)
-            {
-                return null;
-            }
-            var item = prefab.GetComponent<CardizableItemBase>();
-            return item != null && item.Definition != null ? item.Definition.CardId : null;
+            return entry?.definition != null ? entry.definition.CardId : null;
         }
 
         /// <summary>
@@ -232,8 +207,8 @@ namespace STYLY.TIB_Template.GIPoker
 
             var sessionDurationSeconds = GameSession.Instance != null ? GameSession.Instance.SessionDurationSeconds : 0f;
             var bonusWindowStartSeconds = Mathf.Max(0f, sessionDurationSeconds - bonusTimeSeconds);
-            var normalWeights = ToWeightDictionary(normalRankWeights);
-            var bonusWeights = ToWeightDictionary(bonusRankWeights);
+            var normalWeights = BuildNormalWeightDictionary();
+            var bonusWeights = BuildBonusWeightDictionary();
 
             schedule.Clear();
             schedule.AddRange(builder.Build(seed, entries, anchors, bonusWindowStartSeconds, bonusTrickleInterval, normalWeights, bonusWeights));
@@ -260,39 +235,48 @@ namespace STYLY.TIB_Template.GIPoker
             var specs = new List<SpawnEntrySpec>(entries.Count);
             for (var i = 0; i < entries.Count; i++)
             {
-                specs.Add(new SpawnEntrySpec(entries[i].initialCount, entries[i].maxCount, ResolveCardRank(entries[i].prefab)));
+                specs.Add(new SpawnEntrySpec(entries[i].InitialCount, entries[i].MaxCount, ResolveCardRank(entries[i])));
             }
             return specs;
         }
 
-        private static CardRank ResolveCardRank(GameObject prefab)
+        /// <summary>カタログエントリの CardDefinition からランクを解決する。definition が無ければ D 扱い（警告ログ付き）。</summary>
+        private static CardRank ResolveCardRank(ItemCatalog.Entry entry)
         {
-            if (prefab == null)
-            {
-                return CardRank.D;
-            }
-            var item = prefab.GetComponent<CardizableItemBase>();
-            if (item == null || item.Definition == null)
+            if (entry?.definition == null)
             {
                 Debug.LogWarning(
-                    $"[ItemSpawnManager] '{prefab.name}' に CardizableItemBase / Definition が設定されていないため、" +
-                    "ボーナスタイムの重み付き抽選ではランクD相当として扱われます", prefab);
+                    "[ItemSpawnManager] カタログエントリに CardDefinition が設定されていないため、" +
+                    "ボーナスタイムの重み付き抽選ではランクD相当として扱われます");
                 return CardRank.D;
             }
-            return item.Definition.Rank;
+            return entry.definition.Rank;
         }
 
-        /// <summary>ランク別抽選重みリスト（Inspector用）を Build() が要求する Dictionary へ変換する。</summary>
-        private static Dictionary<CardRank, float> ToWeightDictionary(List<RankSpawnWeight> source)
+        /// <summary>通常時（ボーナスタイム前）のランク別抽選重み辞書を GIPokerAssets.RankConfig から構築する。
+        /// 未設定のランクは DefaultRankWeights にフォールバックする。</summary>
+        private static Dictionary<CardRank, float> BuildNormalWeightDictionary()
         {
             var dict = new Dictionary<CardRank, float>();
-            if (source == null)
+            foreach (var (rank, normalWeight, _) in DefaultRankWeights)
             {
-                return dict;
+                dict[rank] = GIPokerAssets.RankConfig != null && GIPokerAssets.RankConfig.TryGetEntry(rank, out var entry)
+                    ? entry.normalSpawnWeight
+                    : normalWeight;
             }
-            foreach (var entry in source)
+            return dict;
+        }
+
+        /// <summary>ボーナスタイム中のランク別抽選重み辞書を GIPokerAssets.RankConfig から構築する。
+        /// 未設定のランクは DefaultRankWeights にフォールバックする。</summary>
+        private static Dictionary<CardRank, float> BuildBonusWeightDictionary()
+        {
+            var dict = new Dictionary<CardRank, float>();
+            foreach (var (rank, _, bonusWeight) in DefaultRankWeights)
             {
-                dict[entry.rank] = entry.weight;
+                dict[rank] = GIPokerAssets.RankConfig != null && GIPokerAssets.RankConfig.TryGetEntry(rank, out var entry)
+                    ? entry.bonusSpawnWeight
+                    : bonusWeight;
             }
             return dict;
         }
@@ -331,7 +315,7 @@ namespace STYLY.TIB_Template.GIPoker
         }
 
         /// <summary>
-        /// カタログの prefab から cardId → エントリインデックスの対応表を作る
+        /// カタログの CardDefinition から cardId → エントリインデックスの対応表を作る
         /// （StageSpawnAnchor.AllowedCardIds の解決用）。
         /// </summary>
         private Dictionary<string, int> BuildCardIdToEntryIndexMap()
@@ -340,13 +324,7 @@ namespace STYLY.TIB_Template.GIPoker
             var entries = catalog.Entries;
             for (var i = 0; i < entries.Count; i++)
             {
-                var prefab = entries[i].prefab;
-                if (prefab == null)
-                {
-                    continue;
-                }
-                var item = prefab.GetComponent<CardizableItemBase>();
-                var cardId = item != null && item.Definition != null ? item.Definition.CardId : null;
+                var cardId = ResolveCardId(entries[i]);
                 if (!string.IsNullOrEmpty(cardId) && !map.ContainsKey(cardId))
                 {
                     map.Add(cardId, i);
@@ -376,7 +354,7 @@ namespace STYLY.TIB_Template.GIPoker
         private void Spawn(ScheduledSpawn spawn)
         {
             var entry = catalog.Entries[spawn.EntryIndex];
-            if (entry.prefab == null)
+            if (entry.Prefab == null)
             {
                 return;
             }
@@ -385,13 +363,13 @@ namespace STYLY.TIB_Template.GIPoker
             // spawnedCountByCardId を「通常出現・宝籤出現の両方を合算した唯一の真実のソース」として扱うことで、
             // 出現上限（カード化限度枚数）が二重にカウントされて超過するのを防ぐ
             // （例: Sランクは maxCount=1 のため、宝籤が先に引いた後にスケジュール分も出現すると2枚になってしまう）
-            var definition = ResolveCardId(entry.prefab) != null ? entry.prefab.GetComponent<CardizableItemBase>().Definition : null;
+            var definition = entry.definition;
             if (definition != null && !HasRemainingCapacity(definition))
             {
                 return;
             }
             // 整列アンカー（木の幹・壁龕など）ではアンカーの回転、それ以外はランダム yaw が入っている
-            var go = Instantiate(entry.prefab, spawn.Position, spawn.Rotation);
+            var go = Instantiate(entry.Prefab, spawn.Position, spawn.Rotation);
             var item = go.GetComponent<CardizableItemBase>();
             if (item != null && CardNetworkSync.Instance != null)
             {

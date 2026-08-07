@@ -69,6 +69,61 @@ namespace STYLY.TIB_Template.GIPoker.Tests
         }
 
         [Test]
+        public void Build_AppendingZeroCapacityEntry_DoesNotAffectExistingEntriesSchedule()
+        {
+            // 20260807-card-rank-config-consolidation.md: ItemCatalog.entries の末尾に
+            // InitialCount=0/MaxCount=0 のエントリ（SSランクの ss_beach 等、通常スポーンの対象外）を
+            // 追加しても、rng を一切消費しないため既存エントリのスケジュール（EntryIndex/Position/Time等）は
+            // 完全に不変であること（決定論的スポーンの回帰防止）。
+            var withoutExtra = CreateEntries();
+            var withExtra = CreateEntries();
+            withExtra.Add(new SpawnEntrySpec(initialCount: 0, maxCount: 0, rank: CardRank.SS));
+
+            var anchors = CreateAnchors(4);
+            var scheduleWithout = CreateBuilder().Build(Seed, withoutExtra, anchors);
+            var scheduleWith = CreateBuilder().Build(Seed, withExtra, CreateAnchors(4));
+
+            // 追加エントリ自体は一切スケジュールされない
+            Assert.That(scheduleWith.Any(s => s.EntryIndex == withExtra.Count - 1), Is.False);
+
+            // 既存エントリ分の件数・内容が完全一致する
+            Assert.That(scheduleWith.Count, Is.EqualTo(scheduleWithout.Count));
+            for (var i = 0; i < scheduleWithout.Count; i++)
+            {
+                Assert.That(scheduleWith[i].NetworkId, Is.EqualTo(scheduleWithout[i].NetworkId));
+                Assert.That(scheduleWith[i].EntryIndex, Is.EqualTo(scheduleWithout[i].EntryIndex));
+                Assert.That(scheduleWith[i].Time, Is.EqualTo(scheduleWithout[i].Time));
+                Assert.That(scheduleWith[i].UsedAnchor, Is.EqualTo(scheduleWithout[i].UsedAnchor));
+                Assert.That(scheduleWith[i].Position, Is.EqualTo(scheduleWithout[i].Position));
+                Assert.That(scheduleWith[i].YawDegrees, Is.EqualTo(scheduleWithout[i].YawDegrees));
+            }
+        }
+
+        [Test]
+        public void Build_AppendingZeroCapacityEntry_DoesNotAffectExistingEntriesSchedule_WithBonusWeights()
+        {
+            // ItemSpawnManager が実際に使う重み付きオーバーロード（ボーナスタイム対応）でも、
+            // 0/0容量エントリの追加が既存エントリのスケジュールに影響しないこと。
+            var withoutExtra = CreateRankedEntries();
+            var withExtra = CreateRankedEntries();
+            withExtra.Add(new SpawnEntrySpec(initialCount: 0, maxCount: 0, rank: CardRank.SS));
+
+            var scheduleWithout = CreateBuilder().Build(Seed, withoutExtra, null, 10f, 3f, UniformRankWeights, HighRankSkewedWeights);
+            var scheduleWith = CreateBuilder().Build(Seed, withExtra, null, 10f, 3f, UniformRankWeights, HighRankSkewedWeights);
+
+            Assert.That(scheduleWith.Any(s => s.EntryIndex == withExtra.Count - 1), Is.False);
+            Assert.That(scheduleWith.Count, Is.EqualTo(scheduleWithout.Count));
+            for (var i = 0; i < scheduleWithout.Count; i++)
+            {
+                Assert.That(scheduleWith[i].NetworkId, Is.EqualTo(scheduleWithout[i].NetworkId));
+                Assert.That(scheduleWith[i].EntryIndex, Is.EqualTo(scheduleWithout[i].EntryIndex));
+                Assert.That(scheduleWith[i].Time, Is.EqualTo(scheduleWithout[i].Time));
+                Assert.That(scheduleWith[i].Position, Is.EqualTo(scheduleWithout[i].Position));
+                Assert.That(scheduleWith[i].YawDegrees, Is.EqualTo(scheduleWithout[i].YawDegrees));
+            }
+        }
+
+        [Test]
         public void Build_AnchorCountExceedsSpawnCount_AllSpawnsUseDistinctAnchors()
         {
             var entries = new List<SpawnEntrySpec> { new(initialCount: 2, maxCount: 2) };

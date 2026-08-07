@@ -22,9 +22,17 @@ namespace STYLY.TIB_Template.GIPoker
         private static readonly Dictionary<CardRank, Material> frameMaterials = new();
         private static Material bodyMaterial;
 
-        /// <summary>ランクごとのテーマカラー</summary>
+        /// <summary>
+        /// ランクごとのテーマカラー。
+        /// GIPokerAssets.RankConfig（CardRankConfig.ThemeColor）が設定されていればそちらを優先し、
+        /// 未設定（null）またはランクが見つからない場合は下記のフォールバック値を返す。
+        /// </summary>
         public static Color GetRankColor(CardRank rank)
         {
+            if (GIPokerAssets.RankConfig != null && GIPokerAssets.RankConfig.TryGetEntry(rank, out var entry))
+            {
+                return entry.themeColor;
+            }
             return rank switch
             {
                 CardRank.D => new Color(0.55f, 0.57f, 0.60f), // シルバーグレー

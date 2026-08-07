@@ -65,6 +65,8 @@ namespace STYLY.TIB_Template.GIPoker
         private AudioClip sessionStartVoiceClip;
         [SerializeField, Tooltip("本編（Playing）中にループ再生するBGM（BGM_Play.mp3）")]
         private AudioClip mainBgmClip;
+        [SerializeField, Tooltip("ランク単位の数値バランス設定（得点・出現重み・宝籤重み・テーマカラー）")]
+        private CardRankConfig rankConfig;
 
         private void Awake()
         {
@@ -82,6 +84,7 @@ namespace STYLY.TIB_Template.GIPoker
             GIPokerAssets.TutorialBgmClip = tutorialBgmClip;
             GIPokerAssets.SessionStartVoiceClip = sessionStartVoiceClip;
             GIPokerAssets.MainBgmClip = mainBgmClip;
+            GIPokerAssets.RankConfig = rankConfig;
         }
 
         private void Start()

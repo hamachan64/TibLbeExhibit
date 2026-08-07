@@ -25,10 +25,23 @@ namespace STYLY.TIB_Template.GIPoker
         [SerializeField, TextArea, Tooltip("カードの説明文（バインダーUI表示用）")]
         private string description;
 
+        [Header("出現設定")]
+        [SerializeField, Tooltip("アイテムのプレハブ（CardizableItemBase 付き）")]
+        private GameObject prefab;
+
+        [SerializeField, Tooltip("セッション開始時に出現する数")]
+        private int initialCount = 1;
+
+        [SerializeField, Tooltip("セッション全体での出現上限（カード化限度枚数）")]
+        private int maxCount = 1;
+
         public string CardId => cardId;
         public string DisplayName => displayName;
         public CardRank Rank => rank;
         public CardEffectType EffectType => effectType;
         public string Description => description;
+        public GameObject Prefab => prefab;
+        public int InitialCount => initialCount;
+        public int MaxCount => maxCount;
     }
 }
