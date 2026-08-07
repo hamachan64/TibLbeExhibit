@@ -18,7 +18,7 @@ namespace STYLY.TIB_Template.GIPoker
     {
         private const string HeadTrackerName = "Head Tracker";
         private const float HeightAboveHead = 0.3f;
-        private const float FontSize = 6f;
+        private const float FontSize = 24f;
 
         private NetSyncAvatar avatar;
         private Transform tagTransform;

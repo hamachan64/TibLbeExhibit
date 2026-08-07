@@ -23,7 +23,7 @@ namespace STYLY.TIB_Template.Leaderboard
     /// </summary>
     public class StageScoreMonitorView : MonoBehaviour
     {
-        private const float FontSize = 8f;
+        private const float FontSize = 32f;
 
         [SerializeField, Tooltip("日本語対応TMPフォント（Noto Sans JP SDF）")]
         private TMP_FontAsset japaneseFont;
