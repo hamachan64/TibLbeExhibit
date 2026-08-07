@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using ObservableCollections;
 using R3;
 using UnityEngine;
@@ -109,10 +108,28 @@ namespace STYLY.TIB_Template.GIPoker
                 return false;
             }
 
+            // ボーナスタイム（残り N 秒以降）中に収納したカードはスコア 1.5 倍フラグを立てる
+            if (IsBonusTime())
+            {
+                card.CardInstance.MarkAsBonus();
+            }
+
             card.MarkStored();
             cards.Add(card.CardInstance);
             cardStored.OnNext(card.CardInstance);
             return true;
+        }
+
+        /// <summary>現在がボーナスタイム中（残り時間がしきい値以下）かどうかを判定する</summary>
+        private static bool IsBonusTime()
+        {
+            var session = GameSession.Instance;
+            var spawnManager = ItemSpawnManager.Instance;
+            if (session == null || spawnManager == null)
+            {
+                return false;
+            }
+            return session.RemainingTime.CurrentValue <= spawnManager.BonusTimeSeconds;
         }
 
         /// <summary>
@@ -234,7 +251,8 @@ namespace STYLY.TIB_Template.GIPoker
 
         private void RecalculateScore()
         {
-            score.Value = PokerHandEvaluator.Evaluate(cards.Select(c => c.Rank), GIPokerAssets.RankConfig?.BasePoints);
+            var allCardIds = ItemSpawnManager.Instance?.AllCardIds;
+            score.Value = PokerHandEvaluator.Evaluate(cards, GIPokerAssets.RankConfig?.BasePoints, allCardIds);
         }
     }
 }

@@ -88,6 +88,13 @@ namespace STYLY.TIB_Template.GIPoker
         /// <summary>cardId ごとの累計出現数（1分ルールでの消滅やゲイン後も減らない、生涯出現数）</summary>
         private readonly Dictionary<string, int> spawnedCountByCardId = new();
 
+        /// <summary>
+        /// カタログに登録されている全カードの CardId セット。
+        /// 全種類獲得ボーナス（PokerHandEvaluator）の判定に使用する。
+        /// BuildCapacityMaps（Awake）実行後に確定する。
+        /// </summary>
+        public IReadOnlyCollection<string> AllCardIds => maxCountByCardId.Keys;
+
         private void Awake()
         {
             Instance = this;

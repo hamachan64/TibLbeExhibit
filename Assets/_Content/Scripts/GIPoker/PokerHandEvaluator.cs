@@ -21,7 +21,7 @@ namespace STYLY.TIB_Template.GIPoker
     {
         public static readonly ScoreResult Empty = new(0, Array.Empty<AchievedCombo>());
 
-        /// <summary>カード単体得点の合計</summary>
+        /// <summary>カード単体得点の合計（ボーナスタイム1.5倍を含む）</summary>
         public int BaseScore { get; }
 
         /// <summary>組み合わせボーナスの合計</summary>
@@ -47,113 +47,132 @@ namespace STYLY.TIB_Template.GIPoker
     }
 
     /// <summary>
-    /// バインダー内カードのランク構成から「基本得点＋組み合わせボーナス（役）」を計算する
+    /// バインダー内カードの構成から「基本得点＋組み合わせボーナス」を計算する
     /// 純粋ロジック（MonoBehaviour 非依存・ユニットテスト可能）。
     ///
-    /// 役の判定はボーナス点が高い順の貪欲法で行い、1枚のカードは1つの役にしか使われない。
-    /// 判定順: ストレート(+200) → S-A-A(+150) → 同ランク3枚セット(+50)
-    /// ※同一の役は成立する限り複数回カウントされる。
+    /// 【基本得点】
+    ///   各カードのランク得点の合計。ボーナスタイム中に収納したカードは 1.5 倍（小数切り捨て）。
+    ///
+    /// 【組み合わせボーナス】
+    ///   - 全ランク獲得ボーナス   : D～S の全ランクが1枚以上あれば +5,000
+    ///   - 全種類獲得ボーナス     : バインダー内の CardId が全カタログ種類を網羅すれば +10,000
+    ///     ※ 全種類ボーナスはゲームセッション上で参照できる ItemCatalog を使う。
+    ///        カタログが未設定の場合は判定をスキップする（ボーナスなし）。
     /// </summary>
     public static class PokerHandEvaluator
     {
         /// <summary>
         /// ランクごとの単体得点のフォールバック値。
         /// GIPokerAssets.RankConfig（CardRankConfig.BasePoints）が未設定のときに Evaluate から使われる。
-        /// SS はイベント（リスキーダイス大吉）限定の特別報酬のため S を超える 300 点とする。
         /// </summary>
         public static readonly IReadOnlyDictionary<CardRank, int> DefaultBasePoints = new Dictionary<CardRank, int>
         {
-            { CardRank.D, 1 },
-            { CardRank.C, 2 },
-            { CardRank.B, 3 },
-            { CardRank.A, 5 },
-            { CardRank.S, 100 },
-            { CardRank.SS, 300 },
+            { CardRank.D,  10 },
+            { CardRank.C,  20 },
+            { CardRank.B,  50 },
+            { CardRank.A,  100 },
+            { CardRank.S,  500 },
+            { CardRank.SS, 10000 },
         };
 
-        /// <summary>ストレート（D-C-B-A-S 各1枚）のボーナス</summary>
-        public const int StraightBonus = 200;
-        /// <summary>指定コンボ（S-A-A）のボーナス</summary>
-        public const int SpecialComboBonus = 150;
-        /// <summary>同ランク3枚セットのボーナス</summary>
-        public const int SameRankTripleBonus = 50;
+        /// <summary>D～S 全ランク揃いボーナス</summary>
+        public const int AllRankBonus = 5000;
 
-        private const string StraightName = "ストレート (D-C-B-A-S)";
-        private const string SpecialComboName = "指定コンボ (S-A-A)";
-        private const string TripleNameFormat = "同ランクセット ({0}×3)";
+        /// <summary>全種類（カタログ収録全カード）獲得ボーナス</summary>
+        public const int AllCardTypeBonus = 10000;
 
-        private static readonly CardRank[] StraightRanks =
+        /// <summary>ボーナスタイム中に収納したカードのスコア倍率</summary>
+        public const float BonusTimeMultiplier = 1.5f;
+
+        /// <summary>全ランク揃いに必要なランク（D～S）</summary>
+        private static readonly CardRank[] AllRanks =
         {
             CardRank.D, CardRank.C, CardRank.B, CardRank.A, CardRank.S,
         };
 
+        private const string AllRankBonusName = "全ランク獲得ボーナス (D-C-B-A-S)";
+        private const string AllCardTypeBonusName = "全種類獲得ボーナス";
+
         /// <summary>
-        /// ランクの一覧からスコアを計算する。
+        /// カードインスタンスの一覧からスコアを計算する。
         /// </summary>
-        /// <param name="ranks">評価対象のカードランク一覧</param>
+        /// <param name="cards">評価対象のカードインスタンス一覧</param>
         /// <param name="basePoints">
         /// ランクごとの単体得点。未指定（null）の場合は DefaultBasePoints にフォールバックする
         /// （CardBinder からは GIPokerAssets.RankConfig?.BasePoints を渡す想定）。
         /// </param>
-        public static ScoreResult Evaluate(IEnumerable<CardRank> ranks, IReadOnlyDictionary<CardRank, int> basePoints = null)
+        /// <param name="allCardIds">
+        /// 全種類ボーナス判定に使うカタログの全 CardId。
+        /// null または空の場合は全種類ボーナスの判定をスキップする。
+        /// </param>
+        public static ScoreResult Evaluate(
+            IEnumerable<CardInstance> cards,
+            IReadOnlyDictionary<CardRank, int> basePoints = null,
+            IReadOnlyCollection<string> allCardIds = null)
         {
             basePoints ??= DefaultBasePoints;
-            var counts = new Dictionary<CardRank, int>();
+
+            // --- 基本得点（ボーナスタイム 1.5 倍込み） ---
             var baseScore = 0;
-            foreach (var rank in ranks)
+            var rankCounts = new Dictionary<CardRank, int>();
+            var collectedCardIds = new HashSet<string>(StringComparer.Ordinal);
+
+            foreach (var card in cards)
             {
-                counts[rank] = counts.TryGetValue(rank, out var n) ? n + 1 : 1;
-                baseScore += basePoints.TryGetValue(rank, out var point) ? point : 0;
+                var rank = card.Rank;
+
+                var rawPoint = basePoints.TryGetValue(rank, out var point) ? point : 0;
+                // ボーナスタイム中に収納したカードは 1.5 倍（小数切り捨て）
+                var finalPoint = card.IsBonus
+                    ? (int)(rawPoint * BonusTimeMultiplier)
+                    : rawPoint;
+                baseScore += finalPoint;
+
+                rankCounts[rank] = rankCounts.TryGetValue(rank, out var n) ? n + 1 : 1;
+
+                if (!string.IsNullOrEmpty(card.Definition?.CardId))
+                {
+                    collectedCardIds.Add(card.Definition.CardId);
+                }
             }
 
+            // --- 組み合わせボーナス ---
             var combos = new List<AchievedCombo>();
 
-            // 1. ストレート (D-C-B-A-S): 最高ボーナスのため最優先で消費する
-            while (HasAll(counts, StraightRanks))
+            // 1. 全ランク獲得ボーナス（D～S が各1枚以上）
+            var hasAllRanks = true;
+            foreach (var rank in AllRanks)
             {
-                foreach (var rank in StraightRanks)
+                if (!rankCounts.TryGetValue(rank, out var cnt) || cnt < 1)
                 {
-                    counts[rank]--;
+                    hasAllRanks = false;
+                    break;
                 }
-                combos.Add(new AchievedCombo(StraightName, StraightBonus));
+            }
+            if (hasAllRanks)
+            {
+                combos.Add(new AchievedCombo(AllRankBonusName, AllRankBonus));
             }
 
-            // 2. 指定コンボ (S-A-A)
-            while (Count(counts, CardRank.S) >= 1 && Count(counts, CardRank.A) >= 2)
+            // 2. 全種類獲得ボーナス（カタログに登録された全 CardId を網羅）
+            if (allCardIds != null && allCardIds.Count > 0)
             {
-                counts[CardRank.S]--;
-                counts[CardRank.A] -= 2;
-                combos.Add(new AchievedCombo(SpecialComboName, SpecialComboBonus));
-            }
-
-            // 3. 同ランク3枚セット（任意のランクで成立）
-            foreach (var rank in StraightRanks)
-            {
-                while (Count(counts, rank) >= 3)
+                var hasAllTypes = true;
+                foreach (var id in allCardIds)
                 {
-                    counts[rank] -= 3;
-                    combos.Add(new AchievedCombo(string.Format(TripleNameFormat, rank), SameRankTripleBonus));
+                    if (!collectedCardIds.Contains(id))
+                    {
+                        hasAllTypes = false;
+                        break;
+                    }
+                }
+                if (hasAllTypes)
+                {
+                    combos.Add(new AchievedCombo(AllCardTypeBonusName, AllCardTypeBonus));
                 }
             }
 
             return new ScoreResult(baseScore, combos);
-        }
-
-        private static bool HasAll(Dictionary<CardRank, int> counts, CardRank[] required)
-        {
-            foreach (var rank in required)
-            {
-                if (Count(counts, rank) < 1)
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        private static int Count(Dictionary<CardRank, int> counts, CardRank rank)
-        {
-            return counts.TryGetValue(rank, out var n) ? n : 0;
         }
     }
 }
