@@ -449,9 +449,12 @@ namespace STYLY.TIB_Template.GIPoker
         /// 同じ白煙＋衝撃波VFXをカードサイズに縮小して追加再生する。
         /// バインダーはバインダー実寸（幅約0.45m）に対して等倍で作り込まれているため、
         /// カード実寸（CardVisualFactory基準の縦88mm）に合わせて CardSmokeVfxScale で縮小する。
+        /// 同時にSE（GIPokerAssets.SmokeSfxClip、バインダーと共通）も鳴らす。音源が未準備の間は
+        /// null許容で無音のまま動作する（GIPokerAssets.PlaySfxAtPointがnull安全）。
         /// </summary>
         private void PlayCardSizedSmokeVfx()
         {
+            GIPokerAssets.PlaySfxAtPoint(GIPokerAssets.SmokeSfxClip, transform.position, GIPokerAssets.SmokeSfxVolume);
             GIPokerAssets.SpawnVfx(GIPokerAssets.BinderSmokeVfx, transform.position,
                 lifetime: CardSmokeVfxLifetime, scale: CardSmokeVfxScale);
         }
