@@ -7,16 +7,21 @@ using UnityEngine;
 namespace STYLY.TIB_Template.GIPoker
 {
     /// <summary>
-    /// チュートリアル中だけプレイヤーを包む「ゲーム開始の間」（G.I.風の白い紋様空間）を
-    /// ランタイム生成・制御するディレクター。
+    /// チュートリアル中だけ体験者全員を包む「ゲーム開始の間」（G.I.具現化装置風の
+    /// 円筒VR空間）をランタイム生成・制御するディレクター。
     ///
-    /// 方針（Issue #13）:
+    /// 方針（Issue #13、共有ルーム化で更新）:
     /// - パススルーは切らない。プレイヤーを完全に囲む<b>不透明ジオメトリ</b>
     ///   （円筒ルーム＋床＋天井）で視界を覆うことでVR化する。壁面シェーダーが
     ///   framebuffer alpha=1 を書き込み、MR映像を確実に隠す。
     /// - ルーム（メッシュ・マテリアル）はコードでプロシージャル生成する
     ///   （シーン/プレハブのYAML編集は禁止）。紋様もテクスチャ不要のシェーダー生成。
     /// - 壁面は Unlit 発光なので環境光に依存せず、ルーム内が暗く沈まない。
+    /// - <b>共有ルーム</b>: 各プレイヤーのカメラ基準に個別配置していた旧設計をやめ、
+    ///   固定のワールド座標（<see cref="sharedRoomAnchor"/>）に一度だけ配置する。
+    ///   STYLY NetSync で全クライアントのワールド座標系が空間アンカーにより
+    ///   揃っている前提のため、固定座標にするだけで「全員が物理的に同じ1つの部屋を
+    ///   共有している」状態になる（新規RPC・ネットワークオブジェクト化は不要）。
     ///
     /// GIPokerBootstrap への結線は<b>行わない</b>（遷移Issue担当が Create()/ShowAsync()/
     /// HideAsync() を呼ぶ）。本コンポーネントは単体で完結する。
@@ -32,21 +37,29 @@ namespace STYLY.TIB_Template.GIPoker
         /// </summary>
         private const string ShaderName = "GIPoker/Tutorial/RoomWall";
         private static readonly int RevealId = Shader.PropertyToID("_Reveal");
+        private static readonly int StripeIntensityId = Shader.PropertyToID("_StripeIntensity");
+        private static readonly int TilingId = Shader.PropertyToID("_Tiling");
+        private static readonly int LineWidthId = Shader.PropertyToID("_LineWidth");
+        private static readonly int EmissionId = Shader.PropertyToID("_Emission");
+        private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+        private static readonly int GlowColorId = Shader.PropertyToID("_GlowColor");
+
+        /// <summary>サブメッシュ番号（壁/床/天井）。BuildRoomMesh の SetTriangles と対応させる</summary>
+        private const int WallSubMesh = 0;
+        private const int FloorSubMesh = 1;
+        private const int CeilingSubMesh = 2;
 
         [SerializeField, Tooltip("円筒ルームの半径（m）")]
-        private float radius = 4f;
+        private float radius = 6f;
 
         [SerializeField, Tooltip("床から天井までの高さ（m）")]
-        private float height = 3f;
+        private float height = 5f;
 
-        [SerializeField, Tooltip("床をプレイヤー頭部からどれだけ下に置くか（m）")]
-        private float floorBelowEye = 1.4f;
+        [SerializeField, Tooltip("共有ルームの固定ワールド座標（実世界の床レベルY=0基準。展示レイアウトに応じて現地調整する）")]
+        private Vector3 sharedRoomAnchor = new(-4.9f, 0f, -0.5f);
 
         [SerializeField, Tooltip("円筒の分割数（多いほど滑らか・負荷増）")]
         private int radialSegments = 48;
-
-        [SerializeField, Tooltip("Camera.main が無い場合に想定する目線の高さ（m）")]
-        private float defaultEyeHeight = 1.5f;
 
         [SerializeField, Tooltip("登場演出（紋様が灯る）の所要時間（秒）")]
         private float revealDuration = 1.6f;
@@ -56,7 +69,9 @@ namespace STYLY.TIB_Template.GIPoker
 
         /// <summary>ルーム本体（メッシュ）を持つ子GameObject。表示/非表示の切り替え対象</summary>
         private GameObject roomShell;
-        private Material roomMaterial;
+
+        /// <summary>壁/床/天井の順（BuildRoomMesh のサブメッシュ番号と対応）</summary>
+        private Material[] roomMaterials;
         private Mesh roomMesh;
         private Tween revealTween;
 
@@ -100,9 +115,13 @@ namespace STYLY.TIB_Template.GIPoker
             var shader = Shader.Find(ShaderName);
             if (shader != null)
             {
-                roomMaterial = new Material(shader);
-                roomMaterial.SetFloat(RevealId, 0f);
-                renderer.sharedMaterial = roomMaterial;
+                roomMaterials = new[]
+                {
+                    BuildMaterial(shader, WallPreset),
+                    BuildMaterial(shader, FloorPreset),
+                    BuildMaterial(shader, CeilingPreset),
+                };
+                renderer.sharedMaterials = roomMaterials;
             }
             else
             {
@@ -120,8 +139,8 @@ namespace STYLY.TIB_Template.GIPoker
         }
 
         /// <summary>
-        /// VR空間をプレイヤー（Camera.main / XrOriginLocator.Find() 基準）を中心に
-        /// 構築・表示する。画面フェードアウト中に呼ばれる前提のため壁は即座に立つが、
+        /// VR空間を固定のワールド座標（<see cref="sharedRoomAnchor"/>）に構築・表示する。
+        /// 画面フェードアウト中に呼ばれる前提のため壁は即座に立つが、
         /// 紋様が灯る登場演出（_Reveal 0→1）を重ねる。
         /// </summary>
         public async UniTask ShowAsync(CancellationToken ct)
@@ -132,23 +151,17 @@ namespace STYLY.TIB_Template.GIPoker
             BuildRoom();
             revealTween?.Kill();
 
-            PositionAtPlayer();
+            PositionAtSharedRoom();
             roomShell.SetActive(true);
             IsShown = true;
 
-            if (roomMaterial == null)
+            if (roomMaterials == null || roomMaterials.Length == 0)
             {
                 return;
             }
 
-            roomMaterial.SetFloat(RevealId, 0f);
-            revealTween = DOVirtual.Float(0f, 1f, revealDuration, v =>
-                {
-                    if (roomMaterial != null)
-                    {
-                        roomMaterial.SetFloat(RevealId, v);
-                    }
-                })
+            SetRevealImmediate(0f);
+            revealTween = DOVirtual.Float(0f, 1f, revealDuration, SetReveal)
                 .SetEase(Ease.InOutSine)
                 .SetLink(gameObject);
 
@@ -174,16 +187,10 @@ namespace STYLY.TIB_Template.GIPoker
 
             try
             {
-                if (roomMaterial != null && hideFadeDuration > 0f && roomShell.activeSelf)
+                if (roomMaterials != null && roomMaterials.Length > 0 && hideFadeDuration > 0f && roomShell.activeSelf)
                 {
-                    var from = roomMaterial.GetFloat(RevealId);
-                    revealTween = DOVirtual.Float(from, 0f, hideFadeDuration, v =>
-                        {
-                            if (roomMaterial != null)
-                            {
-                                roomMaterial.SetFloat(RevealId, v);
-                            }
-                        })
+                    var from = roomMaterials[0] != null ? roomMaterials[0].GetFloat(RevealId) : 0f;
+                    revealTween = DOVirtual.Float(from, 0f, hideFadeDuration, SetReveal)
                         .SetEase(Ease.InQuad)
                         .SetLink(gameObject);
 
@@ -200,6 +207,24 @@ namespace STYLY.TIB_Template.GIPoker
                 }
             }
         }
+
+        /// <summary>_Reveal を壁/床/天井の全マテリアルへ同じ値で反映する</summary>
+        private void SetReveal(float value)
+        {
+            if (roomMaterials == null)
+            {
+                return;
+            }
+            for (var i = 0; i < roomMaterials.Length; i++)
+            {
+                if (roomMaterials[i] != null)
+                {
+                    roomMaterials[i].SetFloat(RevealId, value);
+                }
+            }
+        }
+
+        private void SetRevealImmediate(float value) => SetReveal(value);
 
         /// <summary>
         /// Tween の完了を UniTask で待つ。
@@ -227,28 +252,75 @@ namespace STYLY.TIB_Template.GIPoker
             }
         }
 
-        /// <summary>ルートをプレイヤー足元（頭部の真下）へ移動する。円筒は軸対称なので回転は不要。</summary>
-        private void PositionAtPlayer()
+        /// <summary>ルートを固定の共有ルーム座標へ移動する。円筒は軸対称なので回転は不要。</summary>
+        private void PositionAtSharedRoom()
         {
-            Vector3 head;
-            var cam = Camera.main;
-            if (cam != null)
-            {
-                head = cam.transform.position;
-            }
-            else
-            {
-                var origin = XrOriginLocator.Find();
-                head = (origin != null ? origin.position : Vector3.zero) + Vector3.up * defaultEyeHeight;
-            }
+            transform.SetPositionAndRotation(sharedRoomAnchor, Quaternion.identity);
+        }
 
-            transform.SetPositionAndRotation(
-                new Vector3(head.x, head.y - floorBelowEye, head.z),
-                Quaternion.identity);
+        /// <summary>マテリアルの見た目プリセット（壁/床/天井で色味・模様の密度を変える）</summary>
+        private readonly struct MaterialPreset
+        {
+            public readonly Color BaseColor;
+            public readonly Color GlowColor;
+            public readonly float StripeIntensity;
+            public readonly float Tiling;
+            public readonly float? LineWidth;
+            public readonly float Emission;
+
+            public MaterialPreset(Color baseColor, Color glowColor, float stripeIntensity,
+                float tiling, float emission, float? lineWidth = null)
+            {
+                BaseColor = baseColor;
+                GlowColor = glowColor;
+                StripeIntensity = stripeIntensity;
+                Tiling = tiling;
+                Emission = emission;
+                LineWidth = lineWidth;
+            }
+        }
+
+        // 紺〜青黒ベース＋水色/白の発光（G.I.具現化装置演出風）。壁のみストライプ発光を有効化する。
+        private static readonly MaterialPreset WallPreset = new(
+            baseColor: new Color(0.03f, 0.05f, 0.10f),
+            glowColor: new Color(0.55f, 0.85f, 1.0f),
+            stripeIntensity: 1f,
+            tiling: 1.8f,
+            emission: 1.6f);
+
+        private static readonly MaterialPreset FloorPreset = new(
+            baseColor: new Color(0.02f, 0.03f, 0.06f),
+            glowColor: new Color(0.4f, 0.7f, 0.95f),
+            stripeIntensity: 0f,
+            tiling: 2.4f,
+            emission: 1.0f,
+            lineWidth: 0.04f);
+
+        private static readonly MaterialPreset CeilingPreset = new(
+            baseColor: new Color(0.04f, 0.06f, 0.11f),
+            glowColor: new Color(0.5f, 0.8f, 1.0f),
+            stripeIntensity: 0f,
+            tiling: 1.2f,
+            emission: 0.9f);
+
+        private static Material BuildMaterial(Shader shader, MaterialPreset preset)
+        {
+            var mat = new Material(shader);
+            mat.SetColor(BaseColorId, preset.BaseColor);
+            mat.SetColor(GlowColorId, preset.GlowColor);
+            mat.SetFloat(StripeIntensityId, preset.StripeIntensity);
+            mat.SetFloat(TilingId, preset.Tiling);
+            mat.SetFloat(EmissionId, preset.Emission);
+            if (preset.LineWidth.HasValue)
+            {
+                mat.SetFloat(LineWidthId, preset.LineWidth.Value);
+            }
+            mat.SetFloat(RevealId, 0f);
+            return mat;
         }
 
         /// <summary>
-        /// 円筒の側壁＋床＋天井を1メッシュとしてプロシージャル生成する。
+        /// 円筒の側壁＋床＋天井を「壁/床/天井」の3サブメッシュに分けてプロシージャル生成する。
         /// UVは「メートル単位」で貼る（壁: 周長×高さ / 床天井: ローカルXZ）。
         /// シェーダーがこのUVからセル密度を決めるため、面ごとに紋様スケールが揃う。
         /// 巻き方はシェーダー Cull Off に委ねるため厳密でなくてよい。
@@ -257,7 +329,9 @@ namespace STYLY.TIB_Template.GIPoker
         {
             var vertices = new System.Collections.Generic.List<Vector3>();
             var uvs = new System.Collections.Generic.List<Vector2>();
-            var triangles = new System.Collections.Generic.List<int>();
+            var wallTriangles = new System.Collections.Generic.List<int>();
+            var floorTriangles = new System.Collections.Generic.List<int>();
+            var ceilingTriangles = new System.Collections.Generic.List<int>();
 
             var circumference = 2f * Mathf.PI * radius;
 
@@ -282,14 +356,14 @@ namespace STYLY.TIB_Template.GIPoker
                 var t0 = b0 + 1;
                 var b1 = b0 + 2;
                 var t1 = b0 + 3;
-                triangles.Add(b0); triangles.Add(t0); triangles.Add(b1);
-                triangles.Add(t0); triangles.Add(t1); triangles.Add(b1);
+                wallTriangles.Add(b0); wallTriangles.Add(t0); wallTriangles.Add(b1);
+                wallTriangles.Add(t0); wallTriangles.Add(t1); wallTriangles.Add(b1);
             }
 
             // --- 床（y=0, 三角ファン） ---
-            AddCap(vertices, uvs, triangles, radius, 0f, segments);
+            AddCap(vertices, uvs, floorTriangles, radius, 0f, segments);
             // --- 天井（y=height, 三角ファン） ---
-            AddCap(vertices, uvs, triangles, radius, height, segments);
+            AddCap(vertices, uvs, ceilingTriangles, radius, height, segments);
 
             var mesh = new Mesh { name = "GIPoker_TutorialRoom" };
             if (vertices.Count > 65000)
@@ -298,7 +372,10 @@ namespace STYLY.TIB_Template.GIPoker
             }
             mesh.SetVertices(vertices);
             mesh.SetUVs(0, uvs);
-            mesh.SetTriangles(triangles, 0);
+            mesh.subMeshCount = 3;
+            mesh.SetTriangles(wallTriangles, WallSubMesh);
+            mesh.SetTriangles(floorTriangles, FloorSubMesh);
+            mesh.SetTriangles(ceilingTriangles, CeilingSubMesh);
             mesh.RecalculateBounds();
             return mesh;
         }
@@ -334,9 +411,15 @@ namespace STYLY.TIB_Template.GIPoker
         private void OnDestroy()
         {
             revealTween?.Kill();
-            if (roomMaterial != null)
+            if (roomMaterials != null)
             {
-                Destroy(roomMaterial);
+                foreach (var mat in roomMaterials)
+                {
+                    if (mat != null)
+                    {
+                        Destroy(mat);
+                    }
+                }
             }
             if (roomMesh != null)
             {

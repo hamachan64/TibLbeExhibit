@@ -26,6 +26,7 @@ namespace STYLY.TIB_Template.GIPoker
     /// - タイトル: TitleView（開始待ち中に表示するタイトル画面）
     /// - VR空間: TutorialSpaceDirector（チュートリアル中だけ包む「ゲーム開始の間」）
     /// - MR⇔VR遷移: TransitionDirector（白フェード＋VR空間の表示制御。ScreenFaderは内部生成）
+    /// - 音響: TutorialAudioController（Tutorial中BGM・開始の掛け声・本編BGMの切り替え）
     /// - リザルト: ResultView（タイムアップで表示）
     /// </summary>
     [DefaultExecutionOrder(-40)]
@@ -55,6 +56,14 @@ namespace STYLY.TIB_Template.GIPoker
         private GameObject binderSmokeVfx;
         [SerializeField, Tooltip("チュートリアル各ステップの読み上げ音声（7要素、Step1.mp3〜Step7.mp3を順に設定）")]
         private AudioClip[] tutorialStepVoiceClips;
+        [SerializeField, Tooltip("チュートリアル冒頭（ステップ1より前）の前振り音声（Step0.mp3）")]
+        private AudioClip tutorialIntroVoiceClip;
+        [SerializeField, Tooltip("チュートリアル中にループ再生するBGM（BGM_Tutorial.mp3）")]
+        private AudioClip tutorialBgmClip;
+        [SerializeField, Tooltip("Tutorial→Playing遷移時に1回再生する開始の掛け声（Start.mp3）")]
+        private AudioClip sessionStartVoiceClip;
+        [SerializeField, Tooltip("本編（Playing）中にループ再生するBGM（BGM_Play.mp3）")]
+        private AudioClip mainBgmClip;
 
         private void Awake()
         {
@@ -68,6 +77,10 @@ namespace STYLY.TIB_Template.GIPoker
             GIPokerAssets.CardBinderModelPrefab = cardBinderModelPrefab;
             GIPokerAssets.BinderSmokeVfx = binderSmokeVfx;
             GIPokerAssets.TutorialStepVoiceClips = tutorialStepVoiceClips;
+            GIPokerAssets.TutorialIntroVoiceClip = tutorialIntroVoiceClip;
+            GIPokerAssets.TutorialBgmClip = tutorialBgmClip;
+            GIPokerAssets.SessionStartVoiceClip = sessionStartVoiceClip;
+            GIPokerAssets.MainBgmClip = mainBgmClip;
         }
 
         private void Start()
@@ -134,6 +147,11 @@ namespace STYLY.TIB_Template.GIPoker
             var tutorialGo = new GameObject("GIPoker_Tutorial");
             var tutorialDirector = tutorialGo.AddComponent<TutorialDirector>();
             tutorialDirector.Init(session, binder, binderView, transitionDirector);
+
+            // チュートリアル・本編の音響（BGM切り替え・開始の掛け声。Issue: tutorial-room-stage-bgm）
+            var audioGo = new GameObject("GIPoker_TutorialAudio");
+            var tutorialAudio = audioGo.AddComponent<TutorialAudioController>();
+            tutorialAudio.Init(session);
 
 #if UNITY_EDITOR
             // エディタ実行時のデバッグ用: Nキーで現在のチュートリアルステップを強制スキップする

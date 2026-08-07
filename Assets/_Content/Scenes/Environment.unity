@@ -27675,6 +27675,7 @@ MonoBehaviour:
   pedestals: []
   borderCircle: {fileID: 0}
   ambientMotes: {fileID: 0}
+  props: {fileID: 0}
   pedestalStagger: 0.15
 --- !u!4 &971112539
 Transform:

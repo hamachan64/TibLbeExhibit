@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using R3;
 using TMPro;
@@ -91,6 +93,29 @@ namespace STYLY.TIB_Template.GIPoker
         /// 常に true（展示で詰まらせないため、タイムアウトのみで進行できる）。
         /// </summary>
         public bool IsVoiceFinished => voiceFinished;
+
+        /// <summary>
+        /// ステップ進行が始まる前（Step1読み上げより前）に流す前振り音声（Step0.mp3）を再生し、
+        /// 完了を待つ。新しい AudioSource は増やさず、既存の <see cref="voiceAudioSource"/> と
+        /// <see cref="IsVoiceFinished"/> の仕組みをそのまま再利用する
+        /// （再生完了検知は Update() の isPlaying 監視に委ねる）。
+        /// クリップが null の場合は何もせず即座に返る（展示で詰まらせない既存方針を踏襲）。
+        /// </summary>
+        public async UniTask PlayPreambleAsync(AudioClip clip, CancellationToken ct)
+        {
+            if (voiceAudioSource == null || clip == null)
+            {
+                return;
+            }
+
+            voiceAudioSource.Stop();
+            voiceAudioSource.clip = clip;
+            // Play() 直後の1フレーム目で誤って true にならないよう、ここで明示的に false にする
+            voiceFinished = false;
+            voiceAudioSource.Play();
+
+            await UniTask.WaitUntil(() => voiceFinished, cancellationToken: ct);
+        }
 
         /// <summary>現在ステップの指示テキストと進行ドットを更新する</summary>
         public void ShowStep(int stepIndex, TutorialStep step)

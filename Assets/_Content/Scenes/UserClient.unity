@@ -491,6 +491,10 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 93262778fa1354bde827678c7821a889, type: 3}
   - {fileID: 8300000, guid: da32e991b063d4e02a0f782b57d59527, type: 3}
   - {fileID: 8300000, guid: e100109397d934a14a36e6ba77e7a2b3, type: 3}
+  tutorialIntroVoiceClip: {fileID: 8300000, guid: 09b9c858278094ba399d00e0a50d5785, type: 3}
+  tutorialBgmClip: {fileID: 8300000, guid: 1e1d255e12dd94240a7fed02e8ec1948, type: 3}
+  sessionStartVoiceClip: {fileID: 8300000, guid: 1d6c32ed4938c4646b36e2cfce12b559, type: 3}
+  mainBgmClip: {fileID: 8300000, guid: 4cbc5ed3841eb4398bd4ad5e8fc54c4f, type: 3}
 --- !u!114 &2082618858
 MonoBehaviour:
   m_ObjectHideFlags: 0

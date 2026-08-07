@@ -214,7 +214,7 @@ namespace STYLY.TIB_Template.GIPoker
             {
                 headerText.font = GIPokerAssets.JapaneseFont;
             }
-            headerText.fontSize = 9f;
+            headerText.fontSize = 18f;
             headerText.alignment = TextAlignmentOptions.Center;
             headerText.rectTransform.sizeDelta = new Vector2(48f, 8f);
 
