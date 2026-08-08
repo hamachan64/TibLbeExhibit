@@ -561,7 +561,7 @@ PrefabInstance:
     - target: {fileID: 5729049226429455924, guid: e143c37e2b0944c278fd43733d72fa3b, type: 3}
       propertyPath: _remoteAvatarPrefab
       value: 
-      objectReference: {fileID: 7715607727795320353, guid: 3467ae9e2333e434f97fad8094f439cc, type: 3}
+      objectReference: {fileID: 7715607727795320353, guid: fead13fc00a924023a3a50f5f7414caa, type: 3}
     - target: {fileID: 5729049226429455924, guid: e143c37e2b0944c278fd43733d72fa3b, type: 3}
       propertyPath: _serverDiscoveryPort
       value: 6400
