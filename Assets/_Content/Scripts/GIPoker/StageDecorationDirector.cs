@@ -23,10 +23,9 @@ namespace STYLY.TIB_Template.GIPoker
     ///   「島が順に目覚めていく」印象を作る
     /// - <c>GIPokerProps</c>（木・岩・家・祭壇などの村/遺跡プロップ一式ルート。
     ///   GIPokerPropSetup.cs がEnvironmentシーンへ生成する固定オブジェクト）は
-    ///   StagePedestal のような迫り上がり演出を持たないため、Reality（開始待機中）は
-    ///   非アクティブ、それ以外は単純にアクティブへトグルするだけに留める
-    ///   （WaitingForStart→Tutorial遷移時はTransitionDirectorの白フェードで隠れ、
-    ///   Tutorial中も共有ルームの壁がプロップを覆い隠すため、追加のポップイン対策は不要）
+    ///   StagePedestal のような迫り上がり演出を持たないため、Reality（開始待機中）および
+    ///   Awakening（チュートリアル中）は非アクティブとし、ゲーム本編開始（Eroded以降）で
+    ///   アクティブ化する。
     /// </summary>
     public class StageDecorationDirector : MonoBehaviour
     {
@@ -117,8 +116,9 @@ namespace STYLY.TIB_Template.GIPoker
             if (props != null)
             {
                 // 単純な表示/非表示トグルのみ（DOTweenアニメーションは付けない。
-                // Reality＝開始待機中のみ非表示、それ以外の全フェーズでは表示する）
-                props.SetActive(phase != StagePhase.Reality);
+                // Reality＝開始待機中、Awakening＝チュートリアル中は非表示、
+                // それ以外の本編フェーズ（Eroded / Unstable / Receding）で表示する）
+                props.SetActive(phase != StagePhase.Reality && phase != StagePhase.Awakening);
             }
         }
     }

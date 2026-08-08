@@ -23,7 +23,7 @@ namespace STYLY.TIB_Template.Leaderboard
     /// </summary>
     public class StageScoreMonitorView : MonoBehaviour
     {
-        private const float FontSize = 32f;
+        private const float FontSize = 128f;
 
         [SerializeField, Tooltip("日本語対応TMPフォント（Noto Sans JP SDF）")]
         private TMP_FontAsset japaneseFont;
@@ -58,17 +58,19 @@ namespace STYLY.TIB_Template.Leaderboard
         {
             var remainingGo = new GameObject("RemainingTimeText");
             remainingGo.transform.SetParent(transform, false);
-            remainingGo.transform.localPosition = new Vector3(0f, 0.15f, 0f);
+            remainingGo.transform.localPosition = new Vector3(-1.1f, 1.3f, 0f);
+            remainingGo.transform.localEulerAngles = new Vector3(0f, 90f, 0f);
             remainingGo.transform.localScale = Vector3.one * 0.01f;
             remainingTimeText = remainingGo.AddComponent<TextMeshPro>();
-            ConfigureText(remainingTimeText, new Vector2(60f, 10f));
+            ConfigureText(remainingTimeText, new Vector2(160f, 20f));
 
             var top3Go = new GameObject("LiveTop3Text");
             top3Go.transform.SetParent(transform, false);
-            top3Go.transform.localPosition = new Vector3(0f, -0.05f, 0f);
+            top3Go.transform.localPosition = new Vector3(-1.1f, 0.7f, 0f);
+            top3Go.transform.localEulerAngles = new Vector3(0f, 90f, 0f);
             top3Go.transform.localScale = Vector3.one * 0.01f;
             liveTop3Text = top3Go.AddComponent<TextMeshPro>();
-            ConfigureText(liveTop3Text, new Vector2(60f, 30f));
+            ConfigureText(liveTop3Text, new Vector2(160f, 80f));
         }
 
         private void ConfigureText(TextMeshPro text, Vector2 sizeDelta)
@@ -80,6 +82,8 @@ namespace STYLY.TIB_Template.Leaderboard
             text.fontSize = FontSize;
             text.alignment = TextAlignmentOptions.Center;
             text.color = Color.white;
+            text.textWrappingMode = TextWrappingModes.NoWrap;
+            text.overflowMode = TextOverflowModes.Overflow;
             text.rectTransform.sizeDelta = sizeDelta;
         }
 

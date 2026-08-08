@@ -36,8 +36,10 @@ namespace STYLY.TIB_Template.GIPoker
         public const int Capacity = PageCount * SlotsPerPage;
 
         // ページ実メッシュ境界（モデルローカル座標、Model の Euler(-90,0,0) 回転前の値。実測値）
-        public const float PageMeshMinX = -0.007f;
-        public const float PageMeshMaxX = 0.214f;
+        // X軸: PlayMode中の実測（Page_01.MeshFilter.sharedMesh.bounds）により、スパイン側が
+        // X≈+0.007、外側（ページをめくる側）がX≈-0.214であることを確認済み（当初の想定は符号が逆だった）。
+        public const float PageMeshMinX = -0.214f;
+        public const float PageMeshMaxX = 0.007f;
         public const float PageMeshMinZ = -0.145f;
         public const float PageMeshMaxZ = 0.145f;
 
@@ -61,7 +63,7 @@ namespace STYLY.TIB_Template.GIPoker
         /// ページ積層厚み方向）。z-fighting回避用。ページ1枚あたりの積層オフセット実測値
         /// （約1.4mm）より大きい値にして、隣接ページの面より確実に手前へ出す。
         /// </summary>
-        public const float MiniCardSurfaceOffset = 0.004f;
+        public const float MiniCardSurfaceOffset = 0.012f;
 
         // CardVisualFactory.CardWidth/CardHeight（private const 0.063f / 0.088f、実寸トレカサイズ）
         // と同じ値。参照を増やさないためここでは値を複製している。CardVisualFactory側の値を
@@ -70,7 +72,7 @@ namespace STYLY.TIB_Template.GIPoker
         private const float ReferenceCardHeight = 0.088f;
 
         /// <summary>セルからカードがはみ出さないための安全マージン（1.0 未満）</summary>
-        private const float MiniCardFitMargin = 0.9f;
+        private const float MiniCardFitMargin = 0.78f;
 
         /// <summary>
         /// ミニカードのスケール。セル幅・セル高それぞれに対するカード実寸の比のうち、
@@ -80,14 +82,14 @@ namespace STYLY.TIB_Template.GIPoker
         /// </summary>
         public const float MiniCardScale = (CellHeight / ReferenceCardHeight) * MiniCardFitMargin;
 
-        // 角タブ（ページめくりの掴み起点）。ページ実メッシュの外側（X > PageMeshMaxX）に置き、
-        // ポケットグリッド領域（X <= PageMeshMaxX、下記 SlotLocalPosition 参照）と
-        // 物理的に重ならないようにする。
+        // 角タブ（ページめくりの掴み起点）。ページ実メッシュの外側（X < PageMeshMinX、スパインから
+        // 最も遠い、実際にページをめくる側の角）に置き、ポケットグリッド領域
+        // （X >= PageMeshMinX、下記 SlotLocalPosition 参照）と物理的に重ならないようにする。
         public const float PageTabRadius = 0.02f;
         public const float PageTabEdgeMargin = 0.01f;
 
-        /// <summary>角タブのローカルX座標。PageMeshMaxX + 半径 + マージン で、ポケット領域と重ならないことを保証する</summary>
-        public const float PageTabLocalX = PageMeshMaxX + PageTabRadius + PageTabEdgeMargin;
+        /// <summary>角タブのローカルX座標。PageMeshMinX - 半径 - マージン で、ポケット領域と重ならないことを保証する</summary>
+        public const float PageTabLocalX = PageMeshMinX - PageTabRadius - PageTabEdgeMargin;
 
         /// <summary>角タブのローカルZ座標。下端寄りの角（自然に指がかかる位置）</summary>
         public const float PageTabLocalZ = PageMeshMinZ + PageTabRadius + 0.01f;
@@ -107,6 +109,18 @@ namespace STYLY.TIB_Template.GIPoker
         /// <summary>カード全体でのインデックスから、そのページ内でのスロット番号（0〜8）を算出する</summary>
         public static int SlotIndexOf(int cardIndex) => cardIndex % SlotsPerPage;
 
+        /// <summary>1枚目（左上スロット0）のカードのローカルX座標</summary>
+        public const float FirstCardX = -0.044f;
+
+        /// <summary>1枚目（左上スロット0）のカードのローカルZ座標</summary>
+        public const float FirstCardZ = -0.09f;
+
+        /// <summary>カードの横方向間隔（列ピッチ）</summary>
+        public const float CardSpacingX = -0.066f;
+
+        /// <summary>カードの縦方向間隔（行ピッチ）</summary>
+        public const float CardSpacingZ = 0.09f;
+
         /// <summary>
         /// ページ内スロット番号（0〜8、列優先）から、そのページ Transform を基準としたローカル座標を返す。
         /// 原点はページ自身のローカル座標系（実測値ベース）。
@@ -115,8 +129,8 @@ namespace STYLY.TIB_Template.GIPoker
         {
             var col = slotIndex % GridColumns;
             var row = slotIndex / GridColumns;
-            var x = PageCenterX + (col - (GridColumns - 1) * 0.5f) * CellWidth;
-            var z = ((GridRows - 1) * 0.5f - row) * CellHeight;
+            var x = FirstCardX + col * CardSpacingX;
+            var z = FirstCardZ + row * CardSpacingZ;
             return new Vector3(x, MiniCardSurfaceOffset, z);
         }
 

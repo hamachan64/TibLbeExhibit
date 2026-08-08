@@ -65,6 +65,10 @@ namespace STYLY.TIB_Template.GIPoker
         private AudioClip sessionStartVoiceClip;
         [SerializeField, Tooltip("本編（Playing）中にループ再生するBGM（BGM_Play.mp3）")]
         private AudioClip mainBgmClip;
+        [SerializeField, Tooltip("本編の残り時間がラストスパート閾値を切った瞬間に1回再生するSE（Last30s.mp3）")]
+        private AudioClip lastSpurtClip;
+        [SerializeField, Tooltip("本編終了・リザルト遷移時に1回再生する終了SE/音声（Fichish.mp3）")]
+        private AudioClip finishVoiceClip;
         [SerializeField, Tooltip("ランク単位の数値バランス設定（得点・出現重み・宝籤重み・テーマカラー）")]
         private CardRankConfig rankConfig;
 
@@ -84,6 +88,8 @@ namespace STYLY.TIB_Template.GIPoker
             GIPokerAssets.TutorialBgmClip = tutorialBgmClip;
             GIPokerAssets.SessionStartVoiceClip = sessionStartVoiceClip;
             GIPokerAssets.MainBgmClip = mainBgmClip;
+            GIPokerAssets.LastSpurtClip = lastSpurtClip;
+            GIPokerAssets.FinishVoiceClip = finishVoiceClip;
             GIPokerAssets.RankConfig = rankConfig;
         }
 

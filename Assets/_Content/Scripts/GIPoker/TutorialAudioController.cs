@@ -21,6 +21,8 @@ namespace STYLY.TIB_Template.GIPoker
         EnterTutorial,
         /// <summary>Tutorial → Playing: BGMフェードアウト→開始の掛け声→本編BGM開始のシーケンスを行う</summary>
         ExitTutorialToPlaying,
+        /// <summary>Playing → Finished: 本編BGMを停止し、終了SE/音声（Fichish.mp3）を1回再生する</summary>
+        EnterFinished,
     }
 
     /// <summary>
@@ -31,7 +33,11 @@ namespace STYLY.TIB_Template.GIPoker
     /// 「previousState を見て実際の遷移だけ処理する」パターンに倣う）:
     /// - 他状態 → Tutorial: TutorialBgmClip をループ再生開始
     /// - Tutorial → Playing: TutorialBgmClip をフェードアウトして停止 →
-    ///   SessionStartVoiceClip（掛け声）を1回再生 → 再生完了後 MainBgmClip をループ再生開始
+    ///   SessionStartVoiceClip（掛け声）を1回再生 → 再生完了後 MainBgmClip を
+    ///   通常音量（mainBgmVolume × mainBgmVolumeMultiplier）でループ再生開始
+    /// - Playing中、残り時間が lastSpurtRemainingSeconds 以下になったら、本編BGMの
+    ///   音量・再生速度をラストスパート仕様（lastSpurtVolumeMultiplier / lastSpurtPitchMultiplier）
+    ///   に切り替える（1セッションにつき1回のみ）
     /// - それ以外の遷移（skipTutorial による WaitingForStart→Playing 直行、Finished への
     ///   遷移等）では何も行わない
     ///
@@ -51,6 +57,18 @@ namespace STYLY.TIB_Template.GIPoker
         [SerializeField, Tooltip("本編BGMの再生音量")]
         private float mainBgmVolume = 0.2f;
 
+        [SerializeField, Tooltip("本編BGM音量に対する倍率（通常時）")]
+        private float mainBgmVolumeMultiplier = 0.9f;
+
+        [SerializeField, Tooltip("残りこの秒数以下になったら本編BGMをラストスパート仕様（音量・再生速度アップ）に切り替える")]
+        private float lastSpurtRemainingSeconds = 30f;
+
+        [SerializeField, Tooltip("ラストスパート時の本編BGM音量倍率")]
+        private float lastSpurtVolumeMultiplier = 1.2f;
+
+        [SerializeField, Tooltip("ラストスパート時の本編BGM再生速度倍率")]
+        private float lastSpurtPitchMultiplier = 1.1f;
+
         [SerializeField, Tooltip("Tutorial→Playing遷移時、チュートリアルBGMをフェードアウトする所要時間（秒）")]
         private float bgmFadeOutDuration = 0.5f;
 
@@ -60,6 +78,7 @@ namespace STYLY.TIB_Template.GIPoker
         private SessionState? previousState;
         private CancellationTokenSource sequenceCts;
         private Tween bgmFadeTween;
+        private bool lastSpurtApplied;
 
         /// <summary>
         /// 状態遷移（previous→next）から発火すべき音響アクションを判定する。
@@ -78,6 +97,10 @@ namespace STYLY.TIB_Template.GIPoker
             if (previous == SessionState.Tutorial && next == SessionState.Playing)
             {
                 return TutorialAudioAction.ExitTutorialToPlaying;
+            }
+            if (previous == SessionState.Playing && next == SessionState.Finished)
+            {
+                return TutorialAudioAction.EnterFinished;
             }
             return TutorialAudioAction.None;
         }
@@ -98,6 +121,40 @@ namespace STYLY.TIB_Template.GIPoker
             session.State
                 .Subscribe(OnStateChanged)
                 .AddTo(this);
+
+            session.RemainingTime
+                .Subscribe(remaining => OnRemainingTimeChanged(session, remaining))
+                .AddTo(this);
+        }
+
+        /// <summary>
+        /// 本編（Playing）の残り時間を監視し、<see cref="lastSpurtRemainingSeconds"/> 以下になった
+        /// 最初のタイミングで本編BGMの音量・再生速度をラストスパート仕様に切り替える。
+        /// 対象は再生中の本編BGM（MainBgmClip）のみ。以降のセッションでは <see cref="PlayBgmLoop"/> が
+        /// lastSpurtApplied をリセットするため、次のセッションでも同じ演出が発火する。
+        /// </summary>
+        private void OnRemainingTimeChanged(GameSession session, float remaining)
+        {
+            if (lastSpurtApplied || bgmSource == null || bgmSource.clip != GIPokerAssets.MainBgmClip)
+            {
+                return;
+            }
+            if (session.State.CurrentValue != SessionState.Playing || remaining > lastSpurtRemainingSeconds)
+            {
+                return;
+            }
+
+            lastSpurtApplied = true;
+            bgmSource.volume = mainBgmVolume * mainBgmVolumeMultiplier * lastSpurtVolumeMultiplier;
+            bgmSource.pitch = lastSpurtPitchMultiplier;
+
+            // BGM切り替えとは独立に、ワンショットで一度だけ鳴らす（seSourceの.clip/.Playを使う
+            // PlayOneShotAndWaitAsyncとは異なりPlayOneShotは既存の再生を止めずに重ねられるため、
+            // 掛け声（本編開始時点では再生完了済み）と衝突しない）
+            if (seSource != null && GIPokerAssets.LastSpurtClip != null)
+            {
+                seSource.PlayOneShot(GIPokerAssets.LastSpurtClip);
+            }
         }
 
         /// <summary>
@@ -137,7 +194,14 @@ namespace STYLY.TIB_Template.GIPoker
                     case TutorialAudioAction.ExitTutorialToPlaying:
                         await FadeOutAndStopBgmAsync(ct);
                         await PlayOneShotAndWaitAsync(GIPokerAssets.SessionStartVoiceClip, ct);
-                        PlayBgmLoop(GIPokerAssets.MainBgmClip, mainBgmVolume);
+                        PlayBgmLoop(GIPokerAssets.MainBgmClip, mainBgmVolume * mainBgmVolumeMultiplier);
+                        break;
+                    case TutorialAudioAction.EnterFinished:
+                        await FadeOutAndStopBgmAsync(ct);
+                        if (seSource != null && GIPokerAssets.FinishVoiceClip != null)
+                        {
+                            seSource.PlayOneShot(GIPokerAssets.FinishVoiceClip);
+                        }
                         break;
                 }
             }
@@ -163,7 +227,9 @@ namespace STYLY.TIB_Template.GIPoker
             }
             bgmSource.clip = clip;
             bgmSource.volume = volume;
+            bgmSource.pitch = 1f;
             bgmSource.loop = true;
+            lastSpurtApplied = false;
             bgmSource.Play();
         }
 

@@ -126,7 +126,7 @@ namespace STYLY.TIB_Template.GIPoker
         private void AppendTitleStage()
         {
             var title = CreateText(panelRoot.transform, "Title", "TIME UP!",
-                new Vector3(0f, 0.25f, 0f), 26f, GoldColor, FontStyles.Bold);
+                new Vector3(0f, 0.25f, 0f), 32f, GoldColor, FontStyles.Bold);
             title.transform.localScale = Vector3.zero;
 
             panelRoot.transform.localScale = Vector3.zero;
@@ -209,12 +209,12 @@ namespace STYLY.TIB_Template.GIPoker
                 var (comboName, bonus) = lines[i];
 
                 var nameText = CreateText(panelRoot.transform, $"ComboName{i}", comboName,
-                    new Vector3(-0.05f, y, 0f), 10f, Color.white, FontStyles.Normal,
+                    new Vector3(-0.05f, y, 0f), 18f, Color.white, FontStyles.Normal,
                     TextAlignmentOptions.Left, new Vector2(60f, 6f));
                 nameText.alpha = 0f;
 
                 var bonusText = CreateText(panelRoot.transform, $"ComboBonus{i}", $"+{bonus}",
-                    new Vector3(-0.10f, y, 0f), 10f, GoldColor, FontStyles.Bold,
+                    new Vector3(-0.10f, y, 0f), 18f, GoldColor, FontStyles.Bold,
                     TextAlignmentOptions.Right, new Vector2(44f, 6f));
                 bonusText.alpha = 0f;
                 bonusText.transform.localScale = Vector3.zero;
@@ -261,15 +261,15 @@ namespace STYLY.TIB_Template.GIPoker
         private void AppendScoreCountUpStage(ScoreResult result)
         {
             var baseText = CreateText(panelRoot.transform, "BaseScore", "基本得点  0",
-                new Vector3(-0.19f, -0.16f, 0f), 10f, Color.white, FontStyles.Normal);
+                new Vector3(-0.19f, -0.16f, 0f), 14f, Color.white, FontStyles.Normal);
             baseText.alpha = 0f;
 
             var bonusText = CreateText(panelRoot.transform, "BonusScore", "ボーナス  0",
-                new Vector3(0.19f, -0.16f, 0f), 10f, Color.white, FontStyles.Normal);
+                new Vector3(0.19f, -0.16f, 0f), 14f, Color.white, FontStyles.Normal);
             bonusText.alpha = 0f;
 
             var totalText = CreateText(panelRoot.transform, "Total", "TOTAL  0",
-                new Vector3(0f, -0.235f, 0f), 30f, GoldColor, FontStyles.Bold);
+                new Vector3(0f, -0.235f, 0f), 64f, GoldColor, FontStyles.Bold);
             totalText.alpha = 0f;
 
             sequence.AppendInterval(0.2f);
@@ -303,12 +303,12 @@ namespace STYLY.TIB_Template.GIPoker
             stampRoot.transform.localScale = Vector3.one * 3f;
 
             var letterText = CreateText(stampRoot.transform, "GradeLetter", grade.ToString(),
-                new Vector3(0f, 0.01f, 0f), 130f, gradeColor, FontStyles.Bold,
+                new Vector3(0f, 0.01f, 0f), 160f, gradeColor, FontStyles.Bold,
                 TextAlignmentOptions.Center, new Vector2(30f, 20f));
             letterText.alpha = 0f;
 
             var labelText = CreateText(stampRoot.transform, "GradeLabel", ResultGrade.GetLabel(grade),
-                new Vector3(0f, -0.085f, 0f), 10f, gradeColor, FontStyles.Bold,
+                new Vector3(0f, -0.085f, 0f), 16f, gradeColor, FontStyles.Bold,
                 TextAlignmentOptions.Center, new Vector2(30f, 6f));
             labelText.alpha = 0f;
 
@@ -329,7 +329,7 @@ namespace STYLY.TIB_Template.GIPoker
         {
             var footerText = CreateText(panelRoot.transform, "Footer",
                 "体験は以上です。ヘッドセットを外して スタッフにお声がけください",
-                new Vector3(0f, -0.295f, 0f), 8f, new Color(0.85f, 0.88f, 0.85f), FontStyles.Normal);
+                new Vector3(0f, -0.295f, 0f), 14f, new Color(0.85f, 0.88f, 0.85f), FontStyles.Normal);
             footerText.alpha = 0f;
 
             sequence.AppendInterval(0.2f);

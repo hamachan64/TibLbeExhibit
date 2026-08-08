@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using DG.Tweening;
 using R3;
+using Styly.NetSync;
 using TMPro;
 using UnityEngine;
 
@@ -29,7 +30,7 @@ namespace STYLY.TIB_Template.GIPoker
         // Smoke(startLifetime 1s) / ShockWave(startLifetime 0.5s) が再生し切るまでの余裕を持たせた値。
         private const float SmokeVfxLifetime = 1.5f;
 
-        private const float HeaderHeightY = 0.19f;
+        private const float HeaderHeightY = 0.21f;
         private const float HeaderZOffset = -0.01f;
 
         // ページめくりの補完アニメーション（DOTween）の所要時間
@@ -40,12 +41,33 @@ namespace STYLY.TIB_Template.GIPoker
         private static readonly Color HighlightEmissionColor = new Color(0.25f, 0.85f, 1f) * 3f;
         private static readonly int EmissionColorId = Shader.PropertyToID("_EmissionColor");
 
+        // ミニカードをPageのローカル座標系（幅=X/積層の厚み方向=Y/縦方向=Z）に正しく寝かせるための補正回転。
+        // RebuildMiniCards() 参照。
+        private static readonly Quaternion MiniCardPageRotation = Quaternion.Euler(90f, 180f, 0f);
+
+        // 角タブ発光デカール（初見でもページめくりの掴み位置がわかるよう常時表示する平たい発光板）。
+        // 収納OKハイライト（HighlightEmissionColor、シアン系）と混同しないよう暖色（琥珀）にする。
+        // Quadプリミティブの既定法線（-Z）をPageの+Y（浮かせる＝視認者側）に向けるため、
+        // MiniCardPageRotation と同じX=90°回転を使う（平板の色は無地なのでY回転は不要）。
+        private static readonly Color PageTabDecalColor = new Color(0.35f, 0.22f, 0.05f);
+        private static readonly Color PageTabDecalEmission = new Color(1f, 0.75f, 0.15f) * 2.5f;
+        private static readonly Quaternion PageTabDecalRotation = Quaternion.Euler(90f, 0f, 0f);
+
+        // 直前ページ（backward用タブ）は EndPageTurn で静止角180°（開ききった状態、Z軸まわり）に
+        // なる。そのページの子にそのまま forward と同じローカル位置・回転でデカールを置くと、
+        // 親の180°回転がそのまま乗って「浮かせるY方向オフセット」と法線がページの裏側
+        // （視認者と反対）を向いてしまい、実機で見えなくなる（後ろめくりの目印が無い問題の原因）。
+        // 180°回転後に forward と同じ見え方になるよう、あらかじめ打ち消しておく。
+        private static readonly Quaternion PageTabDecalRotationFlipped =
+            Quaternion.AngleAxis(180f, Vector3.forward) * PageTabDecalRotation;
+        private const float PageTabDecalDiameter = BinderLayout.PageTabRadius * 1.6f;
+
         [SerializeField, Tooltip("プレイヤー正面からの距離（m）")]
-        private float followDistance = 0.4f;
+        private float followDistance = 0.3f;
         [SerializeField, Tooltip("頭からどれだけ下に置くか（m）")]
-        private float heightBelowHead = 0.52f;
+        private float heightBelowHead = 0.4f;
         [SerializeField, Tooltip("追従の速さ")]
-        private float followSpeed = 3.5f;
+        private float followSpeed = 4f;
 
         private CardBinder binder;
         private Transform visualRoot;
@@ -67,6 +89,12 @@ namespace STYLY.TIB_Template.GIPoker
 
         /// <summary>現在ドラッグでめくっているページの配列インデックス（-1 ならめくり操作なし）</summary>
         private int turningPageIndex = -1;
+
+        /// <summary>現在ページの角タブ（前めくり用）の発光デカール</summary>
+        private GameObject forwardPageTabDecal;
+
+        /// <summary>直前ページの角タブ（後ろめくり用）の発光デカール。currentPageIndex==0のときは無し</summary>
+        private GameObject backwardPageTabDecal;
 
         /// <summary>true: currentPageIndex のページを 0°→180° 方向にめくっている（次のページへ進む）</summary>
         private bool turningForward;
@@ -98,6 +126,16 @@ namespace STYLY.TIB_Template.GIPoker
             if (GameSession.Instance != null)
             {
                 GameSession.Instance.RemainingTime
+                    .Subscribe(_ => UpdateHeader())
+                    .AddTo(this);
+            }
+
+            // NetSyncManager.ClientNo はサーバーとのハンドシェイク完了後に非同期で確定するため、
+            // ここまでの購読だけでは Ready確定前（かつ RemainingTime が変化しないTutorial中等）は
+            // ずっと「接続中...」のままになりうる。Ready確定時に改めてヘッダーを更新する。
+            if (Styly.NetSync.Utility.EventManager.Instance != null)
+            {
+                Styly.NetSync.Utility.EventManager.Instance.OnReadyAsObservable()
                     .Subscribe(_ => UpdateHeader())
                     .AddTo(this);
             }
@@ -191,7 +229,7 @@ namespace STYLY.TIB_Template.GIPoker
                 var model = Instantiate(modelPrefab, visualRoot);
                 model.name = "Model";
                 model.transform.localPosition = Vector3.zero;
-                model.transform.localRotation = Quaternion.Euler(-90f, 0f, 0f);
+                model.transform.localEulerAngles = new Vector3(-270f, 90f, -90f);
                 model.transform.localScale = Vector3.one;
                 LoadPages(model.transform);
                 modelRenderers = model.GetComponentsInChildren<Renderer>(true);
@@ -216,7 +254,9 @@ namespace STYLY.TIB_Template.GIPoker
             }
             headerText.fontSize = 18f;
             headerText.alignment = TextAlignmentOptions.Center;
-            headerText.rectTransform.sizeDelta = new Vector2(48f, 8f);
+            headerText.textWrappingMode = TextWrappingModes.NoWrap;
+            headerText.overflowMode = TextOverflowModes.Overflow;
+            headerText.rectTransform.sizeDelta = new Vector2(100f, 16f);
 
             UpdateHeader();
         }
@@ -294,10 +334,25 @@ namespace STYLY.TIB_Template.GIPoker
             var seconds = Mathf.FloorToInt(time % 60f);
             var scoreResult = binder != null ? binder.Score.CurrentValue : ScoreResult.Empty;
             var count = binder != null ? binder.Cards.Count : 0;
-            headerText.text =
+            var nameLabel = GetLocalPlayerNameLabel();
+            var statsLabel =
                 $"<color=#FFD34D>残り {minutes:0}:{seconds:00}</color>   " +
                 $"<color=#FFFFFF>SCORE {scoreResult.TotalScore}</color>   " +
                 $"<color=#9AD1FF>{count}枚</color>";
+            headerText.text = $"{nameLabel}\n{statsLabel}";
+        }
+
+        /// <summary>
+        /// 自クライアントのニックネーム（「ハンターNo.xx」形式）を解決する。
+        /// ClientNo はサーバーとのハンドシェイク完了後に非同期で確定するため、未確定（0）の間は
+        /// 「接続中...」を返す（NetSyncManager が存在しない単体シーンテスト等でも同様）。
+        /// </summary>
+        private string GetLocalPlayerNameLabel()
+        {
+            var clientNo = NetSyncManager.Instance != null ? NetSyncManager.Instance.ClientNo : 0;
+            return clientNo > 0
+                ? PlayerNickname.Format(clientNo)
+                : "接続中...";
         }
 
         /// <summary>
@@ -340,6 +395,12 @@ namespace STYLY.TIB_Template.GIPoker
                     var slot = BinderLayout.SlotIndexOf(index);
                     var mini = CardVisualFactory.Create(pageTransform, instance.Definition, BinderLayout.MiniCardScale, withSparkle: false);
                     mini.transform.localPosition = BinderLayout.SlotLocalPosition(slot);
+                    // CardVisualFactory が作るカード本体は「幅=ローカルX/高さ=ローカルY/厚み=ローカルZ」だが、
+                    // Page自体のローカル軸は「幅=X/積層の厚み方向=Y/縦方向=Z」（実測値、BinderLayoutのコメント参照）
+                    // であり、そのままではカードの高さ(88mm)がページの薄い積層方向(Y)に乗って垂直に飛び出してしまう。
+                    // ローカルX軸まわりに90°回転させ、カードの高さをPageのZ軸（縦方向）に、
+                    // カードの前面（-Z向き）をPageの+Y（ページ面から浮かせる＝視認者側）に合わせる。
+                    mini.transform.localRotation = MiniCardPageRotation;
                     mini.SetActive(true);
                     miniCards.Add(mini);
                     miniCardInstances.Add(instance);
@@ -352,6 +413,57 @@ namespace STYLY.TIB_Template.GIPoker
                 }
                 index++;
             }
+
+            UpdatePageTabDecals();
+        }
+
+        /// <summary>
+        /// 現在操作可能な2枚（現在ページの前めくり用／直前ページの後ろめくり用）の角タブに、
+        /// 常時発光するデカールを表示する。TryBeginPageTurn が判定に使う位置・対象ページと一致させる。
+        /// </summary>
+        private void UpdatePageTabDecals()
+        {
+            forwardPageTabDecal = EnsurePageTabDecal(forwardPageTabDecal, currentPageIndex, flipped: false);
+            backwardPageTabDecal = EnsurePageTabDecal(backwardPageTabDecal, currentPageIndex - 1, flipped: true);
+        }
+
+        /// <summary>
+        /// <paramref name="flipped"/> は、そのページが静止角180°（前ページ・開ききった状態）に
+        /// あることを前提とするかどうか。180°の場合は Y オフセット・回転を打ち消して、
+        /// 見た目上 forward タブと同じ向き（視認者側）に浮くようにする。
+        /// </summary>
+        private GameObject EnsurePageTabDecal(GameObject decal, int pageIndex, bool flipped)
+        {
+            if (pages == null || pageIndex < 0 || pageIndex >= pages.Length || pages[pageIndex] == null)
+            {
+                if (decal != null)
+                {
+                    decal.SetActive(false);
+                }
+                return decal;
+            }
+
+            if (decal == null)
+            {
+                decal = CreatePageTabDecal();
+            }
+            decal.transform.SetParent(pages[pageIndex], false);
+            var surfaceOffsetY = flipped ? -BinderLayout.MiniCardSurfaceOffset : BinderLayout.MiniCardSurfaceOffset;
+            decal.transform.localPosition = new Vector3(
+                BinderLayout.PageTabLocalPosition.x, surfaceOffsetY, BinderLayout.PageTabLocalPosition.z);
+            decal.transform.localRotation = flipped ? PageTabDecalRotationFlipped : PageTabDecalRotation;
+            decal.SetActive(true);
+            return decal;
+        }
+
+        private GameObject CreatePageTabDecal()
+        {
+            var decal = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            decal.name = "PageTabDecal";
+            Destroy(decal.GetComponent<Collider>());
+            decal.transform.localScale = Vector3.one * PageTabDecalDiameter;
+            decal.GetComponent<Renderer>().sharedMaterial = CardVisualFactory.CreateLitMaterial(PageTabDecalColor, PageTabDecalEmission);
+            return decal;
         }
 
         /// <summary>
@@ -653,7 +765,10 @@ namespace STYLY.TIB_Template.GIPoker
             }
 
             targetPos = cam.transform.position + flatForward * followDistance + Vector3.down * heightBelowHead;
-            targetRot = Quaternion.LookRotation(flatForward) * Quaternion.Euler(30f, 0f, 180f);
+            // 本の表裏（プレイヤーに正対させるか）を反転させたい場合はY軸（ヨー）で回すこと。
+            // Z軸（ロール）の180°回転は表裏を変えず、ヘッダーテキストやページ内容が上下反転する
+            // 副作用だけを生むため使わない（過去にZ軸で反転を「修正」していたのがテキスト逆表示の原因）。
+            targetRot = Quaternion.LookRotation(flatForward) * Quaternion.Euler(30f, 0f, 0f);
             return true;
         }
 

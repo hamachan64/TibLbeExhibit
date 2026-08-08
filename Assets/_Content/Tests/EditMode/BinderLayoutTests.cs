@@ -34,8 +34,9 @@ namespace STYLY.TIB_Template.GIPoker.Tests
         [Test]
         public void PageCenterX_MatchesMeasuredMidpoint()
         {
-            // (-0.007 + 0.214) / 2 = 0.1035
-            Assert.That(BinderLayout.PageCenterX, Is.EqualTo(0.1035f).Within(Tolerance));
+            // (-0.214 + 0.007) / 2 = -0.1035
+            // （PlayMode実測により、当初想定していたX符号が実際のメッシュと逆であったことが判明したため修正）
+            Assert.That(BinderLayout.PageCenterX, Is.EqualTo(-0.1035f).Within(Tolerance));
         }
 
         [Test]
@@ -46,16 +47,16 @@ namespace STYLY.TIB_Template.GIPoker.Tests
             Assert.That(BinderLayout.CellHeight, Is.EqualTo(0.096667f).Within(Tolerance));
         }
 
-        // slotIndex: 列優先（col = slot % 3, row = slot / 3）。row0が上、col0が左（既存GridPositionの符号規約を踏襲）。
-        [TestCase(0, 0.029833f, 0.096667f)] // col0,row0（左上）
-        [TestCase(1, 0.1035f, 0.096667f)]   // col1,row0（中央上）
-        [TestCase(2, 0.177167f, 0.096667f)] // col2,row0（右上）
-        [TestCase(3, 0.029833f, 0f)]        // col0,row1（左中）
-        [TestCase(4, 0.1035f, 0f)]          // col1,row1（中央）
-        [TestCase(5, 0.177167f, 0f)]        // col2,row1（右中）
-        [TestCase(6, 0.029833f, -0.096667f)] // col0,row2（左下）
-        [TestCase(7, 0.1035f, -0.096667f)]   // col1,row2（中央下）
-        [TestCase(8, 0.177167f, -0.096667f)] // col2,row2（右下）
+        // slotIndex: 列優先（col = slot % 3, row = slot / 3）。row0が上（奥側 -CellHeight）、row2が下（手前側 +CellHeight）。
+        [TestCase(0, -0.177167f, -0.096667f)] // col0,row0（左上）
+        [TestCase(1, -0.1035f, -0.096667f)]   // col1,row0（中央上）
+        [TestCase(2, -0.029833f, -0.096667f)] // col2,row0（右上）
+        [TestCase(3, -0.177167f, 0f)]         // col0,row1（左中）
+        [TestCase(4, -0.1035f, 0f)]           // col1,row1（中央）
+        [TestCase(5, -0.029833f, 0f)]         // col2,row1（右中）
+        [TestCase(6, -0.177167f, 0.096667f)]  // col0,row2（左下）
+        [TestCase(7, -0.1035f, 0.096667f)]    // col1,row2（中央下）
+        [TestCase(8, -0.029833f, 0.096667f)]  // col2,row2（右下）
         public void SlotLocalPosition_MatchesHandComputedGrid(int slotIndex, float expectedX, float expectedZ)
         {
             var position = BinderLayout.SlotLocalPosition(slotIndex);
@@ -100,14 +101,15 @@ namespace STYLY.TIB_Template.GIPoker.Tests
         [Test]
         public void PageTab_DoesNotOverlapPocketGridRegion()
         {
-            // 角タブの当たり判定円の最も内側（PageTabLocalX - 半径）が、
-            // ポケットグリッドの右端（PageMeshMaxX、SlotLocalPosition_RightmostColumnEdge_～ で確認済み）
-            // より確実に外側にあることを構造的に保証する。この重なり回避が最重要の設計要件。
-            var tabInnerEdgeX = BinderLayout.PageTabLocalX - BinderLayout.PageTabRadius;
+            // 角タブはスパインから最も遠い側（PageMeshMinX側）の外に置く。当たり判定円の最も内側
+            // （PageTabLocalX + 半径）が、ポケットグリッドの左端（PageMeshMinX、
+            // SlotLocalPosition_LeftmostColumnEdge_～ で確認済み）より確実に外側にあることを
+            // 構造的に保証する。この重なり回避が最重要の設計要件。
+            var tabInnerEdgeX = BinderLayout.PageTabLocalX + BinderLayout.PageTabRadius;
 
-            Assert.That(tabInnerEdgeX, Is.GreaterThan(BinderLayout.PageMeshMaxX));
+            Assert.That(tabInnerEdgeX, Is.LessThan(BinderLayout.PageMeshMinX));
             // マージン定数どおりの余白が確保されていることも確認する
-            Assert.That(tabInnerEdgeX - BinderLayout.PageMeshMaxX, Is.EqualTo(BinderLayout.PageTabEdgeMargin).Within(Tolerance));
+            Assert.That(BinderLayout.PageMeshMinX - tabInnerEdgeX, Is.EqualTo(BinderLayout.PageTabEdgeMargin).Within(Tolerance));
         }
 
         [Test]

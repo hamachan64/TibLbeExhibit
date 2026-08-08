@@ -224,12 +224,14 @@ namespace STYLY.TIB_Template.GIPoker
             divider.GetComponent<Renderer>().sharedMaterial = CreateTrackedMaterial(GoldColor, GoldEmission);
 
             // タイトル（初期値は空。ShowStep で各ステップの Title に差し替わる）
-            titleText = CreateText("Title", string.Empty, new Vector3(0f, 0.075f, -0.002f), 5.5f,
+            titleText = CreateText("Title", string.Empty, new Vector3(0f, 0.075f, -0.002f), 20f,
                 GoldColor, FontStyles.Bold);
 
             // 指示テキスト（中央・少し大きめ＆行間広めで一読しやすく）
-            instructionText = CreateText("Instruction", string.Empty, new Vector3(0f, 0.006f, -0.002f), 7f,
+            instructionText = CreateText("Instruction", string.Empty, new Vector3(0f, 0.006f, -0.002f), 14f,
                 Color.white, FontStyles.Bold);
+            instructionText.textWrappingMode = TextWrappingModes.Normal;
+            instructionText.rectTransform.sizeDelta = new Vector2(48f, 12f);
             instructionText.lineSpacing = 8f;
             instructionBasePos = instructionText.transform.localPosition;
 
@@ -237,7 +239,7 @@ namespace STYLY.TIB_Template.GIPoker
             BuildDots(stepCount);
 
             // 本編開始カウントダウン（下部・小。最後の5秒は UpdateCountdown 内で強調表示に切り替わる）
-            countdownText = CreateText("Countdown", string.Empty, new Vector3(0f, -0.088f, -0.002f), 4f,
+            countdownText = CreateText("Countdown", string.Empty, new Vector3(0f, -0.088f, -0.002f), 8f,
                 CalmCountdownColor, FontStyles.Normal);
         }
 
@@ -357,10 +359,10 @@ namespace STYLY.TIB_Template.GIPoker
             flourishRoot.transform.SetParent(panelRoot, false);
             flourishRoot.transform.localPosition = new Vector3(0f, 0.135f, -0.015f);
 
-            var mainTitle = CreateText(flourishRoot.transform, "IntroTitle", "具現化ポーカー",
-                Vector3.zero, 10f, GoldColor, FontStyles.Bold);
-            var subTitle = CreateText(flourishRoot.transform, "IntroSub", "- G.I. POKER -",
-                new Vector3(0f, -0.026f, 0f), 4.2f, new Color(0.85f, 0.72f, 0.48f), FontStyles.Normal);
+            var mainTitle = CreateText(flourishRoot.transform, "IntroTitle", "MR グリード・アイランド",
+                Vector3.zero, 20f, GoldColor, FontStyles.Bold);
+            var subTitle = CreateText(flourishRoot.transform, "IntroSub", "- MR G.I.  -",
+                new Vector3(0f, -0.026f, 0f), 10f, new Color(0.85f, 0.72f, 0.48f), FontStyles.Normal);
 
             var mainBaseScale = mainTitle.transform.localScale;
             var subBaseScale = subTitle.transform.localScale;
@@ -440,7 +442,7 @@ namespace STYLY.TIB_Template.GIPoker
             }
 
             var praise = CreateText(panelRoot, "Praise", "よくできた！",
-                new Vector3(0f, 0.128f, -0.01f), 5.5f, GoldColor, FontStyles.Bold);
+                new Vector3(0f, 0.128f, -0.01f), 10f, GoldColor, FontStyles.Bold);
             var baseScale = praise.transform.localScale;
             praise.alpha = 0f;
             praise.transform.localScale = Vector3.zero;
@@ -491,7 +493,9 @@ namespace STYLY.TIB_Template.GIPoker
             tmp.color = color;
             tmp.fontStyle = style;
             tmp.alignment = TextAlignmentOptions.Center;
-            tmp.rectTransform.sizeDelta = new Vector2(42f, 8f);
+            tmp.textWrappingMode = TextWrappingModes.NoWrap;
+            tmp.overflowMode = TextOverflowModes.Overflow;
+            tmp.rectTransform.sizeDelta = new Vector2(100f, 15f);
             return tmp;
         }
 
@@ -518,7 +522,7 @@ namespace STYLY.TIB_Template.GIPoker
             {
                 countdownText.text = "本編スタート！";
                 countdownText.color = WarnColor;
-                countdownText.fontSize = 6.5f;
+                countdownText.fontSize = 10f;
                 return;
             }
 
@@ -526,7 +530,7 @@ namespace STYLY.TIB_Template.GIPoker
             {
                 countdownText.text = $"まもなく本編開始… {sec}";
                 countdownText.color = Color.Lerp(GoldColor, WarnColor, (6 - sec) / 5f);
-                countdownText.fontSize = 6.5f;
+                countdownText.fontSize = 10f;
 
                 countdownText.transform.DOKill();
                 countdownText.transform.localScale = Vector3.one * TextBaseScale * 0.8f;
@@ -540,7 +544,7 @@ namespace STYLY.TIB_Template.GIPoker
             {
                 countdownText.text = $"本編開始まで {sec}秒";
                 countdownText.color = CalmCountdownColor;
-                countdownText.fontSize = 4f;
+                countdownText.fontSize = 10f;
             }
         }
 

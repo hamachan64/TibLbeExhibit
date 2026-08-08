@@ -17,6 +17,12 @@ namespace STYLY.TIB_Template.GIPoker
         /// <summary>カード化元のシーン上オブジェクト（ゲイン時の具現化に使用）</summary>
         public CardizableItemBase Source { get; }
 
+        /// <summary>
+        /// ボーナスタイム（残り30秒以降）中に収納されたカードかどうか。
+        /// true のとき、スコア計算で得点が 1.5 倍になる。
+        /// </summary>
+        public bool IsBonus { get; private set; }
+
         public CardRank Rank => Definition.Rank;
 
         public CardInstance(CardDefinition definition, CardizableItemBase source)
@@ -29,6 +35,12 @@ namespace STYLY.TIB_Template.GIPoker
         internal void ReplaceDefinition(CardDefinition newDefinition)
         {
             Definition = newDefinition;
+        }
+
+        /// <summary>ボーナスタイム中に収納されたことをマークする（CardBinder から呼ぶ）</summary>
+        internal void MarkAsBonus()
+        {
+            IsBonus = true;
         }
     }
 }

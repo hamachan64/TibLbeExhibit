@@ -25,6 +25,10 @@ namespace STYLY.TIB_Template.GIPoker
         [SerializeField, TextArea, Tooltip("カードの説明文（バインダーUI表示用）")]
         private string description;
 
+        [Header("ビジュアル設定")]
+        [SerializeField, Tooltip("カードの画像テクスチャ（表面デザイン画像）。設定するとテキストの代わりにこの画像が表示されます。")]
+        private Texture2D cardTexture;
+
         [Header("出現設定")]
         [SerializeField, Tooltip("アイテムのプレハブ（CardizableItemBase 付き）")]
         private GameObject prefab;
@@ -40,6 +44,7 @@ namespace STYLY.TIB_Template.GIPoker
         public CardRank Rank => rank;
         public CardEffectType EffectType => effectType;
         public string Description => description;
+        public Texture2D CardTexture => cardTexture;
         public GameObject Prefab => prefab;
         public int InitialCount => initialCount;
         public int MaxCount => maxCount;

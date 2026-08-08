@@ -46,11 +46,11 @@ namespace STYLY.TIB_Template.GIPoker.Tests
         }
 
         [Test]
-        public void Playing_To_Finished_ReturnsNone()
+        public void Playing_To_Finished_ReturnsEnterFinished()
         {
             var action = TutorialAudioController.PlanAction(SessionState.Playing, SessionState.Finished);
 
-            Assert.That(action, Is.EqualTo(TutorialAudioAction.None));
+            Assert.That(action, Is.EqualTo(TutorialAudioAction.EnterFinished));
         }
 
         [Test]

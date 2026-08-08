@@ -178,8 +178,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u672C\u65E5TOP3"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: ab041cb34e0c84558b8359ca7a47eff9, type: 2}
-  m_sharedMaterial: {fileID: -3723073739088113796, guid: ab041cb34e0c84558b8359ca7a47eff9, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1633e64c790e64dbe8a7c693e2bdb8f5, type: 2}
+  m_sharedMaterial: {fileID: 2068280042649474635, guid: 1633e64c790e64dbe8a7c693e2bdb8f5, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -198,7 +198,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -315,8 +315,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u30B3\u30F3\u30C6\u30F3\u30C4\u306E\u30B9\u30BF\u30FC\u30C8\u30BF\u30A4\u30DF\u30F3\u30B0\u3092\u624B\u5143\u3067\u5236\u5FA1\u3057\u305F\u3044\u5834\u5408\u306F\u3001\u5225\u9014OperatorClient\u3092\u7528\u610F\u3059\u308B\u3068\u826F\u3044\u3067\u3057\u3087\u3046\u3002\n\u30C7\u30E2\u7A0B\u5EA6\u306A\u3089\u30D3\u30EB\u30C9\u305B\u305A\u306BUnityEditor\u5B9F\u884C\u3067\u3082\u3044\u3044\u3068\u601D\u3044\u307E\u3059\u3002\n"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: ab041cb34e0c84558b8359ca7a47eff9, type: 2}
-  m_sharedMaterial: {fileID: -3723073739088113796, guid: ab041cb34e0c84558b8359ca7a47eff9, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1633e64c790e64dbe8a7c693e2bdb8f5, type: 2}
+  m_sharedMaterial: {fileID: 2068280042649474635, guid: 1633e64c790e64dbe8a7c693e2bdb8f5, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -561,7 +561,7 @@ PrefabInstance:
     - target: {fileID: 5729049226429455924, guid: e143c37e2b0944c278fd43733d72fa3b, type: 3}
       propertyPath: _remoteAvatarPrefab
       value: 
-      objectReference: {fileID: 7715607727795320353, guid: 3467ae9e2333e434f97fad8094f439cc, type: 3}
+      objectReference: {fileID: 7715607727795320353, guid: fead13fc00a924023a3a50f5f7414caa, type: 3}
     - target: {fileID: 5729049226429455924, guid: e143c37e2b0944c278fd43733d72fa3b, type: 3}
       propertyPath: _serverDiscoveryPort
       value: 6400
@@ -630,8 +630,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: '-'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: ab041cb34e0c84558b8359ca7a47eff9, type: 2}
-  m_sharedMaterial: {fileID: -3723073739088113796, guid: ab041cb34e0c84558b8359ca7a47eff9, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1633e64c790e64dbe8a7c693e2bdb8f5, type: 2}
+  m_sharedMaterial: {fileID: 2068280042649474635, guid: 1633e64c790e64dbe8a7c693e2bdb8f5, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -650,7 +650,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -767,8 +767,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u30B3\u30F3\u30C6\u30F3\u30C4\u30B9\u30BF\u30FC\u30C8"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: ab041cb34e0c84558b8359ca7a47eff9, type: 2}
-  m_sharedMaterial: {fileID: -3723073739088113796, guid: ab041cb34e0c84558b8359ca7a47eff9, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1633e64c790e64dbe8a7c693e2bdb8f5, type: 2}
+  m_sharedMaterial: {fileID: 2068280042649474635, guid: 1633e64c790e64dbe8a7c693e2bdb8f5, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1349,8 +1349,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u6B8B\u308A\u6642\u9593: --:--"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: ab041cb34e0c84558b8359ca7a47eff9, type: 2}
-  m_sharedMaterial: {fileID: -3723073739088113796, guid: ab041cb34e0c84558b8359ca7a47eff9, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1633e64c790e64dbe8a7c693e2bdb8f5, type: 2}
+  m_sharedMaterial: {fileID: 2068280042649474635, guid: 1633e64c790e64dbe8a7c693e2bdb8f5, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1369,7 +1369,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -1561,8 +1561,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: '-'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: ab041cb34e0c84558b8359ca7a47eff9, type: 2}
-  m_sharedMaterial: {fileID: -3723073739088113796, guid: ab041cb34e0c84558b8359ca7a47eff9, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1633e64c790e64dbe8a7c693e2bdb8f5, type: 2}
+  m_sharedMaterial: {fileID: 2068280042649474635, guid: 1633e64c790e64dbe8a7c693e2bdb8f5, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1581,7 +1581,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -1698,8 +1698,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u73FE\u5728\u306E\u30BB\u30C3\u30B7\u30E7\u30F3TOP3"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: ab041cb34e0c84558b8359ca7a47eff9, type: 2}
-  m_sharedMaterial: {fileID: -3723073739088113796, guid: ab041cb34e0c84558b8359ca7a47eff9, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1633e64c790e64dbe8a7c693e2bdb8f5, type: 2}
+  m_sharedMaterial: {fileID: 2068280042649474635, guid: 1633e64c790e64dbe8a7c693e2bdb8f5, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1718,7 +1718,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2

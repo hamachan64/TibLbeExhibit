@@ -226,7 +226,7 @@ PrefabInstance:
     - target: {fileID: 5729049226429455924, guid: e143c37e2b0944c278fd43733d72fa3b, type: 3}
       propertyPath: _remoteAvatarPrefab
       value: 
-      objectReference: {fileID: 7715607727795320353, guid: 3467ae9e2333e434f97fad8094f439cc, type: 3}
+      objectReference: {fileID: 7715607727795320353, guid: fead13fc00a924023a3a50f5f7414caa, type: 3}
     - target: {fileID: 5729049226429455924, guid: e143c37e2b0944c278fd43733d72fa3b, type: 3}
       propertyPath: _serverDiscoveryPort
       value: 6400
@@ -287,6 +287,10 @@ PrefabInstance:
     - target: {fileID: 932545197216251794, guid: 8ea6960e82d7c419c93a7f4f18e7b06e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1956381348160497358, guid: 8ea6960e82d7c419c93a7f4f18e7b06e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.30000007
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -474,7 +478,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2e41e9d11b284e05ad320291d27cf04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::STYLY.TIB_Template.GIPoker.GIPokerBootstrap
-  japaneseFont: {fileID: 11400000, guid: ab041cb34e0c84558b8359ca7a47eff9, type: 2}
+  japaneseFont: {fileID: 11400000, guid: 1633e64c790e64dbe8a7c693e2bdb8f5, type: 2}
   cardSparkleVfx: {fileID: 2694810411924874915, guid: 678b6a07af7a44900bc846dea3d2afcf, type: 3}
   cardifyVfx: {fileID: 9157105887711914197, guid: c4f829cb7dd4b864caf8832ec5b1ee55, type: 3}
   gainVfx: {fileID: 8771972552311404799, guid: bbf9e36a48d6c5648a13889afab076fd, type: 3}
@@ -495,6 +499,8 @@ MonoBehaviour:
   tutorialBgmClip: {fileID: 8300000, guid: 1e1d255e12dd94240a7fed02e8ec1948, type: 3}
   sessionStartVoiceClip: {fileID: 8300000, guid: 1d6c32ed4938c4646b36e2cfce12b559, type: 3}
   mainBgmClip: {fileID: 8300000, guid: 4cbc5ed3841eb4398bd4ad5e8fc54c4f, type: 3}
+  lastSpurtClip: {fileID: 8300000, guid: de8122486aa4948c7849c21c668277ee, type: 3}
+  finishVoiceClip: {fileID: 8300000, guid: 1e2897f3ca2474dafaa89dd06f96b1d1, type: 3}
   rankConfig: {fileID: 11400000, guid: 014639dcfb40f4803a31dd879eb71320, type: 2}
 --- !u!114 &2082618858
 MonoBehaviour:
@@ -535,10 +541,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 328fd29decd7e40cb986e14cb21e36e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::STYLY.TIB_Template.GIPoker.GameSession
-  sessionDurationSeconds: 300
+  sessionDurationSeconds: 120
   autoStartInEditorDelay: 3
   skipTutorial: 0
-  tutorialDurationSeconds: 110
+  tutorialDurationSeconds: 90
 --- !u!4 &2082618860
 Transform:
   m_ObjectHideFlags: 0

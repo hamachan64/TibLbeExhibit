@@ -20,6 +20,7 @@ namespace STYLY.TIB_Template.GIPoker
         private const float CardThickness = 0.003f;
 
         private static readonly Dictionary<CardRank, Material> frameMaterials = new();
+        private static readonly Dictionary<Texture2D, Material> textureMaterials = new();
         private static Material bodyMaterial;
 
         /// <summary>
@@ -82,9 +83,18 @@ namespace STYLY.TIB_Template.GIPoker
 
             if (definition != null)
             {
-                // 表・裏の両面にテキストを配置する（浮遊回転しても読めるように）
-                CreateFaceTexts(root.transform, definition, rankColor, front: true);
-                CreateFaceTexts(root.transform, definition, rankColor, front: false);
+                if (definition.CardTexture != null)
+                {
+                    // 画像テクスチャが設定されている場合は表裏に Quad で表示
+                    CreateFaceTextureQuads(root.transform, definition.CardTexture, front: true);
+                    CreateFaceTextureQuads(root.transform, definition.CardTexture, front: false);
+                }
+                else
+                {
+                    // 表・裏の両面にテキストを配置する（浮遊回転しても読めるように）
+                    CreateFaceTexts(root.transform, definition, rankColor, front: true);
+                    CreateFaceTexts(root.transform, definition, rankColor, front: false);
+                }
             }
 
             if (withSparkle && GIPokerAssets.CardSparkleVfx != null)
@@ -151,6 +161,33 @@ namespace STYLY.TIB_Template.GIPoker
                 var color = GetRankColor(rank);
                 mat = CreateLitMaterial(color, emission: color * 0.6f);
                 frameMaterials[rank] = mat;
+            }
+            return mat;
+        }
+
+        private static void CreateFaceTextureQuads(Transform root, Texture2D texture, bool front)
+        {
+            var zOffset = (CardThickness * 0.5f + 0.0008f) * (front ? -1f : 1f);
+            var yaw = front ? 0f : 180f;
+
+            var quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            quad.name = front ? "FaceTextureF" : "FaceTextureB";
+            Object.Destroy(quad.GetComponent<Collider>());
+            quad.transform.SetParent(root, false);
+            quad.transform.localPosition = new Vector3(0f, 0f, zOffset);
+            quad.transform.localRotation = Quaternion.Euler(0f, yaw, 0f);
+            quad.transform.localScale = new Vector3(CardWidth, CardHeight, 1f);
+            quad.GetComponent<Renderer>().sharedMaterial = GetTextureMaterial(texture);
+        }
+
+        private static Material GetTextureMaterial(Texture2D texture)
+        {
+            if (texture == null) return null;
+            if (!textureMaterials.TryGetValue(texture, out var mat) || mat == null)
+            {
+                mat = CreateLitMaterial(Color.white, emission: Color.black);
+                mat.SetTexture("_BaseMap", texture);
+                textureMaterials[texture] = mat;
             }
             return mat;
         }

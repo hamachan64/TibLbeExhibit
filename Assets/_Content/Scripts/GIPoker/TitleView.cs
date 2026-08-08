@@ -103,11 +103,11 @@ namespace STYLY.TIB_Template.GIPoker
         private void BuildLogo(Transform parent)
         {
             // 金色（#F2C740系）の大きなメインロゴ
-            CreateText(parent, "MainLogo", "具現化ポーカー",
+            CreateText(parent, "MainLogo", "MR グリード・アイランド",
                 new Vector3(0f, 0.36f, 0f), 64f, new Color(0.95f, 0.78f, 0.25f), FontStyles.Bold);
 
-            CreateText(parent, "SubLogo", "- G.I. POKER -",
-                new Vector3(0f, 0.22f, 0f), 20f, new Color(0.85f, 0.72f, 0.48f), FontStyles.Normal);
+            CreateText(parent, "SubLogo", "- MR G.I. -",
+                new Vector3(0f, 0.22f, 0f), 24f, new Color(0.85f, 0.72f, 0.48f), FontStyles.Normal);
         }
 
         private void BuildDecorCards(Transform parent)
@@ -201,7 +201,7 @@ namespace STYLY.TIB_Template.GIPoker
         {
             var caption = CreateText(parent, "Caption",
                 "スタッフがゲームを開始するまで\nそのままお待ちください",
-                new Vector3(0f, -0.34f, 0f), 14f, Color.white, FontStyles.Normal);
+                new Vector3(0f, -0.34f, 0f), 20f, Color.white, FontStyles.Normal);
 
             // TextMeshPro（3D版）には DOFade 拡張がこのプロジェクトのDOTweenモジュールに
             // 含まれていない（UGUIのGraphic/Image向けのみ）ため、DOVirtual.Float で

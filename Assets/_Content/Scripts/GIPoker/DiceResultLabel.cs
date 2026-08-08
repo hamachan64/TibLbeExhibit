@@ -33,7 +33,7 @@ namespace STYLY.TIB_Template.GIPoker
                 label.text.font = GIPokerAssets.JapaneseFont;
             }
             label.text.text = message;
-            label.text.fontSize = 12f;
+            label.text.fontSize = 24f;
             label.text.color = new Color(0.95f, 0.78f, 0.25f);
             label.text.fontStyle = FontStyles.Bold;
             label.text.alignment = TextAlignmentOptions.Center;

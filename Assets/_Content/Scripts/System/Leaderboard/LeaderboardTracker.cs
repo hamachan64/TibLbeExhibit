@@ -3,14 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using R3;
 using Styly.NetSync;
+using Styly.NetSync.Utility;
 using UnityEngine;
 
 namespace STYLY.TIB_Template.Leaderboard
 {
     /// <summary>
-    /// OperatorClient.unity に配置するシングルトン。
+    /// UserClient.unity / OperatorClient.unity の両方に配置するシングルトン
+    /// （Environment.unity が両シーンから追加ロードされるため、各プロセスでローカルに必要）。
     /// 「今セッションのトップ3」「本日通算のトップ3」「残り時間」を追跡し、
-    /// ScoreMonitorView が購読する ReactiveProperty として公開する。
+    /// ScoreMonitorView / StageScoreMonitorView が購読する ReactiveProperty として公開する。
     /// </summary>
     [DefaultExecutionOrder(-90)]
     public class LeaderboardTracker : MonoBehaviour
@@ -73,6 +75,17 @@ namespace STYLY.TIB_Template.Leaderboard
             // 既に接続中の UserClient）は以後 OnAvatarConnected を受け取れず集計から漏れてしまうため、
             // 購読開始前に現在の接続済みクライアント一覧で connectedScores をシードしておく。
             SeedAlreadyConnectedClients();
+
+            // 自分自身の ClientNo はサーバーとのハンドシェイク完了後に非同期で確定するため、
+            // Start() 時点ではまだ 0（未確定）で GetAliveClients に含まれないことが多い。
+            // OnAvatarConnected は「リモート」アバターの接続にしか発火しないため、
+            // 自分専用に NetSyncManager.IsReady（ClientNo確定込み）を待って再シードする。
+            if (EventManager.Instance != null)
+            {
+                EventManager.Instance.OnReadyAsObservable()
+                    .Subscribe(_ => SeedAlreadyConnectedClients())
+                    .AddTo(this);
+            }
 
             // 接続中クライアントの追跡（サードパーティAPI＝UnityEvent<int> の受け口を Observable.Create でR3化する）
             AvatarConnectedAsObservable(NetSyncManager.Instance)
