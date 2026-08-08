@@ -58,6 +58,9 @@ namespace STYLY.TIB_Template.GIPoker
         /// <summary>本編の残り時間がラストスパート閾値を切った瞬間に1回再生するSE（Last30s.mp3）</summary>
         public static AudioClip LastSpurtClip;
 
+        /// <summary>本編終了・リザルト遷移時に1回再生する終了SE/音声（Fichish.mp3）</summary>
+        public static AudioClip FinishVoiceClip;
+
         /// <summary>
         /// ランク単位の数値バランス設定（得点・出現重み・宝籤重み・テーマカラー）。
         /// 未設定（null）でも各参照元（PokerHandEvaluator/ItemSpawnManager/CardEffectService/CardVisualFactory）は

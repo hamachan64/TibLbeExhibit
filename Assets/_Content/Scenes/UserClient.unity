@@ -499,7 +499,8 @@ MonoBehaviour:
   tutorialBgmClip: {fileID: 8300000, guid: 1e1d255e12dd94240a7fed02e8ec1948, type: 3}
   sessionStartVoiceClip: {fileID: 8300000, guid: 1d6c32ed4938c4646b36e2cfce12b559, type: 3}
   mainBgmClip: {fileID: 8300000, guid: 4cbc5ed3841eb4398bd4ad5e8fc54c4f, type: 3}
-  lastSpurtClip: {fileID: 0}
+  lastSpurtClip: {fileID: 8300000, guid: de8122486aa4948c7849c21c668277ee, type: 3}
+  finishVoiceClip: {fileID: 8300000, guid: 1e2897f3ca2474dafaa89dd06f96b1d1, type: 3}
   rankConfig: {fileID: 11400000, guid: 014639dcfb40f4803a31dd879eb71320, type: 2}
 --- !u!114 &2082618858
 MonoBehaviour:

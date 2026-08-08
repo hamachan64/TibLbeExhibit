@@ -21,6 +21,8 @@ namespace STYLY.TIB_Template.GIPoker
         EnterTutorial,
         /// <summary>Tutorial → Playing: BGMフェードアウト→開始の掛け声→本編BGM開始のシーケンスを行う</summary>
         ExitTutorialToPlaying,
+        /// <summary>Playing → Finished: 本編BGMを停止し、終了SE/音声（Fichish.mp3）を1回再生する</summary>
+        EnterFinished,
     }
 
     /// <summary>
@@ -95,6 +97,10 @@ namespace STYLY.TIB_Template.GIPoker
             if (previous == SessionState.Tutorial && next == SessionState.Playing)
             {
                 return TutorialAudioAction.ExitTutorialToPlaying;
+            }
+            if (previous == SessionState.Playing && next == SessionState.Finished)
+            {
+                return TutorialAudioAction.EnterFinished;
             }
             return TutorialAudioAction.None;
         }
@@ -189,6 +195,13 @@ namespace STYLY.TIB_Template.GIPoker
                         await FadeOutAndStopBgmAsync(ct);
                         await PlayOneShotAndWaitAsync(GIPokerAssets.SessionStartVoiceClip, ct);
                         PlayBgmLoop(GIPokerAssets.MainBgmClip, mainBgmVolume * mainBgmVolumeMultiplier);
+                        break;
+                    case TutorialAudioAction.EnterFinished:
+                        await FadeOutAndStopBgmAsync(ct);
+                        if (seSource != null && GIPokerAssets.FinishVoiceClip != null)
+                        {
+                            seSource.PlayOneShot(GIPokerAssets.FinishVoiceClip);
+                        }
                         break;
                 }
             }

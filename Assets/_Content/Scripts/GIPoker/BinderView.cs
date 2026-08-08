@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using DG.Tweening;
 using R3;
+using Styly.NetSync;
 using TMPro;
 using UnityEngine;
 
@@ -29,7 +30,7 @@ namespace STYLY.TIB_Template.GIPoker
         // Smoke(startLifetime 1s) / ShockWave(startLifetime 0.5s) が再生し切るまでの余裕を持たせた値。
         private const float SmokeVfxLifetime = 1.5f;
 
-        private const float HeaderHeightY = 0.19f;
+        private const float HeaderHeightY = 0.21f;
         private const float HeaderZOffset = -0.01f;
 
         // ページめくりの補完アニメーション（DOTween）の所要時間
@@ -125,6 +126,16 @@ namespace STYLY.TIB_Template.GIPoker
             if (GameSession.Instance != null)
             {
                 GameSession.Instance.RemainingTime
+                    .Subscribe(_ => UpdateHeader())
+                    .AddTo(this);
+            }
+
+            // NetSyncManager.ClientNo はサーバーとのハンドシェイク完了後に非同期で確定するため、
+            // ここまでの購読だけでは Ready確定前（かつ RemainingTime が変化しないTutorial中等）は
+            // ずっと「接続中...」のままになりうる。Ready確定時に改めてヘッダーを更新する。
+            if (Styly.NetSync.Utility.EventManager.Instance != null)
+            {
+                Styly.NetSync.Utility.EventManager.Instance.OnReadyAsObservable()
                     .Subscribe(_ => UpdateHeader())
                     .AddTo(this);
             }
@@ -245,7 +256,7 @@ namespace STYLY.TIB_Template.GIPoker
             headerText.alignment = TextAlignmentOptions.Center;
             headerText.textWrappingMode = TextWrappingModes.NoWrap;
             headerText.overflowMode = TextOverflowModes.Overflow;
-            headerText.rectTransform.sizeDelta = new Vector2(100f, 10f);
+            headerText.rectTransform.sizeDelta = new Vector2(100f, 16f);
 
             UpdateHeader();
         }
@@ -323,10 +334,25 @@ namespace STYLY.TIB_Template.GIPoker
             var seconds = Mathf.FloorToInt(time % 60f);
             var scoreResult = binder != null ? binder.Score.CurrentValue : ScoreResult.Empty;
             var count = binder != null ? binder.Cards.Count : 0;
-            headerText.text =
+            var nameLabel = GetLocalPlayerNameLabel();
+            var statsLabel =
                 $"<color=#FFD34D>残り {minutes:0}:{seconds:00}</color>   " +
                 $"<color=#FFFFFF>SCORE {scoreResult.TotalScore}</color>   " +
                 $"<color=#9AD1FF>{count}枚</color>";
+            headerText.text = $"{nameLabel}\n{statsLabel}";
+        }
+
+        /// <summary>
+        /// 自クライアントのニックネーム（「ハンターNo.xx」形式）を解決する。
+        /// ClientNo はサーバーとのハンドシェイク完了後に非同期で確定するため、未確定（0）の間は
+        /// 「接続中...」を返す（NetSyncManager が存在しない単体シーンテスト等でも同様）。
+        /// </summary>
+        private string GetLocalPlayerNameLabel()
+        {
+            var clientNo = NetSyncManager.Instance != null ? NetSyncManager.Instance.ClientNo : 0;
+            return clientNo > 0
+                ? PlayerNickname.Format(clientNo)
+                : "接続中...";
         }
 
         /// <summary>

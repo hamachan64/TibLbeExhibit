@@ -14,37 +14,37 @@ MonoBehaviour:
   m_EditorClassIdentifier: TibLbeExhibit.Content::STYLY.TIB_Template.GIPoker.CardRankConfig
   entries:
   - rank: 0
-    basePoints: 1
+    basePoints: 10
     normalSpawnWeight: 1
     bonusSpawnWeight: 1
     lotteryWeight: 40
     themeColor: {r: 0.55, g: 0.57, b: 0.6, a: 1}
   - rank: 1
-    basePoints: 2
+    basePoints: 20
     normalSpawnWeight: 1
     bonusSpawnWeight: 1.4
     lotteryWeight: 24
     themeColor: {r: 0.3, g: 0.65, b: 0.35, a: 1}
   - rank: 2
-    basePoints: 3
+    basePoints: 50
     normalSpawnWeight: 0.85
     bonusSpawnWeight: 2.2
     lotteryWeight: 16
     themeColor: {r: 0.25, g: 0.45, b: 0.85, a: 1}
   - rank: 3
-    basePoints: 5
+    basePoints: 100
     normalSpawnWeight: 0.6
     bonusSpawnWeight: 3.2
     lotteryWeight: 12
     themeColor: {r: 0.6, g: 0.3, b: 0.85, a: 1}
   - rank: 4
-    basePoints: 100
+    basePoints: 500
     normalSpawnWeight: 0.4
     bonusSpawnWeight: 4.5
     lotteryWeight: 8
     themeColor: {r: 0.95, g: 0.75, b: 0.2, a: 1}
   - rank: 5
-    basePoints: 300
+    basePoints: 10000
     normalSpawnWeight: 0.4
     bonusSpawnWeight: 4.5
     lotteryWeight: 0
