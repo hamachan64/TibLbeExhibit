@@ -30,6 +30,15 @@ namespace STYLY.TIB_Template.GIPoker
         /// <summary>浮遊アニメーションの全体倍率（「占い水晶」効果で一時的に下げる）</summary>
         private static float globalFloatTimeScale = 1f;
 
+        // カード化⇔ゲイン時に追加再生する煙VFX（BinderSmokeVfx＝VFX_BinderSummonPoof）のスケール。
+        // プレハブはバインダー実寸（幅約0.45m）基準で作り込まれているため、
+        // カード実寸（CardVisualFactory基準、縦88mm）に合わせて縮小する。
+        private const float CardSmokeVfxScale = 0.18f;
+
+        // 上記煙VFXの再生時間（秒）。BinderView.SmokeVfxLifetime（1.5秒）と同じ値を用いる
+        // （Smoke/ShockWaveが再生し切るまでの余裕を持たせた値）。
+        private const float CardSmokeVfxLifetime = 1.5f;
+
         [Header("カード定義")]
         [SerializeField, Tooltip("このアイテムのカード定義（ScriptableObject）")]
         private CardDefinition definition;
@@ -425,12 +434,29 @@ namespace STYLY.TIB_Template.GIPoker
         protected virtual void OnCardified()
         {
             GIPokerAssets.SpawnVfx(GIPokerAssets.CardifyVfx, transform.position);
+            PlayCardSizedSmokeVfx();
         }
 
         /// <summary>ゲイン（具現化）した瞬間の演出・効果発動フック</summary>
         protected virtual void OnGained()
         {
             GIPokerAssets.SpawnVfx(GIPokerAssets.GainVfx, transform.position);
+            PlayCardSizedSmokeVfx();
+        }
+
+        /// <summary>
+        /// カード化⇔ゲイン（アイテム化）の瞬間に、バインダー出し入れ（VFX_BinderSummonPoof）と
+        /// 同じ白煙＋衝撃波VFXをカードサイズに縮小して追加再生する。
+        /// バインダーはバインダー実寸（幅約0.45m）に対して等倍で作り込まれているため、
+        /// カード実寸（CardVisualFactory基準の縦88mm）に合わせて CardSmokeVfxScale で縮小する。
+        /// 同時にSE（GIPokerAssets.SmokeSfxClip、バインダーと共通）も鳴らす。音源が未準備の間は
+        /// null許容で無音のまま動作する（GIPokerAssets.PlaySfxAtPointがnull安全）。
+        /// </summary>
+        private void PlayCardSizedSmokeVfx()
+        {
+            GIPokerAssets.PlaySfxAtPoint(GIPokerAssets.SmokeSfxClip, transform.position, GIPokerAssets.SmokeSfxVolume);
+            GIPokerAssets.SpawnVfx(GIPokerAssets.BinderSmokeVfx, transform.position,
+                lifetime: CardSmokeVfxLifetime, scale: CardSmokeVfxScale);
         }
 
         /// <summary>1分ルールで消滅するときの演出フック。既定では縮小して破棄する</summary>

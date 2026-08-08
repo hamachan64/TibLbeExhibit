@@ -53,8 +53,12 @@ namespace STYLY.TIB_Template.GIPoker
         private GameObject diceCurseVfx;
         [SerializeField, Tooltip("バインダーの3Dモデル（ページめくり可能な本、Blender製FBX）")]
         private GameObject cardBinderModelPrefab;
-        [SerializeField, Tooltip("バインダー出し入れ時の白煙＋衝撃波VFX（VFX_BinderSummonPoof）")]
+        [SerializeField, Tooltip("白煙＋衝撃波VFX（VFX_BinderSummonPoof）。バインダー出し入れ、カード化・ゲイン時に使用")]
         private GameObject binderSmokeVfx;
+        [SerializeField, Tooltip("上記の煙VFXと同時に鳴らすSE（未設定可。音源が用意でき次第ここに設定する）")]
+        private AudioClip smokeSfxClip;
+        [SerializeField, Tooltip("上記SEの再生音量")]
+        private float smokeSfxVolume = 1f;
         [SerializeField, Tooltip("チュートリアル各ステップの読み上げ音声（7要素、Step1.mp3〜Step7.mp3を順に設定）")]
         private AudioClip[] tutorialStepVoiceClips;
         [SerializeField, Tooltip("チュートリアル冒頭（ステップ1より前）の前振り音声（Step0.mp3）")]
@@ -83,6 +87,8 @@ namespace STYLY.TIB_Template.GIPoker
             GIPokerAssets.DiceCurseVfx = diceCurseVfx;
             GIPokerAssets.CardBinderModelPrefab = cardBinderModelPrefab;
             GIPokerAssets.BinderSmokeVfx = binderSmokeVfx;
+            GIPokerAssets.SmokeSfxClip = smokeSfxClip;
+            GIPokerAssets.SmokeSfxVolume = smokeSfxVolume;
             GIPokerAssets.TutorialStepVoiceClips = tutorialStepVoiceClips;
             GIPokerAssets.TutorialIntroVoiceClip = tutorialIntroVoiceClip;
             GIPokerAssets.TutorialBgmClip = tutorialBgmClip;

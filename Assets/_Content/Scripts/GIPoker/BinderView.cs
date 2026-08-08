@@ -201,9 +201,15 @@ namespace STYLY.TIB_Template.GIPoker
                 .OnComplete(() => root.gameObject.SetActive(false));
         }
 
-        /// <summary>煙＋衝撃波VFXを再生する。未設定なら警告のみで演出をスキップする（機能自体は動く）</summary>
+        /// <summary>
+        /// 煙＋衝撃波VFXを再生する。未設定なら警告のみで演出をスキップする（機能自体は動く）。
+        /// 同時にSE（GIPokerAssets.SmokeSfxClip）も鳴らす。SE側は音源が未準備の間はnull許容で
+        /// 無音のまま動作する（GIPokerAssets.PlaySfxAtPointがnull安全）。
+        /// </summary>
         private void PlaySmokeVfx(Vector3 position)
         {
+            GIPokerAssets.PlaySfxAtPoint(GIPokerAssets.SmokeSfxClip, position, GIPokerAssets.SmokeSfxVolume);
+
             if (GIPokerAssets.BinderSmokeVfx == null)
             {
                 Debug.LogWarning("[BinderView] BinderSmokeVfx が未設定のため、出し入れの煙演出をスキップします");
