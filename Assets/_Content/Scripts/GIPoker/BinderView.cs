@@ -51,14 +51,22 @@ namespace STYLY.TIB_Template.GIPoker
         private static readonly Color PageTabDecalColor = new Color(0.35f, 0.22f, 0.05f);
         private static readonly Color PageTabDecalEmission = new Color(1f, 0.75f, 0.15f) * 2.5f;
         private static readonly Quaternion PageTabDecalRotation = Quaternion.Euler(90f, 0f, 0f);
+
+        // 直前ページ（backward用タブ）は EndPageTurn で静止角180°（開ききった状態、Z軸まわり）に
+        // なる。そのページの子にそのまま forward と同じローカル位置・回転でデカールを置くと、
+        // 親の180°回転がそのまま乗って「浮かせるY方向オフセット」と法線がページの裏側
+        // （視認者と反対）を向いてしまい、実機で見えなくなる（後ろめくりの目印が無い問題の原因）。
+        // 180°回転後に forward と同じ見え方になるよう、あらかじめ打ち消しておく。
+        private static readonly Quaternion PageTabDecalRotationFlipped =
+            Quaternion.AngleAxis(180f, Vector3.forward) * PageTabDecalRotation;
         private const float PageTabDecalDiameter = BinderLayout.PageTabRadius * 1.6f;
 
         [SerializeField, Tooltip("プレイヤー正面からの距離（m）")]
-        private float followDistance = 0.25f;
+        private float followDistance = 0.3f;
         [SerializeField, Tooltip("頭からどれだけ下に置くか（m）")]
-        private float heightBelowHead = 0.52f;
+        private float heightBelowHead = 0.4f;
         [SerializeField, Tooltip("追従の速さ")]
-        private float followSpeed = 3.5f;
+        private float followSpeed = 4f;
 
         private CardBinder binder;
         private Transform visualRoot;
@@ -389,11 +397,16 @@ namespace STYLY.TIB_Template.GIPoker
         /// </summary>
         private void UpdatePageTabDecals()
         {
-            forwardPageTabDecal = EnsurePageTabDecal(forwardPageTabDecal, currentPageIndex);
-            backwardPageTabDecal = EnsurePageTabDecal(backwardPageTabDecal, currentPageIndex - 1);
+            forwardPageTabDecal = EnsurePageTabDecal(forwardPageTabDecal, currentPageIndex, flipped: false);
+            backwardPageTabDecal = EnsurePageTabDecal(backwardPageTabDecal, currentPageIndex - 1, flipped: true);
         }
 
-        private GameObject EnsurePageTabDecal(GameObject decal, int pageIndex)
+        /// <summary>
+        /// <paramref name="flipped"/> は、そのページが静止角180°（前ページ・開ききった状態）に
+        /// あることを前提とするかどうか。180°の場合は Y オフセット・回転を打ち消して、
+        /// 見た目上 forward タブと同じ向き（視認者側）に浮くようにする。
+        /// </summary>
+        private GameObject EnsurePageTabDecal(GameObject decal, int pageIndex, bool flipped)
         {
             if (pages == null || pageIndex < 0 || pageIndex >= pages.Length || pages[pageIndex] == null)
             {
@@ -409,9 +422,10 @@ namespace STYLY.TIB_Template.GIPoker
                 decal = CreatePageTabDecal();
             }
             decal.transform.SetParent(pages[pageIndex], false);
+            var surfaceOffsetY = flipped ? -BinderLayout.MiniCardSurfaceOffset : BinderLayout.MiniCardSurfaceOffset;
             decal.transform.localPosition = new Vector3(
-                BinderLayout.PageTabLocalPosition.x, BinderLayout.MiniCardSurfaceOffset, BinderLayout.PageTabLocalPosition.z);
-            decal.transform.localRotation = PageTabDecalRotation;
+                BinderLayout.PageTabLocalPosition.x, surfaceOffsetY, BinderLayout.PageTabLocalPosition.z);
+            decal.transform.localRotation = flipped ? PageTabDecalRotationFlipped : PageTabDecalRotation;
             decal.SetActive(true);
             return decal;
         }
