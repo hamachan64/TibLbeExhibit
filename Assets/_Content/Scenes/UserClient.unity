@@ -487,6 +487,8 @@ MonoBehaviour:
   diceCurseVfx: {fileID: 5985634496115995773, guid: 463cf9f7af4680240898f6aeba3fe3e6, type: 3}
   cardBinderModelPrefab: {fileID: 919132149155446097, guid: 2090ae7d51701434cac7d670e3c1ae64, type: 3}
   binderSmokeVfx: {fileID: 4417224938205195587, guid: 715061b12e0ee4c9d936e727932c99ae, type: 3}
+  smokeSfxClip: {fileID: 8300000, guid: 38272ca3a6fd846e5b8c960473e1eacc, type: 3}
+  smokeSfxVolume: 1
   tutorialStepVoiceClips:
   - {fileID: 8300000, guid: 7ab1af3a3b09149959b1062f0ea305f5, type: 3}
   - {fileID: 8300000, guid: f6141d053d7c141c98fd40f0876cef9b, type: 3}
