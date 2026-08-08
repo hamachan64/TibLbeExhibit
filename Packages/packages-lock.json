@@ -31,13 +31,13 @@
       "url": "https://package.openupm.com"
     },
     "com.styly.styly-netsync": {
-      "version": "0.15.1",
+      "version": "0.17.4",
       "depth": 0,
       "source": "registry",
       "dependencies": {
         "com.styly.device-id-provider": "0.3.1",
         "com.styly.shader-collection.urp": "0.0.5",
-        "com.styly.styly-xr-rig": "0.4.19",
+        "com.styly.styly-xr-rig": "0.4.20",
         "com.unity.nuget.newtonsoft-json": "3.2.1",
         "com.unity.xr.core-utils": "2.1.1",
         "org.nuget.netmq": "4.0.2"
@@ -58,7 +58,7 @@
       "url": "https://package.openupm.com"
     },
     "com.styly.styly-xr-rig": {
-      "version": "0.4.19",
+      "version": "0.4.20",
       "depth": 1,
       "source": "registry",
       "dependencies": {
