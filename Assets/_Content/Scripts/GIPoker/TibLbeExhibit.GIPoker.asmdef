@@ -1,5 +1,5 @@
 {
-    "name": "TibLbeExhibit.Content",
+    "name": "TibLbeExhibit.GIPoker",
     "rootNamespace": "",
     "references": [
         "UniTask",
@@ -14,7 +14,8 @@
         "Unity.XR.CoreUtils",
         "Unity.XR.Hands",
         "Unity.InputSystem",
-        "PICO.TobSupport"
+        "PICO.TobSupport",
+        "TibLbeExhibit.Core"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

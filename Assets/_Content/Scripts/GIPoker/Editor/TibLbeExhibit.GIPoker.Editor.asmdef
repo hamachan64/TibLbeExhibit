@@ -1,8 +1,9 @@
 {
-    "name": "TibLbeExhibit.Content.Editor",
+    "name": "TibLbeExhibit.GIPoker.Editor",
     "rootNamespace": "",
     "references": [
-        "TibLbeExhibit.Content"
+        "TibLbeExhibit.Core",
+        "TibLbeExhibit.GIPoker"
     ],
     "includePlatforms": [
         "Editor"

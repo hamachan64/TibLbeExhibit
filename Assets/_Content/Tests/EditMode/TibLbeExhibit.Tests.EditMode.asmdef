@@ -4,7 +4,8 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "TibLbeExhibit.Content",
+        "TibLbeExhibit.Core",
+        "TibLbeExhibit.GIPoker",
         "R3.Unity"
     ],
     "includePlatforms": [
