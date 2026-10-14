@@ -42,15 +42,26 @@
 
 | シーン名 | 保存先 | 主な役割 |
 | :--- | :--- | :--- |
-| **Environment** | `Assets/_Content/Scenes/Environment.unity` | 3Dステージ、共通の干渉オブジェクト（岩、木、カードの浮遊演出など） |
-| **UserClient** | `Assets/_Content/Scenes/UserClient.unity` | 体験者用XR Rig、バインダーUI、ハンドトラッキング操作ロジック |
-| **OperatorClient** | `Assets/_Content/Scenes/OperatorClient.unity` | 運営用PC向けUI、システム制御、制限時間の管理・開始トリガー |
+| **TreasureHaulEnvironment** | `Assets/_Content/TreasureHaul/Scenes/` | 共有空間（環境光、Shadow Catcher、境界、スコアモニター、ゲームの舞台） |
+| **TreasureHaulUserClient** | `Assets/_Content/TreasureHaul/Scenes/` | 体験者用XR Rig、ハンドトラッキング操作ロジック、`GameSession` |
+| **TreasureHaulOperatorClient** | `Assets/_Content/TreasureHaul/Scenes/` | 運営用PC向けUI、システム制御、開始トリガー、リーダーボード |
+
+- 追加ロードするシーンは名前で解決されるため、**アクティブなビルドプロファイルのシーン一覧に登録されている必要がある**（Unity 6 のビルドプロファイルがグローバルのシーン一覧を上書きする）。
+  Treasure Haul 用は `Assets/Settings/Build Profiles/TreasureHaulUserClient.asset` / `TreasureHaulOperatorClient(mac).asset`。
+- `Assets/_Content/Scenes/` の Environment / UserClient / OperatorClient は前作（具現化ポーカー）用。変更しない。
 
 ## ディレクトリ構成
-- `Assets/_Content/Scripts/`: 主なロジック・スクリプト類
+- `Assets/_Content/Scripts/`: 共通基盤（`TibLbeExhibit.Core`）
   - `UserClient.cs`: 体験者向けの機能やPICOエンタープライズの初期化・制御
   - `OperatorClient.cs`: オペレーター（運用者）向けの機能
   - `VRArea.cs`, `ViewManager.cs`: エリア管理やビュー（UI）の管理
+  - `System/`: RPC・共有変数・シーン追加ロード・リーダーボード
+  - `System/XR/`: 手の判定（指先の接触、ピンチ、ハンドサイン）
+  - `System/Session/`: セッション進行（`GameSession`）
+  - `System/View/`: 画面フェードなど共通の表示
+  - `GIPoker/`: 前作のゲーム固有コード（`TibLbeExhibit.GIPoker`）。新作からは参照しない
+- `Assets/_Content/TreasureHaul/`: 新作のゲーム固有コード・シーン（`TibLbeExhibit.TreasureHaul`、Core のみ参照）
+- `Assets/_Content/Shaders/Common/`, `Assets/_Content/Materials/Common/`: コンテンツ共通のシェーダー・マテリアル（シェーダー名は `TIB/*`）
 
 ## 開発・実装上のルール
 - **言語・命名規則**: C#の標準的な命名規則に従います。クラス・メソッドはPascalCase、変数はcamelCaseを推奨します。

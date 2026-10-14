@@ -15,7 +15,7 @@ description: 「やりたいこと」を受け取り、壁打ち・承認 → So
 
 1. **現状把握**（並列で実行）: `git status` / `git branch --show-current` / 関連ファイルの `Grep`・`Read`。
    既存実装を読まずに仕様を書かないこと。
-2. **企画との突き合わせ**: `GI_POKER_PLAN.md` の該当箇所を読み、ゲームルール（1分ルール、ゲイン制限、ランク別出現上限など）と矛盾しないか確認する。
+2. **企画との突き合わせ**: `TREASURE_HAUL_PLAN.md` の該当箇所を読み、ゲームルールと矛盾しないか確認する。企画書に未記載のルールを前提にする場合は、壁打ちで確認してから企画書にも追記する。
 3. **壁打ち**: 曖昧さがあれば `AskUserQuestion` で詰める。聞くべきは「答えによって作るものが変わる」ことだけ。最大2回まで。典型的な論点:
    - 受け入れ基準（何が動けば完成か）
    - スコープの境界（今回やらないこと）
@@ -57,8 +57,9 @@ description: 「やりたいこと」を受け取り、壁打ち・承認 → So
 
 ## Phase 1 — ブランチ準備【承認後・無停止】
 
-- 現在のブランチが `master` / `develop` なら、`develop` から `feature/<slug>` を切る。
-  既に feature ブランチ上で関連作業中ならそのまま使う。
+- Treasure Haul の統合ブランチは `repo/develop`。現在のブランチが `repo/develop` / `develop` / `master` なら、`repo/develop` から `repo/feature-<slug>` を切る。
+  既に `repo/feature-*` ブランチ上で関連作業中ならそのまま使う。
+- `develop` / `master` は GIPoker（展示のフォールバック）の系統。Treasure Haul の作業をこちらに混ぜない。
 - 無関係な未コミット変更があれば `git stash` せず、**そのまま残して触らない**（ユーザーの作業の可能性がある）。コミット時に対象ファイルだけを `git add` する。
 
 ## Phase 2 — 実装をSonnetに委譲
@@ -67,7 +68,7 @@ description: 「やりたいこと」を受け取り、壁打ち・承認 → So
 
 - 仕様書の**絶対パス**（「まず読め」と明示）
 - 触ってよいファイルの範囲
-- 「gipoker-verify の手順でコンパイル・テストを通してから報告すること」
+- 「treasure-haul-verify の手順でコンパイル・テストを通してから報告すること」
 - 「git 操作はするな」
 
 タスクが独立した2つ以上の機能に分かれる場合でも、**Unityエディタは1インスタンスしかない**ため uloop 検証が直列化する。原則1エージェントずつ順に回すこと。
@@ -84,7 +85,7 @@ description: 「やりたいこと」を受け取り、壁打ち・承認 → So
    ```
    ヒットしたら差し戻し。
 4. `code-reviewer` エージェントを起動して独立したレビューを取る。
-5. `gipoker-verify` スキルで**自分でも**コンパイル + EditModeテストを実行する。ゲームプレイに関わる変更なら PlayMode 確認とスクリーンショットまで行う。
+5. `treasure-haul-verify` スキルで**自分でも**コンパイル + EditModeテストを実行する。ゲームプレイに関わる変更なら PlayMode 確認とスクリーンショットまで行う。
 
 ### 差し戻し判断
 
@@ -98,10 +99,10 @@ description: 「やりたいこと」を受け取り、壁打ち・承認 → So
 
 1. `git add` は**今回の変更ファイルのみ**を明示指定（`git add -A` は使わない）。
 2. コミットメッセージは Conventional Commits + 日本語本文（既存履歴に合わせる）:
-   `feat(gipoker): リスキーダイスの見た目を実モデルに差し替え` 形式。
-   末尾に `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>` を付ける。
-3. `git push -u origin feature/<slug>`
-4. `gh pr create --base develop` でPRを作成。本文には:
+   `feat(treasure-haul): お宝の破損時に価値表示を減算する` 形式。
+   末尾にはシステムが指定する `Co-Authored-By:` 行を付ける。
+3. `git push -u origin repo/feature-<slug>`
+4. `gh pr create --base repo/develop` でPRを作成。本文には:
    - 目的（仕様書の「目的」）
    - 変更点の要約
    - 検証結果（コンパイル / テスト / PlayMode所見）
