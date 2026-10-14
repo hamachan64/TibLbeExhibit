@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: GIP_Occluder
+  m_Name: PassthroughOccluder
   m_Shader: {fileID: 4800000, guid: e156a936f08e94759a107b7f4c6fb43f, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0

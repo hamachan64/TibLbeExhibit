@@ -29,7 +29,7 @@ namespace STYLY.TIB_Template.GIPoker.Editor
 
         private const string ErosionMatPath = StageFolder + "/GIP_ErosionPatch.mat";
         private const string LeyLineMatPath = StageFolder + "/GIP_LeyLine.mat";
-        private const string OccluderMatPath = StageFolder + "/GIP_Occluder.mat";
+        private const string OccluderMatPath = "Assets/_Content/Materials/Common/PassthroughOccluder.mat";
         private const string ShadowCatcherMatPath = StageFolder + "/GIP_ShadowCatcher.mat";
 
         private const string NoiseTexPath = StageFolder + "/GIP_StageNoise.asset";
