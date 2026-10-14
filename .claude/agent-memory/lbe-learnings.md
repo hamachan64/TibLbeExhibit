@@ -114,26 +114,6 @@
   （Y: RuinPillar=1.10 / FloatingRock=1.04、2026-07-15に下記の高さバグ修正で値変更）。
   Anchor_05..30 は床アンカー(isElevated=false)。
 
-## 台座FBX刷新(ca13976)でアンカー高さが台座天板より浮いていたバグ（2026-07-15）
-- `ca13976`（遺跡台座・浮遊岩をBlender製FBXモデルに刷新）で `VisualRoot` 配下のメッシュが
-  プリミティブ組み立て→FBXへ差し替わり実測の天板高さが変わったが、
-  `GIPokerStageDecorationSetup.cs` の `BuildRuinPillarPrefab`/`BuildFloatingRockPrefab` 内の
-  `AnchorPoint.localPosition.y` は旧モデル基準の値（1.15 / 1.1）のまま据え置かれていた。
-  結果、カード出現位置が台座の実際の天板より **RuinPillar約12.4cm・FloatingRock約13.3cm 上に浮く**
-  見た目のズレが発生していた（コード中のコメントには新モデルの正しい高さ「天板上面≈y1.03」
-  「草地上面+0.16(=0.96)」と明記されていたにもかかわらず、数値側が追従していなかった）。
-- 検知方法: `VisualRoot`配下の全Rendererの合成bounds（world）とAnchorPointのworldPos.yを
-  実機/PlayModeでなくエディタ上で`uloop-execute-dynamic-code`により直接比較すると、
-  FBX差し替え後のズレはコンパイルエラーにもテストにも出ないため座標の実測比較でしか発見できない。
-- 修正: `AnchorPoint.localPosition.y` を RuinPillar=1.10（天板1.03+浮遊余白0.07）、
-  FloatingRock=1.04（草地上面0.96+浮遊余白0.08）に変更し、
-  メニュー「GIPoker/Stage/Rebuild Pedestal Prefabs」でプレハブへ反映（シーンには触れない）。
-  シーン側の Anchor_01/02(FloatingRock用)・Anchor_03/04(RuinPillar用) の worldPos.y も
-  同じ値へ手動で追従させる必要がある（両者は別系統のオブジェクトで自動連動しないため）。
-- **教訓**: 台座やアイテムの見た目モデルを差し替えるPRでは、「アンカー/接地点などモデル形状に
-  依存する固定オフセット値」を横断的に検索し、コメントに書かれた新しい実測値と実際の設定値が
-  一致しているか diff で確認すること。ビルドが通ってもテストが通っても、この種のズレは検出されない。
-
 ## PICO実機ビルドでMRパススルー無効・ハンドトラッキング不動作（2026-08-01）
 - 症状: PICO実機に`UserClient`をビルドすると、フルカラーパススルー（MR）が有効にならず、
   ハンドトラッキングも認識されない。
@@ -240,43 +220,6 @@
     「初回起動→権限ダイアログ許可→アプリ再起動」を運用手順に含めること。
   - コンパイルは`uloop-compile --force-recompile`でエラー0件・警告0件を確認済み。実機での
     ハンドトラッキング動作自体（ヘッドセット装着しての目視確認）はまだ未実施。
-
-## ゲイン後のオブジェクトは元々「二度と掴めない」仕様だった（2026-08-01 仕様変更・実装済み）
-- 発端: ユーザーから「ゲイン後のオブジェクト持てなくない？」と指摘。調査したところ
-  `CardizableItemBase.CanBeGrabbed => state.Value == CardizableState.FloatingCard` のみで、
-  `TryGain()`後の`Gained`状態には戻り経路がなく、`CardGrabInteractor`のピンチ掴み候補から
-  恒久的に除外される実装だった（意図か考慮漏れか不明だったため設計判断をユーザーに確認）。
-- `CardEffectService.cs`を確認した限り、剣の錬金やリスキーダイス等の効果は全て**ゲインの瞬間に
-  一括発動**する実装（例: 剣はゲイン位置の半径2.5m以内のDランクを即座に錬金）で、ゲイン後に
-  オブジェクトを持ち運んで使う効果は現状存在しない。なので「掴めない」ことによる効果面の不具合は無かった。
-- ユーザーの要望: 「再び掴めるようにして。一度つかんだらそのあとは重力働くようにして」
-  → ゲイン後は再グラブ可能にし、離したら物理的に落下する通常オブジェクトにする、という仕様に変更。
-- 実装（`CardizableState`に`GainedHeld`を追加する形）:
-  - `CanBeGrabbed`に`Gained`状態も追加。
-  - `TryGrab()`: `Gained`から掴んだ場合は`GainedHeld`に遷移し、Rigidbodyを
-    `isKinematic=true, useGravity=false`にして手の動きに追従できるようにする
-    （`FollowPinchPose`のTransform直接操作と物理エンジンを衝突させないため）。
-  - `Release()`: `GainedHeld`から離した場合は`Gained`に戻しつつ`isKinematic=false, useGravity=true`
-    にして重力に委ね、素手タッチ/掴み判定用だった`Collider.isTrigger`も`false`に切り替えて
-    床等と実際に衝突する物理オブジェクトにする（`DropWithGravity()`）。
-  - `CardGrabInteractor.FollowPinchPose()`の「保持継続判定」を`Held`だけでなく`GainedHeld`も
-    許容するよう修正（これをしないとゲイン後に掴んでも手に追従しない）。
-- **既存コードとの整合性（変更不要だったことを確認済み）**:
-  - `CardBinder.TryStore()`は`Held`/`FloatingCard`以外を弾くガードが既にあるため、
-    `GainedHeld`なオブジェクトをバインダー圏内で離してもスコア用カードとして誤収納されない
-    （＝ゲイン済みは二度とスコアにならない、というG.I.のルールと自動的に整合する）。
-  - `GainGestureDetector.UpdateTear()`は`tearingCard.State.CurrentValue != Held`で毎フレーム
-    ガードしているため、`GainedHeld`なオブジェクトを両手で引き裂こうとしても`Held`ではない
-    ことで自動的にキャンセルされる（＝ゲイン済みの再ゲインは自然に不可能なまま）。
-  - `CardNetworkSync.cs`の`OnLocalStateChanged`は`case CardizableState.Gained:`が
-    prev状態を問わず`Rpc.GiGain`を送るため、`GainedHeld→Gained`の再遷移でも自動的に
-    位置だけ再送される。リモート側の`TryGain()`は既に`Gained`状態のため呼んでも無音で失敗するのみ
-    （二重ゲイン効果は発生しない）。ただし**重力で落下していくアニメーション自体はネットワーク
-    同期されない**（既存の「掴んでいる間の位置は同期しない」制限と同じ）ため、リモートから見ると
-    ドロップ直後の位置に静止して見える点は既知の限界として許容。
-- 実機（ヘッドセット）での重力落下の見た目・地面への接地は未確認。落下先の環境コライダーとの
-  当たり判定（レイヤー衝突マトリクス等）に問題があれば床を貫通する可能性があるため、実機確認時は
-  ゲイン→再度掴む→離す→床に着地するか、を必ず目視確認すること。
 
 ## EditModeテストでR3の型（ReadOnlyReactiveProperty等）を使うとCS0012になる（2026-08-01 解決済み）
 - 症状: `TibLbeExhibit.Tests.EditMode` 配下の新規テストで `ReadOnlyReactiveProperty<T>.CurrentValue` 等を
@@ -421,3 +364,21 @@
   ユーザーに確認する、または`unity-implementer`エージェントへの指示に「作業開始時と完了時に
   `git status`を比較し、自分が触っていないファイルの変更があれば報告すること」を明記すると
   早期検知できる。
+
+## Treasure Haul 用の構成整理で分かったこと（2026-10-15 repo/develop 作成時）
+- **Unity 6 のビルドプロファイルがシーン一覧を上書きする**: `Assets/Settings/Build Profiles/*.asset` が
+  `overrideGlobalScenes=true` だと、`EditorBuildSettings.scenes` の読み書きは**アクティブなプロファイル**に対して行われ、
+  `ProjectSettings/EditorBuildSettings.asset` は使われない。`AdditiveSceneLoader` は名前で `LoadSceneAsync` するため、
+  プロファイル未登録のシーンは `null` が返って NullReferenceException になる。
+  新シーンを足すときはプロファイル（`BuildProfile.scenes`）に登録し、`BuildProfile.SetActiveBuildProfile` で切り替える。
+- **アセンブリ分割はシーン参照を壊さない**: シーン/プレハブはスクリプトを GUID で参照する。YAML 内の
+  `m_EditorClassIdentifier: <アセンブリ名>::<型名>` はエディタ用メタ情報なので、asmdef 名を変えても実害はない。
+  ファイル移動・改名は `AssetDatabase.MoveAsset` / `RenameAsset` で行えば GUID が保たれ、git でも rename として記録される。
+- **ガード（guard.py）の誤検知**: perl/sed のコマンド文字列に `.unity` などの拡張子が含まれると、
+  対象が Markdown でもブロックされる。シーン名を含む文書の置換は Edit ツールで行う。
+  また `uloop execute-dynamic-code --code-file` にスクラッチパッドのパスを渡すと guard が中身を読めずブロックするので、`--code` でインライン実行する。
+- **シェル環境の注意（macOS / zsh）**: BSD sed は `\b` を解釈しない（単語境界の置換は `perl -pi -e`）。
+  zsh では `echo ==` がコマンド展開エラーになり、`--include=*.cs` のような未クォートのグロブは「no matches found」で失敗する。
+- **既存テストの既知の失敗**: `repo/develop` 作成時点で EditMode テスト 257件中24件が失敗している
+  （`BinderLayoutTests` / `ResultGradeTests` / `TutorialSequenceTests`。GIPoker の調整後にテストが追従していないもの）。
+  回帰判定は「失敗がこの24件から増えていないか」で行う。
