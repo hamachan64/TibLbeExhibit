@@ -1,5 +1,5 @@
 // ============================================================================
-// GIPoker MR⇔VR遷移（Issue #14）: 白フェード用スクリーンフェーダー
+// MR⇔VR遷移: 白フェード用スクリーンフェーダー
 //
 // ScreenFader.cs がプレイヤー（Camera.main）を包む球体に適用する、
 // 全天フェード専用の Unlit シェーダー。_Color の RGBA をそのままピクセル出力するだけの
@@ -9,13 +9,13 @@
 //   - Alpha : One      OneMinusSrcAlpha （alphaチャンネルもover式で積む）
 // これにより MR パススルーコンポジタが premultiplied / straight どちらの規約でも
 // 白へのフェードアウト・パススルーへのフェードインを正しく合成できる
-// （Assets/_Content/Shaders/GIPoker/GIP_ShadowCatcher.shader と同じ手法。
+// （Assets/_Content/Shaders/Common/ShadowCatcher.shader と同じ手法。
 //   .claude/agent-memory/lbe-learnings.md の MRパススルー知見に準拠）。
 //
 // カメラは常に球の内側にいる前提のため Cull Front（内面のみ描画）。
 // ZTest Always・ZWrite Off・Queue=Overlay ですべての描画の最前面に必ず重なる。
 // ============================================================================
-Shader "GIPoker/Transition/ScreenFader"
+Shader "TIB/ScreenFader"
 {
     Properties
     {

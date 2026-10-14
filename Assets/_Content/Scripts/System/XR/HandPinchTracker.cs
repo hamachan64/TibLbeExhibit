@@ -6,7 +6,7 @@ using R3;
 using UnityEngine;
 using UnityEngine.XR.Hands;
 
-namespace STYLY.TIB_Template.GIPoker
+namespace STYLY.TIB_Template
 {
     /// <summary>
     /// XR Hands の関節データから片手の「つまむ（ピンチ）／離す」を判定するトラッカー。

@@ -5,14 +5,14 @@ using DG.Tweening;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace STYLY.TIB_Template.GIPoker
+namespace STYLY.TIB_Template
 {
     /// <summary>
     /// MR⇔VR遷移（Issue #14）用の全天フェード。Camera.main に追従する内向き球体で
     /// 視界全体を覆い、指定色への白フェードアウト／パススルーへの白フェードインを行う。
     ///
     /// - MRパススルー上で正しく合成されるよう、専用シェーダー
-    ///   (GIPoker/Transition/ScreenFader) が framebuffer alpha も書き込む
+    ///   (TIB/ScreenFader) が framebuffer alpha も書き込む
     ///   （.claude/agent-memory/lbe-learnings.md の MRパススルー知見に準拠）。
     /// - フェード駆動は DOTween（DOTween.To）で行い、完了は UniTask.WaitUntil で待機する
     ///   （本プロジェクトの DOTween は DLL 版のため UNITASK_DOTWEEN_SUPPORT が未定義で
@@ -24,8 +24,8 @@ namespace STYLY.TIB_Template.GIPoker
     {
         // Resources 配下に置いたシェーダーを参照する。ランタイム Shader.Find のみで参照される
         // シェーダーはどのアセットからも参照されないため、Resources 同梱でビルド除外
-        // （stripping）を防ぐ必要がある（PR #16 の GIP_TutorialRoomWall と同じ流儀）
-        private const string ShaderName = "GIPoker/Transition/ScreenFader";
+        // （stripping）を防ぐ必要がある
+        private const string ShaderName = "TIB/ScreenFader";
         private static readonly int ColorId = Shader.PropertyToID("_Color");
 
         [SerializeField, Tooltip("フェード球の半径（m）。カメラの near/far クリップ内に収まる値にする")]
@@ -44,7 +44,7 @@ namespace STYLY.TIB_Template.GIPoker
         /// </summary>
         public static ScreenFader Create()
         {
-            var go = new GameObject("GIPoker_ScreenFader");
+            var go = new GameObject("ScreenFader");
             var fader = go.AddComponent<ScreenFader>();
             fader.BuildSphere();
             return fader;
@@ -79,7 +79,7 @@ namespace STYLY.TIB_Template.GIPoker
             var shader = Shader.Find(ShaderName);
             if (shader != null)
             {
-                fadeMaterial = new Material(shader) { name = "GIPoker_ScreenFader_Mat" };
+                fadeMaterial = new Material(shader) { name = "ScreenFader_Mat" };
                 sphereRenderer.sharedMaterial = fadeMaterial;
             }
             else
@@ -95,7 +95,7 @@ namespace STYLY.TIB_Template.GIPoker
 
         private void LateUpdate()
         {
-            // BinderView / CardLifetimeLabel と同様、Camera.main を毎フレーム直接参照する
+            // Camera.main を毎フレーム直接参照する
             // （STYLY XR Rig はランタイム生成のためキャッシュせず都度取得する）
             var cam = Camera.main;
             if (cam == null)

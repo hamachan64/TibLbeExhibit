@@ -22,7 +22,7 @@ namespace STYLY.TIB_Template.GIPoker
     ///   ローカルタイマーで消滅させる（イベント数の削減と耐障害性のため）
     /// - リスキーダイス大凶のバインダー破壊は「発動者のバインダーのみ」なのでローカル処理。
     ///   大吉のSS出現・全体効果（占い水晶/彷徨うよろい）・錬金は配信する
-    /// - スコアは UserVariable.GiScore として共有する（他プレイヤーのスコア表示用の基盤）
+    /// - スコアは UserVariable.Score として共有する（他プレイヤーのスコア表示用の基盤）
     ///
     /// 制限: 掴んでいる間のカードの位置は同期しない（リモートではその場に静止し、
     /// 離した位置 GiRelease で再配置される）。継続的な位置同期が必要になったら
@@ -142,13 +142,13 @@ namespace STYLY.TIB_Template.GIPoker
 
             // 自分のスコアを UserVariable として共有
             binder.Score
-                .Subscribe(score => VariableManager.Instance?.SetSelf(UserVariable.GiScore, score.TotalScore))
+                .Subscribe(score => VariableManager.Instance?.SetSelf(UserVariable.Score, score.TotalScore))
                 .AddTo(this);
 
             // 残り時間を UserVariable として共有（運営PCのスコアモニター用。秒単位の更新で十分なため間引く）
             session.RemainingTime
                 .ThrottleLast(System.TimeSpan.FromSeconds(1))
-                .Subscribe(remaining => VariableManager.Instance?.SetSelf(UserVariable.GiRemainingTime, remaining))
+                .Subscribe(remaining => VariableManager.Instance?.SetSelf(UserVariable.RemainingTime, remaining))
                 .AddTo(this);
 
             // セッション終了のエッジ（Finished へ遷移した瞬間）でのみ最終スコアを配信する
@@ -161,7 +161,7 @@ namespace STYLY.TIB_Template.GIPoker
                     previousSessionState = current;
                     if (prev != SessionState.Finished && current == SessionState.Finished)
                     {
-                        Send(Rpc.GiSessionFinished, binder.Score.CurrentValue.TotalScore.ToString(CultureInfo.InvariantCulture));
+                        Send(Rpc.SessionFinished, binder.Score.CurrentValue.TotalScore.ToString(CultureInfo.InvariantCulture));
                     }
                 })
                 .AddTo(this);

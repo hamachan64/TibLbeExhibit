@@ -9,14 +9,13 @@ namespace STYLY.TIB_Template.Leaderboard
     /// <summary>
     /// Environment.unity 内の固定Stage位置（既存 UIDocument プレースホルダーの跡地）に配置する
     /// MR空間向けライブスコアボード。「残り時間」と「今セッションのトップ3」を
-    /// プロシージャルTextMeshPro(3D)（BinderView.BuildBook() と同様の生成パターン）で表示する。
+    /// プロシージャルTextMeshPro(3D)で表示する。
     ///
     /// - 追従・ビルボードは行わない（Stage上の固定モニターのため、Camera.main 依存の LateUpdate は不要）。
     /// - 「本日通算のトップ3」はここでは表示しない（永続化データの端末間不整合の懸念のため、
     ///   引き続き OperatorClient 専用の ScoreMonitorView のみが扱う）。
-    /// - GIPokerAssets.JapaneseFont には依存せず、自前でフォントアセットを持つ
-    ///   （GIPokerBootstrap は UserClient.unity 専用で OperatorClient 側では未初期化のため、
-    ///   Leaderboard 名前空間の「OperatorClient専用ロジックを持たない」設計方針に合わせて自己完結させる）。
+    /// - コンテンツ側のフォント設定には依存せず、自前でフォントアセットを持つ
+    ///   （Leaderboard 名前空間の「OperatorClient専用ロジックを持たない」設計方針に合わせて自己完結させる）。
     /// - LeaderboardTracker は UserClient.unity に配置される。Environment.unity は
     ///   UserClient/OperatorClient どちらからも追加ロードされるため、本Viewは常に同一プロセス内の
     ///   LeaderboardTracker.Instance を見つけて動作する。

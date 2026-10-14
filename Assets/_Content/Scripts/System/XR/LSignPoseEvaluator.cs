@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace STYLY.TIB_Template.GIPoker
+namespace STYLY.TIB_Template
 {
     /// <summary>
     /// 「Lサイン（フィンガーガン）」ポーズの純粋判定ロジック。

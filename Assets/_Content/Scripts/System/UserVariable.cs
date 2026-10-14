@@ -38,16 +38,16 @@ namespace STYLY.TIB_Template
         NeedRegistration,
 
         /// <summary>
-        /// 具現化ポーカーの現在スコア（int）
-        /// バインダーの内容が変わるたびに CardNetworkSync が更新する
+        /// 現在スコア（int）
+        /// 各コンテンツがスコア変化時に更新する（運営PCのスコアモニター・リーダーボードが購読する）
         /// </summary>
-        GiScore,
+        Score,
 
         /// <summary>
-        /// 具現化ポーカーのセッション残り時間（秒, float）
-        /// CardNetworkSync が GameSession.RemainingTime を約1秒間隔で共有する
+        /// セッション残り時間（秒, float）
+        /// 各コンテンツが GameSession.RemainingTime を約1秒間隔で共有する
         /// （運営PCのスコアモニターの「残り時間」表示に使う）
         /// </summary>
-        GiRemainingTime,
+        RemainingTime,
     }
 }

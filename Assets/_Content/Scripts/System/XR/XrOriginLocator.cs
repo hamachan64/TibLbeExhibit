@@ -1,7 +1,7 @@
 using Unity.XR.CoreUtils;
 using UnityEngine;
 
-namespace STYLY.TIB_Template.GIPoker
+namespace STYLY.TIB_Template
 {
     /// <summary>
     /// XR Origin をランタイムで検索・キャッシュするヘルパー。

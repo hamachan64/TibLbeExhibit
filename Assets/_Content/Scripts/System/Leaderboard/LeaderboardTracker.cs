@@ -92,7 +92,7 @@ namespace STYLY.TIB_Template.Leaderboard
                 .Subscribe(clientNo =>
                 {
                     // AsObservableOnChanged は変更時のみ流れるため、接続時点の現在値を明示的に補完する
-                    var initialScore = VariableManager.Instance.Get(UserVariable.GiScore, clientNo, 0);
+                    var initialScore = VariableManager.Instance.Get(UserVariable.Score, clientNo, 0);
                     connectedScores[clientNo] = initialScore;
                     RecomputeLiveTop3();
                 })
@@ -106,7 +106,7 @@ namespace STYLY.TIB_Template.Leaderboard
                 })
                 .AddTo(this);
 
-            VariableManager.Instance.AsObservableOnChanged<int>(UserVariable.GiScore)
+            VariableManager.Instance.AsObservableOnChanged<int>(UserVariable.Score)
                 .Subscribe(data =>
                 {
                     if (!connectedScores.ContainsKey(data.ClientNo))
@@ -118,11 +118,11 @@ namespace STYLY.TIB_Template.Leaderboard
                 })
                 .AddTo(this);
 
-            VariableManager.Instance.AsObservableOnChanged<float>(UserVariable.GiRemainingTime)
+            VariableManager.Instance.AsObservableOnChanged<float>(UserVariable.RemainingTime)
                 .Subscribe(data => remainingTime.Value = data.Value)
                 .AddTo(this);
 
-            RpcManager.Instance.AsObservable(Rpc.GiSessionFinished)
+            RpcManager.Instance.AsObservable(Rpc.SessionFinished)
                 .Subscribe(data =>
                 {
                     if (data.Parameters == null
@@ -159,14 +159,14 @@ namespace STYLY.TIB_Template.Leaderboard
         /// <summary>
         /// OnAvatarConnected の購読開始前から接続済みのクライアントを connectedScores に取り込む。
         /// GetAliveClients はステルスクライアントも含めて取得し（絞り込みなしの要件に合わせる）、
-        /// 各クライアントの現在の GiScore を明示的に取得してシードする。
+        /// 各クライアントの現在の Score を明示的に取得してシードする。
         /// </summary>
         private void SeedAlreadyConnectedClients()
         {
             var aliveClients = NetSyncManager.Instance.GetAliveClients(includeStealthClients: true);
             foreach (var clientNo in aliveClients)
             {
-                connectedScores[clientNo] = VariableManager.Instance.Get(UserVariable.GiScore, clientNo, 0);
+                connectedScores[clientNo] = VariableManager.Instance.Get(UserVariable.Score, clientNo, 0);
             }
             RecomputeLiveTop3();
         }

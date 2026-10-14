@@ -24,8 +24,8 @@ namespace STYLY.TIB_Template.GIPoker.Editor
 
         private const string ErosionShaderName = "GIPoker/Stage/ErosionPatch";
         private const string LeyLineShaderName = "GIPoker/Stage/LeyLine";
-        private const string OccluderShaderName = "GIPoker/Stage/PassthroughOccluder";
-        private const string ShadowCatcherShaderName = "GIPoker/Stage/ShadowCatcher";
+        private const string OccluderShaderName = "TIB/PassthroughOccluder";
+        private const string ShadowCatcherShaderName = "TIB/ShadowCatcher";
 
         private const string ErosionMatPath = StageFolder + "/GIP_ErosionPatch.mat";
         private const string LeyLineMatPath = StageFolder + "/GIP_LeyLine.mat";

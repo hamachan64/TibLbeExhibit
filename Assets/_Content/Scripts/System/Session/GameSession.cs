@@ -3,7 +3,7 @@ using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine;
 
-namespace STYLY.TIB_Template.GIPoker
+namespace STYLY.TIB_Template
 {
     /// <summary>ゲームセッションの状態</summary>
     public enum SessionState

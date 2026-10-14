@@ -5,11 +5,11 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.XR.Hands;
 
-namespace STYLY.TIB_Template.GIPoker
+namespace STYLY.TIB_Template
 {
     /// <summary>
     /// 人差し指の先端に「素手で触れた」判定用の小さなコライダーを追従させるコンポーネント。
-    /// CardizableItemBase の OnTriggerEnter がこのコライダーとの接触でカード化を発火する。
+    /// 触れられる側のオブジェクトは OnTriggerEnter でこのコライダーとの接触を検知する。
     ///
     /// コライダーは HandBone レイヤー（未定義なら Default）に置かれ、
     /// Kinematic Rigidbody 付きなのでトリガーイベントが確実に発生する。
