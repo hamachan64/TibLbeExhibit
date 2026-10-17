@@ -5,10 +5,13 @@ AI駆動開発ループ（承認なしで実装〜PR発行まで走らせる運�
 自動承認ルール（settings.json の permissions.allow）で承認プロンプトを消した分、
 「取り返しがつかない操作」だけをこのフックで確実に止める。
 
+あわせて、権利・費用・セキュリティの歯止め（.claude/rules/license_cost_security.md）も担う。
+
 Claude Code のフックは stdin から JSON を受け取る。
   exit 0 = 許可 / exit 2 = ブロック（stderr の内容が Claude へのフィードバックになる）
+  exit 0 + permissionDecision "ask" の JSON = ユーザーに確認を求める
 
-対象ツール: Bash / Edit / Write / MultiEdit / NotebookEdit
+対象ツール: Bash / Edit / Write / MultiEdit / NotebookEdit / Blender MCP
 """
 
 import json
@@ -26,6 +29,35 @@ GENERATED_DIRS = ("/Library/", "/Temp/", "/obj/", "/Logs/", "/UserSettings/")
 USE_ULOOP = (
     "uloop-execute-dynamic-code で SerializedObject / AssetDatabase / PrefabUtility を"
     "使って操作してください（.claude/rules/unity_asset_rules.md）。"
+)
+
+LICENSE_RULE = "（.claude/rules/license_cost_security.md）"
+
+# --- 費用: 従量課金・クレジット消費の API（アクセス前にユーザーへ確認） ---------------
+PAID_API_HOSTS = (
+    r"api\.openai\.com|api\.elevenlabs\.io|api\.anthropic\.com|"
+    r"hyperhuman\.deemos\.com|api\.hyper3d\.(?:ai|com)|api\.meshy\.ai|api\.tripo3d\.ai|"
+    r"api\.replicate\.com|api\.stability\.ai|generativelanguage\.googleapis\.com"
+)
+PAID_API_RE = re.compile(r"(?:https?://|\b(?:curl|wget)\b[^|;&\n]*\s)(?:" + PAID_API_HOSTS + r")\b")
+
+# Blender MCP の有料・クレジット消費の生成機能と、ライセンスがモデルごとに違う取り込み
+BLENDER_MCP_ASK = [
+    (re.compile(r"hyper3d|rodin|hunyuan", re.I),
+     "Blender MCP の 3D 生成機能（Hyper3D Rodin / Hunyuan3D）は外部サービスのクレジットを消費し、生成物の商用利用条件も要確認です。"),
+    (re.compile(r"sketchfab.*download|download.*sketchfab", re.I),
+     "Sketchfab のモデルはライセンスがモデルごとに違います（CC-BY・非商用など）。商用利用・表示の条件を確認してください。"),
+]
+
+# --- セキュリティ: API キー・秘密鍵らしき文字列（ファイルやコマンドに書かない） --------
+SECRET_RE = re.compile(
+    r"sk-(?:ant-|proj-)?[A-Za-z0-9_-]{20,}"     # OpenAI / Anthropic
+    r"|sk_[0-9a-f]{32,}"                       # ElevenLabs
+    r"|AKIA[0-9A-Z]{16}"                       # AWS
+    r"|gh[pousr]_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{40,}"
+    r"|xox[abprs]-[A-Za-z0-9-]{10,}"           # Slack
+    r"|AIza[0-9A-Za-z_-]{35}"                  # Google
+    r"|-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----"
 )
 
 # --- Bash: 取り返しがつかない操作 -------------------------------------------------
@@ -92,6 +124,27 @@ def block(message):
     sys.exit(2)
 
 
+def ask(message):
+    """ブロックはせず、ユーザーに確認を求める。"""
+    json.dump({
+        "hookSpecificOutput": {
+            "hookEventName": "PreToolUse",
+            "permissionDecision": "ask",
+            "permissionDecisionReason": "[guard] " + message,
+        }
+    }, sys.stdout, ensure_ascii=False)
+    sys.exit(0)
+
+
+def check_secrets(text, where):
+    if text and SECRET_RE.search(text):
+        block(
+            "%s に API キー・トークン・秘密鍵らしき文字列が含まれています。"
+            "リポジトリのファイルやコマンドに秘密情報を書かないでください。"
+            "環境変数やリポジトリ外の設定から読み込む形にしてください%s" % (where, LICENSE_RULE)
+        )
+
+
 def extract_dynamic_code(command):
     """execute-dynamic-code に渡される C# 本文を可能な限り取り出す。"""
     chunks = []
@@ -137,6 +190,28 @@ def check_bash(tool_input):
                         "何をなぜ行いたいのかを報告して指示を仰いでください。" % reason
                     )
 
+    check_secrets(command, "コマンド")
+
+    # ask は exit 0 で抜けるので、ブロックの検査をすべて終えてから行う
+    if PAID_API_RE.search(command):
+        ask(
+            "従量課金・クレジット消費の API へのアクセスです。無料か、商用利用できるかを"
+            "確認してから使ってください%s\n  該当コマンド: %s" % (LICENSE_RULE, command[:300])
+        )
+
+
+def check_mcp(tool_name):
+    for pattern, reason in BLENDER_MCP_ASK:
+        if pattern.search(tool_name):
+            ask("%s%s\n  ツール: %s" % (reason, LICENSE_RULE, tool_name))
+
+
+def file_write_text(tool_input):
+    parts = [tool_input.get("content"), tool_input.get("new_string"), tool_input.get("new_source")]
+    for edit in tool_input.get("edits") or []:
+        parts.append(edit.get("new_string"))
+    return "\n".join(p for p in parts if isinstance(p, str))
+
 
 def check_file_write(tool_input):
     path = tool_input.get("file_path") or tool_input.get("notebook_path") or ""
@@ -155,6 +230,8 @@ def check_file_write(tool_input):
         if directory in normalized:
             block("%s はUnityの生成物ディレクトリです。直接編集しないでください。" % directory.strip("/"))
 
+    check_secrets(file_write_text(tool_input), os.path.basename(path))
+
 
 def main():
     try:
@@ -169,6 +246,8 @@ def main():
         check_bash(tool_input)
     elif tool_name in ("Edit", "Write", "MultiEdit", "NotebookEdit"):
         check_file_write(tool_input)
+    elif tool_name.startswith("mcp__blender"):
+        check_mcp(tool_name)
 
     sys.exit(0)
 
