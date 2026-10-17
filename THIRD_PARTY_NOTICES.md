@@ -1,0 +1,33 @@
+# 外部の素材・サービス・パッケージの記録
+
+> `.claude/rules/license_cost_security.md` の4点（商用利用・権利・無料・セキュリティ）を確認した結果を記録する。
+> 「状態」が **確認済み** の物だけを使う。**未確認** の物は使う前に公式ページの原文で確かめ、この表を更新する。
+> 表示の要否が「要」の物は、待機画面のクレジット欄に出す。
+
+## 使う予定の物（Treasure Haul）
+
+| 名前 | 用途 | 入手元 | ライセンス | 商用 | 費用 | 表示 | 状態 | 確認日 |
+| :--- | :--- | :--- | :--- | :---: | :--- | :--- | :--- | :--- |
+| Smithsonian Open Access 3D | お宝のモデル（文化財スキャン） | https://3d.si.edu/ | CC0（モデルごとに Open Access 表示を確認） | 可 | 無料 | 不要 | 未確認（二次情報のみ） | ― |
+| Poly Haven | 瓦礫・岩などのモデル・テクスチャ | https://polyhaven.com/ | CC0 | 可 | 無料 | 不要 | 未確認 | ― |
+| Quaternius | ローポリの遺跡パーツ（予備） | https://quaternius.com/ | CC0 | 可 | 無料 | 不要 | 未確認 | ― |
+| ナレーション音声 | オープニング | ユーザーが用意 | ― | ― | ― | 生成サービスが求めるなら AI 音声である旨 | ユーザーが確認 | ― |
+
+## プロジェクトに入っている物
+
+| 名前 | 用途 | ライセンス | 商用 | 費用 | 表示 | 状態 |
+| :--- | :--- | :--- | :---: | :--- | :--- | :--- |
+| UniTask（`com.cysharp.unitask`） | 非同期処理 | MIT | 可 | 無料 | 要（ライセンス文の同梱） | 未確認 |
+| R3（`com.cysharp.r3`）、ObservableCollections.R3 | リアクティブ | MIT | 可 | 無料 | 要（ライセンス文の同梱） | 未確認 |
+| DOTween（`Assets/Plugins/Demigiant`） | アニメーション | DOTween の独自ライセンス（無料版） | 要確認 | 無料 | 要確認 | 未確認 |
+| ParrelSync | エディタでの複数起動 | MIT | 可（エディタのみ） | 無料 | ― | 未確認 |
+| uLoopMCP（`io.github.hatayama.uloopmcp`） | AI からのエディタ操作 | 要確認 | エディタのみ | 無料 | ― | 未確認 |
+| STYLY NetSync | 同期 | 要確認 | 要確認 | 要確認 | 要確認 | 未確認 |
+| PICO OpenXR SDK / PXR_Enterprise | PICO 対応 | PICO SDK の規約 | 要確認 | 無料 | 要確認 | 未確認 |
+| Unity 公式パッケージ（URP・XRI・XR Hands・OpenXR 等） | 基盤 | Unity Companion License 等 | 可 | 無料 | ― | 未確認 |
+
+## 使わないと決めた物
+
+| 名前 | 理由 | 確認日 |
+| :--- | :--- | :--- |
+| ElevenLabs（無料プラン） | 無料プランは商用利用不可（公式ヘルプ） | 2026-10-18 |

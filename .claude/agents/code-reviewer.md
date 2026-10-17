@@ -32,6 +32,11 @@ tools: Bash, Read, Grep, Glob
 - asmdef の参照追加が妥当か、テスト（`TibLbeExhibit.Tests.EditMode`）の追加漏れ
 - 純ロジックがMonoBehaviourに埋め込まれてテスト不能になっていないか
 
+### 5. 権利・費用・セキュリティ（`.claude/rules/license_cost_security.md`）
+- `Packages/manifest.json` の変更、`Assets/` への外部の素材・DLL・スクリプトの追加が `THIRD_PARTY_NOTICES.md` に「確認済み」で記録されているか
+- 外部 URL・API へのアクセスを足していないか（有料・従量課金のサービスは不可）
+- API キー・トークンをコードやアセットに書いていないか、ログに出していないか
+
 ## 報告形式
 - 重要度（Critical / Should / Nit）ごとに、`ファイル:行番号`、問題の説明、修正案の順で簡潔に。
 - 問題がなければ「指摘なし」と、確認した観点を添えて報告する。

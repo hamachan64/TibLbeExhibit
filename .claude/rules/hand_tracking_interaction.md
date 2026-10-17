@@ -8,4 +8,5 @@
 - つかむ（グラブ）、つまむ（ピンチ）などのジェスチャー操作は、極力 `XR Hands` および `XR Interaction Toolkit` の標準機能を利用・拡張して実装してください。
 - 特殊ジェスチャー（両手で持ち上げる、特定のハンドサイン等）を実装する場合は、誤爆を防ぐための明確な状態判定を設けてください。
 - 「素手で直接触れる」判定は、ハンドボーンのコライダー（Core の `FingertipTouchCollider`。`HandBone` レイヤー）とオブジェクトのトリガー判定を用いて実装します。
-- ピンチ（つまむ）の判定は Core の `HandPinchTracker` を利用・拡張してください。
+- Treasure Haul のつかむ操作は**握る（グラブ）**: 手を握る（グー）と持ち、開く（パー）と離す。判定は Core の `HandGripTracker`（新規。設計書 4.4）を使う。
+- ピンチ（つまむ）の判定は Core の `HandPinchTracker`（前作用）。Treasure Haul のつかむ操作には使わない。

@@ -51,6 +51,9 @@ description: 「やりたいこと」を受け取り、壁打ち・承認 → So
 
 ## 実機確認が必要な項目
 - <PICO実機でしか確認できないこと。無ければ「なし」>
+
+## 外部の素材・サービス（権利・費用・セキュリティ）
+- <使う外部の物と、.claude/rules/license_cost_security.md の4点の確認結果。無ければ「なし」>
 ```
 
 ---
@@ -85,7 +88,8 @@ description: 「やりたいこと」を受け取り、壁打ち・承認 → So
    ```
    ヒットしたら差し戻し。
 4. `code-reviewer` エージェントを起動して独立したレビューを取る。
-5. `treasure-haul-verify` スキルで**自分でも**コンパイル + EditModeテストを実行する。ゲームプレイに関わる変更なら PlayMode 確認とスクリーンショットまで行う。
+5. **権利・費用・セキュリティ**: `git diff --stat` で `Packages/manifest.json` の変更・`Assets/` への外部ファイルの追加・外部 URL/API へのアクセスを洗い出し、`THIRD_PARTY_NOTICES.md` に「確認済み」で載っているか突き合わせる。載っていなければ差し戻す（`.claude/rules/license_cost_security.md`）。
+6. `treasure-haul-verify` スキルで**自分でも**コンパイル + EditModeテストを実行する。ゲームプレイに関わる変更なら PlayMode 確認とスクリーンショットまで行う。
 
 ### 差し戻し判断
 
@@ -107,8 +111,16 @@ description: 「やりたいこと」を受け取り、壁打ち・承認 → So
    - 変更点の要約
    - 検証結果（コンパイル / テスト / PlayMode所見）
    - **実機確認が必要な項目**（レビュアーが実機で見るべきこと）
+   - 対応する Issue の `Closes #<番号>`
    - 末尾: `🤖 Generated with [Claude Code](https://claude.com/claude-code)`
 5. **マージはしない。** `gh pr merge` は deny 済み。
+6. `TODO.md` の該当行を「👀 PRレビュー中」にして PR 番号を書き、「現在地」を更新して同じブランチにコミット・push する（コミットは PR 作成の前に含めてもよい）。
+7. ボード（https://github.com/users/hamachan64/projects/2 、project number 2）の該当 Issue の Status も「👀 PRレビュー中」にする。着手時（Phase 1）には「🔨 作業中」にする。
+   ```
+   gh project item-list 2 --owner hamachan64 --format json   # Issue 番号から item id を引く
+   gh project field-list 2 --owner hamachan64 --format json  # Status の field id と option id を引く
+   gh project item-edit --project-id <project id> --id <item id> --field-id <Status field id> --single-select-option-id <option id>
+   ```
 
 ## Phase 5 — 完了報告
 
