@@ -1,0 +1,369 @@
+{
+  "fbx_passed": 30,
+  "blend_passed": 10,
+  "checks": [
+    {
+      "file": "mask.fbx",
+      "triangles": 4684,
+      "meshes": 2,
+      "material_slots": 3,
+      "boundary_edges": 0,
+      "dimensions_m": [
+        0.19679248332977295,
+        0.09701482020318508,
+        0.3451747843064368
+      ]
+    },
+    {
+      "file": "mask_pattern_cinnabar.fbx",
+      "triangles": 4684,
+      "meshes": 2,
+      "material_slots": 3,
+      "boundary_edges": 0,
+      "dimensions_m": [
+        0.19679248332977295,
+        0.09701482020318508,
+        0.3451747843064368
+      ]
+    },
+    {
+      "file": "mask_pattern_jade.fbx",
+      "triangles": 4684,
+      "meshes": 2,
+      "material_slots": 3,
+      "boundary_edges": 0,
+      "dimensions_m": [
+        0.19679248332977295,
+        0.09701482020318508,
+        0.3451747843064368
+      ]
+    },
+    {
+      "file": "cup.fbx",
+      "triangles": 4696,
+      "meshes": 2,
+      "material_slots": 3,
+      "boundary_edges": 96,
+      "dimensions_m": [
+        0.1900000050663948,
+        0.1380000337958336,
+        0.20900003246078036
+      ]
+    },
+    {
+      "file": "cup_pattern_cinnabar.fbx",
+      "triangles": 4696,
+      "meshes": 2,
+      "material_slots": 3,
+      "boundary_edges": 96,
+      "dimensions_m": [
+        0.1900000050663948,
+        0.1380000337958336,
+        0.20900003246078036
+      ]
+    },
+    {
+      "file": "cup_pattern_jade.fbx",
+      "triangles": 4696,
+      "meshes": 2,
+      "material_slots": 3,
+      "boundary_edges": 96,
+      "dimensions_m": [
+        0.1900000050663948,
+        0.1380000337958336,
+        0.20900003246078036
+      ]
+    },
+    {
+      "file": "statuette.fbx",
+      "triangles": 4600,
+      "meshes": 2,
+      "material_slots": 4,
+      "boundary_edges": 36,
+      "dimensions_m": [
+        0.11999999731779099,
+        0.12000003829598427,
+        0.292499999046405
+      ]
+    },
+    {
+      "file": "statuette_pattern_cinnabar.fbx",
+      "triangles": 4600,
+      "meshes": 2,
+      "material_slots": 4,
+      "boundary_edges": 36,
+      "dimensions_m": [
+        0.11999999731779099,
+        0.12000003829598427,
+        0.292499999046405
+      ]
+    },
+    {
+      "file": "statuette_pattern_jade.fbx",
+      "triangles": 4600,
+      "meshes": 2,
+      "material_slots": 4,
+      "boundary_edges": 36,
+      "dimensions_m": [
+        0.11999999731779099,
+        0.12000003829598427,
+        0.292499999046405
+      ]
+    },
+    {
+      "file": "scarab_amulet.fbx",
+      "triangles": 2456,
+      "meshes": 2,
+      "material_slots": 3,
+      "boundary_edges": 0,
+      "dimensions_m": [
+        0.17900000512599945,
+        0.08300003409385681,
+        0.20800001034513116
+      ]
+    },
+    {
+      "file": "scarab_amulet_pattern_cinnabar.fbx",
+      "triangles": 2456,
+      "meshes": 2,
+      "material_slots": 3,
+      "boundary_edges": 0,
+      "dimensions_m": [
+        0.17900000512599945,
+        0.08300003409385681,
+        0.20800001034513116
+      ]
+    },
+    {
+      "file": "scarab_amulet_pattern_jade.fbx",
+      "triangles": 2456,
+      "meshes": 2,
+      "material_slots": 3,
+      "boundary_edges": 0,
+      "dimensions_m": [
+        0.17900000512599945,
+        0.08300003409385681,
+        0.20800001034513116
+      ]
+    },
+    {
+      "file": "ceremonial_lamp.fbx",
+      "triangles": 3020,
+      "meshes": 2,
+      "material_slots": 3,
+      "boundary_edges": 0,
+      "dimensions_m": [
+        0.17800000309944153,
+        0.12800002098083496,
+        0.10600001662580727
+      ]
+    },
+    {
+      "file": "ceremonial_lamp_pattern_cinnabar.fbx",
+      "triangles": 3020,
+      "meshes": 2,
+      "material_slots": 3,
+      "boundary_edges": 0,
+      "dimensions_m": [
+        0.17800000309944153,
+        0.12800002098083496,
+        0.10600001662580727
+      ]
+    },
+    {
+      "file": "ceremonial_lamp_pattern_jade.fbx",
+      "triangles": 3020,
+      "meshes": 2,
+      "material_slots": 3,
+      "boundary_edges": 0,
+      "dimensions_m": [
+        0.17800000309944153,
+        0.12800002098083496,
+        0.10600001662580727
+      ]
+    },
+    {
+      "file": "amphora.fbx",
+      "triangles": 4064,
+      "meshes": 3,
+      "material_slots": 4,
+      "boundary_edges": 0,
+      "dimensions_m": [
+        0.2900000214576721,
+        0.19000005722045898,
+        0.38000004051141545
+      ]
+    },
+    {
+      "file": "amphora_pattern_cinnabar.fbx",
+      "triangles": 4064,
+      "meshes": 3,
+      "material_slots": 4,
+      "boundary_edges": 0,
+      "dimensions_m": [
+        0.2900000214576721,
+        0.19000005722045898,
+        0.38000004051141545
+      ]
+    },
+    {
+      "file": "amphora_pattern_jade.fbx",
+      "triangles": 4064,
+      "meshes": 3,
+      "material_slots": 4,
+      "boundary_edges": 0,
+      "dimensions_m": [
+        0.2900000214576721,
+        0.19000005722045898,
+        0.38000004051141545
+      ]
+    },
+    {
+      "file": "inscribed_stele.fbx",
+      "triangles": 2104,
+      "meshes": 3,
+      "material_slots": 5,
+      "boundary_edges": 0,
+      "dimensions_m": [
+        0.48799997568130493,
+        0.10215584561228752,
+        0.5249999822117388
+      ]
+    },
+    {
+      "file": "inscribed_stele_pattern_cinnabar.fbx",
+      "triangles": 2104,
+      "meshes": 3,
+      "material_slots": 5,
+      "boundary_edges": 0,
+      "dimensions_m": [
+        0.48799997568130493,
+        0.10215584561228752,
+        0.5249999822117388
+      ]
+    },
+    {
+      "file": "inscribed_stele_pattern_jade.fbx",
+      "triangles": 2104,
+      "meshes": 3,
+      "material_slots": 5,
+      "boundary_edges": 0,
+      "dimensions_m": [
+        0.48799997568130493,
+        0.10215584561228752,
+        0.5249999822117388
+      ]
+    },
+    {
+      "file": "guardian_statue.fbx",
+      "triangles": 4740,
+      "meshes": 3,
+      "material_slots": 6,
+      "boundary_edges": 0,
+      "dimensions_m": [
+        0.6539999842643738,
+        0.35000012814998627,
+        0.7500000276965171
+      ]
+    },
+    {
+      "file": "guardian_statue_pattern_cinnabar.fbx",
+      "triangles": 4740,
+      "meshes": 3,
+      "material_slots": 6,
+      "boundary_edges": 0,
+      "dimensions_m": [
+        0.6539999842643738,
+        0.35000012814998627,
+        0.7500000276965171
+      ]
+    },
+    {
+      "file": "guardian_statue_pattern_jade.fbx",
+      "triangles": 4740,
+      "meshes": 3,
+      "material_slots": 6,
+      "boundary_edges": 0,
+      "dimensions_m": [
+        0.6539999842643738,
+        0.35000012814998627,
+        0.7500000276965171
+      ]
+    },
+    {
+      "file": "relic_chest.fbx",
+      "triangles": 2508,
+      "meshes": 3,
+      "material_slots": 5,
+      "boundary_edges": 0,
+      "dimensions_m": [
+        0.8059999942779541,
+        0.42090904712677,
+        0.4100000560283661
+      ]
+    },
+    {
+      "file": "relic_chest_pattern_cinnabar.fbx",
+      "triangles": 2508,
+      "meshes": 3,
+      "material_slots": 5,
+      "boundary_edges": 0,
+      "dimensions_m": [
+        0.8059999942779541,
+        0.42090904712677,
+        0.4100000560283661
+      ]
+    },
+    {
+      "file": "relic_chest_pattern_jade.fbx",
+      "triangles": 2508,
+      "meshes": 3,
+      "material_slots": 5,
+      "boundary_edges": 0,
+      "dimensions_m": [
+        0.8059999942779541,
+        0.42090904712677,
+        0.4100000560283661
+      ]
+    },
+    {
+      "file": "sun_mask_secret.fbx",
+      "triangles": 4644,
+      "meshes": 2,
+      "material_slots": 5,
+      "boundary_edges": 0,
+      "dimensions_m": [
+        0.2798677086830139,
+        0.09300005622208118,
+        0.3294746857136488
+      ]
+    },
+    {
+      "file": "sun_mask_secret_pattern_cinnabar.fbx",
+      "triangles": 4644,
+      "meshes": 2,
+      "material_slots": 5,
+      "boundary_edges": 0,
+      "dimensions_m": [
+        0.2798677086830139,
+        0.09300005622208118,
+        0.3294746857136488
+      ]
+    },
+    {
+      "file": "sun_mask_secret_pattern_jade.fbx",
+      "triangles": 4644,
+      "meshes": 2,
+      "material_slots": 5,
+      "boundary_edges": 0,
+      "dimensions_m": [
+        0.2798677086830139,
+        0.09300005622208118,
+        0.3294746857136488
+      ]
+    }
+  ],
+  "unity_compile": "not run",
+  "unity_editmode": "not run",
+  "pico_fps": "not measured"
+}
