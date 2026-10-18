@@ -14,6 +14,20 @@ namespace STYLY.TIB_Template.TreasureHaul.Prototype
     {
         const string NetScene = "Assets/_Content/TreasureHaul/Prototype/Scenes/TH_Proto_Net.unity";
 
+        const string FoundationScene = "Assets/_Content/TreasureHaul/Prototype/Scenes/TH_Foundation_Client.unity";
+
+        /// <summary>#37 の結合確認: SessionClient と NetSync だけを置いた確認用シーンを Play する（端末役）。</summary>
+        public static void PlayFoundationClient()
+        {
+            if (!Application.isBatchMode)
+            {
+                Debug.LogWarning("[ProtoBatchRunner] -batchmode でないので何もしません（メインのエディタでシーンを切り替えないため）");
+                return;
+            }
+            EditorSceneManager.OpenScene(FoundationScene, OpenSceneMode.Single);
+            EditorApplication.EnterPlaymode();
+        }
+
         public static void PlayNet()
         {
             if (!Application.isBatchMode)

@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a1b1e4574f7e4ea59b67280279e24b2, type: 3}
+  m_Name: ThTextTable
+  m_EditorClassIdentifier: TibLbeExhibit.TreasureHaul::STYLY.TIB_Template.TreasureHaul.ThTextTable
+  entries:
+  - id: 0
+    text: "\u5F85\u6A5F"
+  - id: 1
+    text: "\u30AA\u30FC\u30D7\u30CB\u30F3\u30B0"
+  - id: 2
+    text: "\u7DF4\u7FD2"
+  - id: 3
+    text: "\u672C\u7DE8"
+  - id: 4
+    text: "\u7D50\u679C"
+  - id: 5
+    text: "\u6B8B\u308A {0} \u79D2"
+  - id: 6
+    text: RoundId {0}
+  - id: 7
+    text: "\u7AEF\u672B \u63A5\u7D9A\u4E2D {0} / \u53C2\u52A0\u3067\u304D\u308B {1}"
+  - id: 8
+    text: "\u30D1\u30E9\u30E1\u30FC\u30BF\u7248 {0}"
+  - id: 9
+    text: "\u8B66\u544A"
+  - id: 10
+    text: "\u958B\u59CB"
+  - id: 11
+    text: "\u4E2D\u65AD"
+  - id: 12
+    text: "\u3082\u3046\u4E00\u5EA6\u62BC\u3059\u3068\u4E2D\u65AD"
+  - id: 13
+    text: "\u30D1\u30E9\u30E1\u30FC\u30BF\u518D\u8AAD\u307F\u8FBC\u307F"
+  - id: 14
+    text: "\u5B9D\u3092\u8377\u53F0\u307E\u3067\u904B\u307C\u3046\u3002\u3076\u3064\u3051\u308B\u3068\u5024\u6BB5\u304C\u4E0B\u304C\u308B\u3002\u307F\u3093\u306A\u3067\u76EE\u6A19\u984D\u3092\u76EE\u6307\u305D\u3046"
+  - id: 15
+    text: "\u6301\u3061\u624B\u306B\u624B\u3092\u5411\u3051\u3066\u3001\u30AE\u30E5\u30C3\u3068\u63E1\u308B\u3068\u6301\u3066\u308B"
+  - id: 16
+    text: "\u6301\u3061\u624B\u306B\u624B\u3092\u5411\u3051\u3066\u3001\u63E1\u308D\u3046"
+  - id: 17
+    text: "\u3076\u3064\u3051\u308B\u3068\u5024\u6BB5\u304C\u4E0B\u304C\u308B"
+  - id: 18
+    text: "\u3042\u306A\u305F\u306E"
+  - id: 19
+    text: "\u4E21\u624B\u3067\u6301\u3068\u3046"
+  - id: 20
+    text: "\u3053\u3053\u3078\u904B\u307C\u3046"
+  - id: 21
+    text: "\uFF1F"
+  - id: 22
+    text: '{0:N0}G'
+  - id: 23
+    text: "+{0:N0}G\uFF01"
+  - id: 24
+    text: -{0:N0}G
+  - id: 25
+    text: +{0:N0}G
+  - id: 26
+    text: "+{0:N0}G \u50B7\u7269"
+  - id: 27
+    text: "\u4ECA\u56DE\u306E\u640D\u5BB3\uFF1A{0:N0}G"
+  - id: 28
+    text: "\u77F3\u50CF\u306E\u76EE\u304C\u5149\u3063\u305F\u3089\u6B62\u307E\u308D\u3046\u3002\u52D5\u304F\u3068\u5024\u6BB5\u304C\u4E0B\u304C\u308B"
+  - id: 29
+    text: "2\u4EBA\u3067\u6301\u3068\u3046"
