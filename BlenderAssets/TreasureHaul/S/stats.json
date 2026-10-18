@@ -1,0 +1,59 @@
+{
+  "blender_version": "5.1.2",
+  "units": "metres",
+  "source": "original procedural geometry and texture pixels; no external assets",
+  "assets": [
+    {
+      "name": "mask",
+      "triangles": 4684,
+      "mesh_objects": 11,
+      "dimensions_m": [
+        0.1968,
+        0.097,
+        0.3452
+      ],
+      "grip": "TH_S_Mask_Handle",
+      "materials": [
+        "TH_S_AgedBronze",
+        "TH_S_Grip_Emission",
+        "TH_S_WornGilt"
+      ],
+      "uv_layers": true
+    },
+    {
+      "name": "cup",
+      "triangles": 4792,
+      "mesh_objects": 19,
+      "dimensions_m": [
+        0.19,
+        0.138,
+        0.209
+      ],
+      "grip": "TH_S_Cup_Handle",
+      "materials": [
+        "TH_S_AgedBronze",
+        "TH_S_Grip_Emission",
+        "TH_S_WornGilt"
+      ],
+      "uv_layers": true
+    },
+    {
+      "name": "statuette",
+      "triangles": 4664,
+      "mesh_objects": 35,
+      "dimensions_m": [
+        0.12,
+        0.12,
+        0.2925
+      ],
+      "grip": "TH_S_Statuette_Handle",
+      "materials": [
+        "TH_S_AgedBronze",
+        "TH_S_DarkRecess",
+        "TH_S_Grip_Emission",
+        "TH_S_WornGilt"
+      ],
+      "uv_layers": true
+    }
+  ]
+}

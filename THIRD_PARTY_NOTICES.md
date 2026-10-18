@@ -17,6 +17,25 @@
 
 ## プロジェクトに入っている物
 
+### Issue #46: お宝 S（2026-10-18）
+
+外部のモデル・画像・テクスチャは使用せず、既設 Blender と Blender MCP のローカル操作で制作する。以下は制作ツールと自作成果物の記録であり、自作物を第三者の CC0 素材として扱うものではない。
+
+| 名前 | 入手元・根拠 | ライセンス・権利 | 商用 | 費用 | 表示 | セキュリティ | 状態・確認日 |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| Blender 5.1.2（既設） | [公式ライセンス](https://www.blender.org/about/license/)、[公式マニュアル](https://docs.blender.org/UATEST/manual/en/dev/getting_started/about/license.html) | ソフトウェアは GPL。制作した作品・データファイルに GPL を適用する義務はない | 可 | 無料、ローカル制作 | ツールを同梱しないため不要 | 既設の公式 Blender。追加インストール・外部APIアクセスなし | 確認済み・2026-10-18 |
+| MCP for Blender の自作モデリング機能 | [公式MIT原文](https://github.com/ahujasid/mcp-for-blender/blob/main/LICENSE)、[公式配布](https://pypi.org/project/mcp-for-blender/) | MIT、ツール本体は成果物に同梱しない | 可 | 無料のコア機能のみ、Premium・生成クレジットなし | ツールの再配布なし。成果物へのクレジット義務なし | 既設アドオンの execute_blender_code と確認系のみ。全外部ライブラリ・生成機能OFFを確認。秘密情報の使用なし | 確認済み・2026-10-18 |
+| Treasure S 仮面 | `BlenderAssets/TreasureHaul/S/`（本リポジトリ内で自作） | オリジナル形状・材質。実在人物・ブランド・既存作品の複製なし | 可 | ローカル制作、追加課金なし | 第三者素材による義務なし | 自作スクリプトのみ、外部モデル・テクスチャなし | 確認済み・2026-10-18 |
+| Treasure S 杯 | `BlenderAssets/TreasureHaul/S/`（本リポジトリ内で自作） | オリジナル形状・材質。実在人物・ブランド・既存作品の複製なし | 可 | ローカル制作、追加課金なし | 第三者素材による義務なし | 自作スクリプトのみ、外部モデル・テクスチャなし | 確認済み・2026-10-18 |
+| Treasure S 小像 | `BlenderAssets/TreasureHaul/S/`（本リポジトリ内で自作） | オリジナル形状・材質。実在人物・ブランド・既存作品の複製なし | 可 | ローカル制作、追加課金なし | 第三者素材による義務なし | 自作スクリプトのみ、外部モデル・テクスチャなし | 確認済み・2026-10-18 |
+
+#### CC0 素材の調査（不採用、ダウンロードなし）
+
+- Smithsonian Open Access: [公式FAQ](https://www.si.edu/openaccess/faq)は CC0 指定作品の利用・改変・共有を許可。検索では杯・仮面が見つかったが、個別モデルの CC0 表示と取得ファイルを確認できず使用しない。サイト全体を確認済み扱いにはしない。
+- Poly Haven: [公式ライセンス](https://polyhaven.com/license)で CC0・商用・改変・再配布可、クレジット不要を確認。[Bronze Shark Statue](https://polyhaven.com/a/bronze_shark_statue)（7K tri）と [Gothic Statue](https://polyhaven.com/a/gothic_statue)（28K tri）は無料・CC0 の候補だが、持ち手込み5,000 triへ軽量化が必要。今回は小型遺物3点の造形と質感をそろえるため採用しない。素材・スクリプトの取得なし。
+
+### 既存パッケージ
+
 | 名前 | 用途 | ライセンス | 商用 | 費用 | 表示 | 状態 |
 | :--- | :--- | :--- | :---: | :--- | :--- | :--- |
 | UniTask（`com.cysharp.unitask`） | 非同期処理 | MIT | 可 | 無料 | 要（ライセンス文の同梱） | 未確認 |

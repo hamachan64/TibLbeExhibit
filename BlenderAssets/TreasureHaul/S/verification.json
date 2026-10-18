@@ -1,0 +1,67 @@
+{
+  "original_objects_preserved": true,
+  "unity_imported": false,
+  "unity_compile_and_editmode": "not run: no Unity import requested",
+  "checks": [
+    {
+      "asset": "mask",
+      "blend_scene_at_origin": true,
+      "blend_packed_textures": true,
+      "fbx_triangles": 4684,
+      "fbx_dimensions_m": [
+        0.1968,
+        0.097,
+        0.3452
+      ],
+      "fbx_uvs": true,
+      "fbx_grip_count": 1,
+      "fbx_emission_color_linear": [
+        0.03999999910593033,
+        1.0,
+        0.6499999761581421,
+        1.0
+      ],
+      "fbx_emission_strength": 2.5
+    },
+    {
+      "asset": "cup",
+      "blend_scene_at_origin": true,
+      "blend_packed_textures": true,
+      "fbx_triangles": 4792,
+      "fbx_dimensions_m": [
+        0.19,
+        0.138,
+        0.209
+      ],
+      "fbx_uvs": true,
+      "fbx_grip_count": 1,
+      "fbx_emission_color_linear": [
+        0.03999999910593033,
+        1.0,
+        0.6499999761581421,
+        1.0
+      ],
+      "fbx_emission_strength": 2.5
+    },
+    {
+      "asset": "statuette",
+      "blend_scene_at_origin": true,
+      "blend_packed_textures": true,
+      "fbx_triangles": 4664,
+      "fbx_dimensions_m": [
+        0.12,
+        0.12,
+        0.2925
+      ],
+      "fbx_uvs": true,
+      "fbx_grip_count": 1,
+      "fbx_emission_color_linear": [
+        0.03999999910593033,
+        1.0,
+        0.6499999761581421,
+        1.0
+      ],
+      "fbx_emission_strength": 2.5
+    }
+  ]
+}
