@@ -1,0 +1,369 @@
+{
+  "model_count": 10,
+  "fbx_variant_count": 30,
+  "all_under_5000_tri": true,
+  "blend_scene_and_packed_texture_checks": 10,
+  "fbx_roundtrip_checks": [
+    {
+      "model": "mask",
+      "variant": "mask.fbx",
+      "triangles": 4684,
+      "dimensions_m": [
+        0.1968,
+        0.097,
+        0.3452
+      ],
+      "emissive_materials": 1,
+      "expected_grip_count": 1
+    },
+    {
+      "model": "mask",
+      "variant": "mask_pattern_cinnabar.fbx",
+      "triangles": 4684,
+      "dimensions_m": [
+        0.1968,
+        0.097,
+        0.3452
+      ],
+      "emissive_materials": 1,
+      "expected_grip_count": 1
+    },
+    {
+      "model": "mask",
+      "variant": "mask_pattern_jade.fbx",
+      "triangles": 4684,
+      "dimensions_m": [
+        0.1968,
+        0.097,
+        0.3452
+      ],
+      "emissive_materials": 1,
+      "expected_grip_count": 1
+    },
+    {
+      "model": "cup",
+      "variant": "cup.fbx",
+      "triangles": 4792,
+      "dimensions_m": [
+        0.19,
+        0.138,
+        0.209
+      ],
+      "emissive_materials": 1,
+      "expected_grip_count": 1
+    },
+    {
+      "model": "cup",
+      "variant": "cup_pattern_cinnabar.fbx",
+      "triangles": 4792,
+      "dimensions_m": [
+        0.19,
+        0.138,
+        0.209
+      ],
+      "emissive_materials": 1,
+      "expected_grip_count": 1
+    },
+    {
+      "model": "cup",
+      "variant": "cup_pattern_jade.fbx",
+      "triangles": 4792,
+      "dimensions_m": [
+        0.19,
+        0.138,
+        0.209
+      ],
+      "emissive_materials": 1,
+      "expected_grip_count": 1
+    },
+    {
+      "model": "statuette",
+      "variant": "statuette.fbx",
+      "triangles": 4664,
+      "dimensions_m": [
+        0.12,
+        0.12,
+        0.2925
+      ],
+      "emissive_materials": 1,
+      "expected_grip_count": 1
+    },
+    {
+      "model": "statuette",
+      "variant": "statuette_pattern_cinnabar.fbx",
+      "triangles": 4664,
+      "dimensions_m": [
+        0.12,
+        0.12,
+        0.2925
+      ],
+      "emissive_materials": 1,
+      "expected_grip_count": 1
+    },
+    {
+      "model": "statuette",
+      "variant": "statuette_pattern_jade.fbx",
+      "triangles": 4664,
+      "dimensions_m": [
+        0.12,
+        0.12,
+        0.2925
+      ],
+      "emissive_materials": 1,
+      "expected_grip_count": 1
+    },
+    {
+      "model": "scarab_amulet",
+      "variant": "scarab_amulet.fbx",
+      "triangles": 2442,
+      "dimensions_m": [
+        0.179,
+        0.083,
+        0.208
+      ],
+      "emissive_materials": 1,
+      "expected_grip_count": 1
+    },
+    {
+      "model": "scarab_amulet",
+      "variant": "scarab_amulet_pattern_cinnabar.fbx",
+      "triangles": 2442,
+      "dimensions_m": [
+        0.179,
+        0.083,
+        0.208
+      ],
+      "emissive_materials": 1,
+      "expected_grip_count": 1
+    },
+    {
+      "model": "scarab_amulet",
+      "variant": "scarab_amulet_pattern_jade.fbx",
+      "triangles": 2442,
+      "dimensions_m": [
+        0.179,
+        0.083,
+        0.208
+      ],
+      "emissive_materials": 1,
+      "expected_grip_count": 1
+    },
+    {
+      "model": "ceremonial_lamp",
+      "variant": "ceremonial_lamp.fbx",
+      "triangles": 3144,
+      "dimensions_m": [
+        0.187,
+        0.18,
+        0.106
+      ],
+      "emissive_materials": 1,
+      "expected_grip_count": 1
+    },
+    {
+      "model": "ceremonial_lamp",
+      "variant": "ceremonial_lamp_pattern_cinnabar.fbx",
+      "triangles": 3144,
+      "dimensions_m": [
+        0.187,
+        0.18,
+        0.106
+      ],
+      "emissive_materials": 1,
+      "expected_grip_count": 1
+    },
+    {
+      "model": "ceremonial_lamp",
+      "variant": "ceremonial_lamp_pattern_jade.fbx",
+      "triangles": 3144,
+      "dimensions_m": [
+        0.187,
+        0.18,
+        0.106
+      ],
+      "emissive_materials": 1,
+      "expected_grip_count": 1
+    },
+    {
+      "model": "amphora",
+      "variant": "amphora.fbx",
+      "triangles": 4128,
+      "dimensions_m": [
+        0.29,
+        0.19,
+        0.38
+      ],
+      "emissive_materials": 2,
+      "expected_grip_count": 2
+    },
+    {
+      "model": "amphora",
+      "variant": "amphora_pattern_cinnabar.fbx",
+      "triangles": 4128,
+      "dimensions_m": [
+        0.29,
+        0.19,
+        0.38
+      ],
+      "emissive_materials": 2,
+      "expected_grip_count": 2
+    },
+    {
+      "model": "amphora",
+      "variant": "amphora_pattern_jade.fbx",
+      "triangles": 4128,
+      "dimensions_m": [
+        0.29,
+        0.19,
+        0.38
+      ],
+      "emissive_materials": 2,
+      "expected_grip_count": 2
+    },
+    {
+      "model": "inscribed_stele",
+      "variant": "inscribed_stele.fbx",
+      "triangles": 1610,
+      "dimensions_m": [
+        0.488,
+        0.21,
+        0.525
+      ],
+      "emissive_materials": 2,
+      "expected_grip_count": 2
+    },
+    {
+      "model": "inscribed_stele",
+      "variant": "inscribed_stele_pattern_cinnabar.fbx",
+      "triangles": 1610,
+      "dimensions_m": [
+        0.488,
+        0.21,
+        0.525
+      ],
+      "emissive_materials": 2,
+      "expected_grip_count": 2
+    },
+    {
+      "model": "inscribed_stele",
+      "variant": "inscribed_stele_pattern_jade.fbx",
+      "triangles": 1610,
+      "dimensions_m": [
+        0.488,
+        0.21,
+        0.525
+      ],
+      "emissive_materials": 2,
+      "expected_grip_count": 2
+    },
+    {
+      "model": "guardian_statue",
+      "variant": "guardian_statue.fbx",
+      "triangles": 4686,
+      "dimensions_m": [
+        0.654,
+        0.35,
+        0.75
+      ],
+      "emissive_materials": 2,
+      "expected_grip_count": 2
+    },
+    {
+      "model": "guardian_statue",
+      "variant": "guardian_statue_pattern_cinnabar.fbx",
+      "triangles": 4686,
+      "dimensions_m": [
+        0.654,
+        0.35,
+        0.75
+      ],
+      "emissive_materials": 2,
+      "expected_grip_count": 2
+    },
+    {
+      "model": "guardian_statue",
+      "variant": "guardian_statue_pattern_jade.fbx",
+      "triangles": 4686,
+      "dimensions_m": [
+        0.654,
+        0.35,
+        0.75
+      ],
+      "emissive_materials": 2,
+      "expected_grip_count": 2
+    },
+    {
+      "model": "relic_chest",
+      "variant": "relic_chest.fbx",
+      "triangles": 2468,
+      "dimensions_m": [
+        0.806,
+        0.384,
+        0.41
+      ],
+      "emissive_materials": 2,
+      "expected_grip_count": 2
+    },
+    {
+      "model": "relic_chest",
+      "variant": "relic_chest_pattern_cinnabar.fbx",
+      "triangles": 2468,
+      "dimensions_m": [
+        0.806,
+        0.384,
+        0.41
+      ],
+      "emissive_materials": 2,
+      "expected_grip_count": 2
+    },
+    {
+      "model": "relic_chest",
+      "variant": "relic_chest_pattern_jade.fbx",
+      "triangles": 2468,
+      "dimensions_m": [
+        0.806,
+        0.384,
+        0.41
+      ],
+      "emissive_materials": 2,
+      "expected_grip_count": 2
+    },
+    {
+      "model": "sun_mask_secret",
+      "variant": "sun_mask_secret.fbx",
+      "triangles": 4568,
+      "dimensions_m": [
+        0.21,
+        0.093,
+        0.3295
+      ],
+      "emissive_materials": 1,
+      "expected_grip_count": 1
+    },
+    {
+      "model": "sun_mask_secret",
+      "variant": "sun_mask_secret_pattern_cinnabar.fbx",
+      "triangles": 4568,
+      "dimensions_m": [
+        0.21,
+        0.093,
+        0.3295
+      ],
+      "emissive_materials": 1,
+      "expected_grip_count": 1
+    },
+    {
+      "model": "sun_mask_secret",
+      "variant": "sun_mask_secret_pattern_jade.fbx",
+      "triangles": 4568,
+      "dimensions_m": [
+        0.21,
+        0.093,
+        0.3295
+      ],
+      "emissive_materials": 1,
+      "expected_grip_count": 1
+    }
+  ],
+  "unity_imported": false
+}

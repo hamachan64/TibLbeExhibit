@@ -1,5 +1,17 @@
 # 外部の素材・サービス・パッケージの記録
 
+## 追加記録: Treasure Haul お宝10種 (2026-10-18)
+
+以下の7モデルと共通柄テクスチャは、このリポジトリのローカル Blender / Blender MCP `execute_blender_code` だけで新規制作した。外部素材・AI生成サービスは利用していない。4点確認: 商用展示可（自作物）／第三者権利・既存ブランド・人物・R.E.P.O素材を含まない／無料（ローカル制作、従量課金なし）／公式配布物のダウンロードやAPIキー利用なし。
+
+| 名前 | 入手元・根拠 | ライセンス・権利 | 商用 | 費用 | セキュリティ | 確認日 |
+| :--- | :--- | :--- | :---: | :--- | :--- | :--- |
+| Treasure Haul S Scarab Amulet / Ceremonial Lamp | `BlenderAssets/TreasureHaul/` 内で自作 | オリジナル形状・自作柄、第三者素材なし | 可 | 無料 | ローカル制作のみ | 2026-10-18 |
+| Treasure Haul M Amphora / Inscribed Stele | `BlenderAssets/TreasureHaul/` 内で自作 | オリジナル形状・自作柄、第三者素材なし | 可 | 無料 | ローカル制作のみ | 2026-10-18 |
+| Treasure Haul L Guardian Statue / Relic Chest | `BlenderAssets/TreasureHaul/` 内で自作 | オリジナル形状・自作柄、第三者素材なし | 可 | 無料 | ローカル制作のみ | 2026-10-18 |
+| Treasure Haul Secret Sun Mask | `BlenderAssets/TreasureHaul/` 内で自作 | オリジナル形状・自作柄、第三者素材なし | 可 | 無料 | ローカル制作のみ | 2026-10-18 |
+| Treasure Haul Bronze Patina / Cinnabar Gilt / Jade Inlay patterns | `BlenderAssets/TreasureHaul/patterns/` 内で自作。Bronze Patina は同梱済み自作S用テクスチャを再利用 | オリジナルの自作画像、第三者素材なし | 可 | 無料 | ローカル生成のみ | 2026-10-18 |
+
 > `.claude/rules/license_cost_security.md` の4点（商用利用・権利・無料・セキュリティ）を確認した結果を記録する。
 > 「状態」が **確認済み** の物だけを使う。**未確認** の物は使う前に公式ページの原文で確かめ、この表を更新する。
 > 表示の要否が「要」の物は、待機画面のクレジット欄に出す。
