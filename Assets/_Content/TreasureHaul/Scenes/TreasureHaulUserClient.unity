@@ -394,6 +394,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: TibLbeExhibit.TreasureHaul::STYLY.TIB_Template.TreasureHaul.SessionClient
   _defaults: {fileID: 11400000, guid: fb1f89848fe7246d8ad9b170a428bb95, type: 2}
+  _content: {fileID: 11400000, guid: 45f410701c379485b81d0257f1250328, type: 2}
 --- !u!1 &1424104152
 GameObject:
   m_ObjectHideFlags: 0

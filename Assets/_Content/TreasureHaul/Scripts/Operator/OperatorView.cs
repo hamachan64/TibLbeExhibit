@@ -26,16 +26,18 @@ namespace STYLY.TIB_Template.TreasureHaul
         [SerializeField] TMP_Text _abortLabel;
         [SerializeField] Button _reloadButton;
 
-        const string AbortLabelNormal = "中断";
-        const string AbortLabelArmed = "もう一度押すと中断";
+        [SerializeField] TMP_Text _startLabel;
+        [SerializeField] TMP_Text _reloadLabel;
 
-        static readonly Dictionary<RoundState, string> StateLabels = new Dictionary<RoundState, string>
+        ThTextTable _t;
+
+        static readonly Dictionary<RoundState, ThTextId> StateIds = new Dictionary<RoundState, ThTextId>
         {
-            { RoundState.Waiting, "待機" },
-            { RoundState.Opening, "オープニング" },
-            { RoundState.Tutorial, "練習" },
-            { RoundState.Playing, "本編" },
-            { RoundState.Result, "結果" },
+            { RoundState.Waiting, ThTextId.StateWaiting },
+            { RoundState.Opening, ThTextId.StateOpening },
+            { RoundState.Tutorial, ThTextId.StateTutorial },
+            { RoundState.Playing, ThTextId.StatePlaying },
+            { RoundState.Result, ThTextId.StateResult },
         };
 
         AbortConfirmGate _abortGate;
@@ -45,24 +47,27 @@ namespace STYLY.TIB_Template.TreasureHaul
         void Start()
         {
             var core = _host.Core;
+            _t = _host.Content.text;
+            _startLabel.text = _t.Get(ThTextId.OpStart);
+            _reloadLabel.text = _t.Get(ThTextId.OpReloadParams);
             _abortGate = new AbortConfirmGate(core.Params.operation.abortConfirmSeconds);
 
             core.State.Subscribe(s =>
             {
-                _stateText.text = StateLabels[s];
+                _stateText.text = _t.Get(StateIds[s]);
                 if (s == RoundState.Waiting) _abortGate.Reset();
             }).AddTo(this);
             core.RemainingSeconds.Select(r => Mathf.CeilToInt(r)).DistinctUntilChanged()
-                .Subscribe(sec => _timeText.text = $"残り {sec} 秒").AddTo(this);
-            core.RoundId.Subscribe(id => _roundText.text = $"RoundId {id}").AddTo(this);
+                .Subscribe(sec => _timeText.text = _t.Format(ThTextId.OpRemaining, sec)).AddTo(this);
+            core.RoundId.Subscribe(id => _roundText.text = _t.Format(ThTextId.OpRoundId, id)).AddTo(this);
             core.ConnectedCount.CombineLatest(core.EligibleCount, (c, e) => (c, e))
-                .Subscribe(t => _devicesText.text = $"端末 接続中 {t.c} / 参加できる {t.e}").AddTo(this);
+                .Subscribe(t => _devicesText.text = _t.Format(ThTextId.OpDevices, t.c, t.e)).AddTo(this);
             core.ParamsVersionText.Subscribe(v =>
             {
-                _versionText.text = $"パラメータ版 {v}";
+                _versionText.text = _t.Format(ThTextId.OpParamsVersion, v);
                 _abortGate.SetWindow(core.Params.operation.abortConfirmSeconds);   // 再読み込み後の値に合わせる
             }).AddTo(this);
-            core.Warnings.Subscribe(w => _warningText.text = w.Length == 0 ? "" : "警告\n" + string.Join("\n", w)).AddTo(this);
+            core.Warnings.Subscribe(w => _warningText.text = w.Length == 0 ? "" : _t.Get(ThTextId.OpWarning) + "\n" + string.Join("\n", w)).AddTo(this);
 
             // 押せる条件
             core.State.CombineLatest(core.EligibleCount, (s, e) => s == RoundState.Waiting && e >= 1)
@@ -89,7 +94,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             {
                 while (!ct.IsCancellationRequested)
                 {
-                    _abortLabel.text = _abortGate.IsArmed(Now) ? AbortLabelArmed : AbortLabelNormal;
+                    _abortLabel.text = _t.Get(_abortGate.IsArmed(Now) ? ThTextId.OpAbortArmed : ThTextId.OpAbort);
                     await UniTask.Delay(TimeSpan.FromMilliseconds(100), cancellationToken: ct);
                 }
             }

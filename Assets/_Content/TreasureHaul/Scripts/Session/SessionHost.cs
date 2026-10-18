@@ -12,6 +12,9 @@ namespace STYLY.TIB_Template.TreasureHaul
     public sealed class SessionHost : MonoBehaviour
     {
         [SerializeField] ThParamsAsset _defaults;
+        [SerializeField, Tooltip("見た目・音・文言のまとめ役")] ThContentSet _content;
+
+        public ThContentSet Content => _content;
 
         ThEnvironmentInfo _env;   // 未定（#38・#43 で Environment から取る）
         string _dataDir;
@@ -24,6 +27,8 @@ namespace STYLY.TIB_Template.TreasureHaul
         void Awake()
         {
             _dataDir = Application.persistentDataPath;
+            if (_content != null) _content.LogWarnings("SessionHost");
+            else Debug.LogWarning("[SessionHost] ThContentSet が未設定です");
             var p = LoadParams(out var warnings);
             var settings = LoadSettings(out var settingsWarnings);
             Core = new SessionHostCore(new RpcManagerTransport(), p, settings, settingsWarnings, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),

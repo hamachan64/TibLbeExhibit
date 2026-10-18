@@ -2,7 +2,8 @@
     "name": "TibLbeExhibit.TreasureHaul.Editor",
     "rootNamespace": "STYLY.TIB_Template.TreasureHaul.Editor",
     "references": [
-        "TibLbeExhibit.TreasureHaul"
+        "TibLbeExhibit.TreasureHaul",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [
         "Editor"

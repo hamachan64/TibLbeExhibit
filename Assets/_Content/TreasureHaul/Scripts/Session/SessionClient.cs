@@ -13,6 +13,9 @@ namespace STYLY.TIB_Template.TreasureHaul
     public sealed class SessionClient : MonoBehaviour
     {
         [SerializeField] ThParamsAsset _defaults;
+        [SerializeField, Tooltip("見た目・音・文言のまとめ役")] ThContentSet _content;
+
+        public ThContentSet Content => _content;
 
         NetSyncManager _nm;
         SessionClientCore _core;
@@ -27,6 +30,8 @@ namespace STYLY.TIB_Template.TreasureHaul
         {
             try
             {
+                if (_content != null) _content.LogWarnings("SessionClient");
+                else Debug.LogWarning("[SessionClient] ThContentSet が未設定です");
                 _nm = NetSyncManager.Instance;
                 if (_nm == null) { Debug.LogError("[SessionClient] NetSyncManager がありません"); return; }
 
