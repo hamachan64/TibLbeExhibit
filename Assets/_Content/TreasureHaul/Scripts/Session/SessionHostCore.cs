@@ -1,0 +1,223 @@
+using System;
+using System.Collections.Generic;
+using R3;
+using UnityEngine;
+
+namespace STYLY.TIB_Template.TreasureHaul
+{
+    /// <summary>
+    /// 運営PC（ホスト）の進行の中身。SessionHost（MonoBehaviour）は通信・時計・ファイルをここにつなぐだけ。
+    /// 時刻は引数で渡す（now = 単調増加の秒、unixMs = RoundId 用）。
+    /// </summary>
+    public sealed class SessionHostCore : IDisposable
+    {
+        readonly IThTransport _tx;
+
+        public DeviceRegistry Registry { get; } = new DeviceRegistry();
+        public HostRoundMachine Machine { get; }
+        public HostMessageGate Gate { get; }
+
+        public ThParams Params { get; private set; }
+        public string ParamsVersion { get; private set; } = "";
+        public string ParamsJson { get; private set; } = "";
+        public ThGameSettings Settings { get; private set; } = new ThGameSettings();
+        public int OwnClientNo { get; set; } = -1;
+        /// <summary>この運営PCアプリを起動した時刻（Unix ミリ秒）。再起動で変わる</summary>
+        public long HostEpoch { get; }
+
+        double _lastHeartbeatAt = double.NegativeInfinity;
+
+        /// <summary>送り手の ClientNo から今の DeviceId を引く（本番は NetSync の GetDeviceIdByClientNo）。null なら引き直さない。</summary>
+        readonly Func<int, string> _resolveDeviceId;
+        // 端末ごとの送信の抑制（版の合わない端末と ThParams / ThResync が往復し続けないように）
+        readonly Dictionary<string, double> _lastParamsSentAt = new Dictionary<string, double>();
+        readonly Dictionary<string, double> _lastStateReplyAt = new Dictionary<string, double>();
+
+        // 運営UIが購読する状態
+        readonly ReactiveProperty<RoundState> _state = new ReactiveProperty<RoundState>(RoundState.Waiting);
+        readonly ReactiveProperty<float> _remaining = new ReactiveProperty<float>(0f);
+        readonly ReactiveProperty<long> _roundId = new ReactiveProperty<long>(0);
+        readonly ReactiveProperty<int> _connectedCount = new ReactiveProperty<int>(0);
+        readonly ReactiveProperty<int> _eligibleCount = new ReactiveProperty<int>(0);
+        readonly ReactiveProperty<string> _paramsVersionRp = new ReactiveProperty<string>("");
+        readonly ReactiveProperty<string[]> _warnings = new ReactiveProperty<string[]>(new string[0]);
+
+        public ReadOnlyReactiveProperty<RoundState> State => _state;
+        public ReadOnlyReactiveProperty<float> RemainingSeconds => _remaining;
+        public ReadOnlyReactiveProperty<long> RoundId => _roundId;
+        public ReadOnlyReactiveProperty<int> ConnectedCount => _connectedCount;
+        public ReadOnlyReactiveProperty<int> EligibleCount => _eligibleCount;
+        public ReadOnlyReactiveProperty<string> ParamsVersionText => _paramsVersionRp;
+        public ReadOnlyReactiveProperty<string[]> Warnings => _warnings;
+
+        public SessionHostCore(IThTransport tx, ThParamsLoadResult initialParams, ThGameSettings settings, IEnumerable<string> settingsWarnings = null, long hostEpoch = 0, Func<int, string> resolveDeviceId = null)
+        {
+            _tx = tx;
+            _resolveDeviceId = resolveDeviceId;
+            HostEpoch = hostEpoch;
+            Machine = new HostRoundMachine(Registry, initialParams.Params.progress);
+            Gate = new HostMessageGate(Machine, Registry);
+            Adopt(initialParams, settings, settingsWarnings);
+        }
+
+        public void Dispose()
+        {
+            _state.Dispose(); _remaining.Dispose(); _roundId.Dispose(); _connectedCount.Dispose();
+            _eligibleCount.Dispose(); _paramsVersionRp.Dispose(); _warnings.Dispose();
+        }
+
+        void Adopt(ThParamsLoadResult p, ThGameSettings settings, IEnumerable<string> settingsWarnings)
+        {
+            Params = p.Params;
+            ParamsVersion = p.Version;
+            ParamsJson = JsonUtility.ToJson(p.Params);
+            Settings = settings ?? new ThGameSettings();
+            Registry.HostParamsVersion = p.Version;
+            Machine.TrySetTimes(p.Params.progress);
+            var all = new List<string>(p.Warnings);
+            if (settingsWarnings != null) all.AddRange(settingsWarnings);
+            _warnings.Value = all.ToArray();
+            _paramsVersionRp.Value = p.Version;
+        }
+
+        /// <summary>待機中の「再読み込み」。待機中以外は何もしない。新しい版は全員へ配る。</summary>
+        public bool ReloadParams(ThParamsLoadResult p, ThGameSettings settings, IEnumerable<string> settingsWarnings, double now)
+        {
+            if (Machine.State != RoundState.Waiting) return false;
+            Adopt(p, settings, settingsWarnings);
+            SendParams(-1);
+            Refresh(now);
+            return true;
+        }
+
+        // ---- 端末の出入り ----
+
+        // 端末の登録は ThResync（と ClientNo の付け替え）だけで行う。ステルスの運営PC・クローンを接続中に数えないため。
+
+        public void OnClientDisconnected(int clientNo, double now)
+        {
+            Registry.Disconnect(clientNo);
+            Refresh(now);
+        }
+
+        // ---- 運営の操作 ----
+
+        public bool Start(double now, long unixMs, int seed)
+        {
+            if (!Machine.TryStart(now, unixMs, seed)) return false;
+            // 版が違う端末にはその場で ThParams を送り直す（N-7）
+            foreach (var d in Registry.Devices)
+                if (d.Connected && d.ParamsVersion != ParamsVersion && Due(_lastParamsSentAt, d.DeviceId, now)) SendParams(d.ClientNo);
+            SendState(now);
+            Refresh(now);
+            return true;
+        }
+
+        public bool Abort(double now)
+        {
+            if (!Machine.Abort(now)) return false;
+            SendState(now);
+            Refresh(now);
+            return true;
+        }
+
+        // ---- 毎フレーム ----
+
+        public void Tick(double now)
+        {
+            if (Machine.Tick(now)) SendState(now);
+            if (now - _lastHeartbeatAt >= Params.progress.heartbeatInterval)
+            {
+                _lastHeartbeatAt = now;
+                _tx.Send(Rpc.ThHeartbeat, ThMessages.Encode(Machine.RoundId, new ThHeartbeatMsg
+                {
+                    seq = Machine.Seq,
+                    remaining = Machine.RemainingSeconds(now),
+                    total = 0,
+                    paramsVersion = ParamsVersion,
+                    hostEpoch = HostEpoch,
+                }));
+            }
+            Refresh(now);
+        }
+
+        // ---- 受信 ----
+
+        public void OnRpc(Rpc rpc, int senderClientNo, string[] args, double now)
+        {
+            if (senderClientNo == OwnClientNo) return;   // 自分が送った RPC の戻り
+            RebindSender(senderClientNo);
+            if (rpc == Rpc.ThResync) HandleResync(senderClientNo, args, now);
+        }
+
+        /// <summary>サーバーの再起動で ClientNo が入れ替わると、接続・切断イベントなしに対応が変わる。受け取るたびに引き直す。</summary>
+        void RebindSender(int sender)
+        {
+            if (_resolveDeviceId == null) return;
+            var known = Registry.GetDeviceId(sender);
+            if (known == null) return;   // 未登録（ステルスなど）は登録しない。ThResync で登録する
+            var actual = _resolveDeviceId(sender);
+            if (!string.IsNullOrEmpty(actual) && actual != known) Registry.Connect(actual, sender);
+        }
+
+        bool Due(Dictionary<string, double> last, string deviceId, double now)
+        {
+            if (last.TryGetValue(deviceId, out var t) && now - t < Params.progress.resendInterval * 0.5) return false;
+            last[deviceId] = now;
+            return true;
+        }
+
+        void HandleResync(int sender, string[] args, double now)
+        {
+            if (!ThMessages.TryDecode(args, out long knownRound, out ThResyncMsg msg)) return;
+            if (string.IsNullOrEmpty(msg.deviceId)) return;
+            // 接続イベントを取りこぼしていても、報告から端末を登録できる
+            Registry.Connect(msg.deviceId, sender);
+            Registry.ReportParamsVersion(msg.deviceId, msg.paramsVersion ?? "");
+            // 回の途中から入った端末は、その回だけ参加しない（古い報告で次の回を巻き込まないよう、今の回の報告だけ）
+            if (msg.waitNextRound && Machine.State != RoundState.Waiting && knownRound == Machine.RoundId)
+                Registry.SetWaitNextRound(msg.deviceId, true);
+            if (msg.paramsVersion != ParamsVersion && Due(_lastParamsSentAt, msg.deviceId, now)) SendParams(sender);
+            if (Due(_lastStateReplyAt, msg.deviceId, now)) SendState(now);
+            Refresh(now);
+        }
+
+        // ---- 送信 ----
+
+        void SendState(double now)
+        {
+            var m = Machine;
+            _tx.Send(Rpc.ThState, ThMessages.Encode(m.RoundId, new ThStateMsg
+            {
+                seq = m.Seq,
+                state = (int)m.State,
+                remaining = m.RemainingSeconds(now),
+                seed = m.Seed,
+                participants = new List<string>(m.Participants).ToArray(),
+                settings = Settings,
+                paramsVersion = ParamsVersion,
+                hostEpoch = HostEpoch,
+                tutorialColors = new int[0],
+            }));
+        }
+
+        void SendParams(int targetClientNo)
+        {
+            _tx.Send(Rpc.ThParams, ThMessages.Encode(Machine.RoundId, new ThParamsMsg
+            {
+                targetClientNo = targetClientNo,
+                version = ParamsVersion,
+                json = ParamsJson,
+            }));
+        }
+
+        void Refresh(double now)
+        {
+            _state.Value = Machine.State;
+            _remaining.Value = Machine.RemainingSeconds(now);
+            _roundId.Value = Machine.RoundId;
+            _connectedCount.Value = Registry.ConnectedCount;
+            _eligibleCount.Value = Registry.EligibleCount;
+        }
+    }
+}

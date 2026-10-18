@@ -9,8 +9,8 @@
 
 | | |
 | :--- | :--- |
-| **フェーズ** | 0a 試作（エディタ）の PR をレビュー中。仕様書一式（PR #35）は `repo/develop` にマージ済み。**実機は10月中の見込み**なので、それまではエディタ（XRI のシミュレーター・ParrelSync）で検証しながら進める |
-| **次にやること** | PR #50 をマージ → [#37](https://github.com/hamachan64/TibLbeExhibit/issues/37) 基盤 ／ 並行して素材 #46・#47・#48 |
+| **フェーズ** | 1 基盤（[#37](https://github.com/hamachan64/TibLbeExhibit/issues/37)）を作業中。0a 試作（エディタ、PR #50）はマージ済み。**実機は10月中の見込み**なので、それまではエディタ（XRI のシミュレーター・ParrelSync）で検証しながら進める |
+| **次にやること** | #37 基盤の PR → [#38](https://github.com/hamachan64/TibLbeExhibit/issues/38)・[#42](https://github.com/hamachan64/TibLbeExhibit/issues/42)・[#44](https://github.com/hamachan64/TibLbeExhibit/issues/44) ／ 並行して素材 #46・#47・#48 |
 | **判断待ち** | 実機の入手（#49・#45 に必要）。U-1 は通し #45 までに必要。ほかは下の「判断待ち」 |
 | **締切** | 内容変更 **10/31**（あと13日）／最終データ 11/16／現地設営 11/17 |
 
@@ -20,9 +20,9 @@
 
 | 順 | 内容 | Issue | 状態 | 着手の条件 | 目安 |
 | :--- | :--- | :--- | :---: | :--- | :--- |
-| 0a | 試作（エディタ）: 同期・送信上限・追従、シミュレーターの取り込み | [#36](https://github.com/hamachan64/TibLbeExhibit/issues/36)（PR [#50](https://github.com/hamachan64/TibLbeExhibit/pull/50)） | 👀 | ― | 10/18〜19 |
+| 0a | 試作（エディタ）: 同期・送信上限・追従、シミュレーターの取り込み | [#36](https://github.com/hamachan64/TibLbeExhibit/issues/36)（PR [#50](https://github.com/hamachan64/TibLbeExhibit/pull/50)） | ✅ | ― | 10/18〜19 |
 | 0b | 試作（実機）: 握る判定・ビーム・負荷、しきい値の調整 | [#49](https://github.com/hamachan64/TibLbeExhibit/issues/49) | ⛔ | 実機の入手（10月中の見込み） | 実機が届いてから1〜2日 |
-| 1 | 基盤（パラメータ・Rpc・状態遷移・運営UI最小） | [#37](https://github.com/hamachan64/TibLbeExhibit/issues/37) | ⬜ | 0a | 10/20〜21 |
+| 1 | 基盤（パラメータ・Rpc・状態遷移・運営UI最小） | [#37](https://github.com/hamachan64/TibLbeExhibit/issues/37) | 🔨 | 0a | 10/20〜21 |
 | 2 | 配置、S を持つ・置く・回収、表示板 | [#38](https://github.com/hamachan64/TibLbeExhibit/issues/38) | ⬜ | 1 | 10/22〜23 |
 | 3a | 減額と表示（3回で壊れる） | [#39](https://github.com/hamachan64/TibLbeExhibit/issues/39) | ⬜ | 2 | 10/24 |
 | 3b | M（両手で持つ） | [#40](https://github.com/hamachan64/TibLbeExhibit/issues/40) | ⬜ | 3a | 10/25 |
@@ -62,6 +62,8 @@
 | U-18 | 番人の石像に見られて動いたときの減らし方 | 追加要素 |
 
 ## 最近決まったこと
+
+- 2026-10-18（基盤 #37）: 端末の登録は端末が送る状況報告（`ThResync`）で行い、運営PCの起動値（hostEpoch）が変わったら端末は報告し直す。ClientNo の入れ替わりは報告と `GetDeviceIdByClientNo` で付け替える。「開始」時の参加端末は版の一致を問わず、オープニングの終わりに版が合わない端末を外す（設計書 7章）。#44 までは、再接続した端末を「位置合わせ確認済み」に戻す。設計書を第8版に更新。
 
 - 2026-10-18: 前作（GIPoker）のテストを `repo/develop` から削除し、EditMode テストは全件成功を基準にする（PR #51。PR #50 に統合済み）。
 

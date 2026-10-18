@@ -405,3 +405,18 @@
 - DeviceId: `NetSyncManager.Instance.DeviceId`。相手のは `GetDeviceIdByClientNo` / `GetClientNoByDeviceId`。
 - `NetSyncObject` の位置同期は、相手の画面で約 200〜300ms 遅れ、動き始めは約1秒遅れて数秒かけて縮む（内部の補間バッファ。外から変える設定なし）。RPC の片道は 4〜12ms。
 - `RequestOwnership` は先着の調停をしない（他人が持っていても奪える。同時要求は後勝ち）。持ち主の決定はホストが行い、承認された1人だけが要求する。切り替えは約65ms。クライアントが終了すると持ち主は 0 に戻る。
+
+## 基盤（Issue #37、2026-10-18）で分かったこと
+
+### 進行の同期（ホスト＝運営PC、端末は状況報告 ThResync で登録）
+- **運営PCだけ再起動すると、端末が報告し直すきっかけが無い**: 待機中は通し番号も RoundId も同じなので、通し番号の不一致では気づけない。`ThState` / `ThHeartbeat` に運営PCの起動値（hostEpoch）を載せ、端末は「今の起動値に対して自分が報告したか」を持つ（起動値ごとに必ず1回報告）。「起動値が変わったら報告」だけだと、運営PCより先に起動した端末が、他の端末への返信の `ThState` を受けただけで報告し損ねる（レビューで2回直した）。
+- **ClientNo はイベントなしに入れ替わる**: サーバー再起動で端末どうしの ClientNo が入れ替わっても、接続・切断イベントは出ない（生きている番号の集合が変わらないため）。端末は自分の ClientNo が変わったら報告し直し、ホストは受け取るたびに `GetDeviceIdByClientNo` で送り手を引き直す。
+- **`OnAvatarConnected` はステルスの運営PC（ParrelSync のクローンを含む）でも発火する**。端末の登録は、端末が送る報告（`ThResync`）だけで行う。
+- **版が合わない端末と無限往復しうる**: 端末の「採用したら報告」とホストの「版が違えば ThParams」が、往復時間ごとに回り続けて RPC の上限を食い尽くす。端末・ホストの両方で〔再送間隔〕の制限に通す。
+- 純粋クラス（`SessionHostCore` / `SessionClientCore`）に送信の口（`IThTransport`）を注入し、メモリ上の偽の通信でホスト1＋端末N を EditMode テストでつなぐと、取りこぼし・再起動・入れ替わりを数秒で再現できる。
+
+### エディタ・ツール
+- **NetSync のサーバー自動探索が、この Mac の localhost サーバーを見つけられないことがある**（Discovery timeout）。結合確認では、Play 中にリフレクションで `_serverAddress = "localhost"` にして `StartNetworking` を呼び直した（シーンは変えない）。
+- **`persistentDataPath` に置いた一時ファイル（短縮パラメータ JSON など）は、guard.py が `rm` も `File.Delete` も止める**。結合確認の後片付けは人に頼む。短縮値で確かめたいときは、ファイルを置かずに済む方法（テストや dynamic code での上書き）を先に考える。
+- 実装エージェントが結合確認の後に Play を止め忘れることがある。テストの前に `EditorApplication.isPlaying` を確かめ、何のシーンかを見てから止める。
+- 既存の `LeaderboardTracker`（Core）は、NetSync が Ready にならないまま Play を止めると `EventManager.OnReadyAsObservable` の後片付けで NullReferenceException を出す（`NetSyncManager.Instance` が先に消えるため）。今回の変更とは無関係の既存の問題。
