@@ -1,0 +1,7 @@
+# TibLbeExhibit のプロジェクト層設定（Codex）。
+#
+# このファイルと同じフォルダの hooks.json は、Codex が「このフォルダを信頼する」まで
+# 読み込まれない。実際に効いているのは ~/.codex/hooks.json 側。詳細は .codex/README.md。
+#
+# MCP サーバー（blender）の許可リスト（enabled_tools）は ~/.codex/config.toml にある。
+# プロジェクト層に書いても信頼前は効かないため、意図的にここには置いていない。

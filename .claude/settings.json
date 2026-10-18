@@ -169,7 +169,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/guard.py"
+            "command": "uv run --no-project \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/guard.py"
           }
         ]
       }

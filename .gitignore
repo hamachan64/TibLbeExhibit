@@ -125,3 +125,7 @@ InitTestScene*.unity*
 # Claude Code agent worktrees / uloop outputs
 .claude/worktrees/
 .uloop/
+
+# フック（Python）のキャッシュ
+__pycache__/
+*.pyc

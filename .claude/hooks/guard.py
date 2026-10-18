@@ -20,6 +20,14 @@ import re
 import shlex
 import sys
 
+# Windows では既定の標準入出力が cp932 になり、日本語のブロック理由が
+# エージェント側（UTF-8 で読む）で文字化けする。明示的に UTF-8 に固定する。
+for _stream in (sys.stdin, sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, OSError, ValueError):
+        pass
+
 # シリアライズ済みUnityアセット（テキスト直接編集を禁止）
 SERIALIZED_ASSET_EXT = (".unity", ".prefab", ".asset", ".meta")
 

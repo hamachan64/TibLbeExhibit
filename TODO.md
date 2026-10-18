@@ -36,7 +36,7 @@
 
 | 内容 | Issue | 状態 | メモ |
 | :--- | :--- | :---: | :--- |
-| お宝・荷台・瓦礫の 3D モデル | [#46](https://github.com/hamachan64/TibLbeExhibit/issues/46) | ⬜ | CC0 素材を優先、足りない物は Blender MCP。`THIRD_PARTY_NOTICES.md` に記録 |
+| お宝・荷台・瓦礫の 3D モデル | [#46](https://github.com/hamachan64/TibLbeExhibit/issues/46) | 🔨 | ブランチ `repo/feature-th-asset-models`。**モデリングは Codex + Blender MCP で行う**（ガードレールは `.codex/README.md`）。CC0 素材の取り込みと権利確認は人が行う。`THIRD_PARTY_NOTICES.md` に記録 |
 | オープニングのナレーション音声 | [#47](https://github.com/hamachan64/TibLbeExhibit/issues/47) | ⬜ | 原稿 `TREASURE_HAUL_NARRATION.md`。音声はユーザーが用意する |
 | 会場レイアウト（Environment） | [#48](https://github.com/hamachan64/TibLbeExhibit/issues/48) | ⬜ | 順4b と同じシーンを触るので同時に作業しない |
 
