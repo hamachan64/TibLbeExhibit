@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using UnityEngine;
 
-namespace STYLY.TIB_Template.GIPoker.Tests
+namespace STYLY.TIB_Template.Tests
 {
     /// <summary>
     /// LSignPoseEvaluator（Lサイン＝フィンガーガンポーズの純粋判定ロジック）のEditModeテスト。

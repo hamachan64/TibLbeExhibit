@@ -11,6 +11,7 @@
 | Smithsonian Open Access 3D | お宝のモデル（文化財スキャン） | https://3d.si.edu/ | CC0（モデルごとに Open Access 表示を確認） | 可 | 無料 | 不要 | 未確認（二次情報のみ） | ― |
 | Poly Haven | 瓦礫・岩などのモデル・テクスチャ | https://polyhaven.com/ | CC0 | 可 | 無料 | 不要 | 未確認 | ― |
 | Quaternius | ローポリの遺跡パーツ（予備） | https://quaternius.com/ | CC0 | 可 | 無料 | 不要 | 未確認 | ― |
+| STYLY NetSync サーバー（PyPI `styly-netsync-server` 0.17.4、`uvx` で取得） | 開発・展示の同期サーバー（運営PCで動かす）。疑似クライアント `styly-netsync-simulator` を含む | https://pypi.org/project/styly-netsync-server/ （github.com/styly-dev/STYLY-NetSync） | Apache-2.0（PyPI の表示） | 可 | 無料 | 再配布するならライセンス文の同梱（今は再配布しない） | 確認済み | 2026-10-18 |
 | ナレーション音声 | オープニング | ユーザーが用意 | ― | ― | ― | 生成サービスが求めるなら AI 音声である旨 | ユーザーが確認 | ― |
 
 ## プロジェクトに入っている物
@@ -24,7 +25,7 @@
 | uLoopMCP（`io.github.hatayama.uloopmcp`） | AI からのエディタ操作 | 要確認 | エディタのみ | 無料 | ― | 未確認 |
 | STYLY NetSync | 同期 | 要確認 | 要確認 | 要確認 | 要確認 | 未確認 |
 | PICO OpenXR SDK / PXR_Enterprise | PICO 対応 | PICO SDK の規約 | 要確認 | 無料 | 要確認 | 未確認 |
-| Unity 公式パッケージ（URP・XRI・XR Hands・OpenXR 等） | 基盤 | Unity Companion License 等 | 可 | 無料 | ― | 未確認 |
+| Unity 公式パッケージ（URP・XRI・XR Hands・OpenXR 等）と付属サンプル（XRI の「XR Interaction Simulator」「Hands Interaction Demo」「Starter Assets」、XR Hands の「HandVisualizer」「Gestures」） | 基盤、エディタでの手のシミュレーション | Unity Companion License 等 | 可 | 無料 | ― | 未確認 |
 
 ## 使わないと決めた物
 

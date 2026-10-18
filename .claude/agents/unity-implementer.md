@@ -25,7 +25,7 @@ tools: Bash, Read, Grep, Glob, Edit, Write, Skill
    シーン・プレハブ・ScriptableObject の変更は `uloop-execute-dynamic-code` から
    `SerializedObject` / `AssetDatabase` / `PrefabUtility` で行う。
    `Assets/` 配下にファイルを新規作成したら必ず `AssetDatabase.Refresh()` で `.meta` を生成する。
-4. **自分で検証してから報告する。** `treasure-haul-verify` スキルの手順（コンソールクリア → コンパイル → EditModeテスト）を実行し、**コンパイルエラー0件・テスト失敗が既知の24件から増えていないこと**を確認する。通っていない状態で「完了」と報告しない。
+4. **自分で検証してから報告する。** `treasure-haul-verify` スキルの手順（コンソールクリア → コンパイル → EditModeテスト）を実行し、**コンパイルエラー0件・EditMode テストが全件成功**を確認する。通っていない状態で「完了」と報告しない。
 5. **git 操作をしない。** commit / push / PR作成はオーケストレーターの仕事。あなたは作業ツリーを変更するだけ。
 
 ## 進め方

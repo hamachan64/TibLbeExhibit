@@ -18,8 +18,8 @@ C#やアセットを変更したら、以下の順で検証する。途中で失
 ## 3. EditModeテスト
 `uloop-run-tests` で EditMode テストを実行する。
 - 純ロジック（スコア計算・お宝の価値計算など）を変更・追加した場合は、対応するテストも追加すること。
-- 既存テストのうち GIPoker 由来の24件（`BinderLayoutTests` / `ResultGradeTests` / `TutorialSequenceTests` の一部）は、
-  `repo/develop` 作成時点で既に失敗している。**失敗件数がこの24件から増えていないこと**を基準にする。
+- **全件成功を基準にする**（失敗が1件でもあれば止めて直す）。
+  前作（GIPoker）のテストは、`repo/develop` では保守しないため 2026-10-18 に削除した（前作は `develop` / `master` 系統で扱う）。
 
 ## 4. PlayMode確認（ゲームプレイに関わる変更のみ）
 1. アクティブなビルドプロファイルが `TreasureHaulUserClient` であることを確認する
