@@ -28,6 +28,21 @@ namespace STYLY.TIB_Template.TreasureHaul.Prototype
             EditorApplication.EnterPlaymode();
         }
 
+        const string OperatorScene = "Assets/_Content/TreasureHaul/Scenes/TreasureHaulOperatorClient.unity";
+
+        /// <summary>#38 の結合確認: 運営PC（ホスト）役。時間をメモリ上で短縮し、端末が来たら自動で開始する。何も保存しない。</summary>
+        public static void PlayGrabHost()
+        {
+            if (!Application.isBatchMode)
+            {
+                Debug.LogWarning("[ProtoBatchRunner] -batchmode でないので何もしません（メインのエディタでシーンを切り替えないため）");
+                return;
+            }
+            EditorSceneManager.OpenScene(OperatorScene, OpenSceneMode.Single);
+            new GameObject("GrabHostDriver").AddComponent<GrabHostDriver>();
+            EditorApplication.EnterPlaymode();
+        }
+
         public static void PlayNet()
         {
             if (!Application.isBatchMode)

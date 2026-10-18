@@ -43,6 +43,9 @@ namespace STYLY.TIB_Template.TreasureHaul
         // 追加要素
         StatueNotice,
         HintLargeTwoPeople,
+        // #38
+        /// <summary>荷台の表示板。回収した合計額（書式「{0:N0}G」）</summary>
+        BoardTotalFormat,
     }
 
     [Serializable]

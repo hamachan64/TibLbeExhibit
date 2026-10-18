@@ -425,3 +425,12 @@
 - `gh issue view --jq .body > file` → 加工 → `gh issue edit --body-file file` を for ループで回したところ、1件だけ取得が TLS タイムアウトで失敗し、**空のファイルで本文を上書きした**（#42）。`gh` が失敗しても、ループの次のコマンドは動く。
 - 復旧: GraphQL の `issue.userContentEdits { editedAt diff }` に、過去の版の本文が丸ごと残っている。上書き直前の版を取り出して戻した。
 - 対策: 取得した本文の長さを確かめてから更新する（空・極端に短いなら止める）。加工は「取得に成功したときだけ」動くよう、コマンドを `&&` でつなぐ。
+
+## 配置・S を持つ・回収（Issue #38、2026-10-19）で分かったこと
+- **取りやめ→再申請の間に `ThFreed` が挟まる**: ホストは「承認(申請1) → 取りやめ受理の ThFreed → 承認(申請2)」の順に返す。端末が `ThFreed` で無条件に「つかめる」に戻すと、承認待ちの申請2 まで消え、その後の承認(申請2)を「古い承認」と誤判定して取りやめを返してしまう。承認待ち（自分の申請中）の間の `ThFreed` は世代と置き位置だけ更新する。テストは間のメッセージも含めた実際の順番で流すこと（レビューで発見）。
+- **Rigidbody の Interpolate と kinematic の transform 直書きは混ぜない**: 補間が transform を上書きするので、他端末の補間・DOTween の飛行は `interpolation=None`、物理で動かす追従・落下のときだけ Interpolate にする。
+- **`Rigidbody.SweepTest` は、同じ Rigidbody に付いたトリガー（大きめの持ち手）を掃引に含めない**（実測。トリガー有無で距離が同じ）。持ち手を別 Rigidbody に分ける必要はない。
+- **人とぶつからない処理でアバターのレイヤーを変えない**: `HandBone` は指で触れる判定用。アバターを移すと体で触れる判定が発火し、描画のレイヤーも変わる。`Physics.IgnoreCollision` でお宝ごとに外し、新しいアバターは `OnAvatarConnected` で拾う。
+- **値札は近いと視界をふさぐ**: 手に持ったお宝の上の値札が目の前で巨大になった。一定距離より近いときは距離に比例して縮める。MR の手元 UI はスクリーンショットで必ず見る。
+- **XR Interaction Simulator の手**: `[`+`]` で手のモードに入れないことがあった。`SimulatedDeviceLifecycleManager.SwitchDeviceMode()` とシミュレーター内部の手の状態をリフレクションで動かした。`Hands Smoothing Post Processor` は収束が遅いので確認時だけ無効化。Play のたびに `Assets/Samples/.../Unity_Hand_Medium.mat` が書き換わるので、コミット前に戻す。
+- **MonoBehaviour はファイル名とクラス名を一致させる**: 2つ目のクラスを同じファイルに置いたら、シーンで Missing Script になった。
