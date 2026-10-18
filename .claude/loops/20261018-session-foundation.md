@@ -139,3 +139,41 @@ Issue: #37 ／ ブランチ: `repo/feature-session-foundation`（`repo/develop` 
 ## 外部の素材・サービス（権利・費用・セキュリティ）
 - STYLY NetSync サーバー（結合確認でだけ使う）: #36 で確認・`THIRD_PARTY_NOTICES.md` に記録済み（Apache-2.0、商用可、無料、公式）
 - ほかは使わない
+
+---
+
+## G. 追加（2026-10-18、ユーザーの依頼）: 見た目・音・文言の一括管理の器
+
+ユーザーの依頼で、文言・音・演出を ScriptableObject で一括管理することになった（設計書 9.1）。#38 と #42 を並行で進める前に器と ID を固定するため、**器（定義・空の一覧・まとめ役）と、運営UI・企画書にある文言**をこの PR に入れる。音・演出の中身は #38 以降。
+
+### 受け入れ基準
+- [ ] まとめ役 `ThContentSet`（ScriptableObject）が `ThTextTable`・`ThAudioCatalog`・`ThFxCatalog` を参照する。`SessionHost` と `SessionClient` がこれ1つを `[SerializeField]` で持ち、公開する（お宝カタログ #38・プレーヤーの色 #43 は後から同じまとめ役に足す。コメントで書いておく）。アセットは `Assets/_Content/TreasureHaul/Settings/` に uloop で作る
+- [ ] ID は列挙 `ThTextId` / `ThSoundId` / `ThFxId`。**末尾にだけ足す**（コメントで明記）。一覧はそれぞれ「ID と中身」の配列
+- [ ] `ThTextTable`: ID ごとの文言。`Get(id)` と `Format(id, args)`（`string.Format`。金額は `{0:N0}` で 1,200 のように桁区切り）。無い ID は ID 名を返して警告を1回だけ出す。初期の中身は次の文言だけ（企画書・要件定義書にある物。**ここに無い文言を作らない**）:
+  - 運営UI（今 `OperatorView` に直接書いている物をすべて移す）: 状態名（待機・オープニング・練習・本編・結果）、「残り {0} 秒」、「RoundId {0}」、「端末 接続中 {0} / 参加できる {1}」、「パラメータ版 {0}」、「警告」、「開始」、「中断」、「もう一度押すと中断」、「パラメータ再読み込み」
+  - 体験者向け: 目的の一文「宝を荷台まで運ぼう。ぶつけると値段が下がる。みんなで目標額を目指そう」／持ち方（ビーム）「持ち手に手を向けて、ギュッと握ると持てる」／練習「持ち手に手を向けて、握ろう」／「ぶつけると値段が下がる」／「あなたの」／「両手で持とう」／「ここへ運ぼう」／値札「？」「{0:N0}G」／練習の成功「+{0:N0}G！」／減額「-{0:N0}G」／回収「+{0:N0}G」「+{0:N0}G 傷物」／「今回の損害：{0:N0}G」／（追加要素）石像「石像の目が光ったら止まろう。動くと値段が下がる」、L「2人で持とう」
+- [ ] `ThAudioCatalog`: ID ごとに、音（`AudioClip` の配列。複数ならランダム）、音量、その場所から鳴らすか（3D）、入手元（`THIRD_PARTY_NOTICES.md` の名前）。初期の ID: 発見・減額・砕ける・オープニングのナレーション・オープニングの効果音。中身（音）は空のまま
+- [ ] `ThFxCatalog`: ID ごとに、プレハブ（パーティクル等）とマテリアル（どちらも任意）。初期の ID: 持ち手（通常）・持ち手（ビームが当たっている）・発見の光・ヒビ1段階目・ヒビ2段階目・砕ける・荷台の光。中身は空のまま
+- [ ] 各一覧に `Validate()`（重複した ID、文言の欠け・空）を持たせ、EditMode テストで「組み込みのアセットに重複・文言の欠けが無い」ことを確かめる。音・演出の中身が空なのは許す（起動時に、空の ID を1行の警告にまとめて出す）
+- [ ] `OperatorView` の文言をすべて `ThTextTable` から取る（見た目は今と同じ）
+- [ ] **文字化け対策**: 日本語フォント `Assets/_Content/Fonts/Noto_Sans_JP/NotoSansJP-VariableFont_wght SDF.asset` は Static で 1,043 文字しか入っておらず、「宝・額・傷・損」が無い（調査済み）。
+  - エディタメニュー（例: `Tools/Treasure Haul/文言の文字をフォントに足す`）で、`ThTextTable` の全文言の文字のうち本体フォントに無い物を集め、元の `NotoSansJP-VariableFont_wght.ttf` から**別の小さな Static の SDF フォントアセット**（例: `NotoSansJP SDF - TreasureHaul Extra.asset`、本体と同じ大きさ・余白・描き方）を作り直し、本体フォントのフォールバックに1つだけ登録する（すでに登録されていれば作り直すだけ）。**本体フォントのアトラス・文字表は書き換えない**。保存は `AssetDatabase.SaveAssetIfDirty` で対象だけにする（`SaveAssets()` は無関係のアセットを巻き込む。学習メモ）
+  - EditMode テスト: `ThTextTable` の全文言の文字（書式の `{0:N0}` などは除き、数字と記号「,」「G」「+」「-」を含める）が、本体フォント＋フォールバックで表示できること（`TMP_FontAsset.HasCharacters` の読み取りだけ。フォントを書き換えない）
+  - メニューを実行してテストが通る状態でコミットする
+  - Play で、目的の一文を TMP で一時的に表示して□が出ないことをスクリーンショットで確かめる（シーンは保存しない）
+
+### 変更対象（追加）
+- `Assets/_Content/TreasureHaul/Scripts/Content/`（新規）: `ThContentSet`、`ThTextTable`・`ThTextId`、`ThAudioCatalog`・`ThSoundId`、`ThFxCatalog`・`ThFxId`
+- `Assets/_Content/TreasureHaul/Settings/`: 上の4つのアセット（uloop で作成）
+- `Assets/_Content/TreasureHaul/Editor/`: フォントに文字を足すメニュー
+- `Assets/_Content/Fonts/Noto_Sans_JP/`: 予備のフォントアセットの追加と、本体フォントのフォールバック表への登録（uloop で）
+- `SessionHost` / `SessionClient` / `OperatorView` と、2つのシーン（`ThContentSet` の参照を uloop で設定）
+- `Assets/_Content/Tests/EditMode/`: テスト追加
+
+### やらないこと（追加）
+- 音・演出の中身、体験者向けの表示（#38 以降）
+- 企画書・要件定義書に無い文言を作ること
+- 本体フォントのアトラス・文字表の書き換え、Dela Gothic One など他のフォント
+
+### 外部の素材（追加）
+- Noto Sans JP（`Assets/_Content/Fonts/Noto_Sans_JP/`、プロジェクトに入っている物）: SIL Open Font License 1.1（同梱の `OFL.txt` 原文で確認）、商用可・アプリへの組み込み可・文字を絞った変換可、無料、入手元は Google Fonts。`THIRD_PARTY_NOTICES.md` に記録する（オーケストレーターが行う）

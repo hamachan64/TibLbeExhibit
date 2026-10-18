@@ -420,3 +420,8 @@
 - **`persistentDataPath` に置いた一時ファイル（短縮パラメータ JSON など）は、guard.py が `rm` も `File.Delete` も止める**。結合確認の後片付けは人に頼む。短縮値で確かめたいときは、ファイルを置かずに済む方法（テストや dynamic code での上書き）を先に考える。
 - 実装エージェントが結合確認の後に Play を止め忘れることがある。テストの前に `EditorApplication.isPlaying` を確かめ、何のシーンかを見てから止める。
 - 既存の `LeaderboardTracker`（Core）は、NetSync が Ready にならないまま Play を止めると `EventManager.OnReadyAsObservable` の後片付けで NullReferenceException を出す（`NetSyncManager.Instance` が先に消えるため）。今回の変更とは無関係の既存の問題。
+
+### GitHub Issue の本文をスクリプトで書き換えるとき（2026-10-18）
+- `gh issue view --jq .body > file` → 加工 → `gh issue edit --body-file file` を for ループで回したところ、1件だけ取得が TLS タイムアウトで失敗し、**空のファイルで本文を上書きした**（#42）。`gh` が失敗しても、ループの次のコマンドは動く。
+- 復旧: GraphQL の `issue.userContentEdits { editedAt diff }` に、過去の版の本文が丸ごと残っている。上書き直前の版を取り出して戻した。
+- 対策: 取得した本文の長さを確かめてから更新する（空・極端に短いなら止める）。加工は「取得に成功したときだけ」動くよう、コマンドを `&&` でつなぐ。
