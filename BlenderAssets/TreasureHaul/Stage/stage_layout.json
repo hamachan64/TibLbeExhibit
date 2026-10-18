@@ -1,0 +1,1155 @@
+{
+  "venue": {
+    "width_m": 5,
+    "length_m": 11,
+    "origin": "center of entrance edge",
+    "blender_from_unity": "(X, -Z, Y)",
+    "warning_distance_authoring_assumption_m": 0.4,
+    "spawn_edge_extra_margin_m": 0.3
+  },
+  "central_route": {
+    "fixed_clear_width_m": 2.1,
+    "with_treasure_envelopes_clear_width_m": 1.26
+  },
+  "runtime_stats": {
+    "meshes": 10,
+    "triangles": 8064,
+    "vertices": 4448,
+    "material_slots": 20
+  },
+  "preview_treasure_stats": {
+    "meshes": 55,
+    "triangles": 84084,
+    "vertices": 43088,
+    "material_slots": 85
+  },
+  "module_stats": [
+    {
+      "name": "THStage_ExtractionLift",
+      "meshes": 1,
+      "triangles": 1380,
+      "vertices": 760,
+      "material_slots": 2
+    },
+    {
+      "name": "THStage_Bay_01_BrokenWall",
+      "meshes": 1,
+      "triangles": 760,
+      "vertices": 420,
+      "material_slots": 2
+    },
+    {
+      "name": "THStage_Bay_02_Reliquary",
+      "meshes": 1,
+      "triangles": 596,
+      "vertices": 328,
+      "material_slots": 3
+    },
+    {
+      "name": "THStage_Bay_03_ColumnStump",
+      "meshes": 1,
+      "triangles": 724,
+      "vertices": 396,
+      "material_slots": 2
+    },
+    {
+      "name": "THStage_Bay_04_BrokenWall",
+      "meshes": 1,
+      "triangles": 760,
+      "vertices": 420,
+      "material_slots": 2
+    },
+    {
+      "name": "THStage_Bay_05_Reliquary",
+      "meshes": 1,
+      "triangles": 596,
+      "vertices": 328,
+      "material_slots": 3
+    },
+    {
+      "name": "THStage_Bay_06_ColumnStump",
+      "meshes": 1,
+      "triangles": 724,
+      "vertices": 396,
+      "material_slots": 2
+    },
+    {
+      "name": "THStage_Perimeter_Remnants",
+      "meshes": 1,
+      "triangles": 1672,
+      "vertices": 912,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_SealedArchiveRelief",
+      "meshes": 1,
+      "triangles": 660,
+      "vertices": 360,
+      "material_slots": 2
+    },
+    {
+      "name": "THStage_ExcavationFloorMarks",
+      "meshes": 1,
+      "triangles": 192,
+      "vertices": 128,
+      "material_slots": 1
+    }
+  ],
+  "colliders": [
+    {
+      "name": "ExtractionLift",
+      "center_unity_xyz": [
+        0,
+        0.27,
+        0.8
+      ],
+      "size_unity_xyz": [
+        3,
+        0.54,
+        0.96
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "LiftCorner_-1.4",
+      "center_unity_xyz": [
+        -1.4,
+        0.33,
+        0.8
+      ],
+      "size_unity_xyz": [
+        0.14,
+        0.66,
+        0.96
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "LiftCorner_1.4",
+      "center_unity_xyz": [
+        1.4,
+        0.33,
+        0.8
+      ],
+      "size_unity_xyz": [
+        0.14,
+        0.66,
+        0.96
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "Bay_01",
+      "center_unity_xyz": [
+        -1.6,
+        0.37,
+        4.1
+      ],
+      "size_unity_xyz": [
+        1.1,
+        0.74,
+        0.85
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "Bay_02",
+      "center_unity_xyz": [
+        1.6,
+        0.37,
+        4.1
+      ],
+      "size_unity_xyz": [
+        1.1,
+        0.74,
+        0.85
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "Bay_03",
+      "center_unity_xyz": [
+        -1.6,
+        0.37,
+        6.35
+      ],
+      "size_unity_xyz": [
+        1.1,
+        0.74,
+        0.85
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "Bay_04",
+      "center_unity_xyz": [
+        1.6,
+        0.37,
+        6.35
+      ],
+      "size_unity_xyz": [
+        1.1,
+        0.74,
+        0.85
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "Bay_05",
+      "center_unity_xyz": [
+        -1.6,
+        0.37,
+        8.6
+      ],
+      "size_unity_xyz": [
+        1.1,
+        0.74,
+        0.85
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "Bay_06",
+      "center_unity_xyz": [
+        1.6,
+        0.37,
+        8.6
+      ],
+      "size_unity_xyz": [
+        1.1,
+        0.74,
+        0.85
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "SideSill_-1",
+      "center_unity_xyz": [
+        -2.38,
+        0.2,
+        6.86
+      ],
+      "size_unity_xyz": [
+        0.24,
+        0.4,
+        7.1
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "SideSill_1",
+      "center_unity_xyz": [
+        2.38,
+        0.2,
+        6.86
+      ],
+      "size_unity_xyz": [
+        0.24,
+        0.4,
+        7.1
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "BackSill",
+      "center_unity_xyz": [
+        0,
+        0.18,
+        10.81
+      ],
+      "size_unity_xyz": [
+        4.8,
+        0.36,
+        0.34
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "SealedArchiveRelief",
+      "center_unity_xyz": [
+        0,
+        0.39,
+        10.78
+      ],
+      "size_unity_xyz": [
+        1.75,
+        0.78,
+        0.42
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "VenueFloor",
+      "center_unity_xyz": [
+        0,
+        -0.025,
+        5.5
+      ],
+      "size_unity_xyz": [
+        5,
+        0.05,
+        11
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "markers": [
+    {
+      "name": "CollectionVolume",
+      "role": "collection_volume",
+      "position_unity_xyz": [
+        0,
+        0.67,
+        0.8
+      ],
+      "position_blender_xyz": [
+        0.0,
+        -0.800000011920929,
+        0.6700000166893005
+      ],
+      "size": [
+        2.7,
+        0.35,
+        0.74
+      ]
+    },
+    {
+      "name": "ScoreBoardAnchor",
+      "role": "nonphysical_ui_anchor",
+      "position_unity_xyz": [
+        0,
+        1.6,
+        0.55
+      ],
+      "position_blender_xyz": [
+        0.0,
+        -0.550000011920929,
+        1.600000023841858
+      ]
+    },
+    {
+      "name": "Tutorial_01",
+      "role": "tutorial",
+      "position_unity_xyz": [
+        -1.2,
+        0,
+        2.4
+      ],
+      "position_blender_xyz": [
+        -1.2000000476837158,
+        -2.4000000953674316,
+        0.0
+      ],
+      "symbol": "circle",
+      "color": "red"
+    },
+    {
+      "name": "Tutorial_02",
+      "role": "tutorial",
+      "position_unity_xyz": [
+        -0.4,
+        0,
+        2.4
+      ],
+      "position_blender_xyz": [
+        -0.4000000059604645,
+        -2.4000000953674316,
+        0.0
+      ],
+      "symbol": "triangle",
+      "color": "blue"
+    },
+    {
+      "name": "Tutorial_03",
+      "role": "tutorial",
+      "position_unity_xyz": [
+        0.4,
+        0,
+        2.4
+      ],
+      "position_blender_xyz": [
+        0.4000000059604645,
+        -2.4000000953674316,
+        0.0
+      ],
+      "symbol": "square",
+      "color": "green"
+    },
+    {
+      "name": "Tutorial_04",
+      "role": "tutorial",
+      "position_unity_xyz": [
+        1.2,
+        0,
+        2.4
+      ],
+      "position_blender_xyz": [
+        1.2000000476837158,
+        -2.4000000953674316,
+        0.0
+      ],
+      "symbol": "star",
+      "color": "yellow"
+    },
+    {
+      "name": "TreasureSlot_01",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -1.5,
+        0,
+        3.2
+      ],
+      "position_blender_xyz": [
+        -1.5,
+        -3.200000047683716,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "near"
+    },
+    {
+      "name": "TreasureSlot_02",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -0.9,
+        0,
+        3.2
+      ],
+      "position_blender_xyz": [
+        -0.8999999761581421,
+        -3.200000047683716,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "near"
+    },
+    {
+      "name": "TreasureSlot_03",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        0.9,
+        0,
+        3.2
+      ],
+      "position_blender_xyz": [
+        0.8999999761581421,
+        -3.200000047683716,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "near"
+    },
+    {
+      "name": "TreasureSlot_04",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        1.5,
+        0,
+        3.2
+      ],
+      "position_blender_xyz": [
+        1.5,
+        -3.200000047683716,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "near"
+    },
+    {
+      "name": "TreasureSlot_05",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -1.5,
+        0,
+        4.95
+      ],
+      "position_blender_xyz": [
+        -1.5,
+        -4.949999809265137,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "near"
+    },
+    {
+      "name": "TreasureSlot_06",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -0.9,
+        0,
+        4.95
+      ],
+      "position_blender_xyz": [
+        -0.8999999761581421,
+        -4.949999809265137,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "near"
+    },
+    {
+      "name": "TreasureSlot_07",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        0.9,
+        0,
+        4.95
+      ],
+      "position_blender_xyz": [
+        0.8999999761581421,
+        -4.949999809265137,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "near"
+    },
+    {
+      "name": "TreasureSlot_08",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        1.5,
+        0,
+        4.95
+      ],
+      "position_blender_xyz": [
+        1.5,
+        -4.949999809265137,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "near"
+    },
+    {
+      "name": "TreasureSlot_09",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -1.5,
+        0,
+        5.55
+      ],
+      "position_blender_xyz": [
+        -1.5,
+        -5.550000190734863,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "near"
+    },
+    {
+      "name": "TreasureSlot_10",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -0.9,
+        0,
+        5.55
+      ],
+      "position_blender_xyz": [
+        -0.8999999761581421,
+        -5.550000190734863,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "near"
+    },
+    {
+      "name": "TreasureSlot_11",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        0.9,
+        0,
+        5.55
+      ],
+      "position_blender_xyz": [
+        0.8999999761581421,
+        -5.550000190734863,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "near"
+    },
+    {
+      "name": "TreasureSlot_12",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        1.5,
+        0,
+        5.55
+      ],
+      "position_blender_xyz": [
+        1.5,
+        -5.550000190734863,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "near"
+    },
+    {
+      "name": "TreasureSlot_13",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -1.5,
+        0,
+        7.2
+      ],
+      "position_blender_xyz": [
+        -1.5,
+        -7.199999809265137,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "mid"
+    },
+    {
+      "name": "TreasureSlot_14",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -0.9,
+        0,
+        7.2
+      ],
+      "position_blender_xyz": [
+        -0.8999999761581421,
+        -7.199999809265137,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "mid"
+    },
+    {
+      "name": "TreasureSlot_15",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        0.9,
+        0,
+        7.2
+      ],
+      "position_blender_xyz": [
+        0.8999999761581421,
+        -7.199999809265137,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "mid"
+    },
+    {
+      "name": "TreasureSlot_16",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        1.5,
+        0,
+        7.2
+      ],
+      "position_blender_xyz": [
+        1.5,
+        -7.199999809265137,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "mid"
+    },
+    {
+      "name": "TreasureSlot_17",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -1.5,
+        0,
+        7.8
+      ],
+      "position_blender_xyz": [
+        -1.5,
+        -7.800000190734863,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "mid"
+    },
+    {
+      "name": "TreasureSlot_18",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -0.9,
+        0,
+        7.8
+      ],
+      "position_blender_xyz": [
+        -0.8999999761581421,
+        -7.800000190734863,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "mid"
+    },
+    {
+      "name": "TreasureSlot_19",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        0.9,
+        0,
+        7.8
+      ],
+      "position_blender_xyz": [
+        0.8999999761581421,
+        -7.800000190734863,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "mid"
+    },
+    {
+      "name": "TreasureSlot_20",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        1.5,
+        0,
+        7.8
+      ],
+      "position_blender_xyz": [
+        1.5,
+        -7.800000190734863,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "mid"
+    },
+    {
+      "name": "TreasureSlot_21",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -1.5,
+        0,
+        9.45
+      ],
+      "position_blender_xyz": [
+        -1.5,
+        -9.449999809265137,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "far"
+    },
+    {
+      "name": "TreasureSlot_22",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -0.9,
+        0,
+        9.45
+      ],
+      "position_blender_xyz": [
+        -0.8999999761581421,
+        -9.449999809265137,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "far"
+    },
+    {
+      "name": "TreasureSlot_23",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        0.9,
+        0,
+        9.45
+      ],
+      "position_blender_xyz": [
+        0.8999999761581421,
+        -9.449999809265137,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "far"
+    },
+    {
+      "name": "TreasureSlot_24",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        1.5,
+        0,
+        9.45
+      ],
+      "position_blender_xyz": [
+        1.5,
+        -9.449999809265137,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "far"
+    },
+    {
+      "name": "TreasureSlot_25",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -1.5,
+        0,
+        10.0
+      ],
+      "position_blender_xyz": [
+        -1.5,
+        -10.0,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "far"
+    },
+    {
+      "name": "TreasureSlot_26",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -0.9,
+        0,
+        10.0
+      ],
+      "position_blender_xyz": [
+        -0.8999999761581421,
+        -10.0,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "far"
+    },
+    {
+      "name": "TreasureSlot_27",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        0.9,
+        0,
+        10.0
+      ],
+      "position_blender_xyz": [
+        0.8999999761581421,
+        -10.0,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "far"
+    },
+    {
+      "name": "TreasureSlot_28",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        1.5,
+        0,
+        10.0
+      ],
+      "position_blender_xyz": [
+        1.5,
+        -10.0,
+        0.0
+      ],
+      "clearance_radius_m": 0.27,
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "distance_band": "far"
+    }
+  ],
+  "collider_status": "Conservative placement envelopes only; split to fit visible solids with Unity Editor API before gameplay use.",
+  "sample_placements": [
+    {
+      "model": "amphora",
+      "slot": "TreasureSlot_01",
+      "class_name": "M",
+      "root_name": "TH10_M_Amphora_Root.045"
+    },
+    {
+      "model": "inscribed_stele",
+      "slot": "TreasureSlot_03",
+      "class_name": "M",
+      "root_name": "TH10_M_Inscribed_Stele_Root.038"
+    },
+    {
+      "model": "cup",
+      "slot": "TreasureSlot_04",
+      "class_name": "S",
+      "root_name": "TH_S_Cup_Root.029"
+    },
+    {
+      "model": "scarab_amulet",
+      "slot": "TreasureSlot_05",
+      "class_name": "S",
+      "root_name": "TH10_S_Scarab_Amulet_Root.031"
+    },
+    {
+      "model": "mask",
+      "slot": "TreasureSlot_06",
+      "class_name": "S",
+      "root_name": "TH_S_Mask_Root.031"
+    },
+    {
+      "model": "cup",
+      "slot": "TreasureSlot_08",
+      "class_name": "S",
+      "root_name": "TH_S_Cup_Root.030"
+    },
+    {
+      "model": "inscribed_stele",
+      "slot": "TreasureSlot_09",
+      "class_name": "M",
+      "root_name": "TH10_M_Inscribed_Stele_Root.039"
+    },
+    {
+      "model": "mask",
+      "slot": "TreasureSlot_11",
+      "class_name": "S",
+      "root_name": "TH_S_Mask_Root.032"
+    },
+    {
+      "model": "amphora",
+      "slot": "TreasureSlot_12",
+      "class_name": "M",
+      "root_name": "TH10_M_Amphora_Root.046"
+    },
+    {
+      "model": "amphora",
+      "slot": "TreasureSlot_13",
+      "class_name": "M",
+      "root_name": "TH10_M_Amphora_Root.047"
+    },
+    {
+      "model": "statuette",
+      "slot": "TreasureSlot_14",
+      "class_name": "S",
+      "root_name": "TH_S_Statuette_Root.029"
+    },
+    {
+      "model": "ceremonial_lamp",
+      "slot": "TreasureSlot_16",
+      "class_name": "S",
+      "root_name": "TH10_S_Ceremonial_Lamp_Root.024"
+    },
+    {
+      "model": "scarab_amulet",
+      "slot": "TreasureSlot_17",
+      "class_name": "S",
+      "root_name": "TH10_S_Scarab_Amulet_Root.032"
+    },
+    {
+      "model": "inscribed_stele",
+      "slot": "TreasureSlot_19",
+      "class_name": "M",
+      "root_name": "TH10_M_Inscribed_Stele_Root.040"
+    },
+    {
+      "model": "inscribed_stele",
+      "slot": "TreasureSlot_20",
+      "class_name": "M",
+      "root_name": "TH10_M_Inscribed_Stele_Root.041"
+    },
+    {
+      "model": "cup",
+      "slot": "TreasureSlot_21",
+      "class_name": "S",
+      "root_name": "TH_S_Cup_Root.031"
+    },
+    {
+      "model": "statuette",
+      "slot": "TreasureSlot_22",
+      "class_name": "S",
+      "root_name": "TH_S_Statuette_Root.030"
+    },
+    {
+      "model": "scarab_amulet",
+      "slot": "TreasureSlot_23",
+      "class_name": "S",
+      "root_name": "TH10_S_Scarab_Amulet_Root.033"
+    },
+    {
+      "model": "amphora",
+      "slot": "TreasureSlot_24",
+      "class_name": "M",
+      "root_name": "TH10_M_Amphora_Root.048"
+    },
+    {
+      "model": "amphora",
+      "slot": "TreasureSlot_25",
+      "class_name": "M",
+      "root_name": "TH10_M_Amphora_Root.049"
+    },
+    {
+      "model": "mask",
+      "slot": "TreasureSlot_26",
+      "class_name": "S",
+      "root_name": "TH_S_Mask_Root.033"
+    },
+    {
+      "model": "statuette",
+      "slot": "TreasureSlot_27",
+      "class_name": "S",
+      "root_name": "TH_S_Statuette_Root.031"
+    },
+    {
+      "model": "ceremonial_lamp",
+      "slot": "TreasureSlot_28",
+      "class_name": "S",
+      "root_name": "TH10_S_Ceremonial_Lamp_Root.025"
+    }
+  ],
+  "preview_only": "floor, 23 sample treasures, camera and lights; not in stage FBX",
+  "unity_imported": false,
+  "pico_fps_measured": false
+}
