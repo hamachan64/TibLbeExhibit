@@ -6,6 +6,7 @@
         "UnityEditor.TestRunner",
         "TibLbeExhibit.Core",
         "TibLbeExhibit.GIPoker",
+        "TibLbeExhibit.TreasureHaul",
         "R3.Unity"
     ],
     "includePlatforms": [

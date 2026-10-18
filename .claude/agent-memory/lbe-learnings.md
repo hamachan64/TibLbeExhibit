@@ -382,3 +382,25 @@
 - **既存テストの既知の失敗**: `repo/develop` 作成時点で EditMode テスト 257件中24件が失敗している
   （`BinderLayoutTests` / `ResultGradeTests` / `TutorialSequenceTests`。GIPoker の調整後にテストが追従していないもの）。
   回帰判定は「失敗がこの24件から増えていないか」で行う。
+
+## エディタでの試作（Issue #36、2026-10-18）で分かったこと
+
+### XRI 3.3.1「XR Interaction Simulator」サンプル
+- 取り込んだだけでは、手の形のうち Grab / Thumb / Open / Fist の4つが動かない。プレハブの入力参照が、別サンプル「XR Device Simulator」の `.inputactions`（guid `b72ab2a4…`）を指しているため。
+  - 回避: サンプル本体は編集せず、シーン上のインスタンスで4つの参照を `XR Interaction Hand Controls.inputactions`（Hands/Grab・Thumb・Open・Fist）に付け替える（`TH_Proto_Hands` はこの状態）。XR Device Simulator サンプルも取り込めば直る見込み（未検証）。
+- 操作: Game View にキー入力が必要（`uloop simulate-keyboard` の KeyDown/KeyUp で届く）。コントローラー⇔手の切り替えは `[` と `]` の同時押し（Tab ではない）。手の形は単独キーで右手・Shift で左手、O=Open、P=Fist（押すたびにトグル）、M=Pinch、N=Poke。
+- 手の関節は `XRDeviceSimulatorHandsProvider` が `XRHandSubsystem` として渡すので、実機と同じコードで読める。
+
+### ParrelSync のクローンを AI から動かす
+- `uloop launch <クローン>` で GUI 起動すると、ParrelSync の「Asset modifications saving detected and blocked」モーダル（ボタンは ok のみ）で止まり、uloop がつながらない（2回再現）。人が ok を押すか、`-batchmode -executeMethod`（`ProtoBatchRunner.PlayNet`）で起動する。batchmode では uloop・Game View が使えないので、クローンの操作は RPC で命令を送る形にした。
+- このマシンは Library が約18GB（Bee 約11GB）・ディスク空き約17GB。`CreateCloneFromCurrent` で全コピーすると満杯になりうる。Library は Bee を除いて `cp -c -R`（APFS クローン）でコピーした。
+- `NetSyncObject` の ObjectId の自動割り当ては、dynamic code での編集では発動しなかった（パッケージと同じ GlobalObjectId の FNV で `SerializedObject` から書いた）。
+
+### STYLY NetSync 0.17.4 の実測（同じ Mac、localhost）
+- RPC: 1クライアント 30回/秒（スライディング窓）を超えると捨てる（`Rate limited: dropped`）。`ConfigureRpcLimit` で上げられ、100回/秒でも欠損なし。順番の入れ替わり・重複はなし。自分の broadcast は自分にも届く。
+- RPC の引数は JSON で 65,535 バイトまで（`(ushort)` で長さを持つ）。超えると**エラーも出ずに受信側の args が null** になる。設計上は 32KB 程度を上限にする。
+- サーバーが落ちても `IsReady` / `HasServerConnection` は true のまま（切断に気づかない）。再起動後1秒以内に自動再接続するが、**ClientNo が入れ替わる**。停止中に送った RPC は溜まって、再接続後にまとめて届く。サーバーのグローバル変数は消える（クライアントの手元のキャッシュには残る）。
+- グローバル変数: 後から入った端末も読める。書いた直後の Get は null（サーバー往復後に反映）。1024 文字を超えると `SetGlobalVariable` が false。
+- DeviceId: `NetSyncManager.Instance.DeviceId`。相手のは `GetDeviceIdByClientNo` / `GetClientNoByDeviceId`。
+- `NetSyncObject` の位置同期は、相手の画面で約 200〜300ms 遅れ、動き始めは約1秒遅れて数秒かけて縮む（内部の補間バッファ。外から変える設定なし）。RPC の片道は 4〜12ms。
+- `RequestOwnership` は先着の調停をしない（他人が持っていても奪える。同時要求は後勝ち）。持ち主の決定はホストが行い、承認された1人だけが要求する。切り替えは約65ms。クライアントが終了すると持ち主は 0 に戻る。
