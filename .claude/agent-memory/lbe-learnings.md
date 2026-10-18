@@ -379,9 +379,10 @@
   また `uloop execute-dynamic-code --code-file` にスクラッチパッドのパスを渡すと guard が中身を読めずブロックするので、`--code` でインライン実行する。
 - **シェル環境の注意（macOS / zsh）**: BSD sed は `\b` を解釈しない（単語境界の置換は `perl -pi -e`）。
   zsh では `echo ==` がコマンド展開エラーになり、`--include=*.cs` のような未クォートのグロブは「no matches found」で失敗する。
-- **既存テストの既知の失敗**: `repo/develop` 作成時点で EditMode テスト 257件中24件が失敗している
-  （`BinderLayoutTests` / `ResultGradeTests` / `TutorialSequenceTests`。GIPoker の調整後にテストが追従していないもの）。
-  回帰判定は「失敗がこの24件から増えていないか」で行う。
+- **EditMode テストは全件成功が基準**: 以前は前作（GIPoker）のテストが24件失敗していた（GIPoker の調整後にテストが追従していなかった）。
+  `repo/develop` では GIPoker を保守しないため、2026-10-18 に GIPoker のテスト15ファイルを削除し、テストの asmdef から GIPoker への参照を外した。
+  `LSignPoseEvaluatorTests` は Core のテストなので残した。
+  なお Assets 配下のファイル削除は、guard.py（シェルでの削除コマンド）と uloop の安全機能（`AssetDatabase.DeleteAsset`）の両方で止まる。削除が必要なときは人に頼む（ユーザーが自分のターミナルで `git rm` する）。
 
 ## エディタでの試作（Issue #36、2026-10-18）で分かったこと
 
