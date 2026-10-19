@@ -1,5 +1,7 @@
 # 外部の素材・サービス・パッケージの記録
 
+> 2026-10-19: `BlenderAssets/TreasureHaul/Stage/Revision2/`〜`Revision6/` は作業ツリーから削除した（Git の履歴には残っている）。下の記録で「同フォルダーのREADME」とあるものは履歴から参照する。現在の出力 `Stage/Output/`（`Stage/build_stage.py` で生成。旧 Revision7）も、同じ自作の形状・自作アトラスだけでできていて、外部の素材・サービスは追加していない。
+
 ## 追加記録: 遺跡の風化・床際改修 (2026-10-19)
 
 `BlenderAssets/TreasureHaul/Stage/Revision4/` の石積み、漆喰、土・敷石と共有アトラスはローカルBlender MCPで自作。商用可（自作物）／第三者素材・R.E.P.O.アセット不使用／無料・クレジット消費なし／外部ダウンロード・APIキー利用なし、の4点を確認。既存の自作お宝と台車は確認用に再利用。

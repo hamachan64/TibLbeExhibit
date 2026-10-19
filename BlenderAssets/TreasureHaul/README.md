@@ -2,7 +2,7 @@
 
 **Cart:** use [`Cart/Revision2/`](Cart/Revision2/README.md), the researched salvage-bin revision (4,432 triangles), with a Unity prefab and live cargo-value display. See [`Cart/RESEARCH.md`](Cart/RESEARCH.md) for references and design decisions. Moving-cart gameplay and host synchronization remain pending.
 
-**Stage:** use [`Stage/Revision7/`](Stage/Revision7/README.md): 23 finds on stone (14 S + 9 M), 18 in masonry niches closed toward the entrance. Measured: 18/18 hidden from the practice row yet findable standing up close, 23/23 beam-reachable, no floor placement or mesh intersection. `Stage/Revision6/` (failed: 7/18) and Revision4–5 remain for comparison. Unity integration and PICO checks remain pending.
+**Stage:** built by `Stage/build_stage.py` into the single folder [`Stage/Output/`](Stage/Output/README.md) (work in progress: the five visible finds still read as floor placements and the layout is still a grid; a placement redesign is planned). See [`Stage/README.md`](Stage/README.md). Older revisions live in Git history only. Unity integration and PICO checks remain pending.
 
 **Current reviewed deliverables:** use [`Reviewed/`](Reviewed/) for the corrected ten models and 30 FBX variants. See [`Reviewed/REVIEW.md`](Reviewed/REVIEW.md) for findings, budgets, and remaining device validation; [`Reviewed/details.png`](Reviewed/details.png) shows the revised treasure silhouettes. Files below and in `S/` are retained as the original authoring inputs for comparison. Run `review_treasures.py` after regenerating those inputs, then `verify_reviewed.py`. Do not import the older exports by mistake.
 

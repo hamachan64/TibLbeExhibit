@@ -1,5 +1,5 @@
-"""Reload actual FBX/blend outputs and measure supported-stage geometry."""
-import bpy,json,runpy,importlib.util
+"""Reload the ContextReviewed treasure FBX/blend outputs and measure their geometry."""
+import bpy,json
 from pathlib import Path
 from mathutils import Vector
 HERE=Path(__file__).resolve().parent;OUT=HERE/'ContextReviewed'
@@ -44,28 +44,6 @@ def run():
         bpy.ops.object.select_all(action='DESELECT')
         for o in selected:o.select_set(True)
         bpy.context.view_layer.objects.active=active
-    spec=importlib.util.spec_from_file_location('verify_stage_base',HERE/'Stage/verify_stage.py');legacy=importlib.util.module_from_spec(spec);spec.loader.exec_module(legacy)
-    legacy.OUT=HERE/'Stage/Revision5'
-    def layout_checks(data):
-        paths=runpy.run_path(str(HERE/'Stage/check_context_paths.py'),run_name='verify')['run']()
-        assert paths['human_all_reachable'] and paths['cart_max_depth_m']>=8.9
-        assert len(data['sample_placements'])==23
-        assert sum(x['class_name']=='S' for x in data['sample_placements'])==14
-        for p in data['supported_placements']:
-            assert p['base_height_m']>.1 and p['top_height_m']<.8
-            assert abs(p['base_height_m']-p['support_height_m']-p['suspended_offset_m'])<.001
-        for m in data['markers']:
-            if m['role']=='treasure_candidate':
-                x,h,d=m['position_unity_xyz'];assert min(2.5-abs(x),d,11-d)-m['clearance_radius_m']>=.7
-        return paths
-    legacy.layout_checks=layout_checks;legacy.run()
-    p=legacy.OUT/'verification.json';data=json.loads(p.read_text(encoding='utf-8'))
-    data['occlusion_probe']['total']=23
-    data['occlusion_probe']['note']='Single entrance ray to root + 0.15m; this is not a hand-reach or full-silhouette concealment test.'
-    layout=json.loads((legacy.OUT/'stage_layout.json').read_text(encoding='utf-8'))
-    data['combined_triangles_including_cart']=data['combined_triangles']+layout['preview_cart_stats']['triangles']
-    data['unity_compile']='See unity_verification.json; models not imported into Unity'
-    data['unity_editmode']='See unity_verification.json; models not imported into Unity'
-    p.write_text(json.dumps(data,indent=2),encoding='utf-8')
-    print('PASS: 30 treasure round trips, supported-stage FBX/modules/blends, 23 approaches and cart rear delivery route')
+    # The stage is verified separately (Stage/verify_stage.py).
+    print('PASS: treasure FBX/blend round trips')
 if __name__=='__main__':run()

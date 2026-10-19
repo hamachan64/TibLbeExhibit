@@ -1,19 +1,18 @@
-"""Reusable previews, preserving active scene and selection."""
-import bpy,math,runpy
+"""Showcase render of the added S finds, preserving active scene and selection.
+Stage previews are rendered by Stage/render_search_views.py."""
+import bpy,math
 from pathlib import Path
 from mathutils import Vector
 HERE=Path(__file__).resolve().parent
 def run():
     old=bpy.context.window.scene;selected=list(bpy.context.selected_objects);active=bpy.context.view_layer.objects.active
     try:
-        ns=runpy.run_path(str(HERE/'Stage/build_stage_v5.py'),run_name='preview')
-        with bpy.data.libraries.load(str(HERE/'Stage/Revision5/Stage_Review.blend'),link=False) as (src,dst):dst.scenes=src.scenes
-        stage=dst.scenes[0];bpy.context.window.scene=stage
-        b=object.__new__(ns['ContextBuilder']);b.scene=stage;stage.cycles.samples=24
-        for view in ('eye','overview','top'):b.render(view)
         # Detail view of the original small additions, at their true relative sizes.
         scene=bpy.data.scenes.new('TH_New_S_Find_Showcase');bpy.context.window.scene=scene
-        scene.world=stage.world.copy();scene.render.engine='CYCLES';scene.cycles.samples=32
+        scene.world=bpy.data.worlds.new('TH_New_S_World');scene.world.use_nodes=True
+        bg=next(n for n in scene.world.node_tree.nodes if n.type=='BACKGROUND')
+        bg.inputs['Color'].default_value=(.12,.15,.17,1);bg.inputs['Strength'].default_value=.45
+        scene.render.engine='CYCLES';scene.cycles.samples=32
         for index,name in enumerate(('hand_mirror','votive_bell','perfume_jar','stamp_seal','coin_casket')):
             with bpy.data.libraries.load(str(HERE/'ContextReviewed'/(name+'.blend')),link=False) as (src,dst):dst.objects=src.objects
             objects=[o for o in dst.objects if o]

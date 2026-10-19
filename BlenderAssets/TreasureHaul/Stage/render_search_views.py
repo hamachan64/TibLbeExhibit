@@ -1,6 +1,6 @@
 """Render review images of a stage revision headless (the blend is not saved).
 
-  blender -b RevisionN/Stage_Review.blend --python render_search_views.py -- RevisionN [views...]
+  blender -b Output/Stage_Review.blend --python render_search_views.py -- Output [views...]
 Views: eye (entrance sightline), eye_west, top, overview, peek (one tile per hidden
 find, from the measured best close viewpoint in search_visibility.json).
 """
@@ -9,7 +9,7 @@ from pathlib import Path
 from mathutils import Vector
 
 HERE = Path(__file__).resolve().parent
-ARGS = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else ['Revision6']
+ARGS = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else ['Output']
 OUT = HERE / ARGS[0]
 VIEWS = ARGS[1:] or ['eye', 'eye_west', 'top', 'overview', 'peek']
 scene = bpy.context.scene

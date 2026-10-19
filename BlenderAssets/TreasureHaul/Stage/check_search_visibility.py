@@ -1,7 +1,7 @@
 """Measure whether treasures are hidden from the entrance yet findable up close.
 
 Run headless on a review blend (does not modify or save it):
-  blender -b Revision6/Stage_Review.blend --python check_search_visibility.py -- Revision6
+  blender -b Output/Stage_Review.blend --python check_search_visibility.py [-- Output]
 
 Line of sight is ray cast against every stage mesh and the other treasures.
 Sample points are the vertices of each treasure's body and of its glowing grip.
@@ -14,7 +14,7 @@ from pathlib import Path
 from mathutils import Vector
 
 HERE = Path(__file__).resolve().parent
-ARGS = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else ['Revision6']
+ARGS = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else ['Output']
 OUT = HERE / ARGS[0]
 GRID = .10
 HUMAN_R = .30

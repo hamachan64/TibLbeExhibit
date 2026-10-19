@@ -2,9 +2,9 @@
 import math,json,sys
 from pathlib import Path
 from collections import deque
-# Optional revision folder: python check_context_paths.py Revision7 (or blender -b --python ... -- Revision7)
-_args=sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else sys.argv[1:]
-OUT=Path(__file__).resolve().parent/(_args[0] if _args and _args[0].startswith('Revision') else 'Revision5')
+# Output folder (default Output): blender -b --factory-startup --python check_context_paths.py [-- Output]
+_args=sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else []
+OUT=Path(__file__).resolve().parent/(_args[0] if _args else 'Output')
 def run():
     data=json.loads((OUT/'stage_layout.json').read_text(encoding='utf-8'))
     obs=[c for c in data['colliders'] if c['name']!='VenueFloor']
