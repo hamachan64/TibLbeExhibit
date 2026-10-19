@@ -1,7 +1,7 @@
-"""Blender geometry / FBX round-trip and articulated-pivot checks. Not Unity tests."""
+"""Blender geometry / FBX round-trip and articulated-pivot checks for Cart/Output. Not Unity tests."""
 import bpy, json, math
 from pathlib import Path
-OUT=Path(__file__).resolve().parent
+OUT=Path(__file__).resolve().parent/'Output'
 
 def inspect(objects,expected):
     meshes=[o for o in objects if o.type=='MESH']

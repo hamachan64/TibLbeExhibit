@@ -16,8 +16,8 @@ from mathutils import Vector
 
 HERE = Path(__file__).resolve().parent
 OUT = HERE / 'Output'
-TREASURES = HERE.parent / 'ContextReviewed'
-CART = HERE.parent / 'Cart/Revision2/ExcavationCart.blend'
+TREASURES = HERE.parent / 'Treasures'
+CART = HERE.parent / 'Cart/Output/ExcavationCart.blend'
 RNG = random.Random(4618)
 
 # 23 preview finds: 14 S + 9 M (plan 6.1, 4 players). Index = slot - 1.
@@ -71,6 +71,14 @@ class StageBuilder:
 
     # ---- shared material: eight original 128 px swatches in a 1024 x 128 atlas ----
     def make_materials(self):
+        self.make_base_materials(OUT / 'textures')
+        # Two recolour passes through the 8-bit images, in this order, so the atlas
+        # stays byte-identical to the committed output.
+        self.recolor_archive(); self.recolor_ruin()
+
+    def make_base_materials(self, texture_dir=None):
+        """Original atlas and solid materials. The cart uses this without the stage
+        recolours; texture_dir=None packs the images without writing PNG files."""
         colors = [(.16, .205, .20), (.34, .37, .32), (.10, .16, .15), (.055, .067, .07),
                   (.28, .13, .067), (.47, .43, .30), (.54, .34, .09), (.09, .10, .085)]
         metallic = [0, 0, .65, .75, .28, .35, .2, 0]
@@ -95,8 +103,10 @@ class StageBuilder:
             data[:, :, 3] = 1
             im = bpy.data.images.new('THStage_' + label, width=n * 8, height=n, alpha=False)
             if label != 'BaseColor': im.colorspace_settings.name = 'Non-Color'
-            im.pixels.foreach_set(data.ravel()); im.filepath_raw = str(OUT / 'textures' / ('Stage_' + label + '.png'))
-            im.file_format = 'PNG'; im.save(); im.pack(); images.append(im)
+            im.pixels.foreach_set(data.ravel())
+            if texture_dir:
+                im.filepath_raw = str(texture_dir / ('Stage_' + label + '.png')); im.file_format = 'PNG'; im.save()
+            im.pack(); images.append(im)
         self.surface = bpy.data.materials.new('THStage_SharedSurface'); self.surface.use_nodes = True
         bs = next(n for n in self.surface.node_tree.nodes if n.type == 'BSDF_PRINCIPLED')
         for im, socket in zip(images, ('Base Color', 'Metallic', 'Roughness')):
@@ -106,9 +116,6 @@ class StageBuilder:
         self.teal = self.solid('THStage_ExtractionSignal', (.08, .6, .45, 1), 1.8)
         self.dark = self.solid('THStage_DarkRecess', (.018, .023, .022, 1))
         self.floor = self.solid('THStage_PREVIEW_RealFloor', (.24, .26, .26, 1))
-        # Two recolour passes through the 8-bit images, in this order, so the atlas
-        # stays byte-identical to the committed Revision7 output.
-        self.recolor_archive(); self.recolor_ruin()
 
     def recolor_archive(self):
         old = [(.16, .205, .20), (.34, .37, .32), (.10, .16, .15), (.055, .067, .07), (.28, .13, .067), (.47, .43, .30), (.54, .34, .09), (.09, .10, .085)]

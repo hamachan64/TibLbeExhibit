@@ -1,5 +1,7 @@
 # 外部の素材・サービス・パッケージの記録
 
+> 2026-10-20: `BlenderAssets/TreasureHaul/` の `S/`・`patterns/`・`Reviewed/`・ルート直下のお宝モデル・台車の初版も作業ツリーから削除した（Git の履歴には残っている）。現在のお宝は `Treasures/`（旧 `ContextReviewed/`。下の S・`Reviewed/`・文様の記録に書かれた自作物を風化させた版と、自作の S 5種）、台車は `Cart/Output/`（旧 `Cart/Revision2/`）。どちらも自作物だけで、外部の素材・サービスは追加していない。
+>
 > 2026-10-19: `BlenderAssets/TreasureHaul/Stage/Revision2/`〜`Revision6/` は作業ツリーから削除した（Git の履歴には残っている）。下の記録で「同フォルダーのREADME」とあるものは履歴から参照する。現在の出力 `Stage/Output/`（`Stage/build_stage.py` で生成。旧 Revision7）も、同じ自作の形状・自作アトラスだけでできていて、外部の素材・サービスは追加していない。
 
 ## 追加記録: 遺跡の風化・床際改修 (2026-10-19)

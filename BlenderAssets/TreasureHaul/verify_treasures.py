@@ -1,8 +1,9 @@
-"""Reload the ContextReviewed treasure FBX/blend outputs and measure their geometry."""
+"""Reload the treasure FBX/blend files in Treasures/ and check them against stats.json.
+Execute through Blender MCP."""
 import bpy,json
 from pathlib import Path
 from mathutils import Vector
-HERE=Path(__file__).resolve().parent;OUT=HERE/'ContextReviewed'
+HERE=Path(__file__).resolve().parent;OUT=HERE/'Treasures'
 def inspect(objects,expected):
     bpy.context.view_layer.update();meshes=[o for o in objects if o.type=='MESH']
     for o in meshes:o.data.calc_loop_triangles()

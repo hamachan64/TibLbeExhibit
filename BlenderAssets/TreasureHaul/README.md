@@ -1,23 +1,13 @@
-# Treasure Haul treasure models
+# Treasure Haul の 3D 素材（Blender）
 
-**Cart:** use [`Cart/Revision2/`](Cart/Revision2/README.md), the researched salvage-bin revision (4,432 triangles), with a Unity prefab and live cargo-value display. See [`Cart/RESEARCH.md`](Cart/RESEARCH.md) for references and design decisions. Moving-cart gameplay and host synchronization remain pending.
+Unity の `Assets/` の外に置いている制作データ。版はフォルダやファイル名で分けず、Git のコミットで管理する（過去の版は `git log -- BlenderAssets/TreasureHaul` から取り出す）。外部の素材・サービスは使っていない（`THIRD_PARTY_NOTICES.md`）。
 
-**Stage:** built by `Stage/build_stage.py` into the single folder [`Stage/Output/`](Stage/Output/README.md) (work in progress: the five visible finds still read as floor placements and the layout is still a grid; a placement redesign is planned). See [`Stage/README.md`](Stage/README.md). Older revisions live in Git history only. Unity integration and PICO checks remain pending.
+| フォルダ | 中身 | 作り方 |
+| --- | --- | --- |
+| [Treasures/](Treasures/README.md) | お宝 15 種の `.blend` と `.fbx` | `.blend` が正本。直接編集する |
+| [Stage/](Stage/README.md) | 5m × 11m のステージ。出力は `Stage/Output/` | `Stage/build_stage.py` で生成 |
+| [Cart/](Cart/README.md) | 台車。出力は `Cart/Output/` | `Cart/build_cart.py` で生成 |
 
-**Current reviewed deliverables:** use [`Reviewed/`](Reviewed/) for the corrected ten models and 30 FBX variants. See [`Reviewed/REVIEW.md`](Reviewed/REVIEW.md) for findings, budgets, and remaining device validation; [`Reviewed/details.png`](Reviewed/details.png) shows the revised treasure silhouettes. Files below and in `S/` are retained as the original authoring inputs for comparison. Run `review_treasures.py` after regenerating those inputs, then `verify_reviewed.py`. Do not import the older exports by mistake.
-
-Ten original, realistic-leaning treasure models are authored and saved here. Every model is at or below 5,000 triangles including its glowing grip. All Blender scenes and FBX exports stay outside Unity's `Assets/` tree.
-
-| Class | Model | Triangles | Glowing grips |
-| :--- | :--- | ---: | ---: |
-| S | Mask, Cup, Statuette | 4,684 / 4,792 / 4,664 | 1 each |
-| S | Scarab Amulet, Ceremonial Lamp | 2,442 / 3,144 | 1 each |
-| M | Amphora, Inscribed Stele | 4,128 / 1,610 | 2 each |
-| L | Guardian Statue, Relic Chest | 4,686 / 2,468 | 2 each |
-| Secret | Sun Mask | 4,568 | 1 |
-
-Each model has three surface variants: the base bronze patina, cinnabar and gilt, and jade inlay. The original S models are in `S/`; their additional patterned FBX files and all seven new models' `.blend` scenes and three FBX variants are in this directory. Pattern image sources are in `patterns/`.
-
-`Ten_Treasure_Showcase.blend` and `Ten_Treasure_Showcase.png` provide the saved lineup and its rendered preview. `build_more_treasures.py` regenerates the seven new models and FBX variants in an open Blender session; `verify_ten_treasures.py` round-trip checks triangle counts, dimensions, grip emission, and packed images. `ten_type_stats.json` and `ten_type_verification.json` contain the measurements.
-
-All geometry and pattern images were made locally with Blender and procedural code. No external assets, paid generators, or Unity imports were used.
+- `.blend` は Blender 5.1 で保存している（4.4 では開けない）。
+- Unity には、必要な FBX を `Assets/_Content/TreasureHaul/Models/` にコピーして取り込む（台車は取り込み済み。お宝とステージは未取り込み）。Unity のアセットは Editor API で扱い、テキストで編集しない。
+- 生成スクリプトは Blender MCP で実行する。専用のシーンを作って書き出し、ユーザーのシーンに戻す。確認・検証用のスクリプトは、できるだけ `blender -b`（バックグラウンド）で動かす。
