@@ -33,6 +33,28 @@ namespace STYLY.TIB_Template.TreasureHaul
             _buf[_count++] = new Sample { Time = time, Pos = pos, Rot = rot };
         }
 
+        /// <summary>
+        /// 他の端末が動かしているお宝の速度（m/s。VenueRoot ローカル）。
+        /// 受け取った時刻は受信時刻なので、まとめて届くと 2 点の間隔が極端に短くなる・間隔がぶれる。
+        /// そのため直近 window 秒の最古と最新のサンプルから出し、時間幅が sendInterval に満たなければ分母を sendInterval にし、maxSpeed で切る。
+        /// サンプルが 2 点未満、または最後のサンプルが now から maxAge 秒より古いときは false。
+        /// </summary>
+        public bool TryGetVelocity(double now, double maxAge, double window, double sendInterval, float maxSpeed, out Vector3 velocity)
+        {
+            velocity = Vector3.zero;
+            if (_count < 2) return false;
+            var last = _buf[_count - 1];
+            if (now - last.Time > maxAge) return false;
+            int oldest = _count - 1;
+            while (oldest > 0 && last.Time - _buf[oldest - 1].Time <= window) oldest--;
+            if (oldest == _count - 1) return false;
+            double span = Math.Max(last.Time - _buf[oldest].Time, sendInterval);
+            if (span <= 1e-6) return false;
+            velocity = (last.Pos - _buf[oldest].Pos) / (float)span;
+            if (velocity.sqrMagnitude > maxSpeed * maxSpeed) velocity = velocity.normalized * maxSpeed;
+            return true;
+        }
+
         /// <summary>now の時点で描く位置。サンプルが無ければ false</summary>
         public bool TrySample(double now, float delay, float maxExtrapolation, out Vector3 pos, out Quaternion rot)
         {

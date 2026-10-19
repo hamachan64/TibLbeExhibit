@@ -1,4 +1,5 @@
 using DG.Tweening;
+using R3;
 using UnityEngine;
 
 namespace STYLY.TIB_Template.TreasureHaul
@@ -11,6 +12,18 @@ namespace STYLY.TIB_Template.TreasureHaul
         Follow,
         /// <summary>重力あり（落下）</summary>
         Falling,
+    }
+
+    /// <summary>自分が動かしているお宝がぶつかった（衝撃の速さ込み。減額の報告に使う）</summary>
+    public readonly struct TreasureImpact
+    {
+        /// <summary>相手のお宝の番号（障害物なら -1）</summary>
+        public readonly int OtherIndex;
+        /// <summary>当たった点（ワールド座標）</summary>
+        public readonly Vector3 WorldPoint;
+        /// <summary>衝撃の速さ（障害物: 自分の平均速度の大きさ / お宝: 相対速度の大きさ）</summary>
+        public readonly float Speed;
+        public TreasureImpact(int otherIndex, Vector3 worldPoint, float speed) { OtherIndex = otherIndex; WorldPoint = worldPoint; Speed = speed; }
     }
 
     /// <summary>
@@ -43,6 +56,21 @@ namespace STYLY.TIB_Template.TreasureHaul
         readonly RestDetector _rest = new RestDetector();
         Collider[] _bodyColliders;
 
+        // ---- 減額（設計書 5章） ----
+        /// <summary>他の端末が動かしているお宝の補間速度を使ってよい、最後のサンプルの古さ（秒）。位置の送信間隔 1/30 秒の数倍</summary>
+        const double RemoteVelocityMaxAge = 0.2;
+        /// <summary>受け取った位置から速度を出す時間幅（秒）。位置の送信間隔 1/30 秒の約 3 倍で、まとまって届く・間隔がぶれるのをならす</summary>
+        const double RemoteVelocityWindow = 0.1;
+        double _poseSendInterval = 1.0 / 30.0;
+        float _followSpeedMax = 10f;
+        readonly Subject<TreasureImpact> _impacts = new Subject<TreasureImpact>();
+        readonly ContactTracker _contactTracker = new ContactTracker();
+        VelocityHistory _velocity = new VelocityHistory(3);
+        float _redamageInterval = 0.5f;
+        Vector3 _prevPos;
+        bool _havePrev;
+        Bounds _modelBounds;
+
         public int HandleCount => _handles == null ? 0 : _handles.Length;
         public Collider[] Handles => _handles;
         public Transform LabelAnchor => _labelAnchor != null ? _labelAnchor : transform;
@@ -51,6 +79,18 @@ namespace STYLY.TIB_Template.TreasureHaul
         public Rigidbody Body => _rb;
         public bool IsFlying => _flight != null && _flight.IsActive();
         public bool Aimed { get; private set; }
+        /// <summary>ぶつけた（報告してよい新しい衝突で、衝撃の速さを出したもの）。数える衝撃を超えるかは ClientItemTable が決める</summary>
+        public Observable<TreasureImpact> Impacts => _impacts;
+        public ContactTracker ContactTracker => _contactTracker;
+        /// <summary>直近の速度の平均（自分の端末で物理を動かしているとき）</summary>
+        public Vector3 AverageVelocity => _velocity.Average;
+        /// <summary>
+        /// 減額の免除中か（設計書 5章。判定役が位置の送信に載せる）。#39 では手元へ飛んでいる途中だけ。
+        /// #41 が手の飛び・補正の無判定時間・そっと置く・見失い待ちを足すときは、ここだけ変える。
+        /// </summary>
+        public bool IsDamageExempt => IsFlying;
+        /// <summary>モデル（持ち手を除く Renderer）の Treasure ローカルの大きさ。ヒビのプレハブを合わせる用</summary>
+        public Bounds ModelBounds => _modelBounds;
 
         /// <summary>生成直後に呼ぶ。レイヤー（お宝本体 / 持ち手）と、持ち手の光り方を設定する。</summary>
         public void Initialize(ClientItem model, ThGripParams grip, Material handleNormal, Material handleAimed, int treasureLayer, int handleLayer)
@@ -74,7 +114,38 @@ namespace STYLY.TIB_Template.TreasureHaul
                 else { body.Add(c); if (treasureLayer >= 0) c.gameObject.layer = treasureLayer; }
             }
             _bodyColliders = body.ToArray();
+            _modelBounds = ComputeModelBounds();
             SetAimed(false);
+        }
+
+        /// <summary>衝撃の速さをならすフレーム数と再減額の間隔を設定する（P-4）</summary>
+        public void ConfigureDamage(int speedSmoothFrames, float redamageInterval, float poseSendInterval = 1f / 30f, float followSpeedMax = 10f)
+        {
+            _poseSendInterval = poseSendInterval;
+            _followSpeedMax = followSpeedMax;
+            _velocity.SetCapacity(speedSmoothFrames);
+            _redamageInterval = redamageInterval;
+        }
+
+        /// <summary>持ち手以外の MeshRenderer を Treasure のローカル座標でまとめた箱（Initialize で 1 回。後から付く演出は含めない）</summary>
+        Bounds ComputeModelBounds()
+        {
+            var skip = new System.Collections.Generic.HashSet<Renderer>(_handleRenderers ?? new Renderer[0]);
+            bool has = false;
+            var result = new Bounds(Vector3.zero, Vector3.one * 0.2f);
+            foreach (var r in GetComponentsInChildren<MeshRenderer>(true))
+            {
+                if (skip.Contains(r)) continue;
+                var lb = r.localBounds;
+                for (int i = 0; i < 8; i++)
+                {
+                    var corner = lb.center + Vector3.Scale(lb.extents, new Vector3((i & 1) == 0 ? -1 : 1, (i & 2) == 0 ? -1 : 1, (i & 4) == 0 ? -1 : 1));
+                    var local = transform.InverseTransformPoint(r.transform.TransformPoint(corner));
+                    if (!has) { result = new Bounds(local, Vector3.zero); has = true; }
+                    else result.Encapsulate(local);
+                }
+            }
+            return result;
         }
 
         public Collider[] BodyColliders => _bodyColliders;
@@ -101,6 +172,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         public void PlaceKinematic(Vector3 localPos, Quaternion localRot)
         {
             KillFlight();
+            _contactTracker.Clear();
             _followTarget = null;
             Mode = TreasureMode.Kinematic;
             SetKinematicMode();
@@ -111,6 +183,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         public void StopInPlace()
         {
             KillFlight();
+            _contactTracker.Clear();
             _followTarget = null;
             Mode = TreasureMode.Kinematic;
             if (_rb == null) return;
@@ -122,6 +195,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         public void FlyToHand(Transform target, float duration)
         {
             KillFlight();
+            _contactTracker.Clear();
             Mode = TreasureMode.Kinematic;
             SetKinematicMode();
             _followTarget = null;
@@ -147,6 +221,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         public void BeginFollow(Transform target)
         {
             KillFlight();
+            _contactTracker.Clear();
             _followTarget = target;
             Mode = TreasureMode.Follow;
             _rb.interpolation = RigidbodyInterpolation.Interpolate;
@@ -159,7 +234,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         /// <summary>手を開いた。重力ありで落下させる</summary>
         public void BeginFalling()
         {
-            KillFlight();
+            KillFlight();   // Follow→Falling は物理が動いたままで接触も続くので、接触の記録は消さない
             _followTarget = null;
             Mode = TreasureMode.Falling;
             _rb.interpolation = RigidbodyInterpolation.Interpolate;
@@ -172,6 +247,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         public void ReturnTo(Vector3 localPos, Quaternion localRot, float duration)
         {
             KillFlight();
+            _contactTracker.Clear();
             _followTarget = null;
             Mode = TreasureMode.Kinematic;
             SetKinematicMode();
@@ -199,7 +275,11 @@ namespace STYLY.TIB_Template.TreasureHaul
             _flight = null;
         }
 
-        void OnDestroy() => KillFlight();
+        void OnDestroy()
+        {
+            KillFlight();
+            _impacts.Dispose();
+        }
 
         /// <summary>落下が止まったか（〔止まったとみなす時間〕静止した）</summary>
         public bool PollSettled(double now, float stopSeconds)
@@ -212,6 +292,7 @@ namespace STYLY.TIB_Template.TreasureHaul
 
         void FixedUpdate()
         {
+            RecordVelocity();
             if (Mode != TreasureMode.Follow || _followTarget == null || _rb == null || _rb.isKinematic) return;
             float dt = Time.fixedDeltaTime;
             var targetRot = _followTarget.rotation * _followRelRot;
@@ -229,6 +310,71 @@ namespace STYLY.TIB_Template.TreasureHaul
             Vector3 w = float.IsFinite(axis.x + axis.y + axis.z) ? axis * (angleDeg * Mathf.Deg2Rad / dt) : Vector3.zero;
             if (w.sqrMagnitude > MaxAngularSpeed * MaxAngularSpeed) w = w.normalized * MaxAngularSpeed;
             _rb.angularVelocity = w;
+        }
+
+        /// <summary>物理を動かしている間、FixedUpdate ごとの実際の移動（位置の差 / dt）を覚える。止めたら忘れる</summary>
+        void RecordVelocity()
+        {
+            if (_rb == null || _rb.isKinematic || (Mode != TreasureMode.Follow && Mode != TreasureMode.Falling))
+            {
+                _havePrev = false;
+                _velocity.Reset();
+                return;
+            }
+            var pos = _rb.position;
+            if (_havePrev) _velocity.Add((pos - _prevPos) / Time.fixedDeltaTime);
+            _prevPos = pos;
+            _havePrev = true;
+        }
+
+        /// <summary>自分の端末で物理を動かしている（Held の追従中か Falling）。この間の衝突だけ報告する</summary>
+        bool IsPhysicsDriven => _rb != null && !_rb.isKinematic && (Mode == TreasureMode.Follow || Mode == TreasureMode.Falling);
+
+        /// <summary>このお宝の今の速度（ワールド）。自分が動かしていれば覚えた平均、他の端末が動かしていれば受け取った位置から、置かれていれば 0</summary>
+        public Vector3 CurrentVelocityWorld(double now)
+        {
+            if (Model != null && !Model.Mine && Model.Interp.TryGetVelocity(now, RemoteVelocityMaxAge, RemoteVelocityWindow, _poseSendInterval, _followSpeedMax, out var local)
+                && (Model.State == ItemState.Held || Model.State == ItemState.Falling))
+                return transform.parent != null ? transform.parent.TransformVector(local) : local;
+            if (IsPhysicsDriven) return _velocity.Average;
+            return Vector3.zero;
+        }
+
+        void OnCollisionEnter(Collision c)
+        {
+            if (!IsPhysicsDriven || Model == null) return;
+            var key = ContactKeyOf(c.collider, out var other);
+            double now = Time.realtimeSinceStartupAsDouble;
+            if (!_contactTracker.OnEnter(key, now, _redamageInterval)) return;
+            EmitImpact(other, c.contactCount > 0 ? c.GetContact(0).point : transform.position, now);
+        }
+
+        void OnCollisionExit(Collision c)
+        {
+            var key = ContactKeyOf(c.collider, out _);
+            _contactTracker.OnExit(key, Time.realtimeSinceStartupAsDouble);
+        }
+
+        static long ContactKeyOf(Collider other, out Treasure otherTreasure)
+        {
+            otherTreasure = other != null ? other.GetComponentInParent<Treasure>() : null;
+            if (otherTreasure != null && otherTreasure.Model != null) return ContactTracker.KeyOfItem(otherTreasure.Model.Index);
+            otherTreasure = null;
+            return ContactTracker.KeyOfCollider(other != null ? other.GetInstanceID() : 0);
+        }
+
+        void EmitImpact(Treasure other, Vector3 worldPoint, double now)
+        {
+            var mine = _velocity.Average;
+            float speed;
+            int otherIndex = -1;
+            if (other != null)
+            {
+                otherIndex = other.Model.Index;
+                speed = (mine - other.CurrentVelocityWorld(now)).magnitude;
+            }
+            else speed = mine.magnitude;
+            _impacts.OnNext(new TreasureImpact(otherIndex, worldPoint, speed));
         }
 
         /// <summary>

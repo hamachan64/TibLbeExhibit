@@ -169,6 +169,9 @@ namespace STYLY.TIB_Template.TreasureHaul
                         _items.Value.OnCollected(cm);
                     }
                     break;
+                case Rpc.ThDamaged:
+                    if (TryItemMsg(args, out ThDamagedMsg dgm)) _items.Value.OnDamaged(dgm);
+                    break;
                 case Rpc.ThItems:
                     if (TryItemMsg(args, out ThItemsMsg im)) _items.Value.OnItems(im, now);
                     break;

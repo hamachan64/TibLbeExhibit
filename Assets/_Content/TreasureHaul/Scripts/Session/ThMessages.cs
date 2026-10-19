@@ -151,6 +151,8 @@ namespace STYLY.TIB_Template.TreasureHaul
         public int item;
         public Vector3 pos;
         public Quaternion rot = Quaternion.identity;
+        /// <summary>減額の免除中か（#39。判定役が載せる。古い端末からは false で届く）。設計書 5章</summary>
+        public bool exempt;
     }
 
     /// <summary>判定役→全員 動かしているお宝の位置（VenueRoot ローカル）。端末ごとに 1 つにまとめる</summary>
@@ -158,6 +160,41 @@ namespace STYLY.TIB_Template.TreasureHaul
     public class ThPosesMsg
     {
         public ThPoseEntry[] poses = new ThPoseEntry[0];
+    }
+
+    /// <summary>判定役→ホスト ぶつけた（#39。送り直さない。設計書 5章・6.2）。位置は VenueRoot ローカル</summary>
+    [Serializable]
+    public class ThDamageMsg
+    {
+        /// <summary>自分のお宝</summary>
+        public int a;
+        /// <summary>相手のお宝（障害物なら -1）</summary>
+        public int b = -1;
+        /// <summary>当たった点</summary>
+        public Vector3 pos;
+        /// <summary>衝撃の速さ（ログ用）</summary>
+        public float speed;
+    }
+
+    /// <summary>ホスト→全員 減額した</summary>
+    [Serializable]
+    public class ThDamagedMsg
+    {
+        public int item;
+        public int gen;
+        /// <summary>減額後のぶつけた回数</summary>
+        public int hits;
+        /// <summary>減額の量</summary>
+        public int amount;
+        /// <summary>減額後の価値</summary>
+        public int value;
+        public Vector3 pos;
+        /// <summary>3 回目で砕けて消えた</summary>
+        public bool destroyed;
+        /// <summary>記録用: そのときの持ち主の ClientNo、いなければ判定役の ClientNo、どちらもいなければ -1</summary>
+        public int by = -1;
+        /// <summary>値段公開済みか（false なら「-NNG」を出さない）</summary>
+        public bool revealed;
     }
 
     [Serializable]

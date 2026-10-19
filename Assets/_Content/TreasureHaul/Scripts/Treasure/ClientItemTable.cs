@@ -23,6 +23,8 @@ namespace STYLY.TIB_Template.TreasureHaul
         public int OwnerClientNo = -1;
         public bool Revealed;
         public int Value;
+        /// <summary>ぶつけた回数（ホストが数えた値。ThDamaged・ThItems で反映）</summary>
+        public int Hits;
         public Vector3 RestPos;
         public Quaternion RestRot = Quaternion.identity;
 
@@ -68,13 +70,28 @@ namespace STYLY.TIB_Template.TreasureHaul
         Discovered,
         /// <summary>結果に入った。その場で止める</summary>
         Frozen,
+        /// <summary>減額された（ThDamaged）。「-NNG」・ヒビ・音を出す。Damage に中身</summary>
+        Damaged,
+        /// <summary>ぶつけた回数が増えていた（ThItems で追いついた）。ヒビの段階だけ合わせる</summary>
+        HitsSynced,
+        /// <summary>3 回目で砕けた（ThDamaged）。砕ける演出・音を出して消す</summary>
+        Destroyed,
+        /// <summary>消滅していた（ThItems で追いついた）。演出・音なしで消す</summary>
+        DestroyedQuiet,
     }
 
     public readonly struct ItemEvent
     {
         public readonly ClientItem Item;
         public readonly ItemEventKind Kind;
-        public ItemEvent(ClientItem item, ItemEventKind kind) { Item = item; Kind = kind; }
+        /// <summary>Damaged / Destroyed のときの ThDamaged の中身</summary>
+        public readonly ThDamagedMsg Damage;
+        /// <summary>初めてぶつけた人への一文を出すか（Damaged / Destroyed で、自分が動かしているお宝のとき）</summary>
+        public readonly bool ShowNote;
+        public ItemEvent(ClientItem item, ItemEventKind kind, ThDamagedMsg damage = null, bool showNote = false)
+        {
+            Item = item; Kind = kind; Damage = damage; ShowNote = showNote;
+        }
     }
 
     /// <summary>
@@ -91,11 +108,14 @@ namespace STYLY.TIB_Template.TreasureHaul
         readonly List<ClientItem> _items = new List<ClientItem>();
         readonly Subject<ItemEvent> _events = new Subject<ItemEvent>();
         int _nextReqId;
+        bool _noteShown;
 
         public IReadOnlyList<ClientItem> Items => _items;
         public Observable<ItemEvent> Events => _events;
         /// <summary>結果に入った。以後は何もつかめない</summary>
         public bool Frozen { get; private set; }
+        /// <summary>「ぶつけると値段が下がる」の一文を、この回で出したか（回ごとに 1 回）</summary>
+        public bool DamageNoteShown => _noteShown;
         /// <summary>自分が参加端末で、Playing 中か（つかめる条件。TreasureClient が毎フレーム更新）</summary>
         public bool ParticipantPlaying { get; set; }
 
@@ -231,7 +251,56 @@ namespace STYLY.TIB_Template.TreasureHaul
             }
         }
 
+        /// <summary>
+        /// 自分が動かしているお宝がぶつかった。〔数える衝撃〕以上なら ThDamage をホストへ送る（送り直さない。設計書 6.2）。
+        /// 自分が参加端末で Playing 中、結果に入る前（Frozen でない）、かつ自分が動かしている物理中のお宝（Mine で Held の追従中か Falling）だけ。
+        /// </summary>
+        /// <param name="otherIndex">相手のお宝の番号（障害物なら -1）</param>
+        /// <param name="localPos">当たった点（VenueRoot ローカル）</param>
+        public bool TryReportDamage(int index, int otherIndex, Vector3 localPos, float speed)
+        {
+            if (Frozen || !ParticipantPlaying) return false;
+            var it = Get(index);
+            if (it == null || it.Gone || !it.Mine || !it.Approved) return false;
+            if (it.State != ItemState.Held && it.State != ItemState.Falling) return false;
+            if (speed < _p.treasure.impactSpeed) return false;
+            Send(Rpc.ThDamage, new ThDamageMsg { a = index, b = otherIndex, pos = localPos, speed = speed });
+            return true;
+        }
+
         // ---- ホストからのメッセージ ----
+
+        /// <summary>減額（ThDamaged）。ぶつけた回数が今より大きいときだけ反映する（同じ・古い物は捨てる）</summary>
+        public void OnDamaged(ThDamagedMsg m)
+        {
+            var it = m == null ? null : Get(m.item);
+            if (it == null || it.Gone || Frozen) return;
+            if (m.hits <= it.Hits) return;
+            it.Hits = m.hits;
+            it.Value = m.value;
+            it.Gen = Math.Max(it.Gen, m.gen);
+            // 初めての一文: 自分が動かしているお宝で、この回で初めてのとき（値段が「？」でも出す）
+            bool note = it.Mine && !_noteShown;
+            if (note) _noteShown = true;
+            if (m.destroyed)
+            {
+                ClearOwnership(it);
+                it.State = ItemState.Destroyed;
+                it.Gone = true;
+                Raise(new ItemEvent(it, ItemEventKind.Destroyed, m, note));
+                return;
+            }
+            Raise(new ItemEvent(it, ItemEventKind.Damaged, m, note));
+        }
+
+        void Raise(ItemEvent e) => _events.OnNext(e);
+
+        /// <summary>消滅: 自分の申請・送り直しを消す</summary>
+        static void ClearOwnership(ClientItem it)
+        {
+            it.Mine = false; it.ReqPending = false; it.Approved = false; it.PendingRest = false; it.PendingCollect = false;
+            it.OwnerClientNo = -1;
+        }
 
         public void OnGrabbed(ThGrabbedMsg m, double now)
         {
@@ -346,6 +415,15 @@ namespace STYLY.TIB_Template.TreasureHaul
             Raise(it, ItemEventKind.Collected);
         }
 
+        void MarkDestroyedQuiet(ClientItem it)
+        {
+            if (it.Gone) return;
+            ClearOwnership(it);
+            it.State = ItemState.Destroyed;
+            it.Gone = true;
+            Raise(it, ItemEventKind.DestroyedQuiet);
+        }
+
         /// <summary>他の端末が動かしているお宝の位置（受信時刻で並べる）</summary>
         public void OnPoses(ThPosesMsg m, double now)
         {
@@ -366,7 +444,19 @@ namespace STYLY.TIB_Template.TreasureHaul
             {
                 var it = e == null ? null : Get(e.item);
                 if (it == null) continue;
-                if (e.gone) { MarkCollected(it); continue; }
+                if (e.hits > it.Hits && !it.Gone)
+                {
+                    // ThDamaged を取りこぼした。ヒビの段階だけ合わせる（「-NNG」と音は出さない）
+                    it.Hits = e.hits;
+                    it.Value = e.value;
+                    Raise(it, ItemEventKind.HitsSynced);
+                }
+                if (e.gone)
+                {
+                    if ((ItemState)e.state == ItemState.Destroyed) MarkDestroyedQuiet(it);
+                    else MarkCollected(it);
+                    continue;
+                }
                 if (it.Gone) continue;
                 if (e.gen < it.Gen) continue;
                 Reconcile(it, e);
