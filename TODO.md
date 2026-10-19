@@ -9,8 +9,8 @@
 
 | | |
 | :--- | :--- |
-| **フェーズ** | 3a 減額と表示（[#39](https://github.com/hamachan64/TibLbeExhibit/issues/39)）を作業中。2 配置・S を持つ・回収（#38、PR #54）、1 基盤（#37、PR #52）、0a 試作（PR #50）はマージ済み。**実機は10月中の見込み**なので、それまではエディタ（XRI のシミュレーター・ParrelSync）で検証しながら進める |
-| **次にやること** | #39 の PR → [#40](https://github.com/hamachan64/TibLbeExhibit/issues/40)。並行して [#42](https://github.com/hamachan64/TibLbeExhibit/issues/42)・[#44](https://github.com/hamachan64/TibLbeExhibit/issues/44) ／ 素材 #46・#47・#48 |
+| **フェーズ** | 3a 減額と表示（[#39](https://github.com/hamachan64/TibLbeExhibit/issues/39)）の PR [#55](https://github.com/hamachan64/TibLbeExhibit/pull/55) をレビュー中。2 配置・S を持つ・回収（#38、PR #54）、1 基盤（#37、PR #52）、0a 試作（PR #50）はマージ済み。**実機は10月中の見込み**なので、それまではエディタ（XRI のシミュレーター・ParrelSync）で検証しながら進める |
+| **次にやること** | PR #55 をマージ → [#40](https://github.com/hamachan64/TibLbeExhibit/issues/40)。並行して [#42](https://github.com/hamachan64/TibLbeExhibit/issues/42)・[#44](https://github.com/hamachan64/TibLbeExhibit/issues/44) ／ 素材 #46・#47・#48 |
 | **判断待ち** | 実機の入手（#49・#45 に必要）。U-1 は通し #45 までに必要。ほかは下の「判断待ち」 |
 | **締切** | 内容変更 **10/31**（あと12日）／最終データ 11/16／現地設営 11/17 |
 
@@ -24,7 +24,7 @@
 | 0b | 試作（実機）: 握る判定・ビーム・負荷、しきい値の調整 | [#49](https://github.com/hamachan64/TibLbeExhibit/issues/49) | ⛔ | 実機の入手（10月中の見込み） | 実機が届いてから1〜2日 |
 | 1 | 基盤（パラメータ・Rpc・状態遷移・運営UI最小） | [#37](https://github.com/hamachan64/TibLbeExhibit/issues/37)（PR [#52](https://github.com/hamachan64/TibLbeExhibit/pull/52)） | ✅ | 0a | 10/20〜21 |
 | 2 | 配置、S を持つ・置く・回収、表示板 | [#38](https://github.com/hamachan64/TibLbeExhibit/issues/38)（PR [#54](https://github.com/hamachan64/TibLbeExhibit/pull/54)） | ✅ | 1 | 10/22〜23 |
-| 3a | 減額と表示（3回で壊れる） | [#39](https://github.com/hamachan64/TibLbeExhibit/issues/39) | 🔨 | 2 | 10/24 |
+| 3a | 減額と表示（3回で壊れる） | [#39](https://github.com/hamachan64/TibLbeExhibit/issues/39)（PR [#55](https://github.com/hamachan64/TibLbeExhibit/pull/55)） | 👀 | 2 | 10/24 |
 | 3b | M（両手で持つ） | [#40](https://github.com/hamachan64/TibLbeExhibit/issues/40) | ⬜ | 3a | 10/25 |
 | 3c | 見失い・手の飛び・そっと置く・持ち主の切断 | [#41](https://github.com/hamachan64/TibLbeExhibit/issues/41) | ⬜ | 3b | 10/26 |
 | 4a | オープニング・保留・本編開始・結果 | [#42](https://github.com/hamachan64/TibLbeExhibit/issues/42) | ⬜ | 1（2・3 と並行可） | 10/24〜26 |
