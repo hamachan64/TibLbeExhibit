@@ -165,6 +165,9 @@ namespace STYLY.TIB_Template.TreasureHaul
                 case Rpc.ThFreed:
                     if (TryItemMsg(args, out ThFreedMsg fm)) _items.Value.OnFreed(fm);
                     break;
+                case Rpc.ThForceRest:
+                    if (TryItemMsg(args, out ThForceRestMsg frm)) _items.Value.OnForceRest(frm);
+                    break;
                 case Rpc.ThCollected:
                     if (TryItemMsg(args, out ThCollectedMsg cm))
                     {

@@ -91,6 +91,18 @@ namespace STYLY.TIB_Template
             return GripEvent.Released;
         }
 
+        /// <summary>
+        /// 握っている状態へ戻す（イベントは出さない）。見失い待ちから手が戻ったとき、握りの強さが離す側のしきい値以上なら持ち続ける（設計書 4.3）。
+        /// つかむ側のしきい値の確定を待たないので、握りの判定を握っている状態へ戻しておかないと、後で手を開いても離したことにならない。
+        /// 以後は今までどおり、開けば（〔離す判定〕の後に）Released(Opened)、見失えば Released(Lost)。
+        /// </summary>
+        public void Resume()
+        {
+            IsGripping = true;
+            _belowSince = double.NaN;
+            _lostSince = double.NaN;
+        }
+
         public void Reset()
         {
             IsGripping = false;

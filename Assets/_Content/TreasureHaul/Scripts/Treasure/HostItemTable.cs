@@ -32,6 +32,12 @@ namespace STYLY.TIB_Template.TreasureHaul
         public bool Practice;
         /// <summary>判定役から報告された減額の免除（ThPoses の exempt。設計書 5章）。持ち主が替わる・つかめるに戻る・回収・消滅で false に戻す</summary>
         public bool ExemptReported;
+        /// <summary>判定役から最後に受けた位置・向き（ThPoses。VenueRoot ローカル）。持ち主の切断で降ろす先を決める元（#41）。HasLastPos=false なら置き位置を使う</summary>
+        public bool HasLastPos;
+        public Vector3 LastPos;
+        public Quaternion LastRot = Quaternion.identity;
+        /// <summary>Placing になった時刻（〔置く時間〕の後に「つかめる」に戻す・回収する）</summary>
+        public double PlaceSince;
 
         /// <summary>ホストが見る免除中: 判定役の報告、または状態が Flying / Placing / Hovering（4.2）</summary>
         public bool IsDamageExempt =>
@@ -52,6 +58,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         // 取りやめ済みの申請（端末, お宝, 申請ID）。後から届いても認めない
         readonly HashSet<string> _cancelled = new HashSet<string>();
         readonly ThTreasureParams _tp;
+        readonly float _placeSeconds;
         // 通信上の重複を捨てるための、組み合わせごとの最後に受けた時刻（捨てた報告も含む）
         readonly Dictionary<long, double> _lastDamageAt = new Dictionary<long, double>();
 
@@ -62,12 +69,18 @@ namespace STYLY.TIB_Template.TreasureHaul
         public int DamageTotal { get; private set; }
         /// <summary>減額の受け付けの記録の出口（実機調整 #45・#49 用。1 件ごと。null なら出さない）</summary>
         public System.Action<string> Log { get; set; }
+        /// <summary>
+        /// 降ろす先を決める関数（VenueRoot ローカルの位置 → 降ろす先。本番は ThVenue の Raycast。外から渡して純粋クラスのまま保つ）。
+        /// 既定は y を 0 にするだけ（床）。
+        /// </summary>
+        public System.Func<Vector3, Vector3> PlaceSolver { get; set; } = p => new Vector3(p.x, 0f, p.z);
         void LogLine(string s) => Log?.Invoke("[HostDamage] " + s);
 
         /// <param name="clientNoOf">DeviceId から今の ClientNo を引く（再接続で ClientNo が付け替わっても ThGrabbed・ThItems に今の番号を載せるため）。引けなければ -1 を返す</param>
-        public HostItemTable(IReadOnlyList<SpawnedTreasure> spawned, Bounds collectBounds, ThEmit emit, System.Func<string, int> clientNoOf = null, ThTreasureParams treasureParams = null)
+        public HostItemTable(IReadOnlyList<SpawnedTreasure> spawned, Bounds collectBounds, ThEmit emit, System.Func<string, int> clientNoOf = null, ThTreasureParams treasureParams = null, float placeSeconds = 0.3f)
         {
             _tp = treasureParams ?? new ThTreasureParams();
+            _placeSeconds = placeSeconds;
             _clientNoOf = clientNoOf;
             _collectBounds = collectBounds;
             _emit = emit;
@@ -132,6 +145,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             it.ControllerClientNo = clientNo;
             if (it.Kind == TreasureKind.S) it.Revealed = true;   // 以後ずっと公開
             it.ExemptReported = false;
+            it.HasLastPos = false;   // 前の持ち主の位置を使わない
             EmitGrabbed(it);
         }
 
@@ -167,13 +181,60 @@ namespace STYLY.TIB_Template.TreasureHaul
 
         /// <summary>
         /// その端末が片手予約中（Locked）のお宝をすべて「つかめる」に戻す（切断・見学への切り替え。設計書 3.3）。
-        /// 持っている（Held 等の）お宝の扱いは #41。
+        /// 持っている（Held 等の）お宝は <see cref="ForceRestItemsOf"/>。
         /// </summary>
         public void ReleaseReservationsOf(string deviceId)
         {
             if (deviceId == null) return;
             foreach (var it in _items)
                 if (!it.Gone && it.State == ItemState.Locked && it.OwnerDevice == deviceId) FreeToRest(it);
+        }
+
+        /// <summary>
+        /// その端末が持っている・判定役のお宝を、最後に受けた位置から降ろす先へそっと置かせる（切断・見学への切り替え。設計書 5章・3.3、F-GRAB-8）。
+        /// 対象: 持ち主がその端末で Held（S、両手で持った後の M）か Flying / 持ち主なしで判定役がその端末の Falling（落下中に切れると誰も ThRest を送らないため）。
+        /// 予約中（Locked）は <see cref="ReleaseReservationsOf"/> が受け持つ。
+        /// 世代を +1 して Placing・持ち主なし・判定役なしにし、ThForceRest（降ろす先）を全員へ送る。〔置く時間〕の後は <see cref="Tick"/> が「つかめる」に戻す／回収する。
+        /// </summary>
+        public void ForceRestItemsOf(string deviceId, double now)
+        {
+            if (deviceId == null) return;
+            foreach (var it in _items)
+            {
+                if (it.Gone) continue;
+                bool held = it.OwnerDevice == deviceId && (it.State == ItemState.Held || it.State == ItemState.Flying);
+                bool falling = it.OwnerDevice == null && it.ControllerDevice == deviceId && it.State == ItemState.Falling;
+                if (!held && !falling) continue;
+                var from = it.HasLastPos ? it.LastPos : it.RestPos;
+                var rot = Quaternion.Euler(0f, (it.HasLastPos ? it.LastRot : it.RestRot).eulerAngles.y, 0f);   // 今の向きの Y 回転だけを残して立てる
+                var dest = PlaceSolver != null ? PlaceSolver(from) : new Vector3(from.x, 0f, from.z);
+                it.Gen++;
+                it.State = ItemState.Placing;
+                it.OwnerDevice = null;
+                it.OwnerClientNo = -1;
+                it.ControllerDevice = null;   // 判定役は運営PC（なし）。切れた端末の遅れた ThRest・ThCollect・ThPoses は捨てられる
+                it.ControllerClientNo = -1;
+                it.ExemptReported = false;    // Placing は状態で免除になる
+                it.RestPos = dest;
+                it.RestRot = rot;
+                it.PlaceSince = now;
+                LogLine($"切断などでそっと置く item={it.Index} device={deviceId} 降ろす先={dest}");
+                _emit(Rpc.ThForceRest, new ThForceRestMsg { item = it.Index, gen = it.Gen, pos = dest, rot = rot });
+            }
+        }
+
+        /// <summary>
+        /// 毎フレーム。Placing（ForceRestItemsOf）になってから〔置く時間〕たったお宝を、Playing 中で降ろす先が荷台の範囲内なら回収、
+        /// それ以外は「つかめる」に戻す（世代 +1、ThFreed）。
+        /// </summary>
+        public void Tick(double now, bool playing)
+        {
+            foreach (var it in _items)
+            {
+                if (it.Gone || it.State != ItemState.Placing || now - it.PlaceSince < _placeSeconds) continue;
+                if (playing && !it.Practice && InCollectZone(it.RestPos)) Collect(it);   // 練習用は回収しない（合計に入れない）
+                else FreeToRest(it);
+            }
         }
 
         int CurrentNo(string device, int stored)
@@ -231,6 +292,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             it.OwnerDevice = null;
             it.OwnerClientNo = -1;
             it.ExemptReported = false;
+            it.HasLastPos = false;
             it.Gen++;
             _emit(Rpc.ThFreed, new ThFreedMsg { item = it.Index, gen = it.Gen, pos = it.RestPos, rot = it.RestRot });
         }
@@ -292,6 +354,9 @@ namespace STYLY.TIB_Template.TreasureHaul
                 bool sender = it.OwnerDevice != null ? it.OwnerDevice == deviceId : it.ControllerDevice == deviceId;
                 if (!sender) continue;
                 it.ExemptReported = e.exempt;
+                it.HasLastPos = true;
+                it.LastPos = e.pos;
+                it.LastRot = e.rot;
             }
         }
 
@@ -331,7 +396,10 @@ namespace STYLY.TIB_Template.TreasureHaul
                 return;
             }
 
-            ApplyDamage(m.a, a, m.pos, m.speed);
+            // a の免除は送り手が知らせる（位置の送信より先に衝突の報告が届いても、減額しないため）。b の免除はホストが判断する
+            // 送り手が a の判定役のときだけ（判定役でない送り手の exemptA で、他人のお宝の減額を止めさせない）
+            if (m.exemptA && a != null && a.ControllerDevice == deviceId) LogLine($"適用しなかった item={m.a} 送り手の報告で免除中");
+            else ApplyDamage(m.a, a, m.pos, m.speed);
             if (m.b >= 0) ApplyDamage(m.b, b, m.pos, m.speed);
         }
 

@@ -71,6 +71,25 @@ namespace STYLY.TIB_Template.TreasureHaul
         /// <summary>外れた手（ThHand）と、その理由が見失いか</summary>
         public int GraceHand = -1;
         public bool GraceLost;
+
+        // ---- 見失い・手の飛び・そっと置く（#41。設計書 4.2・4.3） ----
+
+        /// <summary>見失い待ち（Hovering）が始まった時刻。Hovering は持ち主の端末だけの状態（ホストの表は Held のまま）</summary>
+        public double HoverSince;
+        /// <summary>見失い待ちから戻った手が、離す側のしきい値未満のまま見え続けている開始時刻（NaN = 続いていない）。S は A、M は予約した手が A・2 本目が B</summary>
+        public double HoverOpenSinceA = double.NaN, HoverOpenSinceB = double.NaN;
+        /// <summary>そっと置く（Placing）が始まった時刻</summary>
+        public double PlaceSince;
+        /// <summary>降ろす先が決まったか（Raycast は TreasureClient が行い、SetPlaceTarget で渡す）</summary>
+        public bool PlaceTargetSet;
+        public Vector3 PlacePos;
+        public Quaternion PlaceRot = Quaternion.identity;
+        /// <summary>〔補正の無判定時間〕の終わり（この時刻より前は減額の免除中で、「離れたら置く」も判定しない）</summary>
+        public double CorrectionUntil = double.NegativeInfinity;
+
+        /// <summary>減額の免除中か（設計書 5章）: 手元へ飛ぶ途中・Hovering・Placing・〔補正の無判定時間〕の間。flying = 飛ぶ途中の動き</summary>
+        public bool IsExemptAt(double now, bool flying = false) =>
+            flying || State == ItemState.Flying || State == ItemState.Hovering || State == ItemState.Placing || now < CorrectionUntil;
     }
 
     public enum ItemEventKind
@@ -116,6 +135,14 @@ namespace STYLY.TIB_Template.TreasureHaul
         GraceEnded,
         /// <summary>他の人の M の予約に切り替わった（または置き位置が変わった）。RestPos（置いた位置）に置き直す</summary>
         RemoteLocked,
+        /// <summary>持っている手を見失った（見失い待ち）。その場で止める。手は外さない</summary>
+        Hovered,
+        /// <summary>見失い待ちから手が戻って持ち続ける。手への追従を再開する（〔補正の無判定時間〕が始まっている）</summary>
+        HoverResumed,
+        /// <summary>自分のお宝をそっと置く（Placing）。降ろす先を決めて SetPlaceTarget で渡し、手から外して降ろす</summary>
+        PlaceStarted,
+        /// <summary>ホストの ThForceRest（持ち主の切断など）。降ろす先は RestPos・RestRot。自分が持っていたなら手から外す</summary>
+        ForceRested,
     }
 
     public readonly struct ItemEvent
@@ -206,14 +233,19 @@ namespace STYLY.TIB_Template.TreasureHaul
             return true;
         }
 
-        /// <summary>手を開いた（解除の理由が見失いのときも、#38 では同じ。#41 で Hovering に置き換える）</summary>
-        public void OnHandReleased(int index, double now)
+        /// <summary>
+        /// S を握っていた手が外れた。lost = 解除の理由が見失い。
+        /// 承認前 = 取りやめ / 承認済みで開いた = 落とす / 承認済みで見失った = 落とさず Hovering（その場で待つ。設計書 4.3）。
+        /// </summary>
+        public void OnHandReleased(int index, double now, bool lost = false)
         {
             var it = Get(index);
             if (it == null || !it.Mine || it.Gone || Frozen) return;
-            if (it.ReqPending) { Revert(it, true); return; }   // 承認前に手を開いた（手順 4）
+            if (it.ReqPending) { Revert(it, true); return; }   // 承認前に手を開いた・見失った（手順 4）
             if (it.Approved && (it.State == ItemState.Held || it.State == ItemState.Flying))
             {
+                if (lost) { BeginHover(it, now); return; }
+                ResetTracking(it);
                 it.State = ItemState.Falling;
                 Send(Rpc.ThRelease, new ThReleaseMsg { item = it.Index, reqId = it.MyReqId, gen = it.Gen, reason = (int)ReleaseReason.Dropped });
                 Raise(it, ItemEventKind.Dropped);
@@ -256,6 +288,16 @@ namespace STYLY.TIB_Template.TreasureHaul
             {
                 if (!it.Mine || it.Gone) continue;
                 if (it.ReqPending && now - it.ReqSentAt >= _p.grip.approvalWaitSeconds) { Revert(it, true); continue; }
+                if (it.State == ItemState.Hovering)
+                {
+                    if (now - it.HoverSince >= _p.grip.lostWaitSeconds) BeginPlace(it, now);   // 戻らなかった
+                    continue;
+                }
+                if (it.State == ItemState.Placing)
+                {
+                    if (now - it.PlaceSince >= _p.grip.placeSeconds) SettlePlace(it, now);
+                    continue;
+                }
                 if (it.Kind == TreasureKind.M && TickTwoHand(it, now)) continue;
                 if ((it.PendingRest || it.PendingCollect) && now - it.LastSendAt >= _p.progress.resendInterval)
                 {
@@ -288,6 +330,12 @@ namespace STYLY.TIB_Template.TreasureHaul
             foreach (var it in _items)
             {
                 if (it.Gone) continue;
+                if (it.State == ItemState.Hovering)
+                {
+                    // 見失い待ちは終わる（手・猶予・両手の状態も消す）。その場で止める見た目は Frozen のイベントで
+                    ClearTwoHand(it);
+                    it.Mine = false; it.Approved = false; it.State = ItemState.Resting;
+                }
                 Raise(it, ItemEventKind.Frozen);
             }
         }
@@ -297,15 +345,19 @@ namespace STYLY.TIB_Template.TreasureHaul
         /// 自分が参加端末で Playing 中、結果に入る前（Frozen でない）、かつ自分が動かしている物理中のお宝（Mine で Held の追従中か Falling）だけ。
         /// </summary>
         /// <param name="otherIndex">相手のお宝の番号（障害物なら -1）</param>
+        /// <param name="now">時刻（〔補正の無判定時間〕の判定に使う。省略すると免除中にならない）</param>
         /// <param name="localPos">当たった点（VenueRoot ローカル）</param>
-        public bool TryReportDamage(int index, int otherIndex, Vector3 localPos, float speed)
+        public bool TryReportDamage(int index, int otherIndex, Vector3 localPos, float speed, double now = double.MaxValue)
         {
             if (Frozen || !ParticipantPlaying) return false;
             var it = Get(index);
             if (it == null || it.Gone || !it.Mine || !it.Approved) return false;
             if (it.State != ItemState.Held && it.State != ItemState.Falling) return false;
             if (speed < _p.treasure.impactSpeed) return false;
-            Send(Rpc.ThDamage, new ThDamageMsg { a = index, b = otherIndex, pos = localPos, speed = speed });
+            // 免除中（〔補正の無判定時間〕など）: 障害物なら送らない。お宝どうしなら exemptA で知らせる（相手の免除はホストが判断する）
+            bool exempt = it.IsExemptAt(now);
+            if (exempt && otherIndex < 0) return false;
+            Send(Rpc.ThDamage, new ThDamageMsg { a = index, b = otherIndex, pos = localPos, speed = speed, exemptA = exempt });
             return true;
         }
 
@@ -560,6 +612,12 @@ namespace STYLY.TIB_Template.TreasureHaul
             }
 
             // 持ち主なし
+            if (state == ItemState.Placing)
+            {
+                // ホストが持ち主の切断などでそっと置かせた。ThForceRest を取りこぼした（世代が新しいのに知らない）なら、受けたのと同じにする
+                if (e.gen > oldGen) ApplyForceRest(it, e.gen, e.pos, e.rot);
+                return;
+            }
             if (state == ItemState.Resting)
             {
                 if (it.Mine && it.ReqPending) return;   // 申請の途中（ホストはまだ受けていない）

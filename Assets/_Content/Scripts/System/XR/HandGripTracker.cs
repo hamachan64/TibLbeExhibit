@@ -55,6 +55,13 @@ namespace STYLY.TIB_Template
             _machine.LostGraceSeconds = lostGraceSeconds;
         }
 
+        /// <summary>見失い待ちから手が戻って握り続ける: 握りの判定を握っている状態へ戻す（<see cref="Released"/> は出さない）</summary>
+        public void ResumeGripping()
+        {
+            _machine.Resume();
+            if (!_isGripping.Value) _isGripping.Value = true;
+        }
+
         void Update()
         {
             AcquireSubsystem();

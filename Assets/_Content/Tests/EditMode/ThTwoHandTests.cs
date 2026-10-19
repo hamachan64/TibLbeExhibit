@@ -582,14 +582,14 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
             Assert.AreEqual(1, c.Releases(ReleaseReason.Dropped).Count);
         }
 
-        [Test] public void 端末_片手を見失って猶予が切れても_1_のうちは落とす_TODO41()
+        [Test] public void 端末_片手を見失って猶予が切れたらそっと置く()
         {
             var c = new ClientRig(M);
             c.Reserve(); c.Lift(0.2);
             c.Table.OnMHandReleased(0, ThHand.Right, true, 5.0);
             c.Table.Tick(5.6);
-            Assert.AreEqual(ItemState.Falling, c.It().State, "#40 では見失いも落とす（#41 でそっと置く）");
-            Assert.AreEqual(1, c.Releases(ReleaseReason.Dropped).Count);
+            Assert.AreEqual(ItemState.Placing, c.It().State, "見失いで猶予が切れたら、落とさずそっと置く（#41）");
+            Assert.AreEqual(0, c.Releases(ReleaseReason.Dropped).Count);
         }
 
         [Test] public void 端末_落とした後は回収の範囲でThCollectを送れる()
@@ -997,7 +997,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
             Assert.AreEqual(3, _host.Items.Get(idx).OwnerClientNo);
         }
 
-        [Test] public void 結合_Aが切断すると予約が外れ持っているお宝はそのまま()
+        [Test] public void 結合_Aが切断すると予約が外れ持っているお宝はそっと置かれる()
         {
             Build();
             var a = AddClient(2, "devA");
@@ -1015,7 +1015,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
             _host.OnClientDisconnected(2, _now);
             _net.Pump();
             Assert.AreEqual(ItemState.Resting, _host.Items.Get(ms[0]).State);
-            Assert.AreEqual(ItemState.Held, _host.Items.Get(ms[1]).State, "持っているお宝の扱いは #41");
+            Assert.AreEqual(ItemState.Placing, _host.Items.Get(ms[1]).State, "持っているお宝はそっと置かれる（#41）");
             Assert.IsTrue(bi.IsGrabbable(bi.Get(ms[0])));
         }
 

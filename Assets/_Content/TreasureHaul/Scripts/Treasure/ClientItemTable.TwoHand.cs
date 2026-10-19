@@ -170,7 +170,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             {
                 if (h == it.ReserveHand)
                 {
-                    // TODO(#41): 見失い（lost）が原因のときの扱い（両手とも見えなくなった等）
+                    // 承認前は取りやめ、予約中は〔見失い待ち〕（下）。お宝は動いていないので、元に戻すだけでよい（Hovering にはしない）
                     if (it.ReqPending) { Revert(it, true); return; }   // 承認前に予約の手を開いた（S の手順 4 と同じ）
                     if (!it.Reserved) return;
                     if (lost) { if (!it.ReserveLostWait) { it.ReserveLostWait = true; it.ReserveLostSince = now; } return; }
@@ -184,7 +184,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             if (it.LiftPending)
             {
                 // ThLifted の前にどちらかの手を開いた: 元の位置へ戻して Resting、Cancel（予約も消える）
-                // TODO(#41): 見失い（lost）が原因のときの扱い（両手とも見えなくなった等）
+                // 持ち上げの申請中は飛ぶ途中の短い間なので、見失いでも開いても元の位置へ戻すだけでよい（Hovering にはしない）
                 if (h == it.ReserveHand || h == it.SecondHand) Revert(it, true);
                 return;
             }
@@ -202,8 +202,9 @@ namespace STYLY.TIB_Template.TreasureHaul
                 }
                 else if (h != it.GraceHand)
                 {
-                    // TODO(#41): 見失い（lost）が原因のときの扱い（両手とも見えなくなった等）
-                    Drop(it);   // 猶予の間に、残った手も外れた: すぐ落とす
+                    // 猶予の間に、残った手も外れた: 見失いなら両手とも見えない状態なので〔見失い待ち〕、開いたならすぐ落とす
+                    if (lost) BeginHover(it, now);
+                    else Drop(it);
                 }
             }
         }
@@ -272,8 +273,9 @@ namespace STYLY.TIB_Template.TreasureHaul
             }
             if (it.GraceActive && it.State == ItemState.Held && now - it.GraceSince >= _p.grip.mGraceSeconds)
             {
-                // TODO(#41): 見失いが原因のときは、落とさずその場でそっと置く（Placing）。#40 では見失いも落とす
-                Drop(it);
+                // 外れた理由が見失いなら、落とさずその場でそっと置く（Placing）。開いたなら落とす
+                if (it.GraceLost) BeginPlace(it, now);
+                else Drop(it);
                 return true;
             }
             return false;
@@ -309,6 +311,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             it.GraceActive = false;
             it.GraceHand = -1;
             it.GraceLost = false;
+            ResetTracking(it);
         }
     }
 }

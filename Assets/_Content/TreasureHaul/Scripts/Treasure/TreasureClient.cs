@@ -95,6 +95,8 @@ namespace STYLY.TIB_Template.TreasureHaul
         public ClientItemTable Table => _table;
         public int ViewCount => _views.Count;
         public Treasure GetTreasure(int index) => _views.TryGetValue(index, out var v) ? v.Treasure : null;
+        /// <summary>〔飛びの判定〕（m）。手の目標が 1 フレームでこれ以上動いたら飛び</summary>
+        public float JumpDistance => _core != null ? _core.Params.treasure.jumpDistance : new ThTreasureParams().jumpDistance;
         public HandGrabber Left => _left;
         public HandGrabber Right => _right;
 
@@ -140,7 +142,10 @@ namespace STYLY.TIB_Template.TreasureHaul
                 if (m.Mine)
                 {
                     if (m.State == ItemState.Falling) UpdateFalling(v, now, grip, venueRoot);
-                    if (m.Approved && !m.PendingRest && (m.State == ItemState.Held || m.State == ItemState.Flying || m.State == ItemState.Falling))
+                    else if (m.State == ItemState.Hovering) ObserveHover(v, now);
+                    else if (m.State == ItemState.Held && m.Approved) CheckDetach(v, now);
+                    if (m.Approved && !m.PendingRest
+                        && (m.State == ItemState.Held || m.State == ItemState.Flying || m.State == ItemState.Falling || m.State == ItemState.Hovering || m.State == ItemState.Placing))
                     {
                         if (!slotChecked) { slotChecked = true; slotDue = _core.TryTakePoseSlot(now); }
                         if (slotDue)
@@ -175,6 +180,42 @@ namespace STYLY.TIB_Template.TreasureHaul
                     && ((_left != null && _left.Aimed == t) || (_right != null && _right.Aimed == t) || (t.Model != null && ClientItemTable.IsOwnReservation(t.Model)));
                 if (t.Aimed != want) t.SetAimed(want);
             }
+        }
+
+        /// <summary>見失い待ち: 持っていた手（M は両手）の様子を ClientItemTable に渡す。戻ったら握りの強さで、持ち続ける／そっと置くが決まる</summary>
+        void ObserveHover(View v, double now)
+        {
+            var m = v.Treasure.Model;
+            if (m.Kind == TreasureKind.M)
+            {
+                if (!_twoHands.TryGetValue(m.Index, out var th) || th.Reserve == null || th.Second == null || th.Reserve.Tracker == null || th.Second.Tracker == null) return;
+                _table.OnMHoverObserved(m.Index,
+                    th.Reserve.Tracker.IsTracked.CurrentValue, th.Reserve.Tracker.Strength.CurrentValue,
+                    th.Second.Tracker.IsTracked.CurrentValue, th.Second.Tracker.Strength.CurrentValue, now);
+                return;
+            }
+            if (!_holders.TryGetValue(m.Index, out var g) || g == null || g.Tracker == null) return;   // 手が無ければ〔見失い待ち〕で置く
+            _table.OnHoverObserved(m.Index, g.Tracker.IsTracked.CurrentValue, g.Tracker.Strength.CurrentValue, now);
+        }
+
+        /// <summary>持っているお宝の手に合わせる点と、手の目標との距離を ClientItemTable に渡す（〔離れたら置く距離〕以上ならそっと置く）</summary>
+        void CheckDetach(View v, double now)
+        {
+            var t = v.Treasure;
+            var m = t.Model;
+            Transform target = null;
+            if (m.Kind == TreasureKind.M) { if (_twoHands.TryGetValue(m.Index, out var th)) target = th.Target; }
+            else if (_holders.TryGetValue(m.Index, out var g) && g != null) target = g.Anchor;
+            if (target == null) return;
+            _table.CheckDetach(m.Index, Vector3.Distance(target.position, t.HoldPointWorld), t.IsFlying, now);
+        }
+
+        /// <summary>HandGrabber から: 手の目標が飛んだ。その手で持っているお宝の〔補正の無判定時間〕を始める</summary>
+        public void OnHandJumped(HandGrabber grabber)
+        {
+            var t = grabber.Held;
+            if (t == null || _table == null || t.Model == null) return;
+            _table.NoteJump(t.Model.Index, Now);
         }
 
         void UpdateFalling(View v, double now, ThGripParams grip, Transform venueRoot)
@@ -345,17 +386,20 @@ namespace STYLY.TIB_Template.TreasureHaul
         {
             var t = grabber.Held;
             if (t == null || _table == null) { grabber.Held = null; return; }
-            grabber.Held = null;
             if (t.Model.Kind == TreasureKind.M)
             {
-                // 予約・猶予・取りやめの判断は ClientItemTable。結果はイベントで受ける
+                // 予約・猶予・見失い待ち・取りやめの判断は ClientItemTable。結果はイベントで受ける
                 _table.OnMHandReleased(t.Model.Index, grabber.Hand, lost, Now);
+                // 見失い待ち（Hovering）の間は、戻ってまた見失った手も含めて両手の Held を外さない
+                if (t.Model.State != ItemState.Hovering) grabber.Held = null;
                 // 承認前に 2 本目が開いて待ちが取り消されたら、古い手を覚えたままにしない
                 if (_twoHands.TryGetValue(t.Model.Index, out var rel) && rel.Second == grabber && t.Model.SecondHand < 0) rel.Second = null;
                 return;
             }
+            _table.OnHandReleased(t.Model.Index, Now, lost);
+            if (t.Model.State == ItemState.Hovering) return;   // 見失い待ち: その場で待つ。手は外さない（ビームを出さず、別の物をつかまない）
+            grabber.Held = null;
             _holders.Remove(t.Model.Index);
-            _table.OnHandReleased(t.Model.Index, Now);
         }
 
         /// <summary>猶予の間に外れた手・予約中に見失った手が握り直した。戻れたら true（ビームの当て直しは要らない）</summary>
@@ -385,6 +429,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             {
                 var th = kv.Value;
                 var m = th.Treasure != null ? th.Treasure.Model : null;
+                if (m != null && m.State == ItemState.Hovering) continue;   // 見失い待ち: 止めたまま。手の目標は戻ってから合わせる
                 if (m == null || th.Target == null) { if (m != null) ObserveReserveLostWait(kv.Key, th, m); continue; }
                 if (th.Grace)
                 {
@@ -490,6 +535,26 @@ namespace STYLY.TIB_Template.TreasureHaul
                 case ItemEventKind.GraceEnded:
                     if (_twoHands.TryGetValue(m.Index, out var back)) { back.Grace = false; back.Remaining = null; }
                     break;
+                case ItemEventKind.Hovered:
+                    t.StopInPlace();   // その場で止める（飛ぶ途中なら飛ぶのをやめる）。手は外さない
+                    if (_twoHands.TryGetValue(m.Index, out var hov))
+                    {
+                        hov.Grace = false;
+                        hov.Remaining = null;
+                        if (hov.Reserve != null) hov.Reserve.Held = t;   // 両手とも別の物をつかまない
+                        if (hov.Second != null) hov.Second.Held = t;
+                    }
+                    break;
+                case ItemEventKind.HoverResumed:
+                    ResumeFromHover(m, t);
+                    break;
+                case ItemEventKind.PlaceStarted:
+                    PlaceDown(m, t);
+                    break;
+                case ItemEventKind.ForceRested:
+                    ReleaseHolder(m.Index);   // 自分が持っていたなら手から外す
+                    t.ReturnTo(m.RestPos, m.RestRot, Grip.placeSeconds);
+                    break;
                 case ItemEventKind.Approved:
                     Debug.Log($"[TreasureClient] grab approved item={m.Index} value={m.Value} gen={m.Gen}");
                     break;
@@ -526,7 +591,10 @@ namespace STYLY.TIB_Template.TreasureHaul
                     break;
                 case ItemEventKind.Frozen:
                     ReleaseHolder(m.Index);
-                    t.StopInPlace();
+                    // そっと置いている途中なら、空中で止めず降ろす先に置く（見た目だけ。メッセージは送らない）
+                    if (m.State == ItemState.Placing && m.Mine && m.PlaceTargetSet) t.PlaceKinematic(m.PlacePos, m.PlaceRot);
+                    else if (m.State == ItemState.Placing && !m.Mine) t.PlaceKinematic(m.RestPos, m.RestRot);
+                    else t.StopInPlace();
                     break;
                 case ItemEventKind.Damaged:
                     OnDamagedEvent(v, e);
@@ -545,6 +613,37 @@ namespace STYLY.TIB_Template.TreasureHaul
             }
         }
 
+        /// <summary>見失い待ちから手が戻って持ち続ける: 握りの判定を握っている状態へ戻し、手（M は両手の目標）への追従を再開する</summary>
+        void ResumeFromHover(ClientItem m, Treasure t)
+        {
+            if (m.Kind == TreasureKind.M)
+            {
+                if (!_twoHands.TryGetValue(m.Index, out var th) || th.Target == null) return;
+                // 戻ってまた見失った手の Held が外れていても、両手とも M にしておく
+                if (th.Reserve != null) { th.Reserve.Held = t; if (th.Reserve.Tracker != null) th.Reserve.Tracker.ResumeGripping(); }
+                if (th.Second != null) { th.Second.Held = t; if (th.Second.Tracker != null) th.Second.Tracker.ResumeGripping(); }
+                UpdateTwoHands(Now);   // 追従を始める前に、目標を今の両手に合わせる
+                t.BeginFollow(th.Target);
+                return;
+            }
+            if (!_holders.TryGetValue(m.Index, out var g) || g == null) return;
+            if (g.Tracker != null) g.Tracker.ResumeGripping();
+            t.BeginFollow(g.Anchor);
+        }
+
+        /// <summary>
+        /// そっと置く: 降ろす先（真下の床・荷台・瓦礫の上。向きは Y 回転だけ残して立てる）を決めて ClientItemTable に渡し、
+        /// 手から外して〔置く時間〕で降ろす（kinematic。減額しない）。
+        /// </summary>
+        void PlaceDown(ClientItem m, Treasure t)
+        {
+            var rot = ThPlaceSolver.Upright(t.transform.localRotation);
+            var dest = ThPlaceSolver.Solve(_venue != null ? _venue.Root : null, t.transform.localPosition);
+            _table.SetPlaceTarget(m.Index, dest, rot);
+            ReleaseHolder(m.Index);
+            t.ReturnTo(dest, rot, Grip.placeSeconds);
+        }
+
         // ---- 減額（設計書 5章・9章） ----
 
         /// <summary>自分が動かしているお宝がぶつかった。数える衝撃以上なら ThDamage をホストへ送る（判断は ClientItemTable）</summary>
@@ -552,7 +651,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         {
             if (_table == null || _venue == null || t == null || t.Model == null) return;
             var local = _venue.Root.InverseTransformPoint(imp.WorldPoint);
-            _table.TryReportDamage(t.Model.Index, imp.OtherIndex, local, imp.Speed);
+            _table.TryReportDamage(t.Model.Index, imp.OtherIndex, local, imp.Speed, Now);
         }
 
         void OnDamagedEvent(View v, ItemEvent e)
