@@ -50,11 +50,26 @@ namespace STYLY.TIB_Template.TreasureHaul
         public ReadOnlyReactiveProperty<string> ParamsVersionText => _paramsVersionRp;
         public ReadOnlyReactiveProperty<string[]> Warnings => _warnings;
 
-        public SessionHostCore(IThTransport tx, ThParamsLoadResult initialParams, ThGameSettings settings, IEnumerable<string> settingsWarnings = null, long hostEpoch = 0, Func<int, string> resolveDeviceId = null)
+        // お宝（#38）
+        ThTreasureSetup _setup;
+        HostItemTable _items;
+        long _itemsRound;
+        double _lastItemsSentAt = double.NegativeInfinity;
+        string[] _baseWarnings = new string[0];
+        /// <summary>状態表（本編の間だけ。それ以外は null）</summary>
+        public HostItemTable Items => _items;
+        /// <summary>本編で作った配置の指紋（ホストと端末で同じことを突き合わせる用のログ）</summary>
+        public string SpawnFingerprint { get; private set; } = "";
+        /// <summary>回収した合計額</summary>
+        public int TotalAmount => _items?.Total ?? 0;
+
+        public SessionHostCore(IThTransport tx, ThParamsLoadResult initialParams, ThGameSettings settings, IEnumerable<string> settingsWarnings = null, long hostEpoch = 0, Func<int, string> resolveDeviceId = null, ThTreasureSetup treasureSetup = null)
         {
             _tx = tx;
             _resolveDeviceId = resolveDeviceId;
             HostEpoch = hostEpoch;
+            _setup = treasureSetup;
+            Registry.HostCatalogHash = treasureSetup?.CatalogHash ?? "";
             Machine = new HostRoundMachine(Registry, initialParams.Params.progress);
             Gate = new HostMessageGate(Machine, Registry);
             Adopt(initialParams, settings, settingsWarnings);
@@ -76,7 +91,8 @@ namespace STYLY.TIB_Template.TreasureHaul
             Machine.TrySetTimes(p.Params.progress);
             var all = new List<string>(p.Warnings);
             if (settingsWarnings != null) all.AddRange(settingsWarnings);
-            _warnings.Value = all.ToArray();
+            _baseWarnings = all.ToArray();
+            _warnings.Value = _baseWarnings;
             _paramsVersionRp.Value = p.Version;
         }
 
@@ -86,6 +102,16 @@ namespace STYLY.TIB_Template.TreasureHaul
             if (Machine.State != RoundState.Waiting) return false;
             Adopt(p, settings, settingsWarnings);
             SendParams(-1);
+            Refresh(now);
+            return true;
+        }
+
+        /// <summary>配置とカタログの束を後から渡す（Environment シーンの読み込みを待つため）。待機中だけ。</summary>
+        public bool SetTreasureSetup(ThTreasureSetup setup, double now)
+        {
+            if (Machine.State != RoundState.Waiting) return false;
+            _setup = setup;
+            Registry.HostCatalogHash = setup?.CatalogHash ?? "";
             Refresh(now);
             return true;
         }
@@ -133,10 +159,17 @@ namespace STYLY.TIB_Template.TreasureHaul
                 {
                     seq = Machine.Seq,
                     remaining = Machine.RemainingSeconds(now),
-                    total = 0,
+                    total = TotalAmount,
                     paramsVersion = ParamsVersion,
                     hostEpoch = HostEpoch,
                 }));
+            }
+            if (_items != null && _items.Items.Count > 0
+                && (Machine.State == RoundState.Tutorial || Machine.State == RoundState.Playing)
+                && now - _lastItemsSentAt >= Params.progress.itemsInterval)
+            {
+                _lastItemsSentAt = now;
+                _tx.Send(Rpc.ThItems, ThMessages.Encode(Machine.RoundId, _items.BuildItems()));
             }
             Refresh(now);
         }
@@ -148,6 +181,38 @@ namespace STYLY.TIB_Template.TreasureHaul
             if (senderClientNo == OwnClientNo) return;   // 自分が送った RPC の戻り
             RebindSender(senderClientNo);
             if (rpc == Rpc.ThResync) HandleResync(senderClientNo, args, now);
+            else if (rpc == Rpc.ThGrab || rpc == Rpc.ThRelease || rpc == Rpc.ThRest || rpc == Rpc.ThCollect) HandleItemMessage(rpc, senderClientNo, args);
+            // ThLift・ThDamage などは #38 では受け取らない
+        }
+
+        /// <summary>お宝のメッセージ（設計書 6.1）。RoundId・送り手が今の参加端末・本編（Playing）中のときだけ。</summary>
+        void HandleItemMessage(Rpc rpc, int sender, string[] args)
+        {
+            if (_items == null || Machine.State != RoundState.Playing) return;
+            string device;
+            switch (rpc)
+            {
+                case Rpc.ThGrab:
+                    if (!ThMessages.TryDecode(args, out long r1, out ThGrabMsg grab) || !Gate.Accept(r1, sender)) return;
+                    device = Registry.GetDeviceId(sender);
+                    _items.OnGrab(device, sender, grab);
+                    break;
+                case Rpc.ThRelease:
+                    if (!ThMessages.TryDecode(args, out long r2, out ThReleaseMsg rel) || !Gate.Accept(r2, sender)) return;
+                    device = Registry.GetDeviceId(sender);
+                    _items.OnRelease(device, rel);
+                    break;
+                case Rpc.ThRest:
+                    if (!ThMessages.TryDecode(args, out long r3, out ThRestMsg rest) || !Gate.Accept(r3, sender)) return;
+                    device = Registry.GetDeviceId(sender);
+                    _items.OnRest(device, rest);
+                    break;
+                case Rpc.ThCollect:
+                    if (!ThMessages.TryDecode(args, out long r4, out ThCollectMsg col) || !Gate.Accept(r4, sender)) return;
+                    device = Registry.GetDeviceId(sender);
+                    _items.OnCollect(device, col);
+                    break;
+            }
         }
 
         /// <summary>サーバーの再起動で ClientNo が入れ替わると、接続・切断イベントなしに対応が変わる。受け取るたびに引き直す。</summary>
@@ -174,6 +239,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             // 接続イベントを取りこぼしていても、報告から端末を登録できる
             Registry.Connect(msg.deviceId, sender);
             Registry.ReportParamsVersion(msg.deviceId, msg.paramsVersion ?? "");
+            Registry.ReportCatalogHash(msg.deviceId, msg.catalogHash ?? "");
             // 回の途中から入った端末は、その回だけ参加しない（古い報告で次の回を巻き込まないよう、今の回の報告だけ）
             if (msg.waitNextRound && Machine.State != RoundState.Waiting && knownRound == Machine.RoundId)
                 Registry.SetWaitNextRound(msg.deviceId, true);
@@ -198,6 +264,7 @@ namespace STYLY.TIB_Template.TreasureHaul
                 paramsVersion = ParamsVersion,
                 hostEpoch = HostEpoch,
                 tutorialColors = new int[0],
+                catalogHash = Registry.HostCatalogHash,
             }));
         }
 
@@ -211,8 +278,54 @@ namespace STYLY.TIB_Template.TreasureHaul
             }));
         }
 
+        /// <summary>状態に合わせて状態表を作る・消す（本編に入ったら作り、待機に戻ったら消す）</summary>
+        void SyncItems()
+        {
+            var st = Machine.State;
+            if (st == RoundState.Waiting)
+            {
+                _items = null;
+                _itemsRound = 0;
+                _lastItemsSentAt = double.NegativeInfinity;
+                SpawnFingerprint = "";
+            }
+            else if (st == RoundState.Playing && (_items == null || _itemsRound != Machine.RoundId) && _setup != null)
+            {
+                var spawn = TreasureSpawner.Spawn(Machine.Seed, Machine.Participants.Count, Params, _setup.Points, _setup.Catalog);
+                SpawnFingerprint = spawn.Fingerprint();
+                _items = new HostItemTable(spawn.Items, _setup.CollectBounds, (rpc, dto) => _tx.Send(rpc, ThMessages.EncodeObject(Machine.RoundId, dto)),
+                    deviceId => Registry.Get(deviceId)?.ClientNo ?? -1);
+                _itemsRound = Machine.RoundId;
+                _lastItemsSentAt = double.NegativeInfinity;
+            }
+        }
+
+        /// <summary>カタログのハッシュが合わない端末の警告を、起動時の警告に足す（運営UIに出る）</summary>
+        void UpdateCatalogWarnings()
+        {
+            List<string> extra = null;
+            foreach (var d in Registry.Devices)
+            {
+                if (!d.Connected || d.CatalogHash == Registry.HostCatalogHash) continue;
+                (extra ?? (extra = new List<string>())).Add($"お宝カタログのハッシュが違うので参加できません: {d.DeviceId}（端末 {d.CatalogHash} / 運営PC {Registry.HostCatalogHash}）");
+            }
+            int n = extra?.Count ?? 0;
+            var cur = _warnings.Value;
+            bool same = cur.Length == _baseWarnings.Length + n;
+            if (same)
+            {
+                for (int i = 0; i < n && same; i++) same = cur[_baseWarnings.Length + i] == extra[i];
+            }
+            if (same) return;
+            var all = new List<string>(_baseWarnings);
+            if (extra != null) all.AddRange(extra);
+            _warnings.Value = all.ToArray();
+        }
+
         void Refresh(double now)
         {
+            SyncItems();
+            UpdateCatalogWarnings();
             _state.Value = Machine.State;
             _remaining.Value = Machine.RemainingSeconds(now);
             _roundId.Value = Machine.RoundId;

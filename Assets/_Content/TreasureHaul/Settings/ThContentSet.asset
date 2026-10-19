@@ -15,3 +15,4 @@ MonoBehaviour:
   text: {fileID: 11400000, guid: c7d65254f270c41af807da95fb8d5577, type: 2}
   audio: {fileID: 11400000, guid: 7d1f90f64ea2547afbda7fc7ed121c38, type: 2}
   fx: {fileID: 11400000, guid: acd996b5a5e264c29acb0c74028c48d0, type: 2}
+  treasures: {fileID: 11400000, guid: 7eb4725c0b544410cb43033416794759, type: 2}

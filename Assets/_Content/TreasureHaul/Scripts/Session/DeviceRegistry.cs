@@ -15,6 +15,8 @@ namespace STYLY.TIB_Template.TreasureHaul
         public bool Spectator;
         /// <summary>端末から報告されたパラメータ版（未報告 = null）</summary>
         public string ParamsVersion;
+        /// <summary>端末から報告されたお宝カタログのハッシュ（未報告 = ""）</summary>
+        public string CatalogHash = "";
         /// <summary>回の途中から入ったので、この回は参加しない（Waiting に戻ったら解除）</summary>
         public bool WaitNextRound;
     }
@@ -29,6 +31,8 @@ namespace STYLY.TIB_Template.TreasureHaul
 
         /// <summary>ホストが使っているパラメータ版。参加できる条件の一つ。</summary>
         public string HostParamsVersion { get; set; } = "";
+        /// <summary>ホストのお宝カタログのハッシュ。参加できる条件の一つ（パラメータ版と同じ扱い）</summary>
+        public string HostCatalogHash { get; set; } = "";
 
         public IEnumerable<DeviceInfo> Devices => _byDevice.Values;
 
@@ -95,6 +99,12 @@ namespace STYLY.TIB_Template.TreasureHaul
             if (d != null) d.ParamsVersion = version;
         }
 
+        public void ReportCatalogHash(string deviceId, string hash)
+        {
+            var d = Get(deviceId);
+            if (d != null) d.CatalogHash = hash ?? "";
+        }
+
         // #44 の UI から使う。
         public void SetAlignmentConfirmed(string deviceId, bool confirmed) { var d = Get(deviceId); if (d != null) d.AlignmentConfirmed = confirmed; }
         public void SetSpectator(string deviceId, bool spectator) { var d = Get(deviceId); if (d != null) d.Spectator = spectator; }
@@ -115,7 +125,8 @@ namespace STYLY.TIB_Template.TreasureHaul
         public bool IsEligible(string deviceId)
         {
             var d = Get(deviceId);
-            return IsJoinable(deviceId) && d.ParamsVersion != null && d.ParamsVersion == HostParamsVersion;
+            return IsJoinable(deviceId) && d.ParamsVersion != null && d.ParamsVersion == HostParamsVersion
+                && d.CatalogHash == HostCatalogHash;
         }
 
         public List<string> JoinableDeviceIds()

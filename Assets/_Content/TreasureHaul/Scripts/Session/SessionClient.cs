@@ -39,11 +39,23 @@ namespace STYLY.TIB_Template.TreasureHaul
                 int rpcLimit = _defaults.values.progress.rpcLimit;
                 _nm.ConfigureRpcLimit(rpcLimit);
 
-                _core = new SessionClientCore(_nm.DeviceId, new RpcManagerTransport(), _defaults.values, null, Now);
+                // Environment シーン（ThVenue）の読み込みを待つ（配置候補点の数・荷台の範囲・カタログのハッシュに使う）
+                // 待つ時間に上限は設けない（Environment が間に合わないと、その起動中ずっとお宝の設定が無くなるため）。10秒ごとに警告する
+                for (int i = 0; ThVenue.Instance == null; i++)
+                {
+                    if (i > 0 && i % 100 == 0) Debug.LogWarning("[SessionClient] ThVenue を待っています（Environment シーンの読み込み待ち）");
+                    await UniTask.Delay(100, cancellationToken: ct);
+                }
+                var venue = ThVenue.Instance;
+                if (venue == null) Debug.LogWarning("[SessionClient] ThVenue が見つかりません（お宝は出ません）");
+                var env = venue != null ? venue.CreateEnvironmentInfo() : null;
+                var setup = venue != null && _content != null ? venue.CreateSetup(_content.treasures) : null;
+
+                _core = new SessionClientCore(_nm.DeviceId, new RpcManagerTransport(), _defaults.values, env, Now, setup);
                 _core.OwnClientNo = _nm.ClientNo;
                 var t = _core.Tracker;
 
-                foreach (var rpc in new[] { Rpc.ThState, Rpc.ThHeartbeat, Rpc.ThParams })
+                foreach (var rpc in new[] { Rpc.ThState, Rpc.ThHeartbeat, Rpc.ThParams, Rpc.ThGrabbed, Rpc.ThGrabDenied, Rpc.ThFreed, Rpc.ThCollected, Rpc.ThItems, Rpc.ThPoses })
                 {
                     var r = rpc;
                     RpcManager.Instance.AsObservable(r)
@@ -56,6 +68,7 @@ namespace STYLY.TIB_Template.TreasureHaul
                 LogLoop(ct).Forget();
 
                 _core.OnReady(Now);
+                _core.Items.Subscribe(it => { if (it != null) Debug.Log($"[SessionClient] spawn fingerprint={_core.SpawnFingerprint} items={it.Items.Count}"); }).AddTo(this);
                 Debug.Log($"[SessionClient] ready clientNo={_nm.ClientNo} deviceId={_nm.DeviceId} paramsVersion={t.LocalParamsVersion}");
 
                 while (!ct.IsCancellationRequested)

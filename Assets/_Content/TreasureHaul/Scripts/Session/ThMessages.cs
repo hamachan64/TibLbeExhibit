@@ -21,6 +21,8 @@ namespace STYLY.TIB_Template.TreasureHaul
         public long hostEpoch;
         /// <summary>練習の色の割り当て（この PR では空。#43 で入れる）。participants と同じ順で色番号</summary>
         public int[] tutorialColors = new int[0];
+        /// <summary>お宝カタログのハッシュ（ホストの物。端末の物と違えば参加端末から外す）</summary>
+        public string catalogHash = "";
     }
 
     [Serializable]
@@ -44,6 +46,8 @@ namespace STYLY.TIB_Template.TreasureHaul
         public string paramsVersion = "";
         /// <summary>回の途中から入ったので、その回は参加しない</summary>
         public bool waitNextRound;
+        /// <summary>この端末のお宝カタログのハッシュ</summary>
+        public string catalogHash = "";
     }
 
     [Serializable]
@@ -55,10 +59,144 @@ namespace STYLY.TIB_Template.TreasureHaul
         public string json = "";
     }
 
+    // ---- お宝（#38。設計書 4.4・5章・6章）。item はお宝の番号、gen は世代番号、reqId は申請ID ----
+
+    /// <summary>端末→ホスト つかむ申請（kind: 0=S）</summary>
+    [Serializable]
+    public class ThGrabMsg
+    {
+        public int item;
+        public int reqId;
+        /// <summary>申請した端末が知っている世代</summary>
+        public int gen;
+        public int kind;
+    }
+
+    /// <summary>ホスト→全員 つかめた</summary>
+    [Serializable]
+    public class ThGrabbedMsg
+    {
+        public int item;
+        public int clientNo;
+        public int reqId;
+        public int gen;
+        /// <summary>現在の価値</summary>
+        public int value;
+    }
+
+    /// <summary>ホスト→全員 つかめなかった</summary>
+    [Serializable]
+    public class ThGrabDeniedMsg
+    {
+        public int item;
+        public int clientNo;
+        public int reqId;
+    }
+
+    /// <summary>端末→ホスト 取りやめ・落とした（reason は ReleaseReason）</summary>
+    [Serializable]
+    public class ThReleaseMsg
+    {
+        public int item;
+        public int reqId;
+        public int gen;
+        public int reason;
+    }
+
+    /// <summary>ホスト→全員 つかめるに戻った（位置は VenueRoot ローカル）</summary>
+    [Serializable]
+    public class ThFreedMsg
+    {
+        public int item;
+        public int gen;
+        public Vector3 pos;
+        public Quaternion rot = Quaternion.identity;
+    }
+
+    /// <summary>判定役→ホスト 置かれた（静止した）</summary>
+    [Serializable]
+    public class ThRestMsg
+    {
+        public int item;
+        public int gen;
+        public Vector3 pos;
+        public Quaternion rot = Quaternion.identity;
+    }
+
+    /// <summary>判定役→ホスト 荷台への回収</summary>
+    [Serializable]
+    public class ThCollectMsg
+    {
+        public int item;
+        public int gen;
+    }
+
+    /// <summary>ホスト→全員 回収した</summary>
+    [Serializable]
+    public class ThCollectedMsg
+    {
+        public int item;
+        public int gen;
+        /// <summary>回収後の合計額</summary>
+        public int total;
+        /// <summary>回収した価値</summary>
+        public int value;
+        /// <summary>傷物か（元の値段より下がっていた）</summary>
+        public bool damaged;
+    }
+
+    [Serializable]
+    public class ThPoseEntry
+    {
+        public int item;
+        public Vector3 pos;
+        public Quaternion rot = Quaternion.identity;
+    }
+
+    /// <summary>判定役→全員 動かしているお宝の位置（VenueRoot ローカル）。端末ごとに 1 つにまとめる</summary>
+    [Serializable]
+    public class ThPosesMsg
+    {
+        public ThPoseEntry[] poses = new ThPoseEntry[0];
+    }
+
+    [Serializable]
+    public class ThItemEntry
+    {
+        public int item;
+        public int state;
+        /// <summary>持ち主の ClientNo（いなければ -1）</summary>
+        public int owner = -1;
+        /// <summary>判定役の ClientNo（いなければ -1）</summary>
+        public int ctl = -1;
+        /// <summary>持ち主の承認済み申請ID</summary>
+        public int reqId;
+        public int gen;
+        public int value;
+        public int hits;
+        public bool revealed;
+        public bool gone;
+        public Vector3 pos;
+        public Quaternion rot = Quaternion.identity;
+    }
+
+    /// <summary>ホスト→全員 全お宝の状態表</summary>
+    [Serializable]
+    public class ThItemsMsg
+    {
+        public ThItemEntry[] items = new ThItemEntry[0];
+    }
+
     /// <summary>引数の符号化・復号（純粋）。壊れた・空の引数は例外を出さずに false を返す。</summary>
     public static class ThMessages
     {
         public static string[] Encode<T>(long roundId, T dto) where T : class
+        {
+            return new[] { roundId.ToString(System.Globalization.CultureInfo.InvariantCulture), JsonUtility.ToJson(dto) };
+        }
+
+        /// <summary>型が実行時に決まる DTO 用（ホストの状態表が送る物）</summary>
+        public static string[] EncodeObject(long roundId, object dto)
         {
             return new[] { roundId.ToString(System.Globalization.CultureInfo.InvariantCulture), JsonUtility.ToJson(dto) };
         }

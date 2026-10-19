@@ -1,7 +1,9 @@
 {
     "name": "TibLbeExhibit.TreasureHaul.Prototype.Editor",
     "rootNamespace": "STYLY.TIB_Template.TreasureHaul.Prototype",
-    "references": [],
+    "references": [
+        "TibLbeExhibit.TreasureHaul"
+    ],
     "includePlatforms": [
         "Editor"
     ],

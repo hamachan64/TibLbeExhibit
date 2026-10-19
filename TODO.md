@@ -9,8 +9,8 @@
 
 | | |
 | :--- | :--- |
-| **フェーズ** | 1 基盤（[#37](https://github.com/hamachan64/TibLbeExhibit/issues/37)）の PR [#52](https://github.com/hamachan64/TibLbeExhibit/pull/52) をレビュー中。0a 試作（エディタ、PR #50）はマージ済み。**実機は10月中の見込み**なので、それまではエディタ（XRI のシミュレーター・ParrelSync）で検証しながら進める |
-| **次にやること** | PR #52 をマージ → [#38](https://github.com/hamachan64/TibLbeExhibit/issues/38)・[#42](https://github.com/hamachan64/TibLbeExhibit/issues/42)・[#44](https://github.com/hamachan64/TibLbeExhibit/issues/44) ／ 並行して素材 #46・#47・#48 |
+| **フェーズ** | 2 配置・S を持つ・回収（[#38](https://github.com/hamachan64/TibLbeExhibit/issues/38)）の PR [#54](https://github.com/hamachan64/TibLbeExhibit/pull/54) をレビュー中。1 基盤（#37、PR #52）と 0a 試作（PR #50）はマージ済み。**実機は10月中の見込み**なので、それまではエディタ（XRI のシミュレーター・ParrelSync）で検証しながら進める |
+| **次にやること** | PR #54 をマージ → [#39](https://github.com/hamachan64/TibLbeExhibit/issues/39)。並行して [#42](https://github.com/hamachan64/TibLbeExhibit/issues/42)・[#44](https://github.com/hamachan64/TibLbeExhibit/issues/44) ／ 素材 #46・#47・#48 |
 | **判断待ち** | 実機の入手（#49・#45 に必要）。U-1 は通し #45 までに必要。ほかは下の「判断待ち」 |
 | **締切** | 内容変更 **10/31**（あと13日）／最終データ 11/16／現地設営 11/17 |
 
@@ -22,8 +22,8 @@
 | :--- | :--- | :--- | :---: | :--- | :--- |
 | 0a | 試作（エディタ）: 同期・送信上限・追従、シミュレーターの取り込み | [#36](https://github.com/hamachan64/TibLbeExhibit/issues/36)（PR [#50](https://github.com/hamachan64/TibLbeExhibit/pull/50)） | ✅ | ― | 10/18〜19 |
 | 0b | 試作（実機）: 握る判定・ビーム・負荷、しきい値の調整 | [#49](https://github.com/hamachan64/TibLbeExhibit/issues/49) | ⛔ | 実機の入手（10月中の見込み） | 実機が届いてから1〜2日 |
-| 1 | 基盤（パラメータ・Rpc・状態遷移・運営UI最小） | [#37](https://github.com/hamachan64/TibLbeExhibit/issues/37)（PR [#52](https://github.com/hamachan64/TibLbeExhibit/pull/52)） | 👀 | 0a | 10/20〜21 |
-| 2 | 配置、S を持つ・置く・回収、表示板 | [#38](https://github.com/hamachan64/TibLbeExhibit/issues/38) | ⬜ | 1 | 10/22〜23 |
+| 1 | 基盤（パラメータ・Rpc・状態遷移・運営UI最小） | [#37](https://github.com/hamachan64/TibLbeExhibit/issues/37)（PR [#52](https://github.com/hamachan64/TibLbeExhibit/pull/52)） | ✅ | 0a | 10/20〜21 |
+| 2 | 配置、S を持つ・置く・回収、表示板 | [#38](https://github.com/hamachan64/TibLbeExhibit/issues/38)（PR [#54](https://github.com/hamachan64/TibLbeExhibit/pull/54)） | 👀 | 1 | 10/22〜23 |
 | 3a | 減額と表示（3回で壊れる） | [#39](https://github.com/hamachan64/TibLbeExhibit/issues/39) | ⬜ | 2 | 10/24 |
 | 3b | M（両手で持つ） | [#40](https://github.com/hamachan64/TibLbeExhibit/issues/40) | ⬜ | 3a | 10/25 |
 | 3c | 見失い・手の飛び・そっと置く・持ち主の切断 | [#41](https://github.com/hamachan64/TibLbeExhibit/issues/41) | ⬜ | 3b | 10/26 |
@@ -62,6 +62,8 @@
 | U-18 | 番人の石像に見られて動いたときの減らし方 | 追加要素 |
 
 ## 最近決まったこと
+
+- 2026-10-18（#38）: 荷台の表示板は、荷台に入っているお宝の合計額だけを出す（「1,250G」）。目標額の見せ方と、目標に届いたときの知らせは #42 で決める。発見音は素材が決まるまで空のまま。Environment に `VenueRoot` と仮の会場（配置候補点・荷台・瓦礫）を置き、#46 と会場の作り込みで差し替える。手を開いて落としたときは世代番号を変えない（設計書 4.2）。企画書 5.4・要件 F-SCORE-2・設計書 4.2/5/9章を更新。
 
 - 2026-10-18: 文言・音・演出も ScriptableObject（`ThTextTable` / `ThAudioCatalog` / `ThFxCatalog`。まとめ役 `ThContentSet`）で一括管理する。器と運営UI・企画書にある文言は #37 で作り、中身は各 Issue で足す（設計書 9.1）。日本語フォントに「宝・額・傷・損」が無かったので、文言の全文字を表示できるかをテストで確かめる。
 

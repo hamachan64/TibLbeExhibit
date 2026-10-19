@@ -16,7 +16,7 @@ namespace STYLY.TIB_Template.TreasureHaul
 
         public ThContentSet Content => _content;
 
-        ThEnvironmentInfo _env;   // 未定（#38・#43 で Environment から取る）
+        ThEnvironmentInfo _env;   // ThVenue から取る（Environment シーンの読み込み後。TutorialSlot の数は #43）
         string _dataDir;
         NetSyncManager _nm;
 
@@ -63,15 +63,36 @@ namespace STYLY.TIB_Template.TreasureHaul
                 await UniTask.WaitUntil(() => _nm.IsReady, cancellationToken: ct);
                 _nm.ConfigureRpcLimit(Core.Params.progress.rpcLimit);
                 Core.OwnClientNo = _nm.ClientNo;
+
+                // Environment シーン（ThVenue）の読み込みを待つ。配置候補点の数・荷台の範囲・カタログのハッシュを渡し、パラメータを読み直す
+                // 待つ時間に上限は設けない（Environment が間に合わないと、その起動中ずっとお宝の設定が無くなるため）。10秒ごとに警告する
+                for (int i = 0; ThVenue.Instance == null; i++)
+                {
+                    if (i > 0 && i % 100 == 0) Debug.LogWarning("[SessionHost] ThVenue を待っています（Environment シーンの読み込み待ち）");
+                    await UniTask.Delay(100, cancellationToken: ct);
+                }
+                var venue = ThVenue.Instance;
+                if (venue == null) Debug.LogWarning("[SessionHost] ThVenue が見つかりません（お宝は出ません）");
+                else
+                {
+                    _env = venue.CreateEnvironmentInfo();
+                    Core.SetTreasureSetup(venue.CreateSetup(_content != null ? _content.treasures : null), Now);
+                    RequestReloadParams();
+                    Debug.Log($"[SessionHost] venue points={_env.PlacementPointCount} catalogHash={Core.Registry.HostCatalogHash}");
+                }
                 Debug.Log($"[SessionHost] ready clientNo={_nm.ClientNo} deviceId={_nm.DeviceId} paramsVersion={Core.ParamsVersion}");
 
                 // 端末の登録は ThResync で行う（ステルスの運営PC・クローンを数えない）。切断だけ NetSync のイベントを使う。
-                RpcManager.Instance.AsObservable(Rpc.ThResync)
-                    .Subscribe(d => Core.OnRpc(Rpc.ThResync, d.ClientNo, d.Parameters, Now)).AddTo(this);
+                foreach (var rpc in new[] { Rpc.ThResync, Rpc.ThGrab, Rpc.ThRelease, Rpc.ThRest, Rpc.ThCollect })
+                {
+                    var r = rpc;
+                    RpcManager.Instance.AsObservable(r)
+                        .Subscribe(d => Core.OnRpc(r, d.ClientNo, d.Parameters, Now)).AddTo(this);
+                }
                 _nm.OnAvatarDisconnected.AsObservable()
                     .Subscribe(no => Core.OnClientDisconnected(no, Now)).AddTo(this);
 
-                Core.State.Subscribe(s => Debug.Log($"[SessionHost] state={s} roundId={Core.Machine.RoundId} seq={Core.Machine.Seq} participants={string.Join("/", Core.Machine.Participants)}")).AddTo(this);
+                Core.State.Subscribe(s => Debug.Log($"[SessionHost] state={s} roundId={Core.Machine.RoundId} seq={Core.Machine.Seq} participants={string.Join("/", Core.Machine.Participants)} spawn={Core.SpawnFingerprint} items={Core.Items?.Items.Count ?? 0} total={Core.TotalAmount}")).AddTo(this);
                 LogLoop(ct).Forget();
 
                 while (!ct.IsCancellationRequested)
