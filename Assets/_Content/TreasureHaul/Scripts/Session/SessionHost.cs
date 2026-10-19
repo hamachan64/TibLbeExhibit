@@ -83,7 +83,7 @@ namespace STYLY.TIB_Template.TreasureHaul
                 Debug.Log($"[SessionHost] ready clientNo={_nm.ClientNo} deviceId={_nm.DeviceId} paramsVersion={Core.ParamsVersion}");
 
                 // 端末の登録は ThResync で行う（ステルスの運営PC・クローンを数えない）。切断だけ NetSync のイベントを使う。
-                foreach (var rpc in new[] { Rpc.ThResync, Rpc.ThGrab, Rpc.ThRelease, Rpc.ThRest, Rpc.ThCollect })
+                foreach (var rpc in new[] { Rpc.ThResync, Rpc.ThGrab, Rpc.ThRelease, Rpc.ThRest, Rpc.ThCollect, Rpc.ThDamage, Rpc.ThPoses })
                 {
                     var r = rpc;
                     RpcManager.Instance.AsObservable(r)

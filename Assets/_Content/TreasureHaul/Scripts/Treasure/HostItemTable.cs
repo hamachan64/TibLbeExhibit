@@ -30,6 +30,12 @@ namespace STYLY.TIB_Template.TreasureHaul
         public Quaternion RestRot = Quaternion.identity;
         /// <summary>練習用か（#43 から。#38 では常に false）</summary>
         public bool Practice;
+        /// <summary>判定役から報告された減額の免除（ThPoses の exempt。設計書 5章）。持ち主が替わる・つかめるに戻る・回収・消滅で false に戻す</summary>
+        public bool ExemptReported;
+
+        /// <summary>ホストが見る免除中: 判定役の報告、または状態が Flying / Placing / Hovering（4.2）</summary>
+        public bool IsDamageExempt =>
+            ExemptReported || State == ItemState.Flying || State == ItemState.Placing || State == ItemState.Hovering;
     }
 
     /// <summary>
@@ -45,14 +51,23 @@ namespace STYLY.TIB_Template.TreasureHaul
         readonly System.Func<string, int> _clientNoOf;
         // 取りやめ済みの申請（端末, お宝, 申請ID）。後から届いても認めない
         readonly HashSet<string> _cancelled = new HashSet<string>();
+        readonly ThTreasureParams _tp;
+        // 通信上の重複を捨てるための、組み合わせごとの最後に受けた時刻（捨てた報告も含む）
+        readonly Dictionary<long, double> _lastDamageAt = new Dictionary<long, double>();
 
         public IReadOnlyList<HostItem> Items => _items;
         /// <summary>回収した合計額（本編のお宝だけ）</summary>
         public int Total { get; private set; }
+        /// <summary>適用した減額の合計（回ごと。#42 の「今回の損害」、#44 の記録の材料。表示は作らない）</summary>
+        public int DamageTotal { get; private set; }
+        /// <summary>減額の受け付けの記録の出口（実機調整 #45・#49 用。1 件ごと。null なら出さない）</summary>
+        public System.Action<string> Log { get; set; }
+        void LogLine(string s) => Log?.Invoke("[HostDamage] " + s);
 
         /// <param name="clientNoOf">DeviceId から今の ClientNo を引く（再接続で ClientNo が付け替わっても ThGrabbed・ThItems に今の番号を載せるため）。引けなければ -1 を返す</param>
-        public HostItemTable(IReadOnlyList<SpawnedTreasure> spawned, Bounds collectBounds, ThEmit emit, System.Func<string, int> clientNoOf = null)
+        public HostItemTable(IReadOnlyList<SpawnedTreasure> spawned, Bounds collectBounds, ThEmit emit, System.Func<string, int> clientNoOf = null, ThTreasureParams treasureParams = null)
         {
+            _tp = treasureParams ?? new ThTreasureParams();
             _clientNoOf = clientNoOf;
             _collectBounds = collectBounds;
             _emit = emit;
@@ -110,6 +125,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             it.ControllerDevice = deviceId;
             it.ControllerClientNo = clientNo;
             it.Revealed = true;   // 以後ずっと公開
+            it.ExemptReported = false;
             EmitGrabbed(it);
         }
 
@@ -149,6 +165,7 @@ namespace STYLY.TIB_Template.TreasureHaul
                 it.State = ItemState.Falling;
                 it.OwnerDevice = null;
                 it.OwnerClientNo = -1;
+                it.ExemptReported = false;
             }
         }
 
@@ -157,6 +174,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             it.State = ItemState.Resting;
             it.OwnerDevice = null;
             it.OwnerClientNo = -1;
+            it.ExemptReported = false;
             it.Gen++;
             _emit(Rpc.ThFreed, new ThFreedMsg { item = it.Index, gen = it.Gen, pos = it.RestPos, rot = it.RestRot });
         }
@@ -192,9 +210,107 @@ namespace STYLY.TIB_Template.TreasureHaul
             it.State = ItemState.Collected;
             it.OwnerDevice = null;
             it.OwnerClientNo = -1;
+            it.ExemptReported = false;
             it.Gen++;
             Total += it.Value;
             _emit(Rpc.ThCollected, new ThCollectedMsg { item = it.Index, gen = it.Gen, total = Total, value = it.Value, damaged = it.Value < it.BaseValue });
+        }
+
+        // ---- 免除の報告（ThPoses） ----
+
+        /// <summary>
+        /// 判定役の位置の送信から、減額の免除だけを読む。送り手がそのお宝の判定役で、お宝が消えていないときだけ覚える。
+        /// 位置そのものは端末どうしで補間するので、ホストは使わない。
+        /// </summary>
+        public void OnPoses(string deviceId, ThPosesMsg m)
+        {
+            if (m?.poses == null || deviceId == null) return;
+            foreach (var e in m.poses)
+            {
+                var it = e == null ? null : Get(e.item);
+                if (it == null || it.Gone) continue;
+                // 動いている状態のときだけ。Resting になった後に遅れて届いた exempt=true で免除が立ちっぱなしにならないように
+                if (it.State != ItemState.Held && it.State != ItemState.Falling && it.State != ItemState.Flying
+                    && it.State != ItemState.Placing && it.State != ItemState.Hovering) continue;
+                // 送り手は持ち主（Held 系）か、持ち主がいなければ判定役（Falling 等）
+                bool sender = it.OwnerDevice != null ? it.OwnerDevice == deviceId : it.ControllerDevice == deviceId;
+                if (!sender) continue;
+                it.ExemptReported = e.exempt;
+            }
+        }
+
+        // ---- 減額 ----
+
+        /// <summary>組み合わせのキー。お宝同士は小さい番号・大きい番号の組（向きは区別しない）、障害物は (a, -1)</summary>
+        static long PairKey(int a, int b)
+        {
+            int lo = System.Math.Min(a, b), hi = System.Math.Max(a, b);
+            return ((long)(lo + 1) << 32) | (uint)(hi + 1);
+        }
+
+        /// <summary>
+        /// 判定役の「ぶつけた」（設計書 5章・6.1）。Playing 中であることは呼び出し側が確かめる。
+        /// 送り手が a か b の判定役のときだけ受け付け、同じ組み合わせの重複を捨て、お宝ごとに別々に免除などを判断して適用する。
+        /// </summary>
+        public void OnDamage(string deviceId, ThDamageMsg m, double now)
+        {
+            if (m == null || deviceId == null) return;
+            var a = Get(m.a);
+            var b = m.b >= 0 ? Get(m.b) : null;
+            if (a == null && b == null) return;
+            if (m.a == m.b) return;
+            bool fromController = (a != null && a.ControllerDevice == deviceId) || (b != null && b.ControllerDevice == deviceId);
+            if (!fromController)   // 判定役でない送り手の報告は捨てる（重複の記録もしない）
+            {
+                LogLine($"判定役でないので捨てた device={deviceId} a={m.a} b={m.b} speed={m.speed:F2}");
+                return;
+            }
+
+            long key = PairKey(m.a, m.b);
+            bool duplicate = _lastDamageAt.TryGetValue(key, out var last) && now - last <= _tp.dedupSeconds;
+            _lastDamageAt[key] = now;   // 捨てた報告でも時刻を延ばす
+            if (duplicate)
+            {
+                LogLine($"重複で捨てた a={m.a} b={m.b} 直前の報告から {now - last:F3}秒 speed={m.speed:F2}");
+                return;
+            }
+
+            ApplyDamage(m.a, a, m.pos, m.speed);
+            if (m.b >= 0) ApplyDamage(m.b, b, m.pos, m.speed);
+        }
+
+        void ApplyDamage(int index, HostItem it, Vector3 pos, float speed)
+        {
+            if (it == null) { LogLine($"適用しなかった item={index} お宝が無い"); return; }
+            if (it.Gone) { LogLine($"適用しなかった item={index} 回収・消滅済み"); return; }
+            if (it.Practice) { LogLine($"適用しなかった item={index} 練習用"); return; }
+            if (it.IsDamageExempt) { LogLine($"適用しなかった item={index} 免除中 state={it.State} 報告={it.ExemptReported}"); return; }
+            var r = DamageCalculator.Apply(it.BaseValue, it.Value, it.Hits, _tp);
+            if (!r.Applied) return;
+
+            // 記録用（設計書 8章）: そのときの持ち主、いなければ判定役（最後に持った人）。誰も持ったことがなければ -1（当てた側の人には付けない）
+            int by = it.OwnerDevice != null ? CurrentNo(it.OwnerDevice, it.OwnerClientNo)
+                : it.ControllerDevice != null ? CurrentNo(it.ControllerDevice, it.ControllerClientNo)
+                : -1;
+
+            it.Hits = r.Hits;
+            it.Value = r.Value;
+            DamageTotal += r.Amount;
+            if (r.Destroyed)
+            {
+                it.Gone = true;
+                it.State = ItemState.Destroyed;
+                it.OwnerDevice = null;
+                it.OwnerClientNo = -1;
+                it.ExemptReported = false;
+                it.Gen++;   // 設計書 4.2: 回収・消滅のとき
+            }
+            LogLine($"適用した item={it.Index} 回数={it.Hits} 額={r.Amount} 価値={it.Value} 消滅={r.Destroyed} speed={speed:F2}");
+            _emit(Rpc.ThDamaged, new ThDamagedMsg
+            {
+                item = it.Index, gen = it.Gen, hits = it.Hits, amount = r.Amount, value = it.Value,
+                pos = pos, destroyed = r.Destroyed, by = by, revealed = it.Revealed,
+            });
         }
 
         // ---- 状態表 ----

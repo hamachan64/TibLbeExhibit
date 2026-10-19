@@ -181,12 +181,13 @@ namespace STYLY.TIB_Template.TreasureHaul
             if (senderClientNo == OwnClientNo) return;   // 自分が送った RPC の戻り
             RebindSender(senderClientNo);
             if (rpc == Rpc.ThResync) HandleResync(senderClientNo, args, now);
-            else if (rpc == Rpc.ThGrab || rpc == Rpc.ThRelease || rpc == Rpc.ThRest || rpc == Rpc.ThCollect) HandleItemMessage(rpc, senderClientNo, args);
-            // ThLift・ThDamage などは #38 では受け取らない
+            else if (rpc == Rpc.ThGrab || rpc == Rpc.ThRelease || rpc == Rpc.ThRest || rpc == Rpc.ThCollect
+                || rpc == Rpc.ThDamage || rpc == Rpc.ThPoses) HandleItemMessage(rpc, senderClientNo, args, now);
+            // ThLift などは #40 まで受け取らない
         }
 
         /// <summary>お宝のメッセージ（設計書 6.1）。RoundId・送り手が今の参加端末・本編（Playing）中のときだけ。</summary>
-        void HandleItemMessage(Rpc rpc, int sender, string[] args)
+        void HandleItemMessage(Rpc rpc, int sender, string[] args, double now)
         {
             if (_items == null || Machine.State != RoundState.Playing) return;
             string device;
@@ -211,6 +212,17 @@ namespace STYLY.TIB_Template.TreasureHaul
                     if (!ThMessages.TryDecode(args, out long r4, out ThCollectMsg col) || !Gate.Accept(r4, sender)) return;
                     device = Registry.GetDeviceId(sender);
                     _items.OnCollect(device, col);
+                    break;
+                case Rpc.ThDamage:
+                    if (!ThMessages.TryDecode(args, out long r5, out ThDamageMsg dmg) || !Gate.Accept(r5, sender)) return;
+                    device = Registry.GetDeviceId(sender);
+                    _items.OnDamage(device, dmg, now);
+                    break;
+                case Rpc.ThPoses:
+                    // 位置は端末どうしで補間する。ホストは減額の免除の報告だけを読む
+                    if (!ThMessages.TryDecode(args, out long r6, out ThPosesMsg poses) || !Gate.Accept(r6, sender)) return;
+                    device = Registry.GetDeviceId(sender);
+                    _items.OnPoses(device, poses);
                     break;
             }
         }
@@ -294,7 +306,8 @@ namespace STYLY.TIB_Template.TreasureHaul
                 var spawn = TreasureSpawner.Spawn(Machine.Seed, Machine.Participants.Count, Params, _setup.Points, _setup.Catalog);
                 SpawnFingerprint = spawn.Fingerprint();
                 _items = new HostItemTable(spawn.Items, _setup.CollectBounds, (rpc, dto) => _tx.Send(rpc, ThMessages.EncodeObject(Machine.RoundId, dto)),
-                    deviceId => Registry.Get(deviceId)?.ClientNo ?? -1);
+                    deviceId => Registry.Get(deviceId)?.ClientNo ?? -1, Params.treasure);
+                _items.Log = Debug.Log;
                 _itemsRound = Machine.RoundId;
                 _lastItemsSentAt = double.NegativeInfinity;
             }

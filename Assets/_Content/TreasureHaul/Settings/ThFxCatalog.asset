@@ -23,13 +23,13 @@ MonoBehaviour:
     prefab: {fileID: 8556624865429012995, guid: abca3fb8ed3534f29b872afa6e90e232, type: 3}
     material: {fileID: 0}
   - id: 3
-    prefab: {fileID: 0}
+    prefab: {fileID: 1362824584577266522, guid: 154f79e0ea7c14a389c3bfbbc9a5b283, type: 3}
     material: {fileID: 0}
   - id: 4
-    prefab: {fileID: 0}
+    prefab: {fileID: 1076941667948218432, guid: 9899b19fb01c5461e8e5aedd66317a68, type: 3}
     material: {fileID: 0}
   - id: 5
-    prefab: {fileID: 0}
+    prefab: {fileID: 5417791270101439668, guid: 483acecada99540ba81b2dd18e8cd7bf, type: 3}
     material: {fileID: 0}
   - id: 6
     prefab: {fileID: 0}

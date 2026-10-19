@@ -813,5 +813,85 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
             Assert.IsFalse(b.Tracker.IsParticipant.CurrentValue);
             Assert.IsFalse(b.Items.CurrentValue.TryBeginGrab(FirstS(b.Items.CurrentValue), _now));
         }
+
+        // ---- 減額（#39）: ホスト1＋端末2をつなぐ ----
+
+        [Test] public void 結合_障害物に当たると全員の価値と回数が同じになり_3回で消滅して全員から消える()
+        {
+            Build();
+            var a = AddClient(2, "devA");
+            var b = AddClient(3, "devB");
+            StartPlaying();
+            var ai = a.Items.CurrentValue; var bi = b.Items.CurrentValue;
+            int idx = FirstS(ai);
+            int baseValue = ai.Get(idx).BaseValue;
+            Assert.IsTrue(ai.TryBeginGrab(idx, _now)); _net.Pump();
+            Assert.IsTrue(ai.Get(idx).Approved);
+            var events = new List<ItemEvent>();
+            bi.Events.Subscribe(e => events.Add(e));
+
+            Assert.IsTrue(ai.TryReportDamage(idx, -1, Vector3.zero, 1.5f)); _net.Pump();
+            int v1 = baseValue - baseValue * 30 / 100;
+            foreach (var t in new[] { ai, bi }) { Assert.AreEqual(1, t.Get(idx).Hits); Assert.AreEqual(v1, t.Get(idx).Value); }
+            Assert.AreEqual(v1, _host.Items.Get(idx).Value);
+            Assert.IsTrue(events.Any(e => e.Kind == ItemEventKind.Damaged));
+            Assert.IsTrue(ai.DamageNoteShown, "自分が動かしているお宝の初めての一文");
+            Assert.IsFalse(bi.DamageNoteShown);
+
+            Advance(0.5);
+            Assert.IsTrue(ai.TryReportDamage(idx, -1, Vector3.zero, 1.5f)); _net.Pump();
+            Advance(0.5);
+            Assert.IsTrue(ai.TryReportDamage(idx, -1, Vector3.zero, 1.5f)); _net.Pump();
+            foreach (var t in new[] { ai, bi }) { Assert.IsTrue(t.Get(idx).Gone); Assert.AreEqual(ItemState.Destroyed, t.Get(idx).State); Assert.AreEqual(3, t.Get(idx).Hits); }
+            Assert.IsFalse(ai.Get(idx).Mine);
+            Assert.IsTrue(events.Any(e => e.Kind == ItemEventKind.Destroyed));
+            Assert.AreEqual(baseValue, _host.Items.DamageTotal);
+            Assert.AreEqual(0, _host.TotalAmount);
+            Assert.IsFalse(bi.IsGrabbable(bi.Get(idx)));
+        }
+
+        [Test] public void 結合_お宝同士の衝突を両方の端末が報告しても1回だけ数える()
+        {
+            Build();
+            var a = AddClient(2, "devA");
+            var b = AddClient(3, "devB");
+            StartPlaying();
+            var ai = a.Items.CurrentValue; var bi = b.Items.CurrentValue;
+            int x = FirstS(ai), y = FirstS(ai, 1);
+            Assert.IsTrue(ai.TryBeginGrab(x, _now)); Assert.IsTrue(bi.TryBeginGrab(y, _now)); _net.Pump();
+            Assert.IsTrue(ai.Get(x).Approved); Assert.IsTrue(bi.Get(y).Approved);
+            Assert.IsTrue(ai.TryReportDamage(x, y, Vector3.zero, 2f));
+            Assert.IsTrue(bi.TryReportDamage(y, x, Vector3.zero, 2f));
+            _net.Pump();
+            foreach (var t in new[] { ai, bi, })
+            {
+                Assert.AreEqual(1, t.Get(x).Hits, "x は 1 回だけ");
+                Assert.AreEqual(1, t.Get(y).Hits, "y は 1 回だけ");
+            }
+            Assert.AreEqual(2, _net.Log.Count(l => l.rpc == Rpc.ThDamaged), "ThDamaged は 2 つのお宝に 1 つずつ");
+        }
+
+        [Test] public void 結合_ThDamagedを捨ててもThItemsで回数と消滅が追いつく()
+        {
+            Build();
+            var a = AddClient(2, "devA");
+            var b = AddClient(3, "devB");
+            StartPlaying();
+            var ai = a.Items.CurrentValue; var bi = b.Items.CurrentValue;
+            int idx = FirstS(ai);
+            ai.TryBeginGrab(idx, _now); _net.Pump();
+            _net.Drop = (s, r, args, to) => r == Rpc.ThDamaged && to == 3;
+            ai.TryReportDamage(idx, -1, Vector3.zero, 2f); _net.Pump();
+            Assert.AreEqual(0, bi.Get(idx).Hits, "B は取りこぼした");
+            Advance(1.2);   // 次の ThItems
+            Assert.AreEqual(1, bi.Get(idx).Hits);
+            Assert.AreEqual(_host.Items.Get(idx).Value, bi.Get(idx).Value);
+            Advance(0.5); ai.TryReportDamage(idx, -1, Vector3.zero, 2f); _net.Pump();
+            Advance(0.5); ai.TryReportDamage(idx, -1, Vector3.zero, 2f); _net.Pump();
+            Assert.IsFalse(bi.Get(idx).Gone);
+            Advance(1.2);
+            Assert.IsTrue(bi.Get(idx).Gone);
+            Assert.AreEqual(ItemState.Destroyed, bi.Get(idx).State);
+        }
     }
 }

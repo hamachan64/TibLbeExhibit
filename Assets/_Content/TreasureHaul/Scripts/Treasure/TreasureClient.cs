@@ -30,7 +30,20 @@ namespace STYLY.TIB_Template.TreasureHaul
         {
             public Treasure Treasure;
             public PriceLabel Label;
+            /// <summary>今付けているヒビ（お宝の子）と、その段階（ぶつけた回数）</summary>
+            public GameObject Crack;
+            public int CrackStage;
         }
+
+        /// <summary>「-NNG」の赤。ぶつけて値段が下がったことが一目でわかる色</summary>
+        static readonly Color DamageColor = new Color(1f, 0.2f, 0.2f);
+        /// <summary>初めての一文の色。赤い「-NNG」と区別して読める白</summary>
+        static readonly Color NoteColor = Color.white;
+        /// <summary>値札の上に重ねない高さ（m）。値札（高さ 0.3m）の上に、一文 → 「-NNG」の順に積む</summary>
+        const float NoteOffset = 0.1f, AmountOffset = 0.18f;
+        const float AmountFontSize = 1.0f, NoteFontSize = 0.45f;
+        /// <summary>砕ける演出の片付けまでの秒数（プレハブが自分で消えない場合の保険）</summary>
+        const float ShatterLifetime = 5f;
 
         SessionClientCore _core;
         ClientItemTable _table;
@@ -40,6 +53,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         readonly Dictionary<int, View> _views = new Dictionary<int, View>();
         readonly Dictionary<int, HandGrabber> _holders = new Dictionary<int, HandGrabber>();
         readonly List<ThPoseEntry> _poseBuffer = new List<ThPoseEntry>();
+        readonly List<DamagePopup> _popups = new List<DamagePopup>();
         HandGrabber _grabbing;
         ThParams _configuredFor;
 
@@ -108,7 +122,7 @@ namespace STYLY.TIB_Template.TreasureHaul
                         if (slotDue)
                         {
                             var tr = v.Treasure.transform;
-                            _poseBuffer.Add(new ThPoseEntry { item = m.Index, pos = tr.localPosition, rot = tr.localRotation });
+                            _poseBuffer.Add(new ThPoseEntry { item = m.Index, pos = tr.localPosition, rot = tr.localRotation, exempt = v.Treasure.IsDamageExempt });
                         }
                     }
                 }
@@ -225,7 +239,9 @@ namespace STYLY.TIB_Template.TreasureHaul
                 go.name = $"Treasure_{m.Index}_{m.Kind}";
                 var t = go.GetComponent<Treasure>();
                 t.Initialize(m, Grip, normal, aimed, _treasureLayer, _handleLayer);
+                t.ConfigureDamage(_core.Params.treasure.speedSmoothFrames, _core.Params.treasure.redamageInterval, _core.Params.grip.poseSendInterval, _core.Params.grip.followSpeedMax);
                 t.PlaceKinematic(m.HomePos, m.HomeRot);
+                t.Impacts.Subscribe(imp => OnImpact(t, imp)).AddTo(_tableSubs);
                 var label = PriceLabel.Create(_venue.Root, t.LabelAnchor, _labelHeight, _content.text, _labelFont);
                 label.SetState(m.Revealed, m.Value);
                 _views[m.Index] = new View { Treasure = t, Label = label };
@@ -239,10 +255,12 @@ namespace STYLY.TIB_Template.TreasureHaul
             _tableSubs = null;
             foreach (var kv in _views)
             {
-                if (kv.Value.Treasure != null) Destroy(kv.Value.Treasure.gameObject);
+                if (kv.Value.Treasure != null) Destroy(kv.Value.Treasure.gameObject);   // ヒビはお宝の子なので一緒に消える
                 if (kv.Value.Label != null) Destroy(kv.Value.Label.gameObject);
             }
             _views.Clear();
+            foreach (var p in _popups) if (p != null) Destroy(p.gameObject);   // 表示中の「-NNG」・一文（Tween は SetLink で止まる）
+            _popups.Clear();
             _holders.Clear();
             if (_left != null) { _left.Held = null; _left.ClearAim(); }
             if (_right != null) { _right.Held = null; _right.ClearAim(); }
@@ -344,7 +362,91 @@ namespace STYLY.TIB_Template.TreasureHaul
                     ReleaseHolder(m.Index);
                     t.StopInPlace();
                     break;
+                case ItemEventKind.Damaged:
+                    OnDamagedEvent(v, e);
+                    break;
+                case ItemEventKind.HitsSynced:
+                    // ThDamaged を取りこぼした: ヒビと値札だけ合わせる（「-NNG」と音は出さない）
+                    v.Label.SetState(m.Revealed, m.Value);
+                    SetCrack(v, m.Hits);
+                    break;
+                case ItemEventKind.Destroyed:
+                    OnDestroyedEvent(v, e, true);
+                    break;
+                case ItemEventKind.DestroyedQuiet:
+                    OnDestroyedEvent(v, e, false);
+                    break;
             }
+        }
+
+        // ---- 減額（設計書 5章・9章） ----
+
+        /// <summary>自分が動かしているお宝がぶつかった。数える衝撃以上なら ThDamage をホストへ送る（判断は ClientItemTable）</summary>
+        void OnImpact(Treasure t, TreasureImpact imp)
+        {
+            if (_table == null || _venue == null || t == null || t.Model == null) return;
+            var local = _venue.Root.InverseTransformPoint(imp.WorldPoint);
+            _table.TryReportDamage(t.Model.Index, imp.OtherIndex, local, imp.Speed);
+        }
+
+        void OnDamagedEvent(View v, ItemEvent e)
+        {
+            var m = e.Item;
+            var d = e.Damage;
+            v.Label.SetState(m.Revealed, m.Value);   // 値段が「？」のお宝は「？」のまま
+            SetCrack(v, m.Hits);
+            if (d == null) return;
+            ThAudioPlayer.Play(_content.audio, ThSoundId.Damage, _venue.Root.TransformPoint(d.pos));
+            ShowDamageTexts(v.Treasure, d, e.ShowNote);
+        }
+
+        void OnDestroyedEvent(View v, ItemEvent e, bool withEffects)
+        {
+            var m = e.Item;
+            var t = v.Treasure;
+            if (withEffects && t != null && e.Damage != null)
+            {
+                ShowDamageTexts(t, e.Damage, e.ShowNote);   // 砕ける前に「-NNG」を出す（お宝が消えても最後の位置に残る）
+                var pos = t.transform.position;
+                var prefab = _content.fx?.Find(ThFxId.Shatter)?.prefab;
+                if (prefab != null) Destroy(Instantiate(prefab, pos, Quaternion.identity), ShatterLifetime);
+                ThAudioPlayer.Play(_content.audio, ThSoundId.Shatter, pos);
+            }
+            ReleaseHolder(m.Index);
+            if (t != null) Destroy(t.gameObject);
+            if (v.Label != null) Destroy(v.Label.gameObject);
+        }
+
+        /// <summary>「-NNG」（値段公開済みのお宝だけ）と、初めてぶつけた人への一文（その端末だけ）</summary>
+        void ShowDamageTexts(Treasure t, ThDamagedMsg d, bool showNote)
+        {
+            if (t == null || _content == null || _venue == null) return;
+            _popups.RemoveAll(p => p == null);
+            if (d.revealed)
+                _popups.Add(DamagePopup.Spawn(_venue.Root, t.LabelAnchor, _labelHeight + AmountOffset,
+                    _content.text.Format(ThTextId.DamageFormat, d.amount), _labelFont, DamageColor, AmountFontSize, DamagePopup.RiseHeight, DamagePopup.AmountSeconds));
+            if (showNote)
+                _popups.Add(DamagePopup.Spawn(_venue.Root, t.LabelAnchor, _labelHeight + NoteOffset,
+                    _content.text.Get(ThTextId.PracticeDamageNote), _labelFont, NoteColor, NoteFontSize, 0f, DamagePopup.NoteSeconds));
+        }
+
+        /// <summary>ヒビを回数の段階に合わせる（1 回目 = Crack1、2 回目 = Crack2。前の段階は外す）。お宝のモデルの大きさに合わせて拡大する</summary>
+        void SetCrack(View v, int hits)
+        {
+            if (v.CrackStage == hits || v.Treasure == null) return;
+            v.CrackStage = hits;
+            if (v.Crack != null) Destroy(v.Crack);
+            v.Crack = null;
+            var id = hits == 1 ? ThFxId.Crack1 : hits == 2 ? ThFxId.Crack2 : (ThFxId?)null;
+            if (id == null) return;
+            var prefab = _content?.fx?.Find(id.Value)?.prefab;
+            if (prefab == null) return;
+            var go = Instantiate(prefab, v.Treasure.transform);
+            var b = v.Treasure.ModelBounds;
+            go.transform.localPosition = b.center;
+            go.transform.localRotation = Quaternion.identity;
+            go.transform.localScale = b.size;
+            v.Crack = go;
         }
 
         void ReleaseHolder(int index)
