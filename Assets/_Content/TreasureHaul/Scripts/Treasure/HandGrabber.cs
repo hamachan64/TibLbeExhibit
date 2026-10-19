@@ -42,17 +42,23 @@ namespace STYLY.TIB_Template.TreasureHaul
         int _handleMask;
 
         Treasure _aimed;
+        int _aimedHandle = -1;
         Treasure _lastAimed;
+        int _lastAimedHandle = -1;
         double _lastAimedAt = double.NegativeInfinity;
         Vector3 _beamDir = Vector3.forward;
 
         public HandGripTracker Tracker => _tracker;
         public Handedness Handedness => _tracker != null ? _tracker.Handedness : Handedness.Right;
+        /// <summary>端末の表（ClientItemTable）で使う左右</summary>
+        public ThHand Hand => Handedness == Handedness.Left ? ThHand.Left : ThHand.Right;
         /// <summary>手に合わせて動く目標（お宝はこれに追従する）</summary>
         public Transform Anchor => _anchor;
         /// <summary>今ビームが当たっている持ち手のお宝（つかめるものだけ）</summary>
         public Treasure Aimed => _aimed;
-        /// <summary>この手が申請中・持っているお宝</summary>
+        /// <summary>今ビームが当たっている持ち手の番号（Treasure.Handles の何番目か。-1 = なし）</summary>
+        public int AimedHandle => _aimedHandle;
+        /// <summary>この手が申請中・持っているお宝（M は片手予約・両手で持っている間もそのお宝）</summary>
         public Treasure Held { get; set; }
         public IGrabStyle Style { get => _style; set => _style = value ?? new BeamGrabStyle(); }
 
@@ -74,7 +80,7 @@ namespace STYLY.TIB_Template.TreasureHaul
                 _beam.enabled = false;
             }
             _tracker.IsGripping.Subscribe(OnGripChanged).AddTo(this);
-            _tracker.Released.Subscribe(_ => OnReleased()).AddTo(this);
+            _tracker.Released.Subscribe(OnReleased).AddTo(this);
         }
 
         static double Now => Time.realtimeSinceStartupAsDouble;
@@ -86,6 +92,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             {
                 SetBeam(false, default, default);
                 _aimed = null;
+                _aimedHandle = -1;
                 return;
             }
 
@@ -97,13 +104,15 @@ namespace STYLY.TIB_Template.TreasureHaul
             _anchor.SetPositionAndRotation(target.position, target.rotation);
 
             float length = _style.BeamLength(_client.Grip);
-            _aimed = Held == null && _client.CanGrab ? FindAimed(palm.position, _beamDir, length) : null;
-            if (_aimed != null) { _lastAimed = _aimed; _lastAimedAt = Now; }
+            _aimed = Held == null && _client.CanGrab ? FindAimed(palm.position, _beamDir, length, out _aimedHandle) : null;
+            if (_aimed == null) _aimedHandle = -1;
+            else { _lastAimed = _aimed; _lastAimedHandle = _aimedHandle; _lastAimedAt = Now; }
             SetBeam(true, palm.position, palm.position + _beamDir * length);
         }
 
-        Treasure FindAimed(Vector3 origin, Vector3 dir, float length)
+        Treasure FindAimed(Vector3 origin, Vector3 dir, float length, out int handleIndex)
         {
+            handleIndex = -1;
             if (_handleMask == 0) return null;
             int n = Physics.SphereCastNonAlloc(origin, _client.Grip.snapRadius, dir, _hits, length, _handleMask, QueryTriggerInteraction.Collide);
             Treasure best = null;
@@ -111,8 +120,11 @@ namespace STYLY.TIB_Template.TreasureHaul
             for (int i = 0; i < n; i++)
             {
                 var t = _hits[i].collider.GetComponentInParent<Treasure>();
-                if (t == null || !_client.IsTargetable(t)) continue;
-                if (_hits[i].distance < bestDist) { bestDist = _hits[i].distance; best = t; }
+                if (t == null) continue;
+                int handle = System.Array.IndexOf(t.Handles, _hits[i].collider);   // M は左右 2 つのどちらか
+                if (handle < 0) continue;   // 持ち手として登録されていないコライダーは対象にしない
+                if (!_client.IsTargetable(t, Hand, handle)) continue;
+                if (_hits[i].distance < bestDist) { bestDist = _hits[i].distance; best = t; handleIndex = handle; }
             }
             return best;
         }
@@ -127,21 +139,27 @@ namespace STYLY.TIB_Template.TreasureHaul
         void OnGripChanged(bool gripping)
         {
             if (!gripping || _client == null || Held != null) return;
+            // M を両手で持っている間に外れた手・予約中に見失った手が、もう一度握った: ビームの当て直しは要らない
+            if (_client.TryRegrip(this)) return;
             // 握った瞬間にビームが外れていても、〔狙いの保持〕以内に当たっていた持ち手を対象にする
             var target = _aimed;
-            if (target == null && _lastAimed != null && Now - _lastAimedAt <= _client.Grip.aimHoldSeconds && _client.IsTargetable(_lastAimed))
+            int handle = _aimedHandle;
+            if (target == null && _lastAimed != null && Now - _lastAimedAt <= _client.Grip.aimHoldSeconds && _client.IsTargetable(_lastAimed, Hand, _lastAimedHandle))
+            {
                 target = _lastAimed;
+                handle = _lastAimedHandle;
+            }
             if (target == null || !_client.CanGrab) return;
-            _client.TryGrab(this, target);
+            _client.TryGrab(this, target, Mathf.Max(0, handle));
         }
 
-        void OnReleased()
+        void OnReleased(GripReleaseReason reason)
         {
             if (Held == null || _client == null) return;
-            // TODO(#41): 解除の理由が見失い（GripReleaseReason.Lost）のときは Hovering にする。#38 では手を開いたときと同じ扱い。
-            _client.OnHandReleased(this);
+            // S は理由を問わず手を開いたのと同じ扱い（TODO(#41): 見失いは Hovering にする）。M は予約・猶予が理由を見る
+            _client.OnHandReleased(this, reason == GripReleaseReason.Lost);
         }
 
-        public void ClearAim() { _aimed = null; _lastAimed = null; }
+        public void ClearAim() { _aimed = null; _lastAimed = null; _aimedHandle = -1; _lastAimedHandle = -1; }
     }
 }

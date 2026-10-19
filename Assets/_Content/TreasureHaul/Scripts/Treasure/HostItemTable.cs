@@ -99,15 +99,20 @@ namespace STYLY.TIB_Template.TreasureHaul
             if (it == null || m.reqId <= 0) return;
             if (_cancelled.Contains(Key(deviceId, m.item, m.reqId))) return;   // 取りやめ済み。認めない（返事も要らない）
 
-            // 同じ申請の再送: すでに認めていれば同じ承認を送り直す
-            if (it.State == ItemState.Held && it.OwnerDevice == deviceId && it.AcceptedReqId == m.reqId)
+            // 同じ申請の再送: すでに認めていれば同じ承認を送り直す（S は Held、M は予約中の Locked）
+            if (it.OwnerDevice == deviceId && it.AcceptedReqId == m.reqId
+                && ((it.Kind == TreasureKind.S && it.State == ItemState.Held) || (it.Kind == TreasureKind.M && it.State == ItemState.Locked)))
             {
                 EmitGrabbed(it);
                 return;
             }
+            // 持ち上げ後の M への古い予約の再送は、何も返さない（持ち上げの再送は ThLift で受ける）
+            if (it.Kind == TreasureKind.M && it.State == ItemState.Held && it.OwnerDevice == deviceId && it.AcceptedReqId == m.reqId) return;
 
+            // お宝の種類と申請の種類が合うときだけ（S は kind=S、M は kind=M。L・秘宝は #40 の範囲外なので否認）
+            bool kindOk = (it.Kind == TreasureKind.S && m.kind == (int)TreasureKind.S) || (it.Kind == TreasureKind.M && m.kind == (int)TreasureKind.M);
             bool ok = !it.Gone
-                && it.Kind == TreasureKind.S   // #40 まで M はつかめない
+                && kindOk
                 && !it.Practice
                 && it.State == ItemState.Resting
                 && !InCollectZone(it.RestPos);
@@ -118,15 +123,57 @@ namespace STYLY.TIB_Template.TreasureHaul
             }
 
             it.Gen++;
-            it.State = ItemState.Held;
+            // M は片手予約（Locked）。値段は公開せず、「持った」にも数えない。S は持ち主を認めた時点で Held・値段公開
+            it.State = it.Kind == TreasureKind.M ? ItemState.Locked : ItemState.Held;
             it.OwnerDevice = deviceId;
             it.OwnerClientNo = clientNo;
             it.AcceptedReqId = m.reqId;
             it.ControllerDevice = deviceId;
             it.ControllerClientNo = clientNo;
-            it.Revealed = true;   // 以後ずっと公開
+            if (it.Kind == TreasureKind.S) it.Revealed = true;   // 以後ずっと公開
             it.ExemptReported = false;
             EmitGrabbed(it);
+        }
+
+        // ---- M の両手成立 ----
+
+        /// <summary>
+        /// M の両手成立（設計書 4.4 の M 手順 3）。送り手が予約の持ち主で、申請ID・世代が一致し、Locked なら Held にして値段を公開する。
+        /// 世代は変えない（4.2: +1 は持ち主を認めたとき・つかめるに戻したとき・回収・消滅だけ）。
+        /// </summary>
+        public void OnLift(string deviceId, int clientNo, ThLiftMsg m)
+        {
+            var it = Get(m.item);
+            if (it == null || m.reqId <= 0) return;
+            bool match = it.Kind == TreasureKind.M && !it.Gone && it.OwnerDevice != null && it.OwnerDevice == deviceId
+                && it.AcceptedReqId == m.reqId && it.Gen == m.gen;
+            if (match && it.State == ItemState.Locked)
+            {
+                it.State = ItemState.Held;
+                it.Revealed = true;   // 以後ずっと公開
+                it.ExemptReported = false;
+                EmitLifted(it);
+                return;
+            }
+            if (match && it.State == ItemState.Held) { EmitLifted(it); return; }   // 同じ申請の再送
+            _emit(Rpc.ThGrabDenied, new ThGrabDeniedMsg { item = it.Index, clientNo = clientNo, reqId = m.reqId });
+        }
+
+        void EmitLifted(HostItem it)
+        {
+            it.OwnerClientNo = CurrentNo(it.OwnerDevice, it.OwnerClientNo);
+            _emit(Rpc.ThLifted, new ThLiftedMsg { item = it.Index, clientNo = it.OwnerClientNo, reqId = it.AcceptedReqId, gen = it.Gen, value = it.Value });
+        }
+
+        /// <summary>
+        /// その端末が片手予約中（Locked）のお宝をすべて「つかめる」に戻す（切断・見学への切り替え。設計書 3.3）。
+        /// 持っている（Held 等の）お宝の扱いは #41。
+        /// </summary>
+        public void ReleaseReservationsOf(string deviceId)
+        {
+            if (deviceId == null) return;
+            foreach (var it in _items)
+                if (!it.Gone && it.State == ItemState.Locked && it.OwnerDevice == deviceId) FreeToRest(it);
         }
 
         int CurrentNo(string device, int stored)
@@ -139,7 +186,8 @@ namespace STYLY.TIB_Template.TreasureHaul
         void EmitGrabbed(HostItem it)
         {
             it.OwnerClientNo = CurrentNo(it.OwnerDevice, it.OwnerClientNo);
-            _emit(Rpc.ThGrabbed, new ThGrabbedMsg { item = it.Index, clientNo = it.OwnerClientNo, reqId = it.AcceptedReqId, gen = it.Gen, value = it.Value });
+            bool reserve = it.State == ItemState.Locked;   // M の片手予約は値段を載せない
+            _emit(Rpc.ThGrabbed, new ThGrabbedMsg { item = it.Index, clientNo = it.OwnerClientNo, reqId = it.AcceptedReqId, gen = it.Gen, value = reserve ? 0 : it.Value, reserve = reserve });
         }
 
         // ---- 置く・取りやめ ----
@@ -158,10 +206,18 @@ namespace STYLY.TIB_Template.TreasureHaul
                 return;
             }
 
+            if (m.reason == (int)ReleaseReason.Unreserve)
+            {
+                // M の予約解除: 持ち主・申請ID・世代が一致し、Locked のときだけ「つかめる」に戻す。それ以外は捨てる
+                if (!isOwner || m.gen != it.Gen || it.State != ItemState.Locked) return;
+                FreeToRest(it);
+                return;
+            }
+
             if (m.reason == (int)ReleaseReason.Dropped)
             {
-                // 今の持ち主の申請ID・世代が一致するものだけ。世代は変えない
-                if (!isOwner || m.gen != it.Gen) return;
+                // 今の持ち主の申請ID・世代が一致するものだけ。世代は変えない（予約中は落とせない）
+                if (!isOwner || m.gen != it.Gen || it.State == ItemState.Locked) return;
                 it.State = ItemState.Falling;
                 it.OwnerDevice = null;
                 it.OwnerClientNo = -1;

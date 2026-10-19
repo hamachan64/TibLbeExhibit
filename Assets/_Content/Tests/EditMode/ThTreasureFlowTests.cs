@@ -82,7 +82,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
             Assert.AreEqual("A", h.Table.Items[0].OwnerDevice);
         }
 
-        [Test] public void 種類Mの申請は否認する()
+        [Test] public void Mのお宝へのSの申請は否認する()
         {
             var h = new HostRig(TreasureKind.M);
             h.Table.OnGrab("A", 2, Grab(0, 1));
@@ -473,11 +473,11 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
             Assert.AreEqual(0, c.Tx.Sent.Count);
         }
 
-        [Test] public void 端末_Mと参加していない端末はつかめない()
+        [Test] public void 端末_Mはビームの対象だがSの手順では持てず_参加していない端末はつかめない()
         {
             var c = new ClientRig(TreasureKind.M, TreasureKind.S);
-            Assert.IsFalse(c.Table.IsGrabbable(c.Table.Items[0]));
-            Assert.IsFalse(c.Table.TryBeginGrab(0, 0));
+            Assert.IsTrue(c.Table.IsGrabbable(c.Table.Items[0]), "M も #40 からビームの対象（予約は TryBeginLock）");
+            Assert.IsFalse(c.Table.TryBeginGrab(0, 0), "M は S の手順では持てない");
             c.Table.ParticipantPlaying = false;
             Assert.IsFalse(c.Table.TryBeginGrab(1, 0));
         }

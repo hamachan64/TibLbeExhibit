@@ -55,7 +55,7 @@ namespace STYLY.TIB_Template.TreasureHaul
                 _core.OwnClientNo = _nm.ClientNo;
                 var t = _core.Tracker;
 
-                foreach (var rpc in new[] { Rpc.ThState, Rpc.ThHeartbeat, Rpc.ThParams, Rpc.ThGrabbed, Rpc.ThGrabDenied, Rpc.ThFreed, Rpc.ThCollected, Rpc.ThItems, Rpc.ThPoses, Rpc.ThDamaged })
+                foreach (var rpc in new[] { Rpc.ThState, Rpc.ThHeartbeat, Rpc.ThParams, Rpc.ThGrabbed, Rpc.ThLifted, Rpc.ThGrabDenied, Rpc.ThFreed, Rpc.ThCollected, Rpc.ThItems, Rpc.ThPoses, Rpc.ThDamaged })
                 {
                     var r = rpc;
                     RpcManager.Instance.AsObservable(r)

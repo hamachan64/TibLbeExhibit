@@ -156,6 +156,9 @@ namespace STYLY.TIB_Template.TreasureHaul
                 case Rpc.ThGrabbed:
                     if (TryItemMsg(args, out ThGrabbedMsg gm)) _items.Value.OnGrabbed(gm, now);
                     break;
+                case Rpc.ThLifted:
+                    if (TryItemMsg(args, out ThLiftedMsg lm)) _items.Value.OnLifted(lm, now);
+                    break;
                 case Rpc.ThGrabDenied:
                     if (TryItemMsg(args, out ThGrabDeniedMsg dm)) _items.Value.OnDenied(dm, now);
                     break;

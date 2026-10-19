@@ -45,6 +45,32 @@ namespace STYLY.TIB_Template.TreasureHaul
 
         /// <summary>他の端末が動かしているときの位置の補間</summary>
         public readonly PoseInterpolator Interp = new PoseInterpolator();
+
+        // ---- M（両手で持つ。#40。設計書 4.4 の M の手順）。S では使わない ----
+
+        /// <summary>予約した持ち手の番号（Treasure.Handles の何番目か。-1 = 予約なし）</summary>
+        public int LockHandle = -1;
+        /// <summary>予約した手（ThHand。-1 = なし）</summary>
+        public int ReserveHand = -1;
+        /// <summary>予約が認められた（ThGrabbed の reserve を受けた）</summary>
+        public bool Reserved;
+        /// <summary>2 本目の手で握り、ThLift を送って ThLifted を待っている</summary>
+        public bool LiftPending;
+        public double LiftSentAt;
+        /// <summary>予約の承認が届く前に 2 本目の手が握った（承認の瞬間に持ち上げへ進む）</summary>
+        public bool LiftQueued;
+        /// <summary>2 本目の手（ThHand。-1 = なし）と、握った持ち手の番号</summary>
+        public int SecondHand = -1;
+        public int SecondHandle = -1;
+        /// <summary>予約した手を見失って〔見失い待ち〕の最中（始まった時刻）</summary>
+        public bool ReserveLostWait;
+        public double ReserveLostSince;
+        /// <summary>両手で持っている間に片手が外れて〔M の猶予〕の最中</summary>
+        public bool GraceActive;
+        public double GraceSince;
+        /// <summary>外れた手（ThHand）と、その理由が見失いか</summary>
+        public int GraceHand = -1;
+        public bool GraceLost;
     }
 
     public enum ItemEventKind
@@ -78,6 +104,18 @@ namespace STYLY.TIB_Template.TreasureHaul
         Destroyed,
         /// <summary>消滅していた（ThItems で追いついた）。演出・音なしで消す</summary>
         DestroyedQuiet,
+        /// <summary>M を片手で握って予約を申請した（お宝は動かさない。値段も出さない）</summary>
+        LockStarted,
+        /// <summary>M の両手が成立して ThLift を送った。両手の目標へ飛び始める</summary>
+        LiftStarted,
+        /// <summary>M の予約を自分で解除した（お宝は動いていないので、手から外すだけ）</summary>
+        Unreserved,
+        /// <summary>M を両手で持っている間に片手が外れた（〔M の猶予〕の始まり。残った手で持ち続ける）</summary>
+        GraceStarted,
+        /// <summary>猶予の間に外れた手が握り直して、両手持ちに戻った</summary>
+        GraceEnded,
+        /// <summary>他の人の M の予約に切り替わった（または置き位置が変わった）。RestPos（置いた位置）に置き直す</summary>
+        RemoteLocked,
     }
 
     public readonly struct ItemEvent
@@ -98,7 +136,7 @@ namespace STYLY.TIB_Template.TreasureHaul
     /// 端末側のお宝の表と、つかむ手順（設計書 4.4 の端末側）・状態表への追いつき（6.2）。純粋クラス。時刻は引数。
     /// 見た目・物理は購読者（TreasureClient）が <see cref="Events"/> を見て行う。
     /// </summary>
-    public sealed class ClientItemTable : IDisposable
+    public sealed partial class ClientItemTable : IDisposable
     {
         readonly IThTransport _tx;
         readonly Func<long> _roundId;
@@ -140,9 +178,9 @@ namespace STYLY.TIB_Template.TreasureHaul
 
         public bool InCollectZone(Vector3 localPos) => _collectBounds.Contains(localPos);
 
-        /// <summary>ビームの対象にしてよいか（他の人が持っている・飛んでいる・荷台の範囲内・回収済み・M ではない）</summary>
+        /// <summary>ビームの対象にしてよいか（他の人が持っている・予約している・飛んでいる・荷台の範囲内・回収済み・S と M 以外ではない）</summary>
         public bool IsGrabbable(ClientItem it) =>
-            !Frozen && !it.Gone && it.Kind == TreasureKind.S && it.State == ItemState.Resting
+            !Frozen && !it.Gone && (it.Kind == TreasureKind.S || it.Kind == TreasureKind.M) && it.State == ItemState.Resting
             && it.OwnerClientNo < 0 && !it.Mine && !it.PendingRest && !it.PendingCollect && !it.ReqPending
             && !InCollectZone(it.RestPos);
 
@@ -155,7 +193,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         public bool TryBeginGrab(int index, double now)
         {
             var it = Get(index);
-            if (it == null || !ParticipantPlaying || !IsGrabbable(it)) return false;
+            if (it == null || !ParticipantPlaying || it.Kind != TreasureKind.S || !IsGrabbable(it)) return false;
             it.Mine = true;
             it.MyReqId = ++_nextReqId;
             it.ReqPending = true;
@@ -218,6 +256,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             {
                 if (!it.Mine || it.Gone) continue;
                 if (it.ReqPending && now - it.ReqSentAt >= _p.grip.approvalWaitSeconds) { Revert(it, true); continue; }
+                if (it.Kind == TreasureKind.M && TickTwoHand(it, now)) continue;
                 if ((it.PendingRest || it.PendingCollect) && now - it.LastSendAt >= _p.progress.resendInterval)
                 {
                     it.LastSendAt = now;
@@ -233,6 +272,8 @@ namespace STYLY.TIB_Template.TreasureHaul
             it.ReqPending = false;
             it.Approved = false;
             it.Mine = false;
+            ClearTwoHand(it);
+            if (it.OwnerClientNo == _ownClientNo()) it.OwnerClientNo = -1;   // M の予約が認められていた分
             it.State = ItemState.Resting;
             if (sendCancel && it.MyReqId > 0)
                 Send(Rpc.ThRelease, new ThReleaseMsg { item = it.Index, reqId = it.MyReqId, gen = it.Gen, reason = (int)ReleaseReason.Cancel });
@@ -280,7 +321,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             it.Value = m.value;
             it.Gen = Math.Max(it.Gen, m.gen);
             // 初めての一文: 自分が動かしているお宝で、この回で初めてのとき（値段が「？」でも出す）
-            bool note = it.Mine && !_noteShown;
+            bool note = it.Mine && it.State != ItemState.Locked && !_noteShown;   // 予約中の M は動いていないので、本人にも出さない
             if (note) _noteShown = true;
             if (m.destroyed)
             {
@@ -299,6 +340,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         static void ClearOwnership(ClientItem it)
         {
             it.Mine = false; it.ReqPending = false; it.Approved = false; it.PendingRest = false; it.PendingCollect = false;
+            ClearTwoHand(it);
             it.OwnerClientNo = -1;
         }
 
@@ -311,6 +353,7 @@ namespace STYLY.TIB_Template.TreasureHaul
 
             if (m.clientNo == own)
             {
+                if (m.reserve) { OnReserveApproved(it, m, now); return; }
                 if (it.MyReqId == m.reqId && it.Approved) return;   // 重複
                 if (it.MyReqId == m.reqId && it.ReqPending && it.Mine)
                 {
@@ -325,9 +368,12 @@ namespace STYLY.TIB_Template.TreasureHaul
             }
 
             // 他の端末が持った
+            // 同じ持ち主の予約（世代が同じ ThGrabbed(reserve)）が、持ち上げ済み（Held）の後に届いても Held を Locked に戻さない
+            if (m.reserve && !it.Mine && it.State == ItemState.Held && it.OwnerClientNo == m.clientNo) return;
             bool lostRace = it.Mine;
             it.Gen = m.gen;
             if (lostRace) { var wasPending = it.ReqPending; Revert(it, wasPending); }
+            if (m.reserve) { SetRemoteLocked(it, m.clientNo); return; }   // M の予約: 値段は公開しない・お宝は置いた位置のまま
             SetRemoteHeld(it, m.clientNo);
             SetRevealed(it, m.value, true);
         }
@@ -364,7 +410,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             var it = Get(m.item);
             if (it == null || it.Gone || Frozen) return;
             if (m.clientNo != _ownClientNo()) return;
-            if (it.MyReqId != m.reqId || !it.ReqPending) return;
+            if (it.MyReqId != m.reqId || !(it.ReqPending || it.LiftPending)) return;   // M は予約の否認も ThLift の否認もここ
             Revert(it, true);
         }
 
@@ -391,6 +437,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             it.ReqPending = false;
             it.PendingRest = false;
             it.PendingCollect = false;
+            ClearTwoHand(it);
             it.OwnerClientNo = -1;
             it.State = ItemState.Resting;
             it.RestPos = pos;
@@ -411,6 +458,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             if (it.Gone) return;
             it.Gone = true;
             it.Mine = false; it.ReqPending = false; it.Approved = false; it.PendingRest = false; it.PendingCollect = false;
+            ClearTwoHand(it);
             it.State = ItemState.Collected;
             Raise(it, ItemEventKind.Collected);
         }
@@ -459,14 +507,15 @@ namespace STYLY.TIB_Template.TreasureHaul
                 }
                 if (it.Gone) continue;
                 if (e.gen < it.Gen) continue;
-                Reconcile(it, e);
+                Reconcile(it, e, now);
             }
         }
 
-        void Reconcile(ClientItem it, ThItemEntry e)
+        void Reconcile(ClientItem it, ThItemEntry e, double now)
         {
             int own = _ownClientNo();
             var state = (ItemState)e.state;
+            int oldGen = it.Gen;
             it.Gen = Math.Max(it.Gen, e.gen);
             if (e.revealed) SetRevealed(it, e.value, false);
             else it.Value = e.value;
@@ -477,7 +526,8 @@ namespace STYLY.TIB_Template.TreasureHaul
                 {
                     if (it.Mine && it.MyReqId == e.reqId)
                     {
-                        if (it.ReqPending) Approve(it, e.value, false);   // ThGrabbed を取りこぼした
+                        if (it.Kind == TreasureKind.M) ReconcileOwnM(it, e, state, now);
+                        else if (it.ReqPending) Approve(it, e.value, false);   // ThGrabbed を取りこぼした
                     }
                     else
                     {
@@ -486,14 +536,26 @@ namespace STYLY.TIB_Template.TreasureHaul
                     }
                     return;
                 }
+                bool posChanged = false;
+                if (state == ItemState.Locked)
+                {
+                    // 同じ持ち主ですでに Held と知っているなら、同じ世代の Locked の状態表で戻さない
+                    if (!it.Mine && it.State == ItemState.Held && it.OwnerClientNo == e.owner) return;
+                    // 予約中の M は誰も位置を送らないので、ホストの置き位置に合わせる
+                    posChanged = (it.RestPos - e.pos).sqrMagnitude > 1e-6f;
+                    it.RestPos = e.pos;
+                    it.RestRot = e.rot;
+                }
                 if (it.Mine)
                 {
-                    bool pending = it.ReqPending;
+                    bool pending = it.ReqPending || it.LiftPending;
                     it.Mine = false; it.ReqPending = false; it.Approved = false; it.PendingRest = false; it.PendingCollect = false;
+                    ClearTwoHand(it);
                     it.State = ItemState.Resting;
                     if (pending) Raise(it, ItemEventKind.Reverted); else Raise(it, ItemEventKind.OwnershipLost);
                 }
-                SetRemoteHeld(it, e.owner);
+                if (state == ItemState.Locked) SetRemoteLocked(it, e.owner, posChanged);   // 他の人の M の予約（値段は公開しない）
+                else SetRemoteHeld(it, e.owner);
                 return;
             }
 
@@ -501,6 +563,12 @@ namespace STYLY.TIB_Template.TreasureHaul
             if (state == ItemState.Resting)
             {
                 if (it.Mine && it.ReqPending) return;   // 申請の途中（ホストはまだ受けていない）
+                if (it.Mine && it.Kind == TreasureKind.M && (it.Reserved || it.LiftPending) && e.gen > oldGen)
+                {
+                    // 予約中のつもりが、ホストでは解除されて世代が進んでいた（切断扱い・ThFreed の取りこぼしなど）→ 予約を消して手から外す
+                    ApplyFreed(it, e.pos, e.rot);
+                    return;
+                }
                 if (it.Mine && it.Approved && it.State != ItemState.Falling && it.State != ItemState.Resting)
                 {
                     // 持っていたつもりが、ホストでは置かれた → 手放す

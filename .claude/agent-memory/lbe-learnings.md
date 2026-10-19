@@ -441,3 +441,11 @@
 - **ホストが覚える免除は、動いている状態のときだけ受ける**: 判定役は置かれた後も「最後の持ち主」として残る。そのため、遅れて届いた `exempt=true` で、置かれたお宝の免除が立ちっぱなしになり得る。Held / Falling 等のときだけ覚え、落としたときにも戻す。
 - **DOTween の Sequence の中では入れ子の Tween の `SetDelay` が効かない**。開始時刻は `Insert(時刻, tween)` で指定する。
 - **PlayMode でエディタを一時停止すると、ホストの Heartbeat が途絶えて端末が Waiting に落ちる**。画面を止めて撮りたいときは `Time.timeScale = 0` にする。
+
+## M（両手で持つ。Issue #40、2026-10-20）で分かったこと
+- **新しい RPC を足したら、`SessionHost` / `SessionClient` の RPC 購読の一覧にも足す**。`SessionHostCore` / `SessionClientCore` の `OnRpc` に分岐を足しただけでは届かない（`ThLift` / `ThLifted` で漏れた）。偽の通信でつなぐ EditMode テストでは購読の一覧を通らないので見つからず、エディタで ParrelSync のクローンと実際に通信して初めて見つかった。
+- **エディタで両手を動かすときは、XR Interaction Simulator ではなく `HandGripTracker` の状態（握り・解除・手のひらの位置）をリフレクションで直接書く**と、2本の手を離して狙う・握る操作を時間どおりに再現できる。ただし `GripStateMachine`（しきい値・離す判定）は通らない。
+  - 握ったままの手に、もう一度「握る」を書いてもイベントは出ない（`ReactiveProperty` は同じ値では通知しない）。先に「開く」を書いてから「握る」。
+  - dynamic code では `Object` が `UnityEngine.Object` と `System.Object` で曖昧になるので、完全修飾で書く。
+- **予約が認められた後に否認・取りやめで戻すときは、端末側の持ち主（`OwnerClientNo`）も -1 に戻す**。戻さないと、自分の予約の跡が残って、そのお宝を二度とつかめなくなる。
+- **作業中に `TH_DiscoverGlow.mat` の `_Color` が `_BaseColor` と同じ値に書き換わることがある**（コードからは触っていない。URP がマテリアルを保存し直すときに古い `_Color` を合わせているとみられる。原因は未確認）。今回の作業と関係なければ、コミット前に戻す。

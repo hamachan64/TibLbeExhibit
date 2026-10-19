@@ -73,6 +73,23 @@ namespace STYLY.TIB_Template.TreasureHaul
 
         public int HandleCount => _handles == null ? 0 : _handles.Length;
         public Collider[] Handles => _handles;
+        /// <summary>
+        /// 手に合わせる点（お宝のローカル）。S は設定値。M（持ち手が 2 つ）は 2 つの持ち手の中点（両手の中点に置くため）。
+        /// </summary>
+        public Vector3 HoldPoint
+        {
+            get
+            {
+                if (Model != null && Model.Kind == TreasureKind.M && HandleCount >= 2 && _handles[0] != null && _handles[1] != null)
+                    return (HandleLocalPosition(0) + HandleLocalPosition(1)) * 0.5f;
+                return _holdPoint;
+            }
+        }
+        /// <summary>手に合わせる点のワールド座標</summary>
+        public Vector3 HoldPointWorld => transform.TransformPoint(HoldPoint);
+        /// <summary>持ち手 i の位置（お宝のローカル）。範囲外・欠けは原点</summary>
+        public Vector3 HandleLocalPosition(int i) =>
+            _handles != null && i >= 0 && i < _handles.Length && _handles[i] != null ? transform.InverseTransformPoint(_handles[i].transform.position) : Vector3.zero;
         public Transform LabelAnchor => _labelAnchor != null ? _labelAnchor : transform;
         public ClientItem Model { get; private set; }
         public TreasureMode Mode { get; private set; } = TreasureMode.Kinematic;
@@ -191,8 +208,11 @@ namespace STYLY.TIB_Template.TreasureHaul
             SetKinematicMode();
         }
 
-        /// <summary>手元へ〔飛ぶ時間〕で飛ばし、着いたら追従に切り替える（飛んでいる間は障害物に当たらない＝減額しない）</summary>
-        public void FlyToHand(Transform target, float duration)
+        /// <summary>
+        /// 手元へ〔飛ぶ時間〕で飛ばし、着いたら追従に切り替える（飛んでいる間は障害物に当たらない＝減額しない）。
+        /// exactRotation = true（M の両手の目標）のときは、目標の向きをそのままお宝の向きにする（立て直しや相対の向きは使わない）。
+        /// </summary>
+        public void FlyToHand(Transform target, float duration, bool exactRotation = false)
         {
             KillFlight();
             _contactTracker.Clear();
@@ -201,13 +221,13 @@ namespace STYLY.TIB_Template.TreasureHaul
             _followTarget = null;
             // 着いたときの向き: 今の向きの Y 回転だけを残して立てた向きを、手の向きからの相対で覚える
             var upright = Quaternion.Euler(0f, transform.eulerAngles.y, 0f);
-            _followRelRot = Quaternion.Inverse(target.rotation) * upright;
+            _followRelRot = exactRotation ? Quaternion.identity : Quaternion.Inverse(target.rotation) * upright;
             Vector3 startPos = transform.position;
             Quaternion startRot = transform.rotation;
             _flight = DOVirtual.Float(0f, 1f, Mathf.Max(0.01f, duration), t =>
             {
                 var rot = target.rotation * _followRelRot;
-                var pos = target.position - rot * _holdPoint;
+                var pos = target.position - rot * HoldPoint;
                 transform.position = Vector3.Lerp(startPos, pos, t);
                 transform.rotation = Quaternion.Slerp(startRot, rot, t);
             }).SetEase(Ease.OutCubic).OnComplete(() =>
@@ -296,7 +316,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             if (Mode != TreasureMode.Follow || _followTarget == null || _rb == null || _rb.isKinematic) return;
             float dt = Time.fixedDeltaTime;
             var targetRot = _followTarget.rotation * _followRelRot;
-            var targetPos = _followTarget.position - targetRot * _holdPoint;
+            var targetPos = _followTarget.position - targetRot * HoldPoint;
 
             Vector3 v = (targetPos - _rb.position) / dt;
             float max = _grip.followSpeedMax;
@@ -403,6 +423,6 @@ namespace STYLY.TIB_Template.TreasureHaul
         }
 
         /// <summary>手の目標と、お宝の保持点との距離（デバッグ用）</summary>
-        public float DistanceToTarget() => _followTarget == null ? 0f : Vector3.Distance(_followTarget.position, transform.TransformPoint(_holdPoint));
+        public float DistanceToTarget() => _followTarget == null ? 0f : Vector3.Distance(_followTarget.position, HoldPointWorld);
     }
 }
