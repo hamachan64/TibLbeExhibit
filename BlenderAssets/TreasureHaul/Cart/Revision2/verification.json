@@ -1,0 +1,49 @@
+{
+  "fbx": {
+    "triangles": 4432,
+    "meshes": 9,
+    "bounds_blender": [
+      [
+        -0.40800002217292786,
+        0.40800002217292786
+      ],
+      [
+        -0.5839999318122864,
+        0.6200001239776611
+      ],
+      [
+        -6.705522537231445e-08,
+        0.7799999117851257
+      ]
+    ],
+    "wheel_pivots": 4,
+    "swivel_pivots": 2,
+    "grip_anchors": 2
+  },
+  "blend": {
+    "triangles": 4432,
+    "meshes": 9,
+    "bounds_blender": [
+      [
+        -0.40800002217292786,
+        0.40800002217292786
+      ],
+      [
+        -0.5839999914169312,
+        0.6200000047683716
+      ],
+      [
+        0.0,
+        0.7799999713897705
+      ]
+    ],
+    "wheel_pivots": 4,
+    "swivel_pivots": 2,
+    "grip_anchors": 2
+  },
+  "unity_imported": false,
+  "unity_compile": "not run",
+  "unity_editmode": "not run",
+  "pico_fps": "not measured",
+  "physical_cart_fit": "not measured"
+}

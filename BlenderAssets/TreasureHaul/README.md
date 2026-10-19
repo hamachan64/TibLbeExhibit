@@ -1,6 +1,8 @@
 # Treasure Haul treasure models
 
-**Stage:** [`Stage/`](Stage/README.md) contains the new 5m × 11m excavation-depot stage, extraction lift, low ruins, placement plan, and a preview with 23 reviewed treasures. Unity integration remains pending.
+**Cart:** use [`Cart/Revision2/`](Cart/Revision2/README.md), the researched salvage-bin revision (4,432 triangles), with a Unity prefab and live cargo-value display. See [`Cart/RESEARCH.md`](Cart/RESEARCH.md) for references and design decisions. Moving-cart gameplay and host synchronization remain pending.
+
+**Stage:** use [`Stage/Revision4/`](Stage/Revision4/README.md) for the 5m × 11m ruined-stone maze, weathered plaster, local soil/paving fragments, and roll-in extraction bay. Retains the L-shaped partition and loop. Includes route checks and previews with 23 treasures and the existing cart. Earlier revisions remain for comparison. Unity integration remains pending.
 
 **Current reviewed deliverables:** use [`Reviewed/`](Reviewed/) for the corrected ten models and 30 FBX variants. See [`Reviewed/REVIEW.md`](Reviewed/REVIEW.md) for findings, budgets, and remaining device validation; [`Reviewed/details.png`](Reviewed/details.png) shows the revised treasure silhouettes. Files below and in `S/` are retained as the original authoring inputs for comparison. Run `review_treasures.py` after regenerating those inputs, then `verify_reviewed.py`. Do not import the older exports by mistake.
 

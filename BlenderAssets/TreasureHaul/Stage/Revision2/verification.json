@@ -1,0 +1,116 @@
+{
+  "layout": {
+    "candidate_count": 28,
+    "min_treasure_edge_margin_m": 0.73,
+    "approaches_passed": 28,
+    "tutorial_points": 4,
+    "sample_population": "14 S + 9 M",
+    "human_proxy_radius_m": 0.3
+  },
+  "fbx": [
+    {
+      "path": "ExcavationDepot_5x11.fbx",
+      "triangles": 11948,
+      "meshes": 10,
+      "max_height_m": 0.7800002098083496,
+      "material_slots": 15
+    },
+    {
+      "path": "modules/THStage_ExtractionLift.fbx",
+      "triangles": 1732,
+      "meshes": 1,
+      "max_height_m": 0.7800002098083496,
+      "material_slots": 4
+    },
+    {
+      "path": "modules/THStage_Bay_01_ArchiveDrawers.fbx",
+      "triangles": 996,
+      "meshes": 1,
+      "max_height_m": 0.7325006723403931,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_Bay_02_EmptyVitrine.fbx",
+      "triangles": 528,
+      "meshes": 1,
+      "max_height_m": 0.7375007271766663,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_Bay_03_BrokenDado.fbx",
+      "triangles": 588,
+      "meshes": 1,
+      "max_height_m": 0.7100011110305786,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_Bay_04_StorageBench.fbx",
+      "triangles": 528,
+      "meshes": 1,
+      "max_height_m": 0.7000011205673218,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_Bay_05_DisplayPlinth.fbx",
+      "triangles": 308,
+      "meshes": 1,
+      "max_height_m": 0.6795014142990112,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_Bay_06_ServiceConsole.fbx",
+      "triangles": 616,
+      "meshes": 1,
+      "max_height_m": 0.7200015187263489,
+      "material_slots": 3
+    },
+    {
+      "path": "modules/THStage_ArchiveWainscot.fbx",
+      "triangles": 3960,
+      "meshes": 1,
+      "max_height_m": 0.6125016808509827,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_BackArchiveCabinet.fbx",
+      "triangles": 2596,
+      "meshes": 1,
+      "max_height_m": 0.763501763343811,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_ExcavationFloorMarks.fbx",
+      "triangles": 96,
+      "meshes": 1,
+      "max_height_m": 0.008001664653420448,
+      "material_slots": 1
+    }
+  ],
+  "blend": [
+    {
+      "path": "ExcavationDepot_5x11.blend",
+      "triangles": 11948,
+      "meshes": 10,
+      "max_height_m": 0.7800000309944153,
+      "material_slots": 15
+    },
+    {
+      "path": "Stage_Review.blend",
+      "triangles": 11948,
+      "meshes": 10,
+      "max_height_m": 0.7800000309944153,
+      "material_slots": 15
+    }
+  ],
+  "occlusion_probe": {
+    "eye_height_m": 1.65,
+    "target_height_m": 0.15,
+    "occluded_candidate_targets": 6,
+    "total": 28
+  },
+  "combined_triangles": 96032,
+  "unity_imported": false,
+  "unity_compile": "not run; model-only revision, Unity integration out of scope",
+  "unity_editmode": "not run",
+  "pico_fps": "not measured"
+}

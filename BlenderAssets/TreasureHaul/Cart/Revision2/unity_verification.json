@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-19",
+  "compile": { "errors": 0, "warnings": 0 },
+  "editmode": { "total": 47, "passed": 47, "failed": 0 },
+  "playmode": {
+    "scene": "Assets/_Content/TreasureHaul/Prototype/CartReview/CartValueReview.unity",
+    "automatic_initial_sum": 3600,
+    "automatic_after_removing_cup": 2800,
+    "after_damage": 2320,
+    "after_holding_statuette": 1120,
+    "after_disabling_remaining_item": 0,
+    "restored_text": "3,600 G",
+    "errors": 0
+  },
+  "unverified": ["PICO frame time and readability", "real cart alignment", "hand interaction", "host synchronization", "full gameplay scene integration"]
+}

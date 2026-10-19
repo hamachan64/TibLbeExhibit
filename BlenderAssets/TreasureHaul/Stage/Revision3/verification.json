@@ -1,0 +1,129 @@
+{
+  "layout": {
+    "candidate_count": 28,
+    "min_treasure_edge_margin_m": 0.73,
+    "approaches_passed": 28,
+    "human_proxy_radius_m": 0.3,
+    "cart_radius_m": 0.8,
+    "cart_checkpoints_passed": [
+      "door_a",
+      "loop_left",
+      "loop_right",
+      "door_b",
+      "rear_left",
+      "rear_right"
+    ],
+    "loop_front_and_back_passed": true,
+    "cart_roll_in_passed": true,
+    "grid_step_m": 0.05,
+    "movable_treasures_in_path_check": false,
+    "limitation": "Static architecture only; treasure clearance, multiple people and physical cart handling require gameplay/device tests."
+  },
+  "fbx": [
+    {
+      "path": "ExcavationDepot_5x11.fbx",
+      "triangles": 11272,
+      "meshes": 10,
+      "max_height_m": 0.7775012850761414,
+      "material_slots": 13
+    },
+    {
+      "path": "modules/THStage_ExtractionBay.fbx",
+      "triangles": 1460,
+      "meshes": 1,
+      "max_height_m": 0.7600003480911255,
+      "material_slots": 4
+    },
+    {
+      "path": "modules/THStage_WestBoundary.fbx",
+      "triangles": 2244,
+      "meshes": 1,
+      "max_height_m": 0.7500017881393433,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_EastBoundary.fbx",
+      "triangles": 2244,
+      "meshes": 1,
+      "max_height_m": 0.7500017881393433,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_BackBoundary.fbx",
+      "triangles": 1364,
+      "meshes": 1,
+      "max_height_m": 0.7500017881393433,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_EntryPartition.fbx",
+      "triangles": 836,
+      "meshes": 1,
+      "max_height_m": 0.7500006556510925,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_RearPartition.fbx",
+      "triangles": 836,
+      "meshes": 1,
+      "max_height_m": 0.7500013113021851,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_RearRoomDivider.fbx",
+      "triangles": 308,
+      "meshes": 1,
+      "max_height_m": 0.7500017881393433,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_CentralCrosswall.fbx",
+      "triangles": 308,
+      "meshes": 1,
+      "max_height_m": 0.7500009536743164,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_CentralReturn.fbx",
+      "triangles": 308,
+      "meshes": 1,
+      "max_height_m": 0.7500010132789612,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_ArchiveDetails.fbx",
+      "triangles": 1364,
+      "meshes": 1,
+      "max_height_m": 0.7775012850761414,
+      "material_slots": 1
+    }
+  ],
+  "blend": [
+    {
+      "path": "ExcavationDepot_5x11.blend",
+      "triangles": 11272,
+      "meshes": 10,
+      "max_height_m": 0.7774999737739563,
+      "material_slots": 13
+    },
+    {
+      "path": "Stage_Review.blend",
+      "triangles": 11272,
+      "meshes": 10,
+      "max_height_m": 0.7774999737739563,
+      "material_slots": 13
+    }
+  ],
+  "occlusion_probe": {
+    "eye_height_m": 1.65,
+    "target_height_m": 0.15,
+    "occluded_candidate_targets": 14,
+    "total": 28
+  },
+  "combined_triangles": 95356,
+  "unity_imported": false,
+  "unity_compile": "not run; model-only revision",
+  "unity_editmode": "not run; model-only revision",
+  "pico_fps": "not measured",
+  "combined_triangles_including_cart": 99788
+}
