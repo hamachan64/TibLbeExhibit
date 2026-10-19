@@ -1,0 +1,272 @@
+[
+  {
+    "model": "mask",
+    "triangles": 4684,
+    "grips": 1,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "mask",
+    "triangles": 4684,
+    "grips": 1,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  },
+  {
+    "model": "cup",
+    "triangles": 4696,
+    "grips": 1,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "cup",
+    "triangles": 4696,
+    "grips": 1,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  },
+  {
+    "model": "statuette",
+    "triangles": 4600,
+    "grips": 1,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "statuette",
+    "triangles": 4600,
+    "grips": 1,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  },
+  {
+    "model": "scarab_amulet",
+    "triangles": 2456,
+    "grips": 1,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "scarab_amulet",
+    "triangles": 2456,
+    "grips": 1,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  },
+  {
+    "model": "ceremonial_lamp",
+    "triangles": 3020,
+    "grips": 1,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "ceremonial_lamp",
+    "triangles": 3020,
+    "grips": 1,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  },
+  {
+    "model": "amphora",
+    "triangles": 4064,
+    "grips": 2,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "amphora",
+    "triangles": 4064,
+    "grips": 2,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  },
+  {
+    "model": "inscribed_stele",
+    "triangles": 2104,
+    "grips": 2,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "inscribed_stele",
+    "triangles": 2104,
+    "grips": 2,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  },
+  {
+    "model": "guardian_statue",
+    "triangles": 4740,
+    "grips": 2,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "guardian_statue",
+    "triangles": 4740,
+    "grips": 2,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  },
+  {
+    "model": "relic_chest",
+    "triangles": 2508,
+    "grips": 2,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "relic_chest",
+    "triangles": 2508,
+    "grips": 2,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  },
+  {
+    "model": "sun_mask_secret",
+    "triangles": 4644,
+    "grips": 1,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "sun_mask_secret",
+    "triangles": 4644,
+    "grips": 1,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  },
+  {
+    "model": "hand_mirror",
+    "triangles": 1668,
+    "grips": 1,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "hand_mirror",
+    "triangles": 1668,
+    "grips": 1,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  },
+  {
+    "model": "votive_bell",
+    "triangles": 1932,
+    "grips": 1,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "votive_bell",
+    "triangles": 1932,
+    "grips": 1,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  },
+  {
+    "model": "perfume_jar",
+    "triangles": 1868,
+    "grips": 1,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "perfume_jar",
+    "triangles": 1868,
+    "grips": 1,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  },
+  {
+    "model": "stamp_seal",
+    "triangles": 848,
+    "grips": 1,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "stamp_seal",
+    "triangles": 848,
+    "grips": 1,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  },
+  {
+    "model": "coin_casket",
+    "triangles": 4384,
+    "grips": 1,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "coin_casket",
+    "triangles": 4384,
+    "grips": 1,
+    "uv": true,
+    "nondegenerate": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  }
+]

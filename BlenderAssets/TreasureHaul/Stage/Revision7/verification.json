@@ -1,0 +1,289 @@
+{
+  "layout": {
+    "paths_approaches": 23,
+    "cart_gap_to_rear_row_m": 0.035,
+    "search": {
+      "hidden_intent": 18,
+      "hidden_concealed_from_entrance": 18,
+      "hidden_concealed_and_discoverable": 18,
+      "all_discoverable": 23,
+      "all_grabbable": 23,
+      "discoverable_without_crouching": 23,
+      "treasure_mesh_intersections": 0,
+      "support_envelope_overlaps": 0,
+      "floor_placed": 0,
+      "total": 23,
+      "exposed_visible_from_entrance": 5,
+      "walkable_points": 2524
+    }
+  },
+  "fbx": [
+    {
+      "path": "ExcavationDepot_5x11.fbx",
+      "triangles": 27533,
+      "meshes": 33,
+      "max_height_m": 0.7911259531974792,
+      "material_slots": 36
+    },
+    {
+      "path": "modules/THStage_ExtractionBay.fbx",
+      "triangles": 1460,
+      "meshes": 1,
+      "max_height_m": 0.7600003480911255,
+      "material_slots": 4
+    },
+    {
+      "path": "modules/THStage_WestBoundary.fbx",
+      "triangles": 2388,
+      "meshes": 1,
+      "max_height_m": 0.682011604309082,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_EastBoundary.fbx",
+      "triangles": 2388,
+      "meshes": 1,
+      "max_height_m": 0.6731980443000793,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_BackBoundary.fbx",
+      "triangles": 1380,
+      "meshes": 1,
+      "max_height_m": 0.6922119855880737,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_EntryPartition.fbx",
+      "triangles": 308,
+      "meshes": 1,
+      "max_height_m": 0.16000063717365265,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_RearPartition.fbx",
+      "triangles": 308,
+      "meshes": 1,
+      "max_height_m": 0.16000133752822876,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_RearRoomDivider.fbx",
+      "triangles": 362,
+      "meshes": 1,
+      "max_height_m": 0.6295551061630249,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_CentralCrosswall.fbx",
+      "triangles": 132,
+      "meshes": 1,
+      "max_height_m": 0.16000095009803772,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_CentralReturn.fbx",
+      "triangles": 230,
+      "meshes": 1,
+      "max_height_m": 0.6114097833633423,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_RuinGroundFragments.fbx",
+      "triangles": 549,
+      "meshes": 1,
+      "max_height_m": 0.003133008722215891,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_FindSupport_01.fbx",
+      "triangles": 1004,
+      "meshes": 1,
+      "max_height_m": 0.7717965245246887,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_FindSupport_02.fbx",
+      "triangles": 916,
+      "meshes": 1,
+      "max_height_m": 0.7849565148353577,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_FindSupport_03.fbx",
+      "triangles": 88,
+      "meshes": 1,
+      "max_height_m": 0.20400063693523407,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_FindSupport_04.fbx",
+      "triangles": 88,
+      "meshes": 1,
+      "max_height_m": 0.20400063693523407,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_FindSupport_05.fbx",
+      "triangles": 1004,
+      "meshes": 1,
+      "max_height_m": 0.769142210483551,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_FindSupport_06.fbx",
+      "triangles": 1136,
+      "meshes": 1,
+      "max_height_m": 0.7910013198852539,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_FindSupport_07.fbx",
+      "triangles": 916,
+      "meshes": 1,
+      "max_height_m": 0.7720364332199097,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_FindSupport_08.fbx",
+      "triangles": 1004,
+      "meshes": 1,
+      "max_height_m": 0.7820521593093872,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_FindSupport_09.fbx",
+      "triangles": 872,
+      "meshes": 1,
+      "max_height_m": 0.7813760042190552,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_FindSupport_10.fbx",
+      "triangles": 88,
+      "meshes": 1,
+      "max_height_m": 0.20400133728981018,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_FindSupport_11.fbx",
+      "triangles": 1004,
+      "meshes": 1,
+      "max_height_m": 0.7853778004646301,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_FindSupport_12.fbx",
+      "triangles": 872,
+      "meshes": 1,
+      "max_height_m": 0.7756024599075317,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_FindSupport_13.fbx",
+      "triangles": 872,
+      "meshes": 1,
+      "max_height_m": 0.7724447250366211,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_FindSupport_14.fbx",
+      "triangles": 88,
+      "meshes": 1,
+      "max_height_m": 0.12400157749652863,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_FindSupport_15.fbx",
+      "triangles": 872,
+      "meshes": 1,
+      "max_height_m": 0.7911259531974792,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_FindSupport_16.fbx",
+      "triangles": 872,
+      "meshes": 1,
+      "max_height_m": 0.7904523611068726,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_FindSupport_17.fbx",
+      "triangles": 1004,
+      "meshes": 1,
+      "max_height_m": 0.781049370765686,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_FindSupport_18.fbx",
+      "triangles": 872,
+      "meshes": 1,
+      "max_height_m": 0.7835284471511841,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_FindSupport_19.fbx",
+      "triangles": 88,
+      "meshes": 1,
+      "max_height_m": 0.20400094985961914,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_FindSupport_20.fbx",
+      "triangles": 1092,
+      "meshes": 1,
+      "max_height_m": 0.7772188186645508,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_FindSupport_21.fbx",
+      "triangles": 1092,
+      "meshes": 1,
+      "max_height_m": 0.7844787836074829,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_FindSupport_22.fbx",
+      "triangles": 1092,
+      "meshes": 1,
+      "max_height_m": 0.7809495329856873,
+      "material_slots": 1
+    },
+    {
+      "path": "modules/THStage_FindSupport_23.fbx",
+      "triangles": 1092,
+      "meshes": 1,
+      "max_height_m": 0.7690659165382385,
+      "material_slots": 1
+    }
+  ],
+  "blend": [
+    {
+      "path": "ExcavationDepot_5x11.blend",
+      "triangles": 27533,
+      "meshes": 33,
+      "max_height_m": 0.7911244034767151,
+      "material_slots": 36
+    },
+    {
+      "path": "Stage_Review.blend",
+      "triangles": 27533,
+      "meshes": 33,
+      "max_height_m": 0.7911244034767151,
+      "material_slots": 36
+    }
+  ],
+  "combined_triangles": 101197,
+  "unity_imported": false,
+  "unity_compile": "not run; Blender-only revision",
+  "unity_editmode": "not run",
+  "pico_fps": "not measured",
+  "legacy_single_ray_probe": {
+    "eye_height_m": 1.65,
+    "target_height_m": 0.15,
+    "occluded_candidate_targets": 19,
+    "total": 23,
+    "note": "Superseded by search_visibility.json (multi-point body/grip, walkable viewpoints)."
+  },
+  "combined_triangles_including_cart": 105629
+}

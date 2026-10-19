@@ -2,7 +2,7 @@
 
 **Cart:** use [`Cart/Revision2/`](Cart/Revision2/README.md), the researched salvage-bin revision (4,432 triangles), with a Unity prefab and live cargo-value display. See [`Cart/RESEARCH.md`](Cart/RESEARCH.md) for references and design decisions. Moving-cart gameplay and host synchronization remain pending.
 
-**Stage:** use [`Stage/Revision4/`](Stage/Revision4/README.md) for the 5m × 11m ruined-stone maze, weathered plaster, local soil/paving fragments, and roll-in extraction bay. Retains the L-shaped partition and loop. Includes route checks and previews with 23 treasures and the existing cart. Earlier revisions remain for comparison. Unity integration remains pending.
+**Stage:** use [`Stage/Revision7/`](Stage/Revision7/README.md): 23 finds on stone (14 S + 9 M), 18 in masonry niches closed toward the entrance. Measured: 18/18 hidden from the practice row yet findable standing up close, 23/23 beam-reachable, no floor placement or mesh intersection. `Stage/Revision6/` (failed: 7/18) and Revision4–5 remain for comparison. Unity integration and PICO checks remain pending.
 
 **Current reviewed deliverables:** use [`Reviewed/`](Reviewed/) for the corrected ten models and 30 FBX variants. See [`Reviewed/REVIEW.md`](Reviewed/REVIEW.md) for findings, budgets, and remaining device validation; [`Reviewed/details.png`](Reviewed/details.png) shows the revised treasure silhouettes. Files below and in `S/` are retained as the original authoring inputs for comparison. Run `review_treasures.py` after regenerating those inputs, then `verify_reviewed.py`. Do not import the older exports by mistake.
 

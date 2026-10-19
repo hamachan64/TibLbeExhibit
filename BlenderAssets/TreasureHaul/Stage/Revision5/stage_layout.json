@@ -1,0 +1,2013 @@
+{
+  "venue": {
+    "width_m": 5,
+    "length_m": 11,
+    "origin": "center of entrance edge",
+    "blender_from_unity": "(X, -Z, Y)",
+    "warning_distance_authoring_assumption_m": 0.4,
+    "spawn_edge_extra_margin_m": 0.3
+  },
+  "runtime_stats": {
+    "meshes": 33,
+    "triangles": 13681,
+    "vertices": 8263,
+    "material_slots": 36
+  },
+  "preview_treasure_stats": {
+    "meshes": 55,
+    "triangles": 73664,
+    "vertices": 37984,
+    "material_slots": 86
+  },
+  "module_stats": [
+    {
+      "name": "THStage_ExtractionBay",
+      "meshes": 1,
+      "triangles": 1460,
+      "vertices": 824,
+      "material_slots": 4
+    },
+    {
+      "name": "THStage_WestBoundary",
+      "meshes": 1,
+      "triangles": 2388,
+      "vertices": 1388,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_EastBoundary",
+      "meshes": 1,
+      "triangles": 2388,
+      "vertices": 1388,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_BackBoundary",
+      "meshes": 1,
+      "triangles": 1380,
+      "vertices": 804,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_EntryPartition",
+      "meshes": 1,
+      "triangles": 308,
+      "vertices": 168,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_RearPartition",
+      "meshes": 1,
+      "triangles": 308,
+      "vertices": 168,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_RearRoomDivider",
+      "meshes": 1,
+      "triangles": 362,
+      "vertices": 206,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_CentralCrosswall",
+      "meshes": 1,
+      "triangles": 132,
+      "vertices": 72,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_CentralReturn",
+      "meshes": 1,
+      "triangles": 230,
+      "vertices": 134,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_RuinGroundFragments",
+      "meshes": 1,
+      "triangles": 549,
+      "vertices": 783,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_FindSupport_01",
+      "meshes": 1,
+      "triangles": 128,
+      "vertices": 72,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_FindSupport_02",
+      "meshes": 1,
+      "triangles": 216,
+      "vertices": 120,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_FindSupport_03",
+      "meshes": 1,
+      "triangles": 128,
+      "vertices": 72,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_FindSupport_04",
+      "meshes": 1,
+      "triangles": 128,
+      "vertices": 72,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_FindSupport_05",
+      "meshes": 1,
+      "triangles": 128,
+      "vertices": 72,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_FindSupport_06",
+      "meshes": 1,
+      "triangles": 128,
+      "vertices": 72,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_FindSupport_07",
+      "meshes": 1,
+      "triangles": 216,
+      "vertices": 120,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_FindSupport_08",
+      "meshes": 1,
+      "triangles": 128,
+      "vertices": 72,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_FindSupport_09",
+      "meshes": 1,
+      "triangles": 128,
+      "vertices": 72,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_FindSupport_10",
+      "meshes": 1,
+      "triangles": 128,
+      "vertices": 72,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_FindSupport_11",
+      "meshes": 1,
+      "triangles": 128,
+      "vertices": 72,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_FindSupport_12",
+      "meshes": 1,
+      "triangles": 260,
+      "vertices": 144,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_FindSupport_13",
+      "meshes": 1,
+      "triangles": 260,
+      "vertices": 144,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_FindSupport_14",
+      "meshes": 1,
+      "triangles": 128,
+      "vertices": 72,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_FindSupport_15",
+      "meshes": 1,
+      "triangles": 260,
+      "vertices": 144,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_FindSupport_16",
+      "meshes": 1,
+      "triangles": 260,
+      "vertices": 144,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_FindSupport_17",
+      "meshes": 1,
+      "triangles": 128,
+      "vertices": 72,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_FindSupport_18",
+      "meshes": 1,
+      "triangles": 128,
+      "vertices": 72,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_FindSupport_19",
+      "meshes": 1,
+      "triangles": 128,
+      "vertices": 72,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_FindSupport_20",
+      "meshes": 1,
+      "triangles": 260,
+      "vertices": 144,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_FindSupport_21",
+      "meshes": 1,
+      "triangles": 260,
+      "vertices": 144,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_FindSupport_22",
+      "meshes": 1,
+      "triangles": 260,
+      "vertices": 144,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_FindSupport_23",
+      "meshes": 1,
+      "triangles": 260,
+      "vertices": 144,
+      "material_slots": 1
+    }
+  ],
+  "colliders": [
+    {
+      "name": "ReceiverSide_-1",
+      "center_unity_xyz": [
+        -1.34,
+        0.225,
+        1.2
+      ],
+      "size_unity_xyz": [
+        0.3,
+        0.45,
+        1.52
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "ReceiverSide_1",
+      "center_unity_xyz": [
+        1.34,
+        0.225,
+        1.2
+      ],
+      "size_unity_xyz": [
+        0.3,
+        0.45,
+        1.52
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "ReceiverBack",
+      "center_unity_xyz": [
+        0,
+        0.36,
+        0.35
+      ],
+      "size_unity_xyz": [
+        3,
+        0.72,
+        0.34
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "ControlPod",
+      "center_unity_xyz": [
+        -1.34,
+        0.39,
+        1.85
+      ],
+      "size_unity_xyz": [
+        0.32,
+        0.78,
+        0.32
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "WestBoundary",
+      "center_unity_xyz": [
+        -2.41,
+        0.375,
+        6.9
+      ],
+      "size_unity_xyz": [
+        0.18,
+        0.75,
+        8.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "EastBoundary",
+      "center_unity_xyz": [
+        2.41,
+        0.375,
+        6.9
+      ],
+      "size_unity_xyz": [
+        0.18,
+        0.75,
+        8.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "BackBoundary",
+      "center_unity_xyz": [
+        0,
+        0.375,
+        10.91
+      ],
+      "size_unity_xyz": [
+        4.64,
+        0.75,
+        0.18
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "EntryPartition",
+      "center_unity_xyz": [
+        -0.85,
+        0.08,
+        3.8
+      ],
+      "size_unity_xyz": [
+        2.94,
+        0.16,
+        0.26
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "RearPartition",
+      "center_unity_xyz": [
+        0.85,
+        0.08,
+        8.1
+      ],
+      "size_unity_xyz": [
+        2.94,
+        0.16,
+        0.26
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "RearRoomDivider",
+      "center_unity_xyz": [
+        0,
+        0.375,
+        10.36
+      ],
+      "size_unity_xyz": [
+        0.26,
+        0.75,
+        0.92
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "CentralCrosswall",
+      "center_unity_xyz": [
+        0,
+        0.08,
+        5.71
+      ],
+      "size_unity_xyz": [
+        1.2,
+        0.16,
+        0.26
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "CentralReturn",
+      "center_unity_xyz": [
+        0.47,
+        0.375,
+        6.06
+      ],
+      "size_unity_xyz": [
+        0.26,
+        0.75,
+        0.44
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "THStage_FindSupport_01.009",
+      "center_unity_xyz": [
+        -1.5,
+        0.10999999940395355,
+        3.799999952316284
+      ],
+      "size_unity_xyz": [
+        0.34999990463256836,
+        0.2199999988079071,
+        0.25500011444091797
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "THStage_FindSupport_02.009",
+      "center_unity_xyz": [
+        -1.0499999523162842,
+        0.3399999998509884,
+        3.832499861717224
+      ],
+      "size_unity_xyz": [
+        0.28999996185302734,
+        0.680000014603138,
+        0.31999993324279785
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "THStage_FindSupport_03.009",
+      "center_unity_xyz": [
+        -0.6000000238418579,
+        0.11750001460313797,
+        3.799999952316284
+      ],
+      "size_unity_xyz": [
+        0.5479999780654907,
+        0.23500002920627594,
+        0.25500011444091797
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "THStage_FindSupport_04.009",
+      "center_unity_xyz": [
+        -0.1512046605348587,
+        0.10999999940395355,
+        3.799999952316284
+      ],
+      "size_unity_xyz": [
+        0.2674092948436737,
+        0.2199999988079071,
+        0.25500011444091797
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "THStage_FindSupport_05.009",
+      "center_unity_xyz": [
+        0.30000001192092896,
+        0.12250000238418579,
+        3.799999952316284
+      ],
+      "size_unity_xyz": [
+        0.3500000238418579,
+        0.24500000476837158,
+        0.25500011444091797
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "THStage_FindSupport_06.009",
+      "center_unity_xyz": [
+        -0.30000001192092896,
+        0.11750001460313797,
+        8.100000143051147
+      ],
+      "size_unity_xyz": [
+        0.5479999780654907,
+        0.23500002920627594,
+        0.25499963760375977
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "THStage_FindSupport_07.009",
+      "center_unity_xyz": [
+        0.15000000596046448,
+        0.3400000035762787,
+        8.132500410079956
+      ],
+      "size_unity_xyz": [
+        0.29500001668930054,
+        0.6800000071525574,
+        0.32000017166137695
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "THStage_FindSupport_08.009",
+      "center_unity_xyz": [
+        0.6000000238418579,
+        0.12250000238418579,
+        8.100000143051147
+      ],
+      "size_unity_xyz": [
+        0.3500000238418579,
+        0.24500000476837158,
+        0.25499963760375977
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "THStage_FindSupport_09.009",
+      "center_unity_xyz": [
+        1.0474003851413727,
+        0.13500000536441803,
+        8.100000143051147
+      ],
+      "size_unity_xyz": [
+        0.2701990008354187,
+        0.27000001072883606,
+        0.25499963760375977
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "THStage_FindSupport_10.009",
+      "center_unity_xyz": [
+        1.5,
+        0.10999999940395355,
+        8.100000143051147
+      ],
+      "size_unity_xyz": [
+        0.5479998588562012,
+        0.2199999988079071,
+        0.25499963760375977
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "THStage_FindSupport_11.009",
+      "center_unity_xyz": [
+        -1.5,
+        0.12250000238418579,
+        9.899999618530273
+      ],
+      "size_unity_xyz": [
+        0.34999990463256836,
+        0.24500000476837158,
+        0.25499916076660156
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "THStage_FindSupport_12.009",
+      "center_unity_xyz": [
+        -1.000008076429367,
+        0.30800002813339233,
+        9.899999618530273
+      ],
+      "size_unity_xyz": [
+        0.2650161385536194,
+        0.6160000562667847,
+        0.25499916076660156
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "THStage_FindSupport_13.009",
+      "center_unity_xyz": [
+        -0.5000462979078293,
+        0.2645467519760132,
+        9.899999618530273
+      ],
+      "size_unity_xyz": [
+        0.3000926077365875,
+        0.5290935039520264,
+        0.267669677734375
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "THStage_FindSupport_14.009",
+      "center_unity_xyz": [
+        0.0,
+        0.11750001460313797,
+        9.899999618530273
+      ],
+      "size_unity_xyz": [
+        0.5479999780654907,
+        0.23500002920627594,
+        0.25499916076660156
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "THStage_FindSupport_15.009",
+      "center_unity_xyz": [
+        0.4987090975046158,
+        0.27150002121925354,
+        9.899999618530273
+      ],
+      "size_unity_xyz": [
+        0.2675817906856537,
+        0.5430000424385071,
+        0.25499916076660156
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "THStage_FindSupport_16.009",
+      "center_unity_xyz": [
+        0.9999999701976776,
+        0.19550001621246338,
+        9.899999618530273
+      ],
+      "size_unity_xyz": [
+        0.2649999260902405,
+        0.39100003242492676,
+        0.25499916076660156
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "THStage_FindSupport_17.009",
+      "center_unity_xyz": [
+        1.5,
+        0.12250000238418579,
+        9.899999618530273
+      ],
+      "size_unity_xyz": [
+        0.34999990463256836,
+        0.24500000476837158,
+        0.25499916076660156
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "THStage_FindSupport_18.009",
+      "center_unity_xyz": [
+        -0.3606921136379242,
+        0.13500000536441803,
+        5.710000038146973
+      ],
+      "size_unity_xyz": [
+        0.26638418436050415,
+        0.27000001072883606,
+        0.25500011444091797
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "THStage_FindSupport_19.009",
+      "center_unity_xyz": [
+        0.17901024967432022,
+        0.10999999940395355,
+        5.710000038146973
+      ],
+      "size_unity_xyz": [
+        0.2704823464155197,
+        0.2199999988079071,
+        0.25500011444091797
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "THStage_FindSupport_20.009",
+      "center_unity_xyz": [
+        -1.5,
+        0.28949999809265137,
+        4.800000190734863
+      ],
+      "size_unity_xyz": [
+        0.26999998092651367,
+        0.5789999961853027,
+        0.2700004577636719
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "THStage_FindSupport_21.009",
+      "center_unity_xyz": [
+        -1.5012314915657043,
+        0.33150002360343933,
+        5.25
+      ],
+      "size_unity_xyz": [
+        0.2674628496170044,
+        0.6630000472068787,
+        0.25500011444091797
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "THStage_FindSupport_22.009",
+      "center_unity_xyz": [
+        -1.5,
+        0.24650001525878906,
+        5.699999809265137
+      ],
+      "size_unity_xyz": [
+        0.2649998664855957,
+        0.4930000305175781,
+        0.25500011444091797
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "THStage_FindSupport_23.009",
+      "center_unity_xyz": [
+        -1.5,
+        0.20800000429153442,
+        6.150000095367432
+      ],
+      "size_unity_xyz": [
+        0.2649998664855957,
+        0.41600000858306885,
+        0.25500011444091797
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "VenueFloor",
+      "center_unity_xyz": [
+        0,
+        -0.025,
+        5.5
+      ],
+      "size_unity_xyz": [
+        5,
+        0.05,
+        11
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "markers": [
+    {
+      "name": "CollectionVolume",
+      "role": "collection_volume",
+      "position_unity_xyz": [
+        0,
+        0.49,
+        1.2
+      ],
+      "position_blender_xyz": [
+        0.0,
+        -1.2000000476837158,
+        0.49000000953674316
+      ],
+      "size": [
+        2.3,
+        0.92,
+        1.56
+      ]
+    },
+    {
+      "name": "ScoreBoardAnchor",
+      "role": "nonphysical_ui_anchor",
+      "position_unity_xyz": [
+        0,
+        1.5,
+        0.32
+      ],
+      "position_blender_xyz": [
+        0.0,
+        -0.3199999928474426,
+        1.5
+      ]
+    },
+    {
+      "name": "CartDock",
+      "role": "cart_dock",
+      "position_unity_xyz": [
+        0,
+        0.024,
+        1.2
+      ],
+      "position_blender_xyz": [
+        0.0,
+        -1.2000000476837158,
+        0.024000000208616257
+      ],
+      "preview_only": true
+    },
+    {
+      "name": "Tutorial_01",
+      "role": "tutorial",
+      "position_unity_xyz": [
+        -1.2,
+        0,
+        2.5
+      ],
+      "position_blender_xyz": [
+        -1.2000000476837158,
+        -2.5,
+        0.0
+      ]
+    },
+    {
+      "name": "Tutorial_02",
+      "role": "tutorial",
+      "position_unity_xyz": [
+        -0.4,
+        0,
+        2.5
+      ],
+      "position_blender_xyz": [
+        -0.4000000059604645,
+        -2.5,
+        0.0
+      ]
+    },
+    {
+      "name": "Tutorial_03",
+      "role": "tutorial",
+      "position_unity_xyz": [
+        0.4,
+        0,
+        2.5
+      ],
+      "position_blender_xyz": [
+        0.4000000059604645,
+        -2.5,
+        0.0
+      ]
+    },
+    {
+      "name": "Tutorial_04",
+      "role": "tutorial",
+      "position_unity_xyz": [
+        1.2,
+        0,
+        2.5
+      ],
+      "position_blender_xyz": [
+        1.2000000476837158,
+        -2.5,
+        0.0
+      ]
+    },
+    {
+      "name": "TreasureSlot_01",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -1.5,
+        0.2199999988079071,
+        3.8
+      ],
+      "position_blender_xyz": [
+        -1.5,
+        -3.799999952316284,
+        0.2199999988079071
+      ],
+      "clearance_radius_m": 0.25,
+      "allowed_classes": [
+        "M"
+      ],
+      "support_module": "THStage_FindSupport_01.009",
+      "placement_kind": "stone_plinth",
+      "model": "amphora",
+      "rotation_blender_xyz": [
+        0.0,
+        0.0,
+        3.1415927410125732
+      ],
+      "support_surface_height_m": 0.22
+    },
+    {
+      "name": "TreasureSlot_02",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -1.05,
+        0.29317477345466614,
+        3.8
+      ],
+      "position_blender_xyz": [
+        -1.0499999523162842,
+        -3.799999952316284,
+        0.29317477345466614
+      ],
+      "clearance_radius_m": 0.25,
+      "allowed_classes": [
+        "S"
+      ],
+      "support_module": "THStage_FindSupport_02.009",
+      "placement_kind": "wall_mount",
+      "model": "mask",
+      "rotation_blender_xyz": [
+        0.0,
+        0.0,
+        3.1415927410125732
+      ],
+      "support_surface_height_m": 0.245
+    },
+    {
+      "name": "TreasureSlot_03",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -0.6,
+        0.23000003397464752,
+        3.8
+      ],
+      "position_blender_xyz": [
+        -0.6000000238418579,
+        -3.799999952316284,
+        0.23000003397464752
+      ],
+      "clearance_radius_m": 0.25,
+      "allowed_classes": [
+        "M"
+      ],
+      "support_module": "THStage_FindSupport_03.009",
+      "placement_kind": "stone_plinth",
+      "model": "inscribed_stele",
+      "rotation_blender_xyz": [
+        0.0,
+        0.0,
+        3.1415927410125732
+      ],
+      "support_surface_height_m": 0.23500002384185792
+    },
+    {
+      "name": "TreasureSlot_04",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -0.15,
+        0.2199999988079071,
+        3.8
+      ],
+      "position_blender_xyz": [
+        -0.15000000596046448,
+        -3.799999952316284,
+        0.2199999988079071
+      ],
+      "clearance_radius_m": 0.25,
+      "allowed_classes": [
+        "S"
+      ],
+      "support_module": "THStage_FindSupport_04.009",
+      "placement_kind": "stone_plinth",
+      "model": "cup",
+      "rotation_blender_xyz": [
+        0.0,
+        0.0,
+        3.1415927410125732
+      ],
+      "support_surface_height_m": 0.22
+    },
+    {
+      "name": "TreasureSlot_05",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        0.3,
+        0.24500000476837158,
+        3.8
+      ],
+      "position_blender_xyz": [
+        0.30000001192092896,
+        -3.799999952316284,
+        0.24500000476837158
+      ],
+      "clearance_radius_m": 0.25,
+      "allowed_classes": [
+        "M"
+      ],
+      "support_module": "THStage_FindSupport_05.009",
+      "placement_kind": "stone_plinth",
+      "model": "amphora",
+      "rotation_blender_xyz": [
+        0.0,
+        0.0,
+        3.1415927410125732
+      ],
+      "support_surface_height_m": 0.245
+    },
+    {
+      "name": "TreasureSlot_06",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -0.3,
+        0.23000003397464752,
+        8.1
+      ],
+      "position_blender_xyz": [
+        -0.30000001192092896,
+        -8.100000381469727,
+        0.23000003397464752
+      ],
+      "clearance_radius_m": 0.25,
+      "allowed_classes": [
+        "M"
+      ],
+      "support_module": "THStage_FindSupport_06.009",
+      "placement_kind": "stone_plinth",
+      "model": "inscribed_stele",
+      "rotation_blender_xyz": [
+        0.0,
+        0.0,
+        3.1415927410125732
+      ],
+      "support_surface_height_m": 0.23500002384185792
+    },
+    {
+      "name": "TreasureSlot_07",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        0.15,
+        0.27000001072883606,
+        8.1
+      ],
+      "position_blender_xyz": [
+        0.15000000596046448,
+        -8.100000381469727,
+        0.27000001072883606
+      ],
+      "clearance_radius_m": 0.25,
+      "allowed_classes": [
+        "S"
+      ],
+      "support_module": "THStage_FindSupport_07.009",
+      "placement_kind": "wall_mount",
+      "model": "hand_mirror",
+      "rotation_blender_xyz": [
+        0.0,
+        0.0,
+        3.1415927410125732
+      ],
+      "support_surface_height_m": 0.22
+    },
+    {
+      "name": "TreasureSlot_08",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        0.6,
+        0.24500000476837158,
+        8.1
+      ],
+      "position_blender_xyz": [
+        0.6000000238418579,
+        -8.100000381469727,
+        0.24500000476837158
+      ],
+      "clearance_radius_m": 0.25,
+      "allowed_classes": [
+        "M"
+      ],
+      "support_module": "THStage_FindSupport_08.009",
+      "placement_kind": "stone_plinth",
+      "model": "amphora",
+      "rotation_blender_xyz": [
+        0.0,
+        0.0,
+        3.1415927410125732
+      ],
+      "support_surface_height_m": 0.245
+    },
+    {
+      "name": "TreasureSlot_09",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        1.05,
+        0.27000001072883606,
+        8.1
+      ],
+      "position_blender_xyz": [
+        1.0499999523162842,
+        -8.100000381469727,
+        0.27000001072883606
+      ],
+      "clearance_radius_m": 0.25,
+      "allowed_classes": [
+        "S"
+      ],
+      "support_module": "THStage_FindSupport_09.009",
+      "placement_kind": "stone_plinth",
+      "model": "statuette",
+      "rotation_blender_xyz": [
+        0.0,
+        0.0,
+        3.1415927410125732
+      ],
+      "support_surface_height_m": 0.27
+    },
+    {
+      "name": "TreasureSlot_10",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        1.5,
+        0.2150000035762787,
+        8.1
+      ],
+      "position_blender_xyz": [
+        1.5,
+        -8.100000381469727,
+        0.2150000035762787
+      ],
+      "clearance_radius_m": 0.25,
+      "allowed_classes": [
+        "M"
+      ],
+      "support_module": "THStage_FindSupport_10.009",
+      "placement_kind": "stone_plinth",
+      "model": "inscribed_stele",
+      "rotation_blender_xyz": [
+        0.0,
+        0.0,
+        3.1415927410125732
+      ],
+      "support_surface_height_m": 0.22
+    },
+    {
+      "name": "TreasureSlot_11",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -1.5,
+        0.24500000476837158,
+        9.9
+      ],
+      "position_blender_xyz": [
+        -1.5,
+        -9.899999618530273,
+        0.24500000476837158
+      ],
+      "clearance_radius_m": 0.25,
+      "allowed_classes": [
+        "M"
+      ],
+      "support_module": "THStage_FindSupport_11.009",
+      "placement_kind": "stone_plinth",
+      "model": "amphora",
+      "rotation_blender_xyz": [
+        0.0,
+        0.0,
+        3.1415927410125732
+      ],
+      "support_surface_height_m": 0.245
+    },
+    {
+      "name": "TreasureSlot_12",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -1,
+        0.27000001072883606,
+        9.9
+      ],
+      "position_blender_xyz": [
+        -1.0,
+        -9.899999618530273,
+        0.27000001072883606
+      ],
+      "clearance_radius_m": 0.25,
+      "allowed_classes": [
+        "S"
+      ],
+      "support_module": "THStage_FindSupport_12.009",
+      "placement_kind": "broken_altar_cache",
+      "model": "stamp_seal",
+      "rotation_blender_xyz": [
+        0.0,
+        0.0,
+        3.1415927410125732
+      ],
+      "support_surface_height_m": 0.27
+    },
+    {
+      "name": "TreasureSlot_13",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -0.5,
+        0.2199999988079071,
+        9.9
+      ],
+      "position_blender_xyz": [
+        -0.5,
+        -9.899999618530273,
+        0.2199999988079071
+      ],
+      "clearance_radius_m": 0.25,
+      "allowed_classes": [
+        "S"
+      ],
+      "support_module": "THStage_FindSupport_13.009",
+      "placement_kind": "broken_altar_cache",
+      "model": "coin_casket",
+      "rotation_blender_xyz": [
+        0.0,
+        0.0,
+        3.1415927410125732
+      ],
+      "support_surface_height_m": 0.22
+    },
+    {
+      "name": "TreasureSlot_14",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        0,
+        0.23000003397464752,
+        9.9
+      ],
+      "position_blender_xyz": [
+        0.0,
+        -9.899999618530273,
+        0.23000003397464752
+      ],
+      "clearance_radius_m": 0.25,
+      "allowed_classes": [
+        "M"
+      ],
+      "support_module": "THStage_FindSupport_14.009",
+      "placement_kind": "stone_plinth",
+      "model": "inscribed_stele",
+      "rotation_blender_xyz": [
+        0.0,
+        0.0,
+        3.1415927410125732
+      ],
+      "support_surface_height_m": 0.23500002384185792
+    },
+    {
+      "name": "TreasureSlot_15",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        0.5,
+        0.2759999930858612,
+        9.9
+      ],
+      "position_blender_xyz": [
+        0.5,
+        -9.899999618530273,
+        0.2759999930858612
+      ],
+      "clearance_radius_m": 0.25,
+      "allowed_classes": [
+        "S"
+      ],
+      "support_module": "THStage_FindSupport_15.009",
+      "placement_kind": "broken_altar_cache",
+      "model": "scarab_amulet",
+      "rotation_blender_xyz": [
+        0.0,
+        0.0,
+        3.1415927410125732
+      ],
+      "support_surface_height_m": 0.27
+    },
+    {
+      "name": "TreasureSlot_16",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        1,
+        0.2199999988079071,
+        9.9
+      ],
+      "position_blender_xyz": [
+        1.0,
+        -9.899999618530273,
+        0.2199999988079071
+      ],
+      "clearance_radius_m": 0.25,
+      "allowed_classes": [
+        "S"
+      ],
+      "support_module": "THStage_FindSupport_16.009",
+      "placement_kind": "broken_altar_cache",
+      "model": "ceremonial_lamp",
+      "rotation_blender_xyz": [
+        0.0,
+        0.0,
+        3.1415927410125732
+      ],
+      "support_surface_height_m": 0.22
+    },
+    {
+      "name": "TreasureSlot_17",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        1.5,
+        0.24500000476837158,
+        9.9
+      ],
+      "position_blender_xyz": [
+        1.5,
+        -9.899999618530273,
+        0.24500000476837158
+      ],
+      "clearance_radius_m": 0.25,
+      "allowed_classes": [
+        "M"
+      ],
+      "support_module": "THStage_FindSupport_17.009",
+      "placement_kind": "stone_plinth",
+      "model": "amphora",
+      "rotation_blender_xyz": [
+        0.0,
+        0.0,
+        3.1415927410125732
+      ],
+      "support_surface_height_m": 0.245
+    },
+    {
+      "name": "TreasureSlot_18",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -0.36,
+        0.27000001072883606,
+        5.71
+      ],
+      "position_blender_xyz": [
+        -0.36000001430511475,
+        -5.710000038146973,
+        0.27000001072883606
+      ],
+      "clearance_radius_m": 0.25,
+      "allowed_classes": [
+        "S"
+      ],
+      "support_module": "THStage_FindSupport_18.009",
+      "placement_kind": "stone_plinth",
+      "model": "cup",
+      "rotation_blender_xyz": [
+        0.0,
+        0.0,
+        3.1415927410125732
+      ],
+      "support_surface_height_m": 0.27
+    },
+    {
+      "name": "TreasureSlot_19",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        0.18,
+        0.2199999988079071,
+        5.71
+      ],
+      "position_blender_xyz": [
+        0.18000000715255737,
+        -5.710000038146973,
+        0.2199999988079071
+      ],
+      "clearance_radius_m": 0.25,
+      "allowed_classes": [
+        "S"
+      ],
+      "support_module": "THStage_FindSupport_19.009",
+      "placement_kind": "stone_plinth",
+      "model": "statuette",
+      "rotation_blender_xyz": [
+        0.0,
+        0.0,
+        3.1415927410125732
+      ],
+      "support_surface_height_m": 0.22
+    },
+    {
+      "name": "TreasureSlot_20",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -1.5,
+        0.24500000476837158,
+        4.8
+      ],
+      "position_blender_xyz": [
+        -1.5,
+        -4.800000190734863,
+        0.24500000476837158
+      ],
+      "clearance_radius_m": 0.25,
+      "allowed_classes": [
+        "S"
+      ],
+      "support_module": "THStage_FindSupport_20.009",
+      "placement_kind": "broken_altar_cache",
+      "model": "votive_bell",
+      "rotation_blender_xyz": [
+        0.0,
+        0.0,
+        3.1415927410125732
+      ],
+      "support_surface_height_m": 0.245
+    },
+    {
+      "name": "TreasureSlot_21",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -1.5,
+        0.27000001072883606,
+        5.25
+      ],
+      "position_blender_xyz": [
+        -1.5,
+        -5.25,
+        0.27000001072883606
+      ],
+      "clearance_radius_m": 0.25,
+      "allowed_classes": [
+        "S"
+      ],
+      "support_module": "THStage_FindSupport_21.009",
+      "placement_kind": "broken_altar_cache",
+      "model": "perfume_jar",
+      "rotation_blender_xyz": [
+        0.0,
+        0.0,
+        3.1415927410125732
+      ],
+      "support_surface_height_m": 0.27
+    },
+    {
+      "name": "TreasureSlot_22",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -1.5,
+        0.22599999606609344,
+        5.7
+      ],
+      "position_blender_xyz": [
+        -1.5,
+        -5.699999809265137,
+        0.22599999606609344
+      ],
+      "clearance_radius_m": 0.25,
+      "allowed_classes": [
+        "S"
+      ],
+      "support_module": "THStage_FindSupport_22.009",
+      "placement_kind": "broken_altar_cache",
+      "model": "scarab_amulet",
+      "rotation_blender_xyz": [
+        0.0,
+        0.0,
+        3.1415927410125732
+      ],
+      "support_surface_height_m": 0.22
+    },
+    {
+      "name": "TreasureSlot_23",
+      "role": "treasure_candidate",
+      "position_unity_xyz": [
+        -1.5,
+        0.24500000476837158,
+        6.15
+      ],
+      "position_blender_xyz": [
+        -1.5,
+        -6.150000095367432,
+        0.24500000476837158
+      ],
+      "clearance_radius_m": 0.25,
+      "allowed_classes": [
+        "S"
+      ],
+      "support_module": "THStage_FindSupport_23.009",
+      "placement_kind": "broken_altar_cache",
+      "model": "ceremonial_lamp",
+      "rotation_blender_xyz": [
+        0.0,
+        0.0,
+        3.1415927410125732
+      ],
+      "support_surface_height_m": 0.245
+    }
+  ],
+  "collider_status": "Conservative placement envelopes only; split to fit visible solids with Unity Editor API before gameplay use.",
+  "sample_placements": [
+    {
+      "model": "amphora",
+      "slot": "TreasureSlot_01",
+      "class_name": "M",
+      "root_name": "TH10_M_Amphora_Root.120"
+    },
+    {
+      "model": "mask",
+      "slot": "TreasureSlot_02",
+      "class_name": "S",
+      "root_name": "TH_S_Mask_Root.060"
+    },
+    {
+      "model": "inscribed_stele",
+      "slot": "TreasureSlot_03",
+      "class_name": "M",
+      "root_name": "TH10_M_Inscribed_Stele_Root.097"
+    },
+    {
+      "model": "cup",
+      "slot": "TreasureSlot_04",
+      "class_name": "S",
+      "root_name": "TH_S_Cup_Root.067"
+    },
+    {
+      "model": "amphora",
+      "slot": "TreasureSlot_05",
+      "class_name": "M",
+      "root_name": "TH10_M_Amphora_Root.121"
+    },
+    {
+      "model": "inscribed_stele",
+      "slot": "TreasureSlot_06",
+      "class_name": "M",
+      "root_name": "TH10_M_Inscribed_Stele_Root.098"
+    },
+    {
+      "model": "hand_mirror",
+      "slot": "TreasureSlot_07",
+      "class_name": "S",
+      "root_name": "hand_mirror_Root.012"
+    },
+    {
+      "model": "amphora",
+      "slot": "TreasureSlot_08",
+      "class_name": "M",
+      "root_name": "TH10_M_Amphora_Root.122"
+    },
+    {
+      "model": "statuette",
+      "slot": "TreasureSlot_09",
+      "class_name": "S",
+      "root_name": "TH_S_Statuette_Root.067"
+    },
+    {
+      "model": "inscribed_stele",
+      "slot": "TreasureSlot_10",
+      "class_name": "M",
+      "root_name": "TH10_M_Inscribed_Stele_Root.099"
+    },
+    {
+      "model": "amphora",
+      "slot": "TreasureSlot_11",
+      "class_name": "M",
+      "root_name": "TH10_M_Amphora_Root.123"
+    },
+    {
+      "model": "stamp_seal",
+      "slot": "TreasureSlot_12",
+      "class_name": "S",
+      "root_name": "stamp_seal_Root.013"
+    },
+    {
+      "model": "coin_casket",
+      "slot": "TreasureSlot_13",
+      "class_name": "S",
+      "root_name": "coin_casket_Root.012"
+    },
+    {
+      "model": "inscribed_stele",
+      "slot": "TreasureSlot_14",
+      "class_name": "M",
+      "root_name": "TH10_M_Inscribed_Stele_Root.100"
+    },
+    {
+      "model": "scarab_amulet",
+      "slot": "TreasureSlot_15",
+      "class_name": "S",
+      "root_name": "TH10_S_Scarab_Amulet_Root.067"
+    },
+    {
+      "model": "ceremonial_lamp",
+      "slot": "TreasureSlot_16",
+      "class_name": "S",
+      "root_name": "TH10_S_Ceremonial_Lamp_Root.051"
+    },
+    {
+      "model": "amphora",
+      "slot": "TreasureSlot_17",
+      "class_name": "M",
+      "root_name": "TH10_M_Amphora_Root.124"
+    },
+    {
+      "model": "cup",
+      "slot": "TreasureSlot_18",
+      "class_name": "S",
+      "root_name": "TH_S_Cup_Root.068"
+    },
+    {
+      "model": "statuette",
+      "slot": "TreasureSlot_19",
+      "class_name": "S",
+      "root_name": "TH_S_Statuette_Root.068"
+    },
+    {
+      "model": "votive_bell",
+      "slot": "TreasureSlot_20",
+      "class_name": "S",
+      "root_name": "votive_bell_Root.012"
+    },
+    {
+      "model": "perfume_jar",
+      "slot": "TreasureSlot_21",
+      "class_name": "S",
+      "root_name": "perfume_jar_Root.012"
+    },
+    {
+      "model": "scarab_amulet",
+      "slot": "TreasureSlot_22",
+      "class_name": "S",
+      "root_name": "TH10_S_Scarab_Amulet_Root.068"
+    },
+    {
+      "model": "ceremonial_lamp",
+      "slot": "TreasureSlot_23",
+      "class_name": "S",
+      "root_name": "TH10_S_Ceremonial_Lamp_Root.052"
+    }
+  ],
+  "preview_only": "floor, 23 treasures, existing cart, camera, lights; not in stage FBX",
+  "unity_imported": false,
+  "pico_fps_measured": false,
+  "revision": 5,
+  "navigation": {
+    "type": "Low offering altars, central ruin, west caches and rear offerings; cart delivery route via offset openings",
+    "door_clear_width_m": 1.7,
+    "cart_dimensions_m": [
+      0.816,
+      1.204
+    ],
+    "cart_clearance_proxy_radius_m": 0.8,
+    "maze_is_visual_and_cargo_geometry_only": true,
+    "human_collision_or_forced_locomotion_implemented": false
+  },
+  "preview_cart_stats": {
+    "meshes": 9,
+    "triangles": 4432,
+    "vertices": 2352,
+    "material_slots": 13
+  },
+  "collection_change": "0.024m receiver floor, frontal roll-in; no scoring or interaction implementation",
+  "ground_decoration": {
+    "max_height_m": 0.004,
+    "collider": false,
+    "cast_shadows": false,
+    "full_floor": false,
+    "description": "Local opaque soil and paving fragments at wall feet; keep passthrough in open paths."
+  },
+  "supported_placements": [
+    {
+      "slot": "TreasureSlot_01",
+      "model": "amphora",
+      "kind": "stone_plinth",
+      "base_height_m": 0.2199999988079071,
+      "top_height_m": 0.6000000238418579,
+      "support_height_m": 0.22,
+      "suspended_offset_m": 0
+    },
+    {
+      "slot": "TreasureSlot_02",
+      "model": "mask",
+      "kind": "wall_mount",
+      "base_height_m": 0.29499998688697815,
+      "top_height_m": 0.6401747465133667,
+      "support_height_m": 0.245,
+      "suspended_offset_m": 0.05
+    },
+    {
+      "slot": "TreasureSlot_03",
+      "model": "inscribed_stele",
+      "kind": "stone_plinth",
+      "base_height_m": 0.23500004410743713,
+      "top_height_m": 0.7599999904632568,
+      "support_height_m": 0.23500002384185792,
+      "suspended_offset_m": 0
+    },
+    {
+      "slot": "TreasureSlot_04",
+      "model": "cup",
+      "kind": "stone_plinth",
+      "base_height_m": 0.2199999988079071,
+      "top_height_m": 0.42900002002716064,
+      "support_height_m": 0.22,
+      "suspended_offset_m": 0
+    },
+    {
+      "slot": "TreasureSlot_05",
+      "model": "amphora",
+      "kind": "stone_plinth",
+      "base_height_m": 0.24500000476837158,
+      "top_height_m": 0.625,
+      "support_height_m": 0.245,
+      "suspended_offset_m": 0
+    },
+    {
+      "slot": "TreasureSlot_06",
+      "model": "inscribed_stele",
+      "kind": "stone_plinth",
+      "base_height_m": 0.23500004410743713,
+      "top_height_m": 0.7599999904632568,
+      "support_height_m": 0.23500002384185792,
+      "suspended_offset_m": 0
+    },
+    {
+      "slot": "TreasureSlot_07",
+      "model": "hand_mirror",
+      "kind": "wall_mount",
+      "base_height_m": 0.27000001072883606,
+      "top_height_m": 0.6660000085830688,
+      "support_height_m": 0.22,
+      "suspended_offset_m": 0.05
+    },
+    {
+      "slot": "TreasureSlot_08",
+      "model": "amphora",
+      "kind": "stone_plinth",
+      "base_height_m": 0.24500000476837158,
+      "top_height_m": 0.625,
+      "support_height_m": 0.245,
+      "suspended_offset_m": 0
+    },
+    {
+      "slot": "TreasureSlot_09",
+      "model": "statuette",
+      "kind": "stone_plinth",
+      "base_height_m": 0.27000001072883606,
+      "top_height_m": 0.5625,
+      "support_height_m": 0.27,
+      "suspended_offset_m": 0
+    },
+    {
+      "slot": "TreasureSlot_10",
+      "model": "inscribed_stele",
+      "kind": "stone_plinth",
+      "base_height_m": 0.2199999988079071,
+      "top_height_m": 0.7450000047683716,
+      "support_height_m": 0.22,
+      "suspended_offset_m": 0
+    },
+    {
+      "slot": "TreasureSlot_11",
+      "model": "amphora",
+      "kind": "stone_plinth",
+      "base_height_m": 0.24500000476837158,
+      "top_height_m": 0.625,
+      "support_height_m": 0.245,
+      "suspended_offset_m": 0
+    },
+    {
+      "slot": "TreasureSlot_12",
+      "model": "stamp_seal",
+      "kind": "broken_altar_cache",
+      "base_height_m": 0.27000001072883606,
+      "top_height_m": 0.5509999990463257,
+      "support_height_m": 0.27,
+      "suspended_offset_m": 0
+    },
+    {
+      "slot": "TreasureSlot_13",
+      "model": "coin_casket",
+      "kind": "broken_altar_cache",
+      "base_height_m": 0.2199999988079071,
+      "top_height_m": 0.46409350633621216,
+      "support_height_m": 0.22,
+      "suspended_offset_m": 0
+    },
+    {
+      "slot": "TreasureSlot_14",
+      "model": "inscribed_stele",
+      "kind": "stone_plinth",
+      "base_height_m": 0.23500004410743713,
+      "top_height_m": 0.7599999904632568,
+      "support_height_m": 0.23500002384185792,
+      "suspended_offset_m": 0
+    },
+    {
+      "slot": "TreasureSlot_15",
+      "model": "scarab_amulet",
+      "kind": "broken_altar_cache",
+      "base_height_m": 0.27000001072883606,
+      "top_height_m": 0.4779999852180481,
+      "support_height_m": 0.27,
+      "suspended_offset_m": 0
+    },
+    {
+      "slot": "TreasureSlot_16",
+      "model": "ceremonial_lamp",
+      "kind": "broken_altar_cache",
+      "base_height_m": 0.2199999988079071,
+      "top_height_m": 0.32600000500679016,
+      "support_height_m": 0.22,
+      "suspended_offset_m": 0
+    },
+    {
+      "slot": "TreasureSlot_17",
+      "model": "amphora",
+      "kind": "stone_plinth",
+      "base_height_m": 0.24500000476837158,
+      "top_height_m": 0.625,
+      "support_height_m": 0.245,
+      "suspended_offset_m": 0
+    },
+    {
+      "slot": "TreasureSlot_18",
+      "model": "cup",
+      "kind": "stone_plinth",
+      "base_height_m": 0.27000001072883606,
+      "top_height_m": 0.4790000319480896,
+      "support_height_m": 0.27,
+      "suspended_offset_m": 0
+    },
+    {
+      "slot": "TreasureSlot_19",
+      "model": "statuette",
+      "kind": "stone_plinth",
+      "base_height_m": 0.2199999988079071,
+      "top_height_m": 0.512499988079071,
+      "support_height_m": 0.22,
+      "suspended_offset_m": 0
+    },
+    {
+      "slot": "TreasureSlot_20",
+      "model": "votive_bell",
+      "kind": "broken_altar_cache",
+      "base_height_m": 0.24500000476837158,
+      "top_height_m": 0.5139999985694885,
+      "support_height_m": 0.245,
+      "suspended_offset_m": 0
+    },
+    {
+      "slot": "TreasureSlot_21",
+      "model": "perfume_jar",
+      "kind": "broken_altar_cache",
+      "base_height_m": 0.27000001072883606,
+      "top_height_m": 0.5980000495910645,
+      "support_height_m": 0.27,
+      "suspended_offset_m": 0
+    },
+    {
+      "slot": "TreasureSlot_22",
+      "model": "scarab_amulet",
+      "kind": "broken_altar_cache",
+      "base_height_m": 0.2199999988079071,
+      "top_height_m": 0.42800000309944153,
+      "support_height_m": 0.22,
+      "suspended_offset_m": 0
+    },
+    {
+      "slot": "TreasureSlot_23",
+      "model": "ceremonial_lamp",
+      "kind": "broken_altar_cache",
+      "base_height_m": 0.24500000476837158,
+      "top_height_m": 0.35099998116493225,
+      "support_height_m": 0.245,
+      "suspended_offset_m": 0
+    }
+  ],
+  "spawn_rule": "23 authored model-specific supported anchors. Do not randomly swap incompatible shapes.",
+  "navigation_status": "Recheck with added support solids; previous revision cart paths are not a guarantee."
+}

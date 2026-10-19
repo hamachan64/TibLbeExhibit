@@ -1,0 +1,850 @@
+{
+  "summary": {
+    "hidden_intent": 18,
+    "hidden_concealed_from_entrance": 13,
+    "hidden_concealed_and_discoverable": 7,
+    "all_discoverable": 17,
+    "all_grabbable": 17,
+    "discoverable_without_crouching": 14,
+    "treasure_mesh_intersections": 3,
+    "support_envelope_overlaps": 7,
+    "floor_placed": 0,
+    "total": 23,
+    "exposed_visible_from_entrance": 5,
+    "walkable_points": 2511
+  },
+  "method": {
+    "viewpoints": "Walkable cells (0.10 m grid, 0.30 m human radius) connected to the practice area; entrance = depth 1.9-3.2 m at eye (1.45, 1.65) m",
+    "concealed": "No grip vertex and <=10%% of body vertices visible from any entrance viewpoint",
+    "discoverable": ">=30% grip vertices visible from a walkable point within 1.30 m at eye 1.0-1.65 m",
+    "grabbable": "Palm at 0.8-1.2 m within 1.5 m of grip with >=25% grip vertices in clear line (beam)",
+    "far": "Share of walkable points >= 2.0 m away (eye 1.65 m) seeing >10% of body or grip",
+    "limitation": "Geometric proxy in Blender. Not a Unity/PICO test; ignores lighting, passthrough contrast, value labels, other players."
+  },
+  "contact": {
+    "treasure_intersections": [
+      {
+        "slot": "TreasureSlot_13",
+        "treasure_mesh": "coin_casket_Body.016",
+        "stage_mesh": "THStage_FindSupport_13.013"
+      },
+      {
+        "slot": "TreasureSlot_14",
+        "treasure_mesh": "Reviewed_inscribed_stele_Body.112",
+        "stage_mesh": "THStage_RearRoomDivider.033"
+      },
+      {
+        "slot": "TreasureSlot_18",
+        "treasure_mesh": "TH_S_Cup_Handle.074",
+        "stage_mesh": "THStage_FindSupport_18.013"
+      }
+    ],
+    "envelope_overlaps": [
+      {
+        "a": "RearRoomDivider",
+        "b": "THStage_FindSupport_14",
+        "penetration_m": 0.124
+      },
+      {
+        "a": "CentralReturn",
+        "b": "THStage_FindSupport_19",
+        "penetration_m": 0.005
+      },
+      {
+        "a": "THStage_FindSupport_02",
+        "b": "THStage_FindSupport_03",
+        "penetration_m": 0.021
+      },
+      {
+        "a": "THStage_FindSupport_03",
+        "b": "THStage_FindSupport_04",
+        "penetration_m": 0.014
+      },
+      {
+        "a": "THStage_FindSupport_06",
+        "b": "THStage_FindSupport_07",
+        "penetration_m": 0.028
+      },
+      {
+        "a": "THStage_FindSupport_09",
+        "b": "THStage_FindSupport_10",
+        "penetration_m": 0.021
+      },
+      {
+        "a": "THStage_FindSupport_22",
+        "b": "THStage_FindSupport_23",
+        "penetration_m": 0.024
+      }
+    ],
+    "floor_placed": [],
+    "stacked_on_altar_foundation": [
+      {
+        "support": "THStage_FindSupport_01",
+        "foundation": "EntryPartition"
+      },
+      {
+        "support": "THStage_FindSupport_02",
+        "foundation": "EntryPartition"
+      },
+      {
+        "support": "THStage_FindSupport_03",
+        "foundation": "EntryPartition"
+      },
+      {
+        "support": "THStage_FindSupport_04",
+        "foundation": "EntryPartition"
+      },
+      {
+        "support": "THStage_FindSupport_05",
+        "foundation": "EntryPartition"
+      },
+      {
+        "support": "THStage_FindSupport_06",
+        "foundation": "RearPartition"
+      },
+      {
+        "support": "THStage_FindSupport_07",
+        "foundation": "RearPartition"
+      },
+      {
+        "support": "THStage_FindSupport_08",
+        "foundation": "RearPartition"
+      },
+      {
+        "support": "THStage_FindSupport_09",
+        "foundation": "RearPartition"
+      },
+      {
+        "support": "THStage_FindSupport_10",
+        "foundation": "RearPartition"
+      },
+      {
+        "support": "THStage_FindSupport_18",
+        "foundation": "CentralCrosswall"
+      },
+      {
+        "support": "THStage_FindSupport_19",
+        "foundation": "CentralCrosswall"
+      }
+    ]
+  },
+  "slots": [
+    {
+      "slot": "TreasureSlot_01",
+      "model": "amphora",
+      "hidden_intent": true,
+      "placement_kind": "reverse_open_stone_locker",
+      "entrance_max_body_visible": 0.0,
+      "entrance_max_grip_visible": 0.0,
+      "far_viewpoints_seeing": "197/345",
+      "far_seen_ratio": 0.571,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "score": 1.6021586345381527,
+        "eye_unity_xyz": [
+          -1.0,
+          1.0,
+          4.9
+        ],
+        "body_visible": 0.831,
+        "grip_visible": 0.771
+      },
+      "discoverable_up_close": true,
+      "standing_near_max_grip_visible": 0.448,
+      "discoverable_without_crouching": true,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          -1.5,
+          0.8,
+          4.3
+        ],
+        "grip_clear": 1.0
+      },
+      "grabbable": true
+    },
+    {
+      "slot": "TreasureSlot_02",
+      "model": "mask",
+      "hidden_intent": true,
+      "placement_kind": "reverse_open_stone_locker",
+      "entrance_max_body_visible": 0.0,
+      "entrance_max_grip_visible": 0.0,
+      "far_viewpoints_seeing": "206/327",
+      "far_seen_ratio": 0.63,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "score": 1.525,
+        "eye_unity_xyz": [
+          -0.9,
+          1.0,
+          5.0
+        ],
+        "body_visible": 1.0,
+        "grip_visible": 0.525
+      },
+      "discoverable_up_close": true,
+      "standing_near_max_grip_visible": 0.0,
+      "discoverable_without_crouching": false,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          -1.1,
+          0.8,
+          4.4
+        ],
+        "grip_clear": 0.375
+      },
+      "grabbable": true
+    },
+    {
+      "slot": "TreasureSlot_03",
+      "model": "inscribed_stele",
+      "hidden_intent": false,
+      "placement_kind": "exposed_stone_find",
+      "entrance_max_body_visible": 1.0,
+      "entrance_max_grip_visible": 1.0,
+      "far_viewpoints_seeing": "305/305",
+      "far_seen_ratio": 1.0,
+      "concealed_from_entrance": false,
+      "best_near_view": {
+        "score": 2.0,
+        "eye_unity_xyz": [
+          0.4,
+          1.65,
+          3.2
+        ],
+        "body_visible": 1.0,
+        "grip_visible": 1.0
+      },
+      "discoverable_up_close": true,
+      "standing_near_max_grip_visible": 1.0,
+      "discoverable_without_crouching": true,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          -0.6,
+          0.8,
+          3.3
+        ],
+        "grip_clear": 1.0
+      },
+      "grabbable": true
+    },
+    {
+      "slot": "TreasureSlot_04",
+      "model": "cup",
+      "hidden_intent": false,
+      "placement_kind": "exposed_stone_find",
+      "entrance_max_body_visible": 1.0,
+      "entrance_max_grip_visible": 1.0,
+      "far_viewpoints_seeing": "272/284",
+      "far_seen_ratio": 0.958,
+      "concealed_from_entrance": false,
+      "best_near_view": {
+        "score": 2.0,
+        "eye_unity_xyz": [
+          0.4,
+          1.65,
+          3.2
+        ],
+        "body_visible": 1.0,
+        "grip_visible": 1.0
+      },
+      "discoverable_up_close": true,
+      "standing_near_max_grip_visible": 1.0,
+      "discoverable_without_crouching": true,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          -0.2,
+          0.8,
+          3.3
+        ],
+        "grip_clear": 1.0
+      },
+      "grabbable": true
+    },
+    {
+      "slot": "TreasureSlot_05",
+      "model": "amphora",
+      "hidden_intent": true,
+      "placement_kind": "reverse_open_stone_locker",
+      "entrance_max_body_visible": 0.0,
+      "entrance_max_grip_visible": 0.0,
+      "far_viewpoints_seeing": "206/273",
+      "far_seen_ratio": 0.755,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "score": 1.855421686746988,
+        "eye_unity_xyz": [
+          0.3,
+          1.0,
+          5.0
+        ],
+        "body_visible": 0.855,
+        "grip_visible": 1.0
+      },
+      "discoverable_up_close": true,
+      "standing_near_max_grip_visible": 0.75,
+      "discoverable_without_crouching": true,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          0.3,
+          0.8,
+          4.3
+        ],
+        "grip_clear": 1.0
+      },
+      "grabbable": true
+    },
+    {
+      "slot": "TreasureSlot_06",
+      "model": "inscribed_stele",
+      "hidden_intent": true,
+      "placement_kind": "reverse_open_stone_locker",
+      "entrance_max_body_visible": 0.0,
+      "entrance_max_grip_visible": 0.0,
+      "far_viewpoints_seeing": "10/280",
+      "far_seen_ratio": 0.036,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "score": 2.0,
+        "eye_unity_xyz": [
+          -0.2,
+          1.0,
+          8.9
+        ],
+        "body_visible": 1.0,
+        "grip_visible": 1.0
+      },
+      "discoverable_up_close": true,
+      "standing_near_max_grip_visible": 1.0,
+      "discoverable_without_crouching": true,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          -0.3,
+          0.8,
+          8.6
+        ],
+        "grip_clear": 1.0
+      },
+      "grabbable": true
+    },
+    {
+      "slot": "TreasureSlot_07",
+      "model": "hand_mirror",
+      "hidden_intent": true,
+      "placement_kind": "reverse_open_stone_locker",
+      "entrance_max_body_visible": 0.0,
+      "entrance_max_grip_visible": 0.0,
+      "far_viewpoints_seeing": "0/283",
+      "far_seen_ratio": 0.0,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "score": 1.6666666666666665,
+        "eye_unity_xyz": [
+          0.0,
+          1.0,
+          9.3
+        ],
+        "body_visible": 1.0,
+        "grip_visible": 0.667
+      },
+      "discoverable_up_close": true,
+      "standing_near_max_grip_visible": 0.0,
+      "discoverable_without_crouching": false,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          0.1,
+          0.8,
+          8.6
+        ],
+        "grip_clear": 0.458
+      },
+      "grabbable": true
+    },
+    {
+      "slot": "TreasureSlot_08",
+      "model": "amphora",
+      "hidden_intent": true,
+      "placement_kind": "reverse_open_stone_locker",
+      "entrance_max_body_visible": 0.0,
+      "entrance_max_grip_visible": 0.0,
+      "far_viewpoints_seeing": "1/299",
+      "far_seen_ratio": 0.003,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "score": 1.855421686746988,
+        "eye_unity_xyz": [
+          0.5,
+          1.0,
+          9.3
+        ],
+        "body_visible": 0.855,
+        "grip_visible": 1.0
+      },
+      "discoverable_up_close": true,
+      "standing_near_max_grip_visible": 0.75,
+      "discoverable_without_crouching": true,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          0.6,
+          0.8,
+          8.6
+        ],
+        "grip_clear": 1.0
+      },
+      "grabbable": true
+    },
+    {
+      "slot": "TreasureSlot_09",
+      "model": "statuette",
+      "hidden_intent": true,
+      "placement_kind": "reverse_open_stone_locker",
+      "entrance_max_body_visible": 0.0,
+      "entrance_max_grip_visible": 0.0,
+      "far_viewpoints_seeing": "0/320",
+      "far_seen_ratio": 0.0,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "score": 1.558139534883721,
+        "eye_unity_xyz": [
+          0.8,
+          1.0,
+          9.3
+        ],
+        "body_visible": 1.0,
+        "grip_visible": 0.558
+      },
+      "discoverable_up_close": true,
+      "standing_near_max_grip_visible": 0.0,
+      "discoverable_without_crouching": false,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          1.0,
+          0.8,
+          8.8
+        ],
+        "grip_clear": 0.465
+      },
+      "grabbable": true
+    },
+    {
+      "slot": "TreasureSlot_10",
+      "model": "inscribed_stele",
+      "hidden_intent": false,
+      "placement_kind": "exposed_stone_find",
+      "entrance_max_body_visible": 1.0,
+      "entrance_max_grip_visible": 1.0,
+      "far_viewpoints_seeing": "334/334",
+      "far_seen_ratio": 1.0,
+      "concealed_from_entrance": false,
+      "best_near_view": {
+        "score": 2.0,
+        "eye_unity_xyz": [
+          1.1,
+          1.65,
+          7.1
+        ],
+        "body_visible": 1.0,
+        "grip_visible": 1.0
+      },
+      "discoverable_up_close": true,
+      "standing_near_max_grip_visible": 1.0,
+      "discoverable_without_crouching": true,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          1.5,
+          0.8,
+          7.6
+        ],
+        "grip_clear": 1.0
+      },
+      "grabbable": true
+    },
+    {
+      "slot": "TreasureSlot_11",
+      "model": "amphora",
+      "hidden_intent": true,
+      "placement_kind": "reverse_open_stone_locker",
+      "entrance_max_body_visible": 0.0,
+      "entrance_max_grip_visible": 0.0,
+      "far_viewpoints_seeing": "0/372",
+      "far_seen_ratio": 0.0,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "score": 0.0,
+        "eye_unity_xyz": [
+          -1.2,
+          1.65,
+          8.8
+        ],
+        "body_visible": 0.0,
+        "grip_visible": 0.0
+      },
+      "discoverable_up_close": false,
+      "standing_near_max_grip_visible": 0.0,
+      "discoverable_without_crouching": false,
+      "beam_grab": null,
+      "grabbable": false
+    },
+    {
+      "slot": "TreasureSlot_12",
+      "model": "stamp_seal",
+      "hidden_intent": true,
+      "placement_kind": "reverse_open_stone_locker",
+      "entrance_max_body_visible": 0.0,
+      "entrance_max_grip_visible": 0.0,
+      "far_viewpoints_seeing": "0/366",
+      "far_seen_ratio": 0.0,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "score": 0.0,
+        "eye_unity_xyz": [
+          -1.2,
+          1.65,
+          8.8
+        ],
+        "body_visible": 0.0,
+        "grip_visible": 0.0
+      },
+      "discoverable_up_close": false,
+      "standing_near_max_grip_visible": 0.0,
+      "discoverable_without_crouching": false,
+      "beam_grab": null,
+      "grabbable": false
+    },
+    {
+      "slot": "TreasureSlot_13",
+      "model": "coin_casket",
+      "hidden_intent": true,
+      "placement_kind": "reverse_open_stone_locker",
+      "entrance_max_body_visible": 0.0,
+      "entrance_max_grip_visible": 0.0,
+      "far_viewpoints_seeing": "0/362",
+      "far_seen_ratio": 0.0,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "score": 0.0,
+        "eye_unity_xyz": [
+          -0.9,
+          1.65,
+          9.3
+        ],
+        "body_visible": 0.0,
+        "grip_visible": 0.0
+      },
+      "discoverable_up_close": false,
+      "standing_near_max_grip_visible": 0.0,
+      "discoverable_without_crouching": false,
+      "beam_grab": null,
+      "grabbable": false
+    },
+    {
+      "slot": "TreasureSlot_14",
+      "model": "inscribed_stele",
+      "hidden_intent": false,
+      "placement_kind": "exposed_stone_find",
+      "entrance_max_body_visible": 0.728,
+      "entrance_max_grip_visible": 0.837,
+      "far_viewpoints_seeing": "291/363",
+      "far_seen_ratio": 0.802,
+      "concealed_from_entrance": false,
+      "best_near_view": {
+        "score": 2.0,
+        "eye_unity_xyz": [
+          0.6,
+          1.65,
+          9.0
+        ],
+        "body_visible": 1.0,
+        "grip_visible": 1.0
+      },
+      "discoverable_up_close": true,
+      "standing_near_max_grip_visible": 1.0,
+      "discoverable_without_crouching": true,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          0.0,
+          0.8,
+          9.4
+        ],
+        "grip_clear": 1.0
+      },
+      "grabbable": true
+    },
+    {
+      "slot": "TreasureSlot_15",
+      "model": "scarab_amulet",
+      "hidden_intent": true,
+      "placement_kind": "reverse_open_stone_locker",
+      "entrance_max_body_visible": 0.0,
+      "entrance_max_grip_visible": 0.0,
+      "far_viewpoints_seeing": "0/369",
+      "far_seen_ratio": 0.0,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "score": 0.0,
+        "eye_unity_xyz": [
+          1.4,
+          1.65,
+          9.4
+        ],
+        "body_visible": 0.0,
+        "grip_visible": 0.0
+      },
+      "discoverable_up_close": false,
+      "standing_near_max_grip_visible": 0.0,
+      "discoverable_without_crouching": false,
+      "beam_grab": null,
+      "grabbable": false
+    },
+    {
+      "slot": "TreasureSlot_16",
+      "model": "ceremonial_lamp",
+      "hidden_intent": true,
+      "placement_kind": "reverse_open_stone_locker",
+      "entrance_max_body_visible": 0.0,
+      "entrance_max_grip_visible": 0.0,
+      "far_viewpoints_seeing": "0/376",
+      "far_seen_ratio": 0.0,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "score": 0.0,
+        "eye_unity_xyz": [
+          1.4,
+          1.65,
+          9.4
+        ],
+        "body_visible": 0.0,
+        "grip_visible": 0.0
+      },
+      "discoverable_up_close": false,
+      "standing_near_max_grip_visible": 0.0,
+      "discoverable_without_crouching": false,
+      "beam_grab": null,
+      "grabbable": false
+    },
+    {
+      "slot": "TreasureSlot_17",
+      "model": "amphora",
+      "hidden_intent": true,
+      "placement_kind": "reverse_open_stone_locker",
+      "entrance_max_body_visible": 0.0,
+      "entrance_max_grip_visible": 0.0,
+      "far_viewpoints_seeing": "0/384",
+      "far_seen_ratio": 0.0,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "score": 0.0,
+        "eye_unity_xyz": [
+          1.8,
+          1.65,
+          8.7
+        ],
+        "body_visible": 0.0,
+        "grip_visible": 0.0
+      },
+      "discoverable_up_close": false,
+      "standing_near_max_grip_visible": 0.0,
+      "discoverable_without_crouching": false,
+      "beam_grab": null,
+      "grabbable": false
+    },
+    {
+      "slot": "TreasureSlot_18",
+      "model": "cup",
+      "hidden_intent": true,
+      "placement_kind": "side_rubble_cavity",
+      "entrance_max_body_visible": 0.16,
+      "entrance_max_grip_visible": 0.0,
+      "far_viewpoints_seeing": "50/295",
+      "far_seen_ratio": 0.169,
+      "concealed_from_entrance": false,
+      "best_near_view": {
+        "score": 1.825,
+        "eye_unity_xyz": [
+          0.9,
+          1.2,
+          5.8
+        ],
+        "body_visible": 1.0,
+        "grip_visible": 0.825
+      },
+      "discoverable_up_close": true,
+      "standing_near_max_grip_visible": 0.825,
+      "discoverable_without_crouching": true,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          0.4,
+          0.8,
+          6.6
+        ],
+        "grip_clear": 0.425
+      },
+      "grabbable": true
+    },
+    {
+      "slot": "TreasureSlot_19",
+      "model": "statuette",
+      "hidden_intent": false,
+      "placement_kind": "exposed_stone_find",
+      "entrance_max_body_visible": 1.0,
+      "entrance_max_grip_visible": 1.0,
+      "far_viewpoints_seeing": "276/279",
+      "far_seen_ratio": 0.989,
+      "concealed_from_entrance": false,
+      "best_near_view": {
+        "score": 2.0,
+        "eye_unity_xyz": [
+          0.3,
+          1.65,
+          6.7
+        ],
+        "body_visible": 1.0,
+        "grip_visible": 1.0
+      },
+      "discoverable_up_close": true,
+      "standing_near_max_grip_visible": 1.0,
+      "discoverable_without_crouching": true,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          0.2,
+          0.8,
+          5.2
+        ],
+        "grip_clear": 1.0
+      },
+      "grabbable": true
+    },
+    {
+      "slot": "TreasureSlot_20",
+      "model": "votive_bell",
+      "hidden_intent": true,
+      "placement_kind": "side_rubble_cavity",
+      "entrance_max_body_visible": 0.759,
+      "entrance_max_grip_visible": 1.0,
+      "far_viewpoints_seeing": "168/360",
+      "far_seen_ratio": 0.467,
+      "concealed_from_entrance": false,
+      "best_near_view": {
+        "score": 2.0,
+        "eye_unity_xyz": [
+          -0.8,
+          1.0,
+          4.8
+        ],
+        "body_visible": 1.0,
+        "grip_visible": 1.0
+      },
+      "discoverable_up_close": true,
+      "standing_near_max_grip_visible": 1.0,
+      "discoverable_without_crouching": true,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          -1.0,
+          0.8,
+          4.8
+        ],
+        "grip_clear": 1.0
+      },
+      "grabbable": true
+    },
+    {
+      "slot": "TreasureSlot_21",
+      "model": "perfume_jar",
+      "hidden_intent": true,
+      "placement_kind": "side_rubble_cavity",
+      "entrance_max_body_visible": 0.671,
+      "entrance_max_grip_visible": 0.854,
+      "far_viewpoints_seeing": "146/357",
+      "far_seen_ratio": 0.409,
+      "concealed_from_entrance": false,
+      "best_near_view": {
+        "score": 2.0,
+        "eye_unity_xyz": [
+          -0.5,
+          1.0,
+          5.1
+        ],
+        "body_visible": 1.0,
+        "grip_visible": 1.0
+      },
+      "discoverable_up_close": true,
+      "standing_near_max_grip_visible": 0.375,
+      "discoverable_without_crouching": true,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          -1.0,
+          0.8,
+          5.2
+        ],
+        "grip_clear": 0.542
+      },
+      "grabbable": true
+    },
+    {
+      "slot": "TreasureSlot_22",
+      "model": "scarab_amulet",
+      "hidden_intent": true,
+      "placement_kind": "side_rubble_cavity",
+      "entrance_max_body_visible": 0.675,
+      "entrance_max_grip_visible": 0.14,
+      "far_viewpoints_seeing": "141/345",
+      "far_seen_ratio": 0.409,
+      "concealed_from_entrance": false,
+      "best_near_view": {
+        "score": 2.0,
+        "eye_unity_xyz": [
+          -0.9,
+          1.0,
+          5.5
+        ],
+        "body_visible": 1.0,
+        "grip_visible": 1.0
+      },
+      "discoverable_up_close": true,
+      "standing_near_max_grip_visible": 1.0,
+      "discoverable_without_crouching": true,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          -1.0,
+          0.8,
+          5.7
+        ],
+        "grip_clear": 1.0
+      },
+      "grabbable": true
+    },
+    {
+      "slot": "TreasureSlot_23",
+      "model": "ceremonial_lamp",
+      "hidden_intent": true,
+      "placement_kind": "side_rubble_cavity",
+      "entrance_max_body_visible": 0.349,
+      "entrance_max_grip_visible": 0.907,
+      "far_viewpoints_seeing": "157/336",
+      "far_seen_ratio": 0.467,
+      "concealed_from_entrance": false,
+      "best_near_view": {
+        "score": 2.0,
+        "eye_unity_xyz": [
+          -0.9,
+          1.2,
+          6.0
+        ],
+        "body_visible": 1.0,
+        "grip_visible": 1.0
+      },
+      "discoverable_up_close": true,
+      "standing_near_max_grip_visible": 1.0,
+      "discoverable_without_crouching": true,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          -1.0,
+          0.8,
+          6.0
+        ],
+        "grip_clear": 1.0
+      },
+      "grabbable": true
+    }
+  ]
+}
