@@ -122,7 +122,11 @@ namespace STYLY.TIB_Template.TreasureHaul
 
         public void OnClientDisconnected(int clientNo, double now)
         {
+            var deviceId = Registry.GetDeviceId(clientNo);
             Registry.Disconnect(clientNo);
+            // 切断した端末の M の片手予約を解除する（設計書 3.3）。持っているお宝の扱いは #41。
+            // TODO(#44): 見学への切り替え（運営PCの UI）でも同じく ReleaseReservationsOf を呼ぶ
+            if (_items != null && Machine.State == RoundState.Playing) _items.ReleaseReservationsOf(deviceId);
             Refresh(now);
         }
 
@@ -181,9 +185,8 @@ namespace STYLY.TIB_Template.TreasureHaul
             if (senderClientNo == OwnClientNo) return;   // 自分が送った RPC の戻り
             RebindSender(senderClientNo);
             if (rpc == Rpc.ThResync) HandleResync(senderClientNo, args, now);
-            else if (rpc == Rpc.ThGrab || rpc == Rpc.ThRelease || rpc == Rpc.ThRest || rpc == Rpc.ThCollect
+            else if (rpc == Rpc.ThGrab || rpc == Rpc.ThLift || rpc == Rpc.ThRelease || rpc == Rpc.ThRest || rpc == Rpc.ThCollect
                 || rpc == Rpc.ThDamage || rpc == Rpc.ThPoses) HandleItemMessage(rpc, senderClientNo, args, now);
-            // ThLift などは #40 まで受け取らない
         }
 
         /// <summary>お宝のメッセージ（設計書 6.1）。RoundId・送り手が今の参加端末・本編（Playing）中のときだけ。</summary>
@@ -197,6 +200,11 @@ namespace STYLY.TIB_Template.TreasureHaul
                     if (!ThMessages.TryDecode(args, out long r1, out ThGrabMsg grab) || !Gate.Accept(r1, sender)) return;
                     device = Registry.GetDeviceId(sender);
                     _items.OnGrab(device, sender, grab);
+                    break;
+                case Rpc.ThLift:
+                    if (!ThMessages.TryDecode(args, out long r7, out ThLiftMsg lift) || !Gate.Accept(r7, sender)) return;
+                    device = Registry.GetDeviceId(sender);
+                    _items.OnLift(device, sender, lift);
                     break;
                 case Rpc.ThRelease:
                     if (!ThMessages.TryDecode(args, out long r2, out ThReleaseMsg rel) || !Gate.Accept(r2, sender)) return;

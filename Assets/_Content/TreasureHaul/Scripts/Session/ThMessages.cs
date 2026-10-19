@@ -61,7 +61,7 @@ namespace STYLY.TIB_Template.TreasureHaul
 
     // ---- お宝（#38。設計書 4.4・5章・6章）。item はお宝の番号、gen は世代番号、reqId は申請ID ----
 
-    /// <summary>端末→ホスト つかむ申請（kind: 0=S）</summary>
+    /// <summary>端末→ホスト つかむ申請（kind: 0=S、1=M の片手予約）</summary>
     [Serializable]
     public class ThGrabMsg
     {
@@ -77,6 +77,30 @@ namespace STYLY.TIB_Template.TreasureHaul
     public class ThGrabbedMsg
     {
         public int item;
+        public int clientNo;
+        public int reqId;
+        public int gen;
+        /// <summary>現在の価値（M の予約では 0。値段を載せない）</summary>
+        public int value;
+        /// <summary>M の片手予約の承認（#40。古い送り手からは false で届く）。予約は「持った」に数えず、値段も公開しない</summary>
+        public bool reserve;
+    }
+
+    /// <summary>端末→ホスト M の両手成立（予約した申請ID・予約の承認で受けた世代）</summary>
+    [Serializable]
+    public class ThLiftMsg
+    {
+        public int item;
+        public int reqId;
+        public int gen;
+    }
+
+    /// <summary>ホスト→全員 M を持ち上げた（ここが M の「持った」瞬間。値段を公開する）</summary>
+    [Serializable]
+    public class ThLiftedMsg
+    {
+        public int item;
+        /// <summary>持ち主の ClientNo</summary>
         public int clientNo;
         public int reqId;
         public int gen;

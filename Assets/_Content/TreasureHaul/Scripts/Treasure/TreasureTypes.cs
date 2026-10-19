@@ -33,6 +33,15 @@ namespace STYLY.TIB_Template.TreasureHaul
         Cancel = 0,
         /// <summary>手を開いて落とした</summary>
         Dropped = 1,
+        /// <summary>M の片手予約の解除（予約した手を開いた・見失い待ちの間に戻らなかった）</summary>
+        Unreserve = 2,
+    }
+
+    /// <summary>左右の手（端末の表は XR Hands の型を知らないので、番号で持つ）</summary>
+    public enum ThHand
+    {
+        Left = 0,
+        Right = 1,
     }
 
     /// <summary>配置候補点。位置は VenueRoot のローカル座標、band は荷台からの距離帯（0=近い / 1=中 / 2=遠い）</summary>

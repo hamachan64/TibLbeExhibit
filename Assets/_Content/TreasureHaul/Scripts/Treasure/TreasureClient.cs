@@ -35,6 +35,21 @@ namespace STYLY.TIB_Template.TreasureHaul
             public int CrackStage;
         }
 
+        /// <summary>M を両手で持っている間の状態（見た目の側。判断は ClientItemTable）</summary>
+        sealed class TwoHand
+        {
+            public Treasure Treasure;
+            /// <summary>予約した手（1 本目）と 2 本目の手</summary>
+            public HandGrabber Reserve, Second;
+            /// <summary>お宝が追う目標（位置 = 手に合わせる点、向き = お宝の向き）。両手の中点か、猶予の間は残った手についていく点</summary>
+            public Transform Target;
+            public bool Grace;
+            /// <summary>猶予の間についていく手と、外れた瞬間の「残った手 → 手に合わせる点・お宝」の相対</summary>
+            public HandGrabber Remaining;
+            public Vector3 GraceRelPos;
+            public Quaternion GraceRelRot = Quaternion.identity;
+        }
+
         /// <summary>「-NNG」の赤。ぶつけて値段が下がったことが一目でわかる色</summary>
         static readonly Color DamageColor = new Color(1f, 0.2f, 0.2f);
         /// <summary>初めての一文の色。赤い「-NNG」と区別して読める白</summary>
@@ -42,6 +57,8 @@ namespace STYLY.TIB_Template.TreasureHaul
         /// <summary>値札の上に重ねない高さ（m）。値札（高さ 0.3m）の上に、一文 → 「-NNG」の順に積む</summary>
         const float NoteOffset = 0.1f, AmountOffset = 0.18f;
         const float AmountFontSize = 1.0f, NoteFontSize = 0.45f;
+        /// <summary>「両手で持とう」: 値札の上に重ねない高さ（m）・文字の大きさ・表示時間（秒）。読める長さの数秒（見た目の調整値なのでコードの定数）</summary>
+        const float HintOffset = 0.12f, HintFontSize = 0.45f, HintSeconds = 4f;
         /// <summary>砕ける演出の片付けまでの秒数（プレハブが自分で消えない場合の保険）</summary>
         const float ShatterLifetime = 5f;
 
@@ -54,6 +71,11 @@ namespace STYLY.TIB_Template.TreasureHaul
         readonly Dictionary<int, HandGrabber> _holders = new Dictionary<int, HandGrabber>();
         readonly List<ThPoseEntry> _poseBuffer = new List<ThPoseEntry>();
         readonly List<DamagePopup> _popups = new List<DamagePopup>();
+        readonly Dictionary<int, TwoHand> _twoHands = new Dictionary<int, TwoHand>();
+        readonly List<KeyValuePair<int, TwoHand>> _twoHandBuf = new List<KeyValuePair<int, TwoHand>>();
+        readonly TwoHandHint _hint = new TwoHandHint();
+        DamagePopup _hintPopup;
+        int _hintItem = -1;
         HandGrabber _grabbing;
         ThParams _configuredFor;
 
@@ -105,6 +127,8 @@ namespace STYLY.TIB_Template.TreasureHaul
             _table.ParticipantPlaying = _core.Tracker.IsParticipant.CurrentValue && _core.Tracker.State.CurrentValue == RoundState.Playing;
             var venueRoot = _venue.Root;
             var grip = Grip;
+            UpdateTwoHands(now);
+            UpdateTwoHandHint();
             _poseBuffer.Clear();
             bool slotChecked = false, slotDue = false;   // 送る枠が来たフレームだけ詰める（枠は、送る物があるときだけ消費する）
 
@@ -146,7 +170,9 @@ namespace STYLY.TIB_Template.TreasureHaul
             {
                 var t = kv.Value.Treasure;
                 if (t == null) continue;
-                bool want = _table != null && !_table.Frozen && ((_left != null && _left.Aimed == t) || (_right != null && _right.Aimed == t));
+                // 自分が予約中の M は、片手で握ったことがわかるように「狙っている」光のままにする
+                bool want = _table != null && !_table.Frozen
+                    && ((_left != null && _left.Aimed == t) || (_right != null && _right.Aimed == t) || (t.Model != null && ClientItemTable.IsOwnReservation(t.Model)));
                 if (t.Aimed != want) t.SetAimed(want);
             }
         }
@@ -262,6 +288,12 @@ namespace STYLY.TIB_Template.TreasureHaul
             foreach (var p in _popups) if (p != null) Destroy(p.gameObject);   // 表示中の「-NNG」・一文（Tween は SetLink で止まる）
             _popups.Clear();
             _holders.Clear();
+            foreach (var th in _twoHands.Values) if (th.Target != null) Destroy(th.Target.gameObject);
+            _twoHands.Clear();
+            if (_hintPopup != null) Destroy(_hintPopup.gameObject);
+            _hintPopup = null;
+            _hintItem = -1;
+            _hint.Reset();
             if (_left != null) { _left.Held = null; _left.ClearAim(); }
             if (_right != null) { _right.Held = null; _right.ClearAim(); }
             _table = null;
@@ -275,11 +307,12 @@ namespace STYLY.TIB_Template.TreasureHaul
 
         // ---- HandGrabber から ----
 
-        public bool IsTargetable(Treasure t) => _table != null && t != null && t.Model != null && _table.IsGrabbable(t.Model);
+        public bool IsTargetable(Treasure t, ThHand hand, int handleIndex) => _table != null && t != null && t.Model != null && _table.IsTargetFor(t.Model, hand, handleIndex);
 
-        public bool TryGrab(HandGrabber grabber, Treasure t)
+        public bool TryGrab(HandGrabber grabber, Treasure t, int handleIndex)
         {
             if (!CanGrab || t == null) return false;
+            if (t.Model.Kind == TreasureKind.M) return TryGrabM(grabber, t, handleIndex);
             _grabbing = grabber;
             bool ok = _table.TryBeginGrab(t.Model.Index, Now);
             _grabbing = null;
@@ -289,13 +322,126 @@ namespace STYLY.TIB_Template.TreasureHaul
             return true;
         }
 
-        public void OnHandReleased(HandGrabber grabber)
+        /// <summary>M: 予約中でなければ片手予約、予約中なら 2 本目の手で両手成立</summary>
+        bool TryGrabM(HandGrabber grabber, Treasure t, int handleIndex)
+        {
+            int index = t.Model.Index;
+            if (ClientItemTable.IsOwnReservation(t.Model))
+            {
+                if (!_twoHands.TryGetValue(index, out var th)) return false;
+                th.Second = grabber;   // LiftStarted のイベントが手を見られるように、先に覚える
+                if (!_table.TryBeginLift(index, grabber.Hand, handleIndex, Now)) { th.Second = null; return false; }
+                grabber.Held = t;
+                return true;
+            }
+            var created = new TwoHand { Treasure = t, Reserve = grabber };
+            _twoHands[index] = created;
+            if (!_table.TryBeginLock(index, grabber.Hand, handleIndex, Now)) { _twoHands.Remove(index); return false; }
+            grabber.Held = t;
+            return true;
+        }
+
+        public void OnHandReleased(HandGrabber grabber, bool lost)
         {
             var t = grabber.Held;
             if (t == null || _table == null) { grabber.Held = null; return; }
             grabber.Held = null;
+            if (t.Model.Kind == TreasureKind.M)
+            {
+                // 予約・猶予・取りやめの判断は ClientItemTable。結果はイベントで受ける
+                _table.OnMHandReleased(t.Model.Index, grabber.Hand, lost, Now);
+                // 承認前に 2 本目が開いて待ちが取り消されたら、古い手を覚えたままにしない
+                if (_twoHands.TryGetValue(t.Model.Index, out var rel) && rel.Second == grabber && t.Model.SecondHand < 0) rel.Second = null;
+                return;
+            }
             _holders.Remove(t.Model.Index);
             _table.OnHandReleased(t.Model.Index, Now);
+        }
+
+        /// <summary>猶予の間に外れた手・予約中に見失った手が握り直した。戻れたら true（ビームの当て直しは要らない）</summary>
+        public bool TryRegrip(HandGrabber grabber)
+        {
+            if (_table == null) return false;
+            foreach (var kv in _twoHands)
+            {
+                var th = kv.Value;
+                if (th.Reserve != grabber && th.Second != grabber) continue;
+                if (!_table.OnMHandRegripped(kv.Key, grabber.Hand, Now)) continue;
+                grabber.Held = th.Treasure;
+                return true;
+            }
+            return false;
+        }
+
+        // ---- M の両手 ----
+
+        /// <summary>両手の目標を更新する。猶予の間は残った手についていく、予約した手を見失っている間は、戻ったときの開き具合を見る</summary>
+        void UpdateTwoHands(double now)
+        {
+            if (_twoHands.Count == 0) return;
+            _twoHandBuf.Clear();
+            _twoHandBuf.AddRange(_twoHands);   // 予約の解除でイベントが _twoHands を書き換えるので、写しを回す
+            foreach (var kv in _twoHandBuf)
+            {
+                var th = kv.Value;
+                var m = th.Treasure != null ? th.Treasure.Model : null;
+                if (m == null || th.Target == null) { if (m != null) ObserveReserveLostWait(kv.Key, th, m); continue; }
+                if (th.Grace)
+                {
+                    var a = th.Remaining != null ? th.Remaining.Anchor : null;
+                    if (a == null) continue;
+                    th.Target.SetPositionAndRotation(a.TransformPoint(th.GraceRelPos), a.rotation * th.GraceRelRot);
+                }
+                else if (th.Reserve != null && th.Second != null && m.SecondHandle >= 0 && m.LockHandle >= 0)
+                {
+                    var axis = th.Treasure.HandleLocalPosition(m.SecondHandle) - th.Treasure.HandleLocalPosition(m.LockHandle);
+                    var pa = th.Reserve.Anchor.position;
+                    var pb = th.Second.Anchor.position;
+                    // axis はお宝のローカルのベクトル。お宝は今の向きから、目標の向きへ追従で寄っていく
+                    if (TwoHandPose.TrySolve(pa, pb, axis, out var rot))
+                        th.Target.SetPositionAndRotation(TwoHandPose.Midpoint(pa, pb), rot);
+                }
+                ObserveReserveLostWait(kv.Key, th, m);
+            }
+        }
+
+        /// <summary>予約した手を見失っている間に、手が開いた状態で戻ったら予約を解除する（握った状態で戻れば OnGripChanged が拾う）</summary>
+        void ObserveReserveLostWait(int index, TwoHand th, ClientItem m)
+        {
+            if (!m.ReserveLostWait || th.Reserve == null || th.Reserve.Tracker == null) return;
+            var tr = th.Reserve.Tracker;
+            if (tr.IsTracked.CurrentValue && tr.Strength.CurrentValue < Grip.releaseThreshold)
+                _table.OnReserveHandReturnedOpen(index, th.Reserve.Hand);
+        }
+
+        void EnsureTarget(TwoHand th)
+        {
+            if (th.Target != null) return;
+            var go = new GameObject("TwoHandTarget_" + th.Treasure.Model.Index);
+            go.transform.SetParent(transform, false);
+            th.Target = go.transform;
+            // 目標の姿勢を決める前に原点へ飛ばないよう、今のお宝の手に合わせる点・向きで初期化する
+            go.transform.SetPositionAndRotation(th.Treasure.HoldPointWorld, th.Treasure.transform.rotation);
+        }
+
+        // ---- 「両手で持とう」（F-ITEM-5） ----
+
+        void UpdateTwoHandHint()
+        {
+            // 出ている間: その M が消えたら表示も消す
+            if (_hintPopup != null && _hintItem >= 0)
+            {
+                var hm = _table.Get(_hintItem);
+                if (hm == null || hm.Gone) { Destroy(_hintPopup.gameObject); _hintPopup = null; _hintItem = -1; }
+            }
+            if (_hint.Shown || _venue == null || _content == null) return;
+            if (_head == null) { var cam = Camera.main; if (cam == null) return; _head = cam.transform; }
+            var headLocal = _venue.Root.InverseTransformPoint(_head.position);
+            int idx = _hint.Poll(_table.Items, headLocal, Grip.beamDistance, _table.ParticipantPlaying);
+            if (idx < 0 || !_views.TryGetValue(idx, out var v) || v.Treasure == null) return;
+            _hintItem = idx;
+            _hintPopup = DamagePopup.Spawn(_venue.Root, v.Treasure.LabelAnchor, _labelHeight + HintOffset,
+                _content.text.Get(ThTextId.HintTwoHands), _labelFont, NoteColor, HintFontSize, 0f, HintSeconds);
         }
 
         public Vector3 EstimateShoulder(Handedness hand)
@@ -323,6 +469,26 @@ namespace STYLY.TIB_Template.TreasureHaul
             {
                 case ItemEventKind.GrabStarted:
                     if (_grabbing != null) t.FlyToHand(_grabbing.Anchor, Grip.flyTime);
+                    break;
+                case ItemEventKind.LiftStarted:
+                    if (_twoHands.TryGetValue(m.Index, out var lifting))
+                    {
+                        EnsureTarget(lifting);
+                        UpdateTwoHands(Now);   // 飛び始める前に目標を今の両手に合わせる
+                        t.FlyToHand(lifting.Target, Grip.flyTime, true);
+                    }
+                    break;
+                case ItemEventKind.RemoteLocked:
+                    t.PlaceKinematic(m.RestPos, m.RestRot);   // 他の人の予約: 置き位置のまま
+                    break;
+                case ItemEventKind.Unreserved:
+                    ReleaseHolder(m.Index);   // お宝は動いていないので、手から外すだけ
+                    break;
+                case ItemEventKind.GraceStarted:
+                    if (_twoHands.TryGetValue(m.Index, out var gr)) BeginGrace(gr, m);
+                    break;
+                case ItemEventKind.GraceEnded:
+                    if (_twoHands.TryGetValue(m.Index, out var back)) { back.Grace = false; back.Remaining = null; }
                     break;
                 case ItemEventKind.Approved:
                     Debug.Log($"[TreasureClient] grab approved item={m.Index} value={m.Value} gen={m.Gen}");
@@ -449,8 +615,30 @@ namespace STYLY.TIB_Template.TreasureHaul
             v.Crack = go;
         }
 
+        /// <summary>猶予の始まり: 外れた瞬間の「残った手 → お宝」の相対を覚え、残った手についていく</summary>
+        void BeginGrace(TwoHand th, ClientItem m)
+        {
+            var released = th.Reserve != null && (int)th.Reserve.Hand == m.GraceHand ? th.Reserve : th.Second;
+            var remaining = released == th.Reserve ? th.Second : th.Reserve;
+            if (released != null) released.Held = null;
+            th.Remaining = remaining;
+            if (remaining == null || remaining.Anchor == null || th.Treasure == null || th.Target == null) return;
+            var a = remaining.Anchor;
+            th.GraceRelPos = a.InverseTransformPoint(th.Treasure.HoldPointWorld);
+            th.GraceRelRot = Quaternion.Inverse(a.rotation) * th.Treasure.transform.rotation;
+            th.Target.SetPositionAndRotation(th.Treasure.HoldPointWorld, th.Treasure.transform.rotation);
+            th.Grace = true;
+        }
+
         void ReleaseHolder(int index)
         {
+            if (_twoHands.TryGetValue(index, out var th))
+            {
+                if (th.Reserve != null && th.Reserve.Held == th.Treasure) th.Reserve.Held = null;
+                if (th.Second != null && th.Second.Held == th.Treasure) th.Second.Held = null;
+                if (th.Target != null) Destroy(th.Target.gameObject);
+                _twoHands.Remove(index);
+            }
             if (_holders.TryGetValue(index, out var g))
             {
                 if (g != null && g.Held != null && g.Held.Model.Index == index) g.Held = null;
