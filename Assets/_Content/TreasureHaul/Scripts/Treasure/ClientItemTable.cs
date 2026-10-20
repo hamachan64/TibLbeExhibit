@@ -48,8 +48,8 @@ namespace STYLY.TIB_Template.TreasureHaul
 
         // ---- M（両手で持つ。#40。設計書 4.4 の M の手順）。S では使わない ----
 
-        /// <summary>予約した持ち手の番号（Treasure.Handles の何番目か。-1 = 予約なし）</summary>
-        public int LockHandle = -1;
+        /// <summary>予約したつかむ範囲の番号（Treasure.GrabZones の何番目か。-1 = 予約なし）</summary>
+        public int LockZone = -1;
         /// <summary>予約した手（ThHand。-1 = なし）</summary>
         public int ReserveHand = -1;
         /// <summary>予約が認められた（ThGrabbed の reserve を受けた）</summary>
@@ -59,9 +59,9 @@ namespace STYLY.TIB_Template.TreasureHaul
         public double LiftSentAt;
         /// <summary>予約の承認が届く前に 2 本目の手が握った（承認の瞬間に持ち上げへ進む）</summary>
         public bool LiftQueued;
-        /// <summary>2 本目の手（ThHand。-1 = なし）と、握った持ち手の番号</summary>
+        /// <summary>2 本目の手（ThHand。-1 = なし）と、握ったつかむ範囲の番号</summary>
         public int SecondHand = -1;
-        public int SecondHandle = -1;
+        public int SecondZone = -1;
         /// <summary>予約した手を見失って〔見失い待ち〕の最中（始まった時刻）</summary>
         public bool ReserveLostWait;
         public double ReserveLostSince;
