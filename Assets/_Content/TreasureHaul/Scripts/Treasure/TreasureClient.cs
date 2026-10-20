@@ -21,7 +21,9 @@ namespace STYLY.TIB_Template.TreasureHaul
         [SerializeField, Tooltip("値札の高さ（お宝の上 m）。お宝の高さ 0.2〜0.5m の頭上に出るよう 0.3m")] float _labelHeight = 0.3f;
 
         const string TreasureLayerName = "Treasure";
-        const string HandleLayerName = "TreasureHandle";
+        const string GrabZoneLayerName = "TreasureGrabZone";
+        /// <summary>高い壁のレイヤー。ビームを止める（低い瓦礫は別レイヤーで止めない）</summary>
+        public const string WallLayerName = "ThWall";
         const string HandBoneLayerName = FingertipTouchCollider.HandBoneLayerName;
         /// <summary>VenueRoot の床よりこれ以上下に落ちたら、その場の床の高さに戻す（m）</summary>
         const float FloorKillDepth = 0.5f;
@@ -79,7 +81,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         HandGrabber _grabbing;
         ThParams _configuredFor;
 
-        int _treasureLayer = -1, _handleLayer = -1, _handBoneLayer = -1;
+        int _treasureLayer = -1, _grabZoneLayer = -1, _wallLayer = -1, _handBoneLayer = -1;
         // アバターのコライダーとお宝の本体コライダーを個別に Physics.IgnoreCollision で外す（アバターのレイヤーは変えない）
         readonly List<Collider> _avatarColliders = new List<Collider>();
         readonly HashSet<Collider> _avatarSet = new HashSet<Collider>();
@@ -105,10 +107,11 @@ namespace STYLY.TIB_Template.TreasureHaul
         void Awake()
         {
             _treasureLayer = LayerMask.NameToLayer(TreasureLayerName);
-            _handleLayer = LayerMask.NameToLayer(HandleLayerName);
+            _grabZoneLayer = LayerMask.NameToLayer(GrabZoneLayerName);
+            _wallLayer = LayerMask.NameToLayer(WallLayerName);
             _handBoneLayer = LayerMask.NameToLayer(HandBoneLayerName);
-            if (_treasureLayer < 0 || _handleLayer < 0 || _handBoneLayer < 0)
-                Debug.LogWarning($"[TreasureClient] レイヤーがありません（{TreasureLayerName}={_treasureLayer} {HandleLayerName}={_handleLayer} {HandBoneLayerName}={_handBoneLayer}）");
+            if (_treasureLayer < 0 || _grabZoneLayer < 0 || _handBoneLayer < 0)
+                Debug.LogWarning($"[TreasureClient] レイヤーがありません（{TreasureLayerName}={_treasureLayer} {GrabZoneLayerName}={_grabZoneLayer} {WallLayerName}={_wallLayer} {HandBoneLayerName}={_handBoneLayer}）");
             // F-DMG-1: お宝は手（HandBone）とは当たらない。アバターとは生成時・アバター出現時に個別に外す
             if (_treasureLayer >= 0 && _handBoneLayer >= 0) Physics.IgnoreLayerCollision(_treasureLayer, _handBoneLayer, true);
         }
@@ -265,9 +268,9 @@ namespace STYLY.TIB_Template.TreasureHaul
             }
             _configuredFor = null;
             var fx = _content?.fx;
-            var beamMat = fx?.Find(ThFxId.HandleAimed)?.material;
-            if (_left != null) _left.Initialize(this, _left.Tracker, _left.GetComponent<LineRenderer>(), beamMat, _handleLayer);
-            if (_right != null) _right.Initialize(this, _right.Tracker, _right.GetComponent<LineRenderer>(), beamMat, _handleLayer);
+            var beamMat = fx?.Find(ThFxId.Beam)?.material;
+            if (_left != null) _left.Initialize(this, _left.Tracker, _left.GetComponent<LineRenderer>(), beamMat, _grabZoneLayer, _wallLayer);
+            if (_right != null) _right.Initialize(this, _right.Tracker, _right.GetComponent<LineRenderer>(), beamMat, _grabZoneLayer, _wallLayer);
         }
 
         void ConfigureHands()
@@ -296,8 +299,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             var catalog = _content != null ? _content.treasures : null;
             if (catalog == null || _venue == null) { Debug.LogWarning("[TreasureClient] カタログまたは ThVenue がありません"); return; }
             var fx = _content.fx;
-            var normal = fx?.Find(ThFxId.HandleNormal)?.material;
-            var aimed = fx?.Find(ThFxId.HandleAimed)?.material;
+            var outline = fx?.Find(ThFxId.AimOutline)?.material;
             foreach (var m in table.Items)
             {
                 if (m.CatalogIndex < 0 || m.CatalogIndex >= catalog.entries.Count) { Debug.LogWarning($"[TreasureClient] お宝 {m.Index} の見た目がありません"); continue; }
@@ -305,7 +307,7 @@ namespace STYLY.TIB_Template.TreasureHaul
                 var go = Instantiate(prefab, _venue.Root);
                 go.name = $"Treasure_{m.Index}_{m.Kind}";
                 var t = go.GetComponent<Treasure>();
-                t.Initialize(m, Grip, normal, aimed, _treasureLayer, _handleLayer);
+                t.Initialize(m, Grip, outline, _treasureLayer, _grabZoneLayer);
                 t.ConfigureDamage(_core.Params.treasure.speedSmoothFrames, _core.Params.treasure.redamageInterval, _core.Params.grip.poseSendInterval, _core.Params.grip.followSpeedMax);
                 t.PlaceKinematic(m.HomePos, m.HomeRot);
                 t.Impacts.Subscribe(imp => OnImpact(t, imp)).AddTo(_tableSubs);
@@ -348,12 +350,12 @@ namespace STYLY.TIB_Template.TreasureHaul
 
         // ---- HandGrabber から ----
 
-        public bool IsTargetable(Treasure t, ThHand hand, int handleIndex) => _table != null && t != null && t.Model != null && _table.IsTargetFor(t.Model, hand, handleIndex);
+        public bool IsTargetable(Treasure t, ThHand hand, int zoneIndex) => _table != null && t != null && t.Model != null && _table.IsTargetFor(t.Model, hand, zoneIndex);
 
-        public bool TryGrab(HandGrabber grabber, Treasure t, int handleIndex)
+        public bool TryGrab(HandGrabber grabber, Treasure t, int zoneIndex)
         {
             if (!CanGrab || t == null) return false;
-            if (t.Model.Kind == TreasureKind.M) return TryGrabM(grabber, t, handleIndex);
+            if (t.Model.Kind == TreasureKind.M) return TryGrabM(grabber, t, zoneIndex);
             _grabbing = grabber;
             bool ok = _table.TryBeginGrab(t.Model.Index, Now);
             _grabbing = null;
@@ -364,20 +366,20 @@ namespace STYLY.TIB_Template.TreasureHaul
         }
 
         /// <summary>M: 予約中でなければ片手予約、予約中なら 2 本目の手で両手成立</summary>
-        bool TryGrabM(HandGrabber grabber, Treasure t, int handleIndex)
+        bool TryGrabM(HandGrabber grabber, Treasure t, int zoneIndex)
         {
             int index = t.Model.Index;
             if (ClientItemTable.IsOwnReservation(t.Model))
             {
                 if (!_twoHands.TryGetValue(index, out var th)) return false;
                 th.Second = grabber;   // LiftStarted のイベントが手を見られるように、先に覚える
-                if (!_table.TryBeginLift(index, grabber.Hand, handleIndex, Now)) { th.Second = null; return false; }
+                if (!_table.TryBeginLift(index, grabber.Hand, zoneIndex, Now)) { th.Second = null; return false; }
                 grabber.Held = t;
                 return true;
             }
             var created = new TwoHand { Treasure = t, Reserve = grabber };
             _twoHands[index] = created;
-            if (!_table.TryBeginLock(index, grabber.Hand, handleIndex, Now)) { _twoHands.Remove(index); return false; }
+            if (!_table.TryBeginLock(index, grabber.Hand, zoneIndex, Now)) { _twoHands.Remove(index); return false; }
             grabber.Held = t;
             return true;
         }
@@ -437,9 +439,9 @@ namespace STYLY.TIB_Template.TreasureHaul
                     if (a == null) continue;
                     th.Target.SetPositionAndRotation(a.TransformPoint(th.GraceRelPos), a.rotation * th.GraceRelRot);
                 }
-                else if (th.Reserve != null && th.Second != null && m.SecondHandle >= 0 && m.LockHandle >= 0)
+                else if (th.Reserve != null && th.Second != null && m.SecondZone >= 0 && m.LockZone >= 0)
                 {
-                    var axis = th.Treasure.HandleLocalPosition(m.SecondHandle) - th.Treasure.HandleLocalPosition(m.LockHandle);
+                    var axis = th.Treasure.GrabZoneLocalPosition(m.SecondZone) - th.Treasure.GrabZoneLocalPosition(m.LockZone);
                     var pa = th.Reserve.Anchor.position;
                     var pb = th.Second.Anchor.position;
                     // axis はお宝のローカルのベクトル。お宝は今の向きから、目標の向きへ追従で寄っていく

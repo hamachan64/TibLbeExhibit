@@ -15,10 +15,10 @@ MonoBehaviour:
   entries:
   - id: 0
     prefab: {fileID: 0}
-    material: {fileID: 2100000, guid: 220373b394fa145828a6fa69cddf25aa, type: 2}
+    material: {fileID: 0}
   - id: 1
     prefab: {fileID: 0}
-    material: {fileID: 2100000, guid: ac57d8506f9c742bd87f059e2c55ffab, type: 2}
+    material: {fileID: 0}
   - id: 2
     prefab: {fileID: 8556624865429012995, guid: abca3fb8ed3534f29b872afa6e90e232, type: 3}
     material: {fileID: 0}
@@ -34,3 +34,9 @@ MonoBehaviour:
   - id: 6
     prefab: {fileID: 0}
     material: {fileID: 0}
+  - id: 7
+    prefab: {fileID: 0}
+    material: {fileID: 2100000, guid: b7329df013eb6d443950433c66344858, type: 2}
+  - id: 8
+    prefab: {fileID: 0}
+    material: {fileID: 2100000, guid: ac57d8506f9c742bd87f059e2c55ffab, type: 2}

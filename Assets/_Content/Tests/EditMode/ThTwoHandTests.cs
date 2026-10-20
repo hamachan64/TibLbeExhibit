@@ -247,13 +247,13 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
             public int Count(ItemEventKind k) => Events.Count(e => e.Kind == k);
             public List<ThReleaseMsg> Releases(ReleaseReason r) => Tx.Of<ThReleaseMsg>(Rpc.ThRelease).Where(x => x.reason == (int)r).ToList();
 
-            /// <summary>左手・持ち手0 で予約して承認まで進める</summary>
+            /// <summary>左手・つかむ範囲0 で予約して承認まで進める</summary>
             public void Reserve(double t = 0, int gen = 1)
             {
                 Assert.IsTrue(Table.TryBeginLock(0, ThHand.Left, 0, t));
                 Table.OnGrabbed(new ThGrabbedMsg { item = 0, clientNo = Own, reqId = It().MyReqId, gen = gen, value = 0, reserve = true }, t + 0.05);
             }
-            /// <summary>右手・持ち手1 で両手成立まで進める（ThLifted まで）</summary>
+            /// <summary>右手・つかむ範囲1 で両手成立まで進める（ThLifted まで）</summary>
             public void Lift(double t = 0.2, int value = 700)
             {
                 Assert.IsTrue(Table.TryBeginLift(0, ThHand.Right, 1, t));
@@ -323,14 +323,14 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
             Assert.AreEqual((int)ReleaseReason.Cancel, c.Tx.Of<ThReleaseMsg>(Rpc.ThRelease).Single().reason);
         }
 
-        [Test] public void 端末_2本目の対象は予約していない方の手と持ち手だけ()
+        [Test] public void 端末_2本目の対象は予約していない方の手とつかむ範囲だけ()
         {
             var c = new ClientRig(M);
             Assert.IsTrue(c.Table.IsTargetFor(c.It(), ThHand.Left, 0), "予約前は S と同じく対象");
             c.Table.TryBeginLock(0, ThHand.Left, 0, 0);   // 承認待ちでも対象は同じ
-            Assert.IsFalse(c.Table.IsTargetFor(c.It(), ThHand.Left, 0), "同じ手・同じ持ち手");
+            Assert.IsFalse(c.Table.IsTargetFor(c.It(), ThHand.Left, 0), "同じ手・同じつかむ範囲");
             Assert.IsFalse(c.Table.IsTargetFor(c.It(), ThHand.Left, 1), "同じ手");
-            Assert.IsFalse(c.Table.IsTargetFor(c.It(), ThHand.Right, 0), "同じ持ち手");
+            Assert.IsFalse(c.Table.IsTargetFor(c.It(), ThHand.Right, 0), "同じつかむ範囲");
             Assert.IsTrue(c.Table.IsTargetFor(c.It(), ThHand.Right, 1));
             Assert.IsFalse(c.Table.TryBeginLift(0, ThHand.Left, 1, 0.1));
             Assert.IsFalse(c.Table.TryBeginLift(0, ThHand.Right, 0, 0.1));
@@ -797,7 +797,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
             Assert.Greater(up.y, 0f);
         }
 
-        [Test] public void 両手の目標_手や持ち手が重なっていれば決めない_真上の線でも解ける()
+        [Test] public void 両手の目標_手やつかむ範囲が重なっていれば決めない_真上の線でも解ける()
         {
             Assert.IsFalse(TwoHandPose.TrySolve(Vector3.one, Vector3.one, Vector3.right, out _));
             Assert.IsFalse(TwoHandPose.TrySolve(Vector3.zero, Vector3.right, Vector3.zero, out _));
