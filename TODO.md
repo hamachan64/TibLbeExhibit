@@ -9,8 +9,8 @@
 
 | | |
 | :--- | :--- |
-| **フェーズ** | 4a オープニング・保留・本編開始・結果（[#42](https://github.com/hamachan64/TibLbeExhibit/issues/42)）の PR [#58](https://github.com/hamachan64/TibLbeExhibit/pull/58) をレビュー中。コア（S・M）の持つ処理は 3c（#41、PR #57）までマージ済み（3b #40・3a #39・2 #38・1 #37・0a #36 も）。**実機は10月中の見込み**なので、それまではエディタ（XRI のシミュレーター・ParrelSync）で検証しながら進める |
-| **次にやること** | PR #58 をマージ → [#43](https://github.com/hamachan64/TibLbeExhibit/issues/43)（練習。荷台前の固定位置・色分け）。並行して [#44](https://github.com/hamachan64/TibLbeExhibit/issues/44)（運営UIの残り・記録 CSV）／ 素材 #46・#47・#48 |
+| **フェーズ** | 4b 練習（[#43](https://github.com/hamachan64/TibLbeExhibit/issues/43)）の PR [#60](https://github.com/hamachan64/TibLbeExhibit/pull/60) をレビュー中。4a（#42、PR #58）までマージ済み（3c #41・3b #40・3a #39・2 #38・1 #37・0a #36 も）。回収地点の呼び方は「納品場所」に変えた。**実機は10月中の見込み**なので、それまではエディタ（XRI のシミュレーター・ParrelSync）で検証しながら進める |
+| **次にやること** | PR #60 をマージ。並行して [#44](https://github.com/hamachan64/TibLbeExhibit/issues/44)（運営UIの残り・記録 CSV）／ 素材 #46・#47・#48 |
 | **判断待ち** | 実機の入手（#49・#45 に必要）。U-1 は通し #45 までに必要。ほかは下の「判断待ち」 |
 | **締切** | 内容変更 **10/31**（あと11日）／最終データ 11/16／現地設営 11/17 |
 
@@ -28,7 +28,7 @@
 | 3b | M（両手で持つ） | [#40](https://github.com/hamachan64/TibLbeExhibit/issues/40)（PR [#56](https://github.com/hamachan64/TibLbeExhibit/pull/56)） | ✅ | 3a | 10/25 |
 | 3c | 見失い・手の飛び・そっと置く・持ち主の切断 | [#41](https://github.com/hamachan64/TibLbeExhibit/issues/41)（PR [#57](https://github.com/hamachan64/TibLbeExhibit/pull/57)） | ✅ | 3b | 10/26 |
 | 4a | オープニング・保留・本編開始・結果 | [#42](https://github.com/hamachan64/TibLbeExhibit/issues/42)（PR [#58](https://github.com/hamachan64/TibLbeExhibit/pull/58)） | ✅ | 1（2・3 と並行可） | 10/24〜26 |
-| 4b | 練習（納品場所の前の固定位置・色分け） | [#43](https://github.com/hamachan64/TibLbeExhibit/issues/43) | ⬜ | 2、4a | 10/27〜28 |
+| 4b | 練習（納品場所の前の固定位置・色分け） | [#43](https://github.com/hamachan64/TibLbeExhibit/issues/43)（PR [#60](https://github.com/hamachan64/TibLbeExhibit/pull/60)） | 👀 | 2、4a | 10/27〜28 |
 | 5 | 運営UIの残り・記録 CSV | [#44](https://github.com/hamachan64/TibLbeExhibit/issues/44) | ⬜ | 1（並行可） | 10/27〜29 |
 | 6 | 連続稼働・実機での通し → 第1検証 | [#45](https://github.com/hamachan64/TibLbeExhibit/issues/45) | ⬜ | すべて（0b を含む） | 目標 10/30〜31。実機が遅れたら11月初め |
 
