@@ -465,3 +465,12 @@
 - **シーンの YAML の差分で、オブジェクトが消えたように見えることがある**（uloop で編集して保存すると、ブロックの並びが変わる）。差分の `-` だけで判断せず、新しいファイルに `m_Name:` が残っているかを数えて確かめる。
 - 頭について来る面は XRI の `LazyFollow`（`UnityEngine.XR.Interaction.Toolkit.UI`）で作れる。`TibLbeExhibit.TreasureHaul.asmdef` に `Unity.XR.Interaction.Toolkit` の参照が要る。エディタの Game View は縦長で水平の視野が狭いので、面の幅の見え方は実機で確かめる。
 - 毎フレーム `ThTextTable.Format` を呼ぶと、`params object[]` とボクシングで GC が出続ける。表示に関わる値が前のフレームと同じなら組み立てを飛ばす。
+
+## 練習・色分け（Issue #43、2026-10-21）で分かったこと
+- **STYLY のアバターのシェーダー（`Shader Graphs/Avatar`）には色の項目が無い**（`_thickness`・`_power` だけ。色は固定値と頂点カラー）。`MaterialPropertyBlock` だけでは塗れない。塗るときは同じ計算を再現した自作シェーダー（`TIB/AvatarTint`）へ塗る間だけ差し替える。**不透明の URP Lit に替えてはいけない**: 見た目が STYLY のアバターから変わり、MR では本物の人を覆う。なお元のアバターも、既定の `_thickness`=3 では中央が不透明（縁だけ透ける）。
+- 手書きの URP シェーダーで元の Shader Graph を再現するときは、ShadowCaster パス（元が影を落とすなら）、ステレオの記述（`UNITY_VERTEX_OUTPUT_STEREO` ほか）、`UnityPerMaterial` の CBUFFER、透明なら `_SURFACE_TYPE_TRANSPARENT`、Unity 6 の柔らかい影のキーワード（`_SHADOWS_SOFT_LOW/MEDIUM/HIGH`）、`_BlendModePreserveSpecular` の扱いまで合わせる（独立レビューで指摘された）。
+- `STYLY Default Avatar A 1` は `BodyTransformSolver.netSyncAvatar` が設定済みで、体は頭について動く（前の版 `A` の不具合は `A 1` では起きない）。
+- 練習のように「Tutorial だけの表」と「本編の表」を分けると、切断時の後片付け（`ForceRestItemsOf`）や Result の取りこぼし（Tutorial → Result に飛ぶ）が片方の表にしか効かない漏れが出やすい。状態ごとに「どの表が生きているか」を必ず確かめる。
+- 案内の段階を「持っているか」で決めるときは、手を開いた後の落下中・回収の承認待ちを「持っている」の続きとして扱わないと、成功の直前に1段目の案内がちらつく。
+- uloop の `run-tests` は、コンパイル直後だと Domain Reload 中で失敗する（JSON でなく「Unity is reloading」を返す）。少し待って再実行する。
+- 実装エージェントが ParrelSync 用に作ったクローン（`TibLbeExhibit_clone_1`）は、guard により `rm` で消せない。後片付けは人に頼む。
