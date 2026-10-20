@@ -1,10 +1,12 @@
+using System;
 using System.Collections.Generic;
 
 namespace STYLY.TIB_Template.TreasureHaul
 {
     /// <summary>
     /// ホストの状態遷移（設計書 3.1）。時刻は引数（now = 単調増加の秒、unixMs = RoundId 用）で渡す。
-    /// 保留・「本編開始」・目標額のみモードは #42。遷移の判断は <see cref="DecideNext"/> の 1 か所にまとめてある。
+    /// 保留・「本編開始」は #42（目標額のみモードは追加要素）。遷移の判断は <see cref="DecideNext"/> の 1 か所にまとめてある。
+    /// 保留は Tutorial 中だけ。保留の間は Tutorial の経過時間が進まず、1 回の練習で保留した時間の合計が〔保留の上限〕に達したら <see cref="Tick"/> で自動解除する。
     /// </summary>
     public sealed class HostRoundMachine
     {
@@ -12,6 +14,10 @@ namespace STYLY.TIB_Template.TreasureHaul
         ThProgressParams _times;
 
         double _enteredAt;
+        // 保留（#42）
+        bool _held;
+        double _holdStartedAt;
+        double _heldTotal;   // 解除済みの保留の合計（秒）。新しい回の「開始」で 0 に戻る
         readonly List<string> _participants = new List<string>();
 
         public HostRoundMachine(DeviceRegistry registry, ThProgressParams times)
@@ -29,6 +35,16 @@ namespace STYLY.TIB_Template.TreasureHaul
         public long LastRoundId { get; private set; }
         public int Seed { get; private set; }
         public IReadOnlyList<string> Participants => _participants;
+        /// <summary>保留中か</summary>
+        public bool IsHeld => _held;
+        /// <summary>この回で保留した時間の合計（秒。保留中なら今の分を含む）。次の「開始」まで読める（#44 の記録用）</summary>
+        public float HeldSeconds(double now) => (float)(_heldTotal + (_held ? Math.Max(0.0, now - _holdStartedAt) : 0.0));
+        /// <summary>この回で保留したことがあるか（次の「開始」まで読める）</summary>
+        public bool WasHeld => _held || _heldTotal > 0.0;
+        /// <summary>保留の上限まであと何秒か（〔保留の上限〕 - 合計）</summary>
+        public float HoldRemainingSeconds(double now) => Math.Max(0f, _times.holdMaxSeconds - HeldSeconds(now));
+        /// <summary>保留を始められるか（Tutorial 中・保留中でない・上限に余りがある）</summary>
+        public bool CanHold(double now) => State == RoundState.Tutorial && !_held && HoldRemainingSeconds(now) > 1e-6f && RemainingSeconds(now) > 0f;
 
         /// <summary>待機中だけ差し替えられる（パラメータの再読み込み）。</summary>
         public bool TrySetTimes(ThProgressParams times)
@@ -45,8 +61,11 @@ namespace STYLY.TIB_Template.TreasureHaul
         {
             float d = DurationOf(State);
             if (d <= 0f) return 0f;
-            return (float)System.Math.Max(0.0, d - (now - _enteredAt));
+            return (float)System.Math.Max(0.0, d - Elapsed(now));
         }
+
+        /// <summary>今の状態に入ってからの経過（保留の間は進まない）</summary>
+        double Elapsed(double now) => (_held ? _holdStartedAt : now) - _enteredAt;
 
         float DurationOf(RoundState s)
         {
@@ -68,6 +87,8 @@ namespace STYLY.TIB_Template.TreasureHaul
             LastRoundId = RoundId;
             Seed = seed;
             _participants.Clear();
+            _held = false;
+            _heldTotal = 0.0;
             // 版の一致は問わない（版が違う端末には ThParams を送り、オープニング中に一致すれば残る。設計書 7章）
             _participants.AddRange(_registry.JoinableDeviceIds());
             EnterState(RoundState.Opening, now);
@@ -82,11 +103,53 @@ namespace STYLY.TIB_Template.TreasureHaul
             return true;
         }
 
-        /// <summary>時間経過による遷移。状態が変わったら true。</summary>
+        /// <summary>「保留」。Tutorial 中だけ。〔保留の上限〕に余りが無い（0 を含む）ときは保留できない。成功したら Seq が +1。</summary>
+        public bool TryHold(double now)
+        {
+            if (!CanHold(now)) return false;
+            _held = true;
+            _holdStartedAt = now;
+            Seq++;
+            return true;
+        }
+
+        /// <summary>「保留を解除」。保留中だけ。解除後は残りの練習時間から進む。成功したら Seq が +1。</summary>
+        public bool TryReleaseHold(double now)
+        {
+            if (State != RoundState.Tutorial || !_held) return false;
+            ReleaseHoldAt(now);
+            return true;
+        }
+
+        void ReleaseHoldAt(double releaseTime)
+        {
+            double used = Math.Max(0.0, releaseTime - _holdStartedAt);
+            _heldTotal += used;
+            _enteredAt += used;   // 保留していた分だけ、練習の始まりを後ろにずらす（残りの練習時間から数え直す）
+            _held = false;
+            Seq++;
+        }
+
+        /// <summary>「本編開始」。Tutorial 中なら保留の有無にかかわらず即 Playing（F-TUT-6）。それ以外では何もしない。</summary>
+        public bool TryBeginPlay(double now)
+        {
+            if (State != RoundState.Tutorial) return false;
+            EnterState(RoundState.Playing, now);
+            return true;
+        }
+
+        /// <summary>時間経過による遷移と、保留の上限での自動解除。Seq が変わったら（状態の遷移・保留の解除）true。</summary>
         public bool Tick(double now)
         {
+            bool changed = false;
+            if (State == RoundState.Tutorial && _held)
+            {
+                // 上限に達した時刻で解除する（Tick の間隔が空いても、解除後の残りが正しくなるように）
+                double limitAt = _holdStartedAt + Math.Max(0.0, _times.holdMaxSeconds - _heldTotal);
+                if (now >= limitAt) { ReleaseHoldAt(limitAt); changed = true; }
+            }
             var next = DecideNext(now);
-            if (next == null) return false;
+            if (next == null) return changed;
             EnterState(next.Value, now);
             return true;
         }
@@ -95,7 +158,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         RoundState? DecideNext(double now)
         {
             if (State == RoundState.Waiting) return null;
-            if (now - _enteredAt < DurationOf(State)) return null;
+            if (Elapsed(now) < DurationOf(State)) return null;
             switch (State)
             {
                 case RoundState.Opening: return RoundState.Tutorial;
@@ -109,6 +172,12 @@ namespace STYLY.TIB_Template.TreasureHaul
         void EnterState(RoundState next, double now)
         {
             var prev = State;
+            if (_held)
+            {
+                // 保留中に別の状態へ移る（本編開始・中断）。保留した時間は合計に入れる
+                _heldTotal += Math.Max(0.0, now - _holdStartedAt);
+                _held = false;
+            }
             State = next;
             _enteredAt = now;
             Seq++;

@@ -55,6 +55,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
             { ThTextId.OpRemaining, 1 }, { ThTextId.OpRoundId, 1 }, { ThTextId.OpDevices, 2 }, { ThTextId.OpParamsVersion, 1 },
             { ThTextId.PriceFormat, 1 }, { ThTextId.PracticeSuccessFormat, 1 }, { ThTextId.DamageFormat, 1 },
             { ThTextId.CollectFormat, 1 }, { ThTextId.CollectDamagedFormat, 1 }, { ThTextId.ResultLossFormat, 1 }, { ThTextId.BoardTotalFormat, 1 },
+            { ThTextId.HudPlayingFormat, 3 }, { ThTextId.ResultAmountFormat, 2 }, { ThTextId.ResultFailFormat, 1 }, { ThTextId.OpHoldingFormat, 1 }, { ThTextId.OpTotalFormat, 2 },
         };
 
         [Test] public void 組み込みアセットの各文言の書式は使う引数の数で例外にならない()

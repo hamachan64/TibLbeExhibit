@@ -23,6 +23,26 @@ namespace STYLY.TIB_Template.TreasureHaul
         public int[] tutorialColors = new int[0];
         /// <summary>お宝カタログのハッシュ（ホストの物。端末の物と違えば参加端末から外す）</summary>
         public string catalogHash = "";
+        // ---- #42（末尾に足す。古い送り手からは既定値で届き、今の動きが変わらない） ----
+        /// <summary>保留中か（Tutorial 中だけ true。端末は保留中は残り秒を数えない）</summary>
+        public bool held;
+        /// <summary>目標額（本編の参加端末が確定した時点＝Playing 以降。それより前は 0）</summary>
+        public int target;
+        /// <summary>結果（Result のときだけ present = true）。JsonUtility は null を出せないので present で「無い」を表す</summary>
+        public ThResultMsg result = new ThResultMsg();
+    }
+
+    /// <summary>結果（ホストが決める。F-FLOW-5）</summary>
+    [Serializable]
+    public class ThResultMsg
+    {
+        /// <summary>結果が載っているか（false = 結果なし）</summary>
+        public bool present;
+        /// <summary>回収額</summary>
+        public int collected;
+        public int target;
+        /// <summary>クリアか（回収額 &gt;= 目標額）</summary>
+        public bool cleared;
     }
 
     [Serializable]
@@ -35,6 +55,8 @@ namespace STYLY.TIB_Template.TreasureHaul
         public string paramsVersion = "";
         /// <summary>ThState と同じ。変わったら運営PCが再起動した</summary>
         public long hostEpoch;
+        /// <summary>保留中か（#42。末尾に足した）</summary>
+        public bool held;
     }
 
     /// <summary>端末→ホスト。端末の状況報告を兼ねる。RoundId 引数には「知っている RoundId」を入れる。</summary>

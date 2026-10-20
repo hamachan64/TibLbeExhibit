@@ -12,6 +12,7 @@
         "com.styly.styly-xr-rig",
         "Unity.TextMeshPro",
         "Unity.XR.CoreUtils",
+        "Unity.XR.Interaction.Toolkit",
         "Unity.XR.Hands",
         "Unity.InputSystem",
         "PICO.TobSupport",

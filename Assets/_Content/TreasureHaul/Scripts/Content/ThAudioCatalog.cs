@@ -10,8 +10,16 @@ namespace STYLY.TIB_Template.TreasureHaul
         Discover,
         Damage,
         Shatter,
+        /// <summary>使わない（1文ずつの OpeningLine1〜5 に分けた）。列挙からは消せないので残す</summary>
         OpeningNarration,
         OpeningSfx,
+        // #42: オープニングの字幕1枚ごとのナレーション（1文1ファイル）と、目標達成の音。中身は #47 で入れる
+        OpeningLine1,
+        OpeningLine2,
+        OpeningLine3,
+        OpeningLine4,
+        OpeningLine5,
+        TargetReached,
     }
 
     [Serializable]
@@ -50,6 +58,12 @@ namespace STYLY.TIB_Template.TreasureHaul
             new ThAudioEntry(ThSoundId.Shatter, true),
             new ThAudioEntry(ThSoundId.OpeningNarration, false),
             new ThAudioEntry(ThSoundId.OpeningSfx, false),
+            new ThAudioEntry(ThSoundId.OpeningLine1, false),
+            new ThAudioEntry(ThSoundId.OpeningLine2, false),
+            new ThAudioEntry(ThSoundId.OpeningLine3, false),
+            new ThAudioEntry(ThSoundId.OpeningLine4, false),
+            new ThAudioEntry(ThSoundId.OpeningLine5, false),
+            new ThAudioEntry(ThSoundId.TargetReached, false),
         };
 
         public ThAudioEntry Find(ThSoundId id)

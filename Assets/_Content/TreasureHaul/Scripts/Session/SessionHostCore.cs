@@ -41,6 +41,12 @@ namespace STYLY.TIB_Template.TreasureHaul
         readonly ReactiveProperty<int> _eligibleCount = new ReactiveProperty<int>(0);
         readonly ReactiveProperty<string> _paramsVersionRp = new ReactiveProperty<string>("");
         readonly ReactiveProperty<string[]> _warnings = new ReactiveProperty<string[]>(new string[0]);
+        // #42
+        readonly ReactiveProperty<bool> _held = new ReactiveProperty<bool>(false);
+        readonly ReactiveProperty<bool> _canHold = new ReactiveProperty<bool>(false);
+        readonly ReactiveProperty<int> _holdRemaining = new ReactiveProperty<int>(0);
+        readonly ReactiveProperty<int> _target = new ReactiveProperty<int>(0);
+        readonly ReactiveProperty<int> _total = new ReactiveProperty<int>(0);
 
         public ReadOnlyReactiveProperty<RoundState> State => _state;
         public ReadOnlyReactiveProperty<float> RemainingSeconds => _remaining;
@@ -49,6 +55,16 @@ namespace STYLY.TIB_Template.TreasureHaul
         public ReadOnlyReactiveProperty<int> EligibleCount => _eligibleCount;
         public ReadOnlyReactiveProperty<string> ParamsVersionText => _paramsVersionRp;
         public ReadOnlyReactiveProperty<string[]> Warnings => _warnings;
+        /// <summary>保留中か</summary>
+        public ReadOnlyReactiveProperty<bool> IsHeld => _held;
+        /// <summary>今「保留」を押せるか（Tutorial 中・保留中でない・上限に余りがある）</summary>
+        public ReadOnlyReactiveProperty<bool> CanHold => _canHold;
+        /// <summary>保留の上限まであと何秒か（切り上げた整数。保留中は減っていく）</summary>
+        public ReadOnlyReactiveProperty<int> HoldRemainingSeconds => _holdRemaining;
+        /// <summary>目標額（Playing 以降。それより前は 0）</summary>
+        public ReadOnlyReactiveProperty<int> Target => _target;
+        /// <summary>回収した合計額</summary>
+        public ReadOnlyReactiveProperty<int> Total => _total;
 
         // お宝（#38）
         ThTreasureSetup _setup;
@@ -82,6 +98,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         {
             _state.Dispose(); _remaining.Dispose(); _roundId.Dispose(); _connectedCount.Dispose();
             _eligibleCount.Dispose(); _paramsVersionRp.Dispose(); _warnings.Dispose();
+            _held.Dispose(); _canHold.Dispose(); _holdRemaining.Dispose(); _target.Dispose(); _total.Dispose();
         }
 
         void Adopt(ThParamsLoadResult p, ThGameSettings settings, IEnumerable<string> settingsWarnings)
@@ -150,6 +167,33 @@ namespace STYLY.TIB_Template.TreasureHaul
             return true;
         }
 
+        /// <summary>「保留」（練習の延長）。Tutorial 中・上限に余りがあるときだけ。</summary>
+        public bool Hold(double now)
+        {
+            if (!Machine.TryHold(now)) return false;
+            SendState(now);
+            Refresh(now);
+            return true;
+        }
+
+        /// <summary>「保留を解除」。保留中だけ。</summary>
+        public bool ReleaseHold(double now)
+        {
+            if (!Machine.TryReleaseHold(now)) return false;
+            SendState(now);
+            Refresh(now);
+            return true;
+        }
+
+        /// <summary>「本編開始」。Tutorial 中なら保留の有無にかかわらず即 Playing（F-TUT-6）。</summary>
+        public bool BeginPlay(double now)
+        {
+            if (!Machine.TryBeginPlay(now)) return false;
+            SendState(now);
+            Refresh(now);
+            return true;
+        }
+
         public bool Abort(double now)
         {
             if (!Machine.Abort(now)) return false;
@@ -173,6 +217,7 @@ namespace STYLY.TIB_Template.TreasureHaul
                     total = TotalAmount,
                     paramsVersion = ParamsVersion,
                     hostEpoch = HostEpoch,
+                    held = Machine.IsHeld,
                 }));
             }
             _items?.Tick(now, Machine.State == RoundState.Playing);   // そっと置かせたお宝を、〔置く時間〕の後につかめる／回収にする
@@ -293,7 +338,54 @@ namespace STYLY.TIB_Template.TreasureHaul
                 hostEpoch = HostEpoch,
                 tutorialColors = new int[0],
                 catalogHash = Registry.HostCatalogHash,
+                held = m.IsHeld,
+                target = TargetAmount,
+                result = BuildResult(),
             }));
+        }
+
+        // ---- 目標額と結果（ホストが決める。F-FLOW-5） ----
+
+        /// <summary>参加人数（1〜4 に丸める）の行の目標額。Playing / Result のときだけ。それ以外は 0。</summary>
+        public int TargetAmount
+        {
+            get
+            {
+                var st = Machine.State;
+                if (st != RoundState.Playing && st != RoundState.Result) return 0;
+                return TargetFor(Machine.Participants.Count, Params);
+            }
+        }
+
+        /// <summary>参加人数に対する目標額（<c>layout.rows[人数 - 1]</c>。人数は 1〜行数に丸める）</summary>
+        public static int TargetFor(int participantCount, ThParams p)
+        {
+            var rows = p?.layout?.rows;
+            if (rows == null || rows.Length == 0) return 0;
+            int n = Mathf.Clamp(participantCount, 1, rows.Length);
+            return rows[n - 1].targetAmount;
+        }
+
+        // 結果は Result に入った最初の ThState で確定し、その回の間は変えない
+        long _resultRound;
+        ThResultMsg _result;
+
+        ThResultMsg BuildResult()
+        {
+            if (Machine.State != RoundState.Result)
+            {
+                _resultRound = 0;
+                _result = null;
+                return new ThResultMsg();
+            }
+            if (_result == null || _resultRound != Machine.RoundId)
+            {
+                int target = TargetAmount;
+                int collected = TotalAmount;
+                _result = new ThResultMsg { present = true, collected = collected, target = target, cleared = collected >= target };
+                _resultRound = Machine.RoundId;
+            }
+            return _result;
         }
 
         void SendParams(int targetClientNo)
@@ -359,6 +451,11 @@ namespace STYLY.TIB_Template.TreasureHaul
             _state.Value = Machine.State;
             _remaining.Value = Machine.RemainingSeconds(now);
             _roundId.Value = Machine.RoundId;
+            _held.Value = Machine.IsHeld;
+            _canHold.Value = Machine.CanHold(now);
+            _holdRemaining.Value = Mathf.CeilToInt(Machine.HoldRemainingSeconds(now));
+            _target.Value = TargetAmount;
+            _total.Value = TotalAmount;
             _connectedCount.Value = Registry.ConnectedCount;
             _eligibleCount.Value = Registry.EligibleCount;
         }

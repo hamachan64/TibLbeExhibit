@@ -13,6 +13,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         Crack1,
         Crack2,
         Shatter,
+        /// <summary>使わない（2026-10-21、荷台の案内はやめた）。列挙からは消せないので残す</summary>
         CargoGlow,
     }
 

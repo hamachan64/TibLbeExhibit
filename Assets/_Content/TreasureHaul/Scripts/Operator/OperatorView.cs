@@ -29,6 +29,14 @@ namespace STYLY.TIB_Template.TreasureHaul
         [SerializeField] TMP_Text _startLabel;
         [SerializeField] TMP_Text _reloadLabel;
 
+        // #42: 保留・本編開始・合計額と目標額
+        [SerializeField] Button _holdButton;
+        [SerializeField] TMP_Text _holdLabel;
+        [SerializeField, Tooltip("保留中の表示（「保留中（あと N 秒で自動解除）」）")] TMP_Text _holdingText;
+        [SerializeField] Button _beginPlayButton;
+        [SerializeField] TMP_Text _beginPlayLabel;
+        [SerializeField] TMP_Text _totalText;
+
         ThTextTable _t;
 
         static readonly Dictionary<RoundState, ThTextId> StateIds = new Dictionary<RoundState, ThTextId>
@@ -50,6 +58,8 @@ namespace STYLY.TIB_Template.TreasureHaul
             _t = _host.Content.text;
             _startLabel.text = _t.Get(ThTextId.OpStart);
             _reloadLabel.text = _t.Get(ThTextId.OpReloadParams);
+            _holdLabel.text = _t.Get(ThTextId.OpHold);
+            _beginPlayLabel.text = _t.Get(ThTextId.OpBeginPlay);
             _abortGate = new AbortConfirmGate(core.Params.operation.abortConfirmSeconds);
 
             core.State.Subscribe(s =>
@@ -78,6 +88,19 @@ namespace STYLY.TIB_Template.TreasureHaul
                 _reloadButton.interactable = s == RoundState.Waiting;
             }).AddTo(this);
 
+            // 保留: 練習中かつ（保留中、または保留できる）ときだけ。保留中はラベルが「保留を解除」
+            core.State.CombineLatest(core.IsHeld, core.CanHold, (s, h, c) => s == RoundState.Tutorial && (h || c))
+                .Subscribe(v => _holdButton.interactable = v).AddTo(this);
+            core.IsHeld.Subscribe(h => _holdLabel.text = _t.Get(h ? ThTextId.OpHoldRelease : ThTextId.OpHold)).AddTo(this);
+            core.IsHeld.CombineLatest(core.HoldRemainingSeconds, (h, r) => (h, r))
+                .Subscribe(x => _holdingText.text = x.h ? _t.Format(ThTextId.OpHoldingFormat, x.r) : "").AddTo(this);
+            core.State.Subscribe(s => _beginPlayButton.interactable = s == RoundState.Tutorial).AddTo(this);
+            // 目標額は Playing 以降だけ（それより前は 0 と出る）
+            core.Total.CombineLatest(core.Target, (tot, tgt) => (tot, tgt))
+                .Subscribe(x => _totalText.text = _t.Format(ThTextId.OpTotalFormat, x.tot, x.tgt)).AddTo(this);
+
+            _holdButton.OnClickAsObservable().Subscribe(_ => _host.RequestToggleHold()).AddTo(this);
+            _beginPlayButton.OnClickAsObservable().Subscribe(_ => _host.RequestBeginPlay()).AddTo(this);
             _startButton.OnClickAsObservable().Subscribe(_ => _host.RequestStart()).AddTo(this);
             _reloadButton.OnClickAsObservable().Subscribe(_ => _host.RequestReloadParams()).AddTo(this);
             _abortButton.OnClickAsObservable().Subscribe(_ =>

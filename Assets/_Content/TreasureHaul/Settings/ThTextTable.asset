@@ -75,3 +75,35 @@ MonoBehaviour:
     text: "2\u4EBA\u3067\u6301\u3068\u3046"
   - id: 30
     text: '{0:N0}G'
+  - id: 31
+    text: "\u767A\u6398\u968A\u306E\u307F\u3093\u306A\u3001\u3088\u304F\u6765\u3066\u304F\u308C\u305F\u3002"
+  - id: 32
+    text: "\u3053\u306E\u907A\u8DE1\u306F\u3001\u3082\u3046\u3059\u3050\u5D29\u308C\u308B\u3002"
+  - id: 33
+    text: "\u304A\u5B9D\u3092\u3001\u642C\u51FA\u30EA\u30D5\u30C8\u307E\u3067\u904B\u3073\u51FA\u3057\u3066\u304F\u308C\u3002"
+  - id: 34
+    text: "\u3076\u3064\u3051\u308B\u3068\u5024\u6253\u3061\u304C\u4E0B\u304C\u308B\u305E\u3002"
+  - id: 35
+    text: "\u307F\u3093\u306A\u3067\u3001\u76EE\u6A19\u984D\u3092\u76EE\u6307\u305D\u3046\uFF01"
+  - id: 36
+    text: "\u6B8B\u308A {0}:{1:00} \uFF0F \u76EE\u6A19 {2:N0}G"
+  - id: 37
+    text: "\u76EE\u6A19\u9054\u6210\uFF01"
+  - id: 38
+    text: "{0:N0}G \uFF0F \u76EE\u6A19 {1:N0}G"
+  - id: 39
+    text: "\u30AF\u30EA\u30A2\uFF01"
+  - id: 40
+    text: "\u3042\u3068 {0:N0}G \u3067\u30AF\u30EA\u30A2"
+  - id: 41
+    text: "\u30D5\u30A9\u30F3\u30C8: Noto Sans JP\uFF08SIL Open Font License 1.1\uFF09"
+  - id: 42
+    text: "\u4FDD\u7559"
+  - id: 43
+    text: "\u4FDD\u7559\u3092\u89E3\u9664"
+  - id: 44
+    text: "\u4FDD\u7559\u4E2D\uFF08\u3042\u3068 {0} \u79D2\u3067\u81EA\u52D5\u89E3\u9664\uFF09"
+  - id: 45
+    text: "\u672C\u7DE8\u958B\u59CB"
+  - id: 46
+    text: "\u5408\u8A08 {0:N0}G \uFF0F \u76EE\u6A19 {1:N0}G"

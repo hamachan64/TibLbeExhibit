@@ -136,6 +136,12 @@ namespace STYLY.TIB_Template.TreasureHaul
             Core != null && _nm != null && _nm.IsReady
             && Core.Start(Now, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), UnityEngine.Random.Range(int.MinValue, int.MaxValue));
 
+        /// <summary>「保留」（練習の延長）／「保留を解除」。保留中なら解除、そうでなければ保留。</summary>
+        public bool RequestToggleHold() => Core != null && (Core.Machine.IsHeld ? Core.ReleaseHold(Now) : Core.Hold(Now));
+
+        /// <summary>「本編開始」（練習中だけ）</summary>
+        public bool RequestBeginPlay() => Core != null && Core.BeginPlay(Now);
+
         public bool RequestAbort() => Core != null && Core.Abort(Now);
 
         /// <summary>待機中だけ。パラメータとゲーム設定のファイルを読み直す。</summary>

@@ -43,6 +43,19 @@ namespace STYLY.TIB_Template.TreasureHaul.Prototype
             EditorApplication.EnterPlaymode();
         }
 
+        /// <summary>#42 の結合確認: 運営PC（ホスト）役。保留・本編開始・回収・結果・中断を決まった時刻で操作する。何も保存しない。</summary>
+        public static void PlayOpeningHost()
+        {
+            if (!Application.isBatchMode)
+            {
+                Debug.LogWarning("[ProtoBatchRunner] -batchmode でないので何もしません（メインのエディタでシーンを切り替えないため）");
+                return;
+            }
+            EditorSceneManager.OpenScene(OperatorScene, OpenSceneMode.Single);
+            new GameObject("OpeningHostDriver").AddComponent<OpeningHostDriver>();
+            EditorApplication.EnterPlaymode();
+        }
+
         public static void PlayNet()
         {
             if (!Application.isBatchMode)

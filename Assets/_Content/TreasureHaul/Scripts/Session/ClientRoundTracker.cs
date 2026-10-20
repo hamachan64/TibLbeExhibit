@@ -17,11 +17,18 @@ namespace STYLY.TIB_Template.TreasureHaul
         readonly ReactiveProperty<float> _remaining = new ReactiveProperty<float>(0f);
         readonly ReactiveProperty<bool> _isParticipant = new ReactiveProperty<bool>(false);
         readonly ReactiveProperty<bool> _isHostLost = new ReactiveProperty<bool>(false);
+        readonly ReactiveProperty<bool> _isHeld = new ReactiveProperty<bool>(false);
 
         public ReadOnlyReactiveProperty<RoundState> State => _state;
         public ReadOnlyReactiveProperty<float> RemainingSeconds => _remaining;
         public ReadOnlyReactiveProperty<bool> IsParticipant => _isParticipant;
         public ReadOnlyReactiveProperty<bool> IsHostLost => _isHostLost;
+        /// <summary>保留中か（練習の残り秒を数えない）</summary>
+        public ReadOnlyReactiveProperty<bool> IsHeld => _isHeld;
+        /// <summary>目標額（ホストの ThState から。Playing 以降。無ければ 0。待機に戻る・回が変わると消える）</summary>
+        public int Target { get; private set; }
+        /// <summary>結果（Result のときだけ。無ければ null）</summary>
+        public ThResultMsg Result { get; private set; }
 
         /// <summary>知っている RoundId（0 = 回が無い）</summary>
         public long RoundId { get; private set; }
@@ -67,10 +74,10 @@ namespace STYLY.TIB_Template.TreasureHaul
 
         public void Dispose()
         {
-            _state.Dispose(); _remaining.Dispose(); _isParticipant.Dispose(); _isHostLost.Dispose();
+            _state.Dispose(); _remaining.Dispose(); _isParticipant.Dispose(); _isHostLost.Dispose(); _isHeld.Dispose();
         }
 
-        double Remaining(double now) => Math.Max(0.0, _anchorRemaining - (now - _anchorTime));
+        double Remaining(double now) => _isHeld.Value ? _anchorRemaining : Math.Max(0.0, _anchorRemaining - (now - _anchorTime));
 
         /// <summary>RoundId が古い（0 でなく、知っている回より前）か</summary>
         bool IsOld(long roundId) => roundId != 0 && roundId < RoundId;
@@ -119,6 +126,10 @@ namespace STYLY.TIB_Template.TreasureHaul
             _hostRoundId = roundId;
             _anchorTime = now;
             _anchorRemaining = Math.Max(0f, msg.remaining);
+            // 保留（Tutorial 中だけ有効）。残り秒の基準を置いた後、残り秒の計算より先に反映する
+            _isHeld.Value = state == RoundState.Tutorial && msg.held;
+            Target = state == RoundState.Waiting ? 0 : Math.Max(0, msg.target);
+            Result = state == RoundState.Result && msg.result != null && msg.result.present ? msg.result : null;
 
             // 購読者が State の通知を受けたとき、残り秒・参加が新しい状態に揃っているように、State を最後に変える
             _remaining.Value = state == RoundState.Waiting ? 0f : (float)Remaining(now);
@@ -141,6 +152,16 @@ namespace STYLY.TIB_Template.TreasureHaul
             // 時間合わせ: 同じ通し番号のときだけ、ずれが〔時間を合わせるずれ〕以上なら合わせる
             if (msg.seq == Seq && roundId == RoundId && _state.Value != RoundState.Waiting)
             {
+                bool held = _state.Value == RoundState.Tutorial && msg.held;
+                if (held != _isHeld.Value)
+                {
+                    // 保留の切り替え。ホストの残り秒に合わせ直して、解除ならそこから数える
+                    _isHeld.Value = held;
+                    _anchorTime = now;
+                    _anchorRemaining = Math.Max(0f, msg.remaining);
+                    _remaining.Value = _anchorRemaining;
+                    return;
+                }
                 double local = Remaining(now);
                 if (Math.Abs(local - msg.remaining) >= _times.syncTolerance)
                 {
@@ -177,6 +198,9 @@ namespace STYLY.TIB_Template.TreasureHaul
                     WaitNextRound = true;
                     _forceResync = true;
                     Participants = new string[0];
+                    Target = 0;
+                    Result = null;
+                    _isHeld.Value = false;
                     _remaining.Value = 0f;
                     SetParticipant(false);
                     _state.Value = RoundState.Waiting;
