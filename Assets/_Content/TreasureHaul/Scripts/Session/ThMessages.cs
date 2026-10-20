@@ -147,6 +147,16 @@ namespace STYLY.TIB_Template.TreasureHaul
         public Quaternion rot = Quaternion.identity;
     }
 
+    /// <summary>ホスト→全員 持ち主の切断などで、その場の降ろす先へそっと置かせる（位置は VenueRoot ローカル。世代は +1 された値）</summary>
+    [Serializable]
+    public class ThForceRestMsg
+    {
+        public int item;
+        public int gen;
+        public Vector3 pos;
+        public Quaternion rot = Quaternion.identity;
+    }
+
     /// <summary>判定役→ホスト 荷台への回収</summary>
     [Serializable]
     public class ThCollectMsg
@@ -198,6 +208,8 @@ namespace STYLY.TIB_Template.TreasureHaul
         public Vector3 pos;
         /// <summary>衝撃の速さ（ログ用）</summary>
         public float speed;
+        /// <summary>a のお宝（送り手が動かしているお宝）が減額の免除中か（#41。古い送り手からは false で届く）。true ならホストは a に適用しない</summary>
+        public bool exemptA;
     }
 
     /// <summary>ホスト→全員 減額した</summary>

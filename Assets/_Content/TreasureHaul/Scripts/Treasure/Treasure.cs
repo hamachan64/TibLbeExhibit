@@ -102,10 +102,10 @@ namespace STYLY.TIB_Template.TreasureHaul
         /// <summary>直近の速度の平均（自分の端末で物理を動かしているとき）</summary>
         public Vector3 AverageVelocity => _velocity.Average;
         /// <summary>
-        /// 減額の免除中か（設計書 5章。判定役が位置の送信に載せる）。#39 では手元へ飛んでいる途中だけ。
-        /// #41 が手の飛び・補正の無判定時間・そっと置く・見失い待ちを足すときは、ここだけ変える。
+        /// 減額の免除中か（設計書 5章。判定役が位置の送信に載せる）。手元へ飛んでいる途中・見失い待ち・そっと置く・〔補正の無判定時間〕の間。
+        /// 判断は <see cref="ClientItem.IsExemptAt"/>。
         /// </summary>
-        public bool IsDamageExempt => IsFlying;
+        public bool IsDamageExempt => Model != null ? Model.IsExemptAt(Time.realtimeSinceStartupAsDouble, IsFlying) : IsFlying;
         /// <summary>モデル（持ち手を除く Renderer）の Treasure ローカルの大きさ。ヒビのプレハブを合わせる用</summary>
         public Bounds ModelBounds => _modelBounds;
 
@@ -263,7 +263,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             _rest.Reset();
         }
 
-        /// <summary>元の位置・向きへ戻す（否認・待ち上限・取りやめ）。戻ったら Kinematic で置く</summary>
+        /// <summary>元の位置・向きへ戻す（否認・待ち上限・取りやめ）。戻ったら Kinematic で置く。そっと置く（降ろす動き）にも使う</summary>
         public void ReturnTo(Vector3 localPos, Quaternion localRot, float duration)
         {
             KillFlight();

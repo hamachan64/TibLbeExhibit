@@ -32,7 +32,8 @@ namespace STYLY.TIB_Template.TreasureHaul
             var p = LoadParams(out var warnings);
             var settings = LoadSettings(out var settingsWarnings);
             Core = new SessionHostCore(new RpcManagerTransport(), p, settings, settingsWarnings, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                no => _nm != null ? _nm.GetDeviceIdByClientNo(no) : null);
+                no => _nm != null ? _nm.GetDeviceIdByClientNo(no) : null, null,
+                local => ThPlaceSolver.Solve(ThVenue.Instance != null ? ThVenue.Instance.Root : null, local));   // 持ち主の切断で降ろす先（Environment の床・荷台・瓦礫への Raycast）
             foreach (var w in Core.Warnings.CurrentValue) Debug.LogWarning("[SessionHost] " + w);
         }
 

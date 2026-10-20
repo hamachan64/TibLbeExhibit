@@ -40,6 +40,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         Transform _anchor;
         IGrabStyle _style = new BeamGrabStyle();
         int _handleMask;
+        readonly HandJumpFilter _jumpFilter = new HandJumpFilter();
 
         Treasure _aimed;
         int _aimedHandle = -1;
@@ -90,6 +91,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             if (_client == null || _tracker == null) return;
             if (!_tracker.IsTracked.CurrentValue || !_tracker.HasPalm)
             {
+                _jumpFilter.Update(false, default, 0f);   // 見失ったら前の位置を忘れる（戻った最初のフレームは比べない）
                 SetBeam(false, default, default);
                 _aimed = null;
                 _aimedHandle = -1;
@@ -101,7 +103,10 @@ namespace STYLY.TIB_Template.TreasureHaul
             var dir = palm.position - shoulder;
             _beamDir = dir.sqrMagnitude > 1e-6f ? dir.normalized : _beamDir;
             var target = _style.HoldTarget(palm, _beamDir);
-            _anchor.SetPositionAndRotation(target.position, target.rotation);
+            // 手の目標が 1 フレームで〔飛びの判定〕以上動いたら飛び: そのフレームは目標を前のまま止め、持っているお宝の〔補正の無判定時間〕を始める
+            var jump = _jumpFilter.Update(true, target.position, _client.JumpDistance);
+            if (jump.Jumped) _client.OnHandJumped(this);
+            else _anchor.SetPositionAndRotation(target.position, target.rotation);
 
             float length = _style.BeamLength(_client.Grip);
             _aimed = Held == null && _client.CanGrab ? FindAimed(palm.position, _beamDir, length, out _aimedHandle) : null;
@@ -156,7 +161,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         void OnReleased(GripReleaseReason reason)
         {
             if (Held == null || _client == null) return;
-            // S は理由を問わず手を開いたのと同じ扱い（TODO(#41): 見失いは Hovering にする）。M は予約・猶予が理由を見る
+            // 理由（開いた / 見失い）は ClientItemTable が見て、落とす・見失い待ち（Hovering）・猶予などを決める
             _client.OnHandReleased(this, reason == GripReleaseReason.Lost);
         }
 

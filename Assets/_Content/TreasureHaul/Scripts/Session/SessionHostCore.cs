@@ -53,6 +53,8 @@ namespace STYLY.TIB_Template.TreasureHaul
         // お宝（#38）
         ThTreasureSetup _setup;
         HostItemTable _items;
+        /// <summary>降ろす先を決める関数（VenueRoot ローカル → 降ろす先。本番は ThVenue の Raycast。null なら床 y=0）</summary>
+        readonly Func<Vector3, Vector3> _placeSolver;
         long _itemsRound;
         double _lastItemsSentAt = double.NegativeInfinity;
         string[] _baseWarnings = new string[0];
@@ -63,8 +65,9 @@ namespace STYLY.TIB_Template.TreasureHaul
         /// <summary>回収した合計額</summary>
         public int TotalAmount => _items?.Total ?? 0;
 
-        public SessionHostCore(IThTransport tx, ThParamsLoadResult initialParams, ThGameSettings settings, IEnumerable<string> settingsWarnings = null, long hostEpoch = 0, Func<int, string> resolveDeviceId = null, ThTreasureSetup treasureSetup = null)
+        public SessionHostCore(IThTransport tx, ThParamsLoadResult initialParams, ThGameSettings settings, IEnumerable<string> settingsWarnings = null, long hostEpoch = 0, Func<int, string> resolveDeviceId = null, ThTreasureSetup treasureSetup = null, Func<Vector3, Vector3> placeSolver = null)
         {
+            _placeSolver = placeSolver;
             _tx = tx;
             _resolveDeviceId = resolveDeviceId;
             HostEpoch = hostEpoch;
@@ -124,9 +127,13 @@ namespace STYLY.TIB_Template.TreasureHaul
         {
             var deviceId = Registry.GetDeviceId(clientNo);
             Registry.Disconnect(clientNo);
-            // 切断した端末の M の片手予約を解除する（設計書 3.3）。持っているお宝の扱いは #41。
-            // TODO(#44): 見学への切り替え（運営PCの UI）でも同じく ReleaseReservationsOf を呼ぶ
-            if (_items != null && Machine.State == RoundState.Playing) _items.ReleaseReservationsOf(deviceId);
+            // 切断した端末の M の片手予約を解除し、持っている・判定役のお宝をその場にそっと置かせる（設計書 3.3、F-GRAB-8）
+            // TODO(#44): 見学への切り替え（運営PCの UI）でも同じく ReleaseReservationsOf と ForceRestItemsOf を呼ぶ
+            if (_items != null && Machine.State == RoundState.Playing)
+            {
+                _items.ReleaseReservationsOf(deviceId);
+                _items.ForceRestItemsOf(deviceId, now);
+            }
             Refresh(now);
         }
 
@@ -168,6 +175,7 @@ namespace STYLY.TIB_Template.TreasureHaul
                     hostEpoch = HostEpoch,
                 }));
             }
+            _items?.Tick(now, Machine.State == RoundState.Playing);   // そっと置かせたお宝を、〔置く時間〕の後につかめる／回収にする
             if (_items != null && _items.Items.Count > 0
                 && (Machine.State == RoundState.Tutorial || Machine.State == RoundState.Playing)
                 && now - _lastItemsSentAt >= Params.progress.itemsInterval)
@@ -314,7 +322,8 @@ namespace STYLY.TIB_Template.TreasureHaul
                 var spawn = TreasureSpawner.Spawn(Machine.Seed, Machine.Participants.Count, Params, _setup.Points, _setup.Catalog);
                 SpawnFingerprint = spawn.Fingerprint();
                 _items = new HostItemTable(spawn.Items, _setup.CollectBounds, (rpc, dto) => _tx.Send(rpc, ThMessages.EncodeObject(Machine.RoundId, dto)),
-                    deviceId => Registry.Get(deviceId)?.ClientNo ?? -1, Params.treasure);
+                    deviceId => Registry.Get(deviceId)?.ClientNo ?? -1, Params.treasure, Params.grip.placeSeconds);
+                if (_placeSolver != null) _items.PlaceSolver = _placeSolver;
                 _items.Log = Debug.Log;
                 _itemsRound = Machine.RoundId;
                 _lastItemsSentAt = double.NegativeInfinity;
