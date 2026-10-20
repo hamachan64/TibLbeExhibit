@@ -5,12 +5,12 @@
 > 各行の中身は GitHub Issue、仕様は `TREASURE_HAUL_DESIGN.md` 13章（依存関係の図あり）。
 > ボード: https://github.com/users/hamachan64/projects/2 （状態の列はこのファイルと同じ5つ。両方を同時に更新する）
 
-## 現在地（2026-10-20 更新）
+## 現在地（2026-10-21 更新）
 
 | | |
 | :--- | :--- |
-| **フェーズ** | 3c 見失い・手の飛び・そっと置く・持ち主の切断（[#41](https://github.com/hamachan64/TibLbeExhibit/issues/41)）の PR [#57](https://github.com/hamachan64/TibLbeExhibit/pull/57) をレビュー中。3b M（#40、PR #56）、3a 減額と表示（#39、PR #55）、2 配置・S を持つ・回収（#38、PR #54）、1 基盤（#37、PR #52）、0a 試作（PR #50）はマージ済み。**実機は10月中の見込み**なので、それまではエディタ（XRI のシミュレーター・ParrelSync）で検証しながら進める |
-| **次にやること** | PR #57 をマージ → コア（S・M）の持つ処理はここまで。次は [#42](https://github.com/hamachan64/TibLbeExhibit/issues/42)（オープニング・保留・本編開始・結果）。並行して [#42](https://github.com/hamachan64/TibLbeExhibit/issues/42)・[#44](https://github.com/hamachan64/TibLbeExhibit/issues/44) ／ 素材 #46・#47・#48 |
+| **フェーズ** | 4a オープニング・保留・本編開始・結果（[#42](https://github.com/hamachan64/TibLbeExhibit/issues/42)）の PR [#58](https://github.com/hamachan64/TibLbeExhibit/pull/58) をレビュー中。コア（S・M）の持つ処理は 3c（#41、PR #57）までマージ済み（3b #40・3a #39・2 #38・1 #37・0a #36 も）。**実機は10月中の見込み**なので、それまではエディタ（XRI のシミュレーター・ParrelSync）で検証しながら進める |
+| **次にやること** | PR #58 をマージ → [#43](https://github.com/hamachan64/TibLbeExhibit/issues/43)（練習。荷台前の固定位置・色分け）。並行して [#44](https://github.com/hamachan64/TibLbeExhibit/issues/44)（運営UIの残り・記録 CSV）／ 素材 #46・#47・#48 |
 | **判断待ち** | 実機の入手（#49・#45 に必要）。U-1 は通し #45 までに必要。ほかは下の「判断待ち」 |
 | **締切** | 内容変更 **10/31**（あと11日）／最終データ 11/16／現地設営 11/17 |
 
@@ -26,8 +26,8 @@
 | 2 | 配置、S を持つ・置く・回収、表示板 | [#38](https://github.com/hamachan64/TibLbeExhibit/issues/38)（PR [#54](https://github.com/hamachan64/TibLbeExhibit/pull/54)） | ✅ | 1 | 10/22〜23 |
 | 3a | 減額と表示（3回で壊れる） | [#39](https://github.com/hamachan64/TibLbeExhibit/issues/39)（PR [#55](https://github.com/hamachan64/TibLbeExhibit/pull/55)） | ✅ | 2 | 10/24 |
 | 3b | M（両手で持つ） | [#40](https://github.com/hamachan64/TibLbeExhibit/issues/40)（PR [#56](https://github.com/hamachan64/TibLbeExhibit/pull/56)） | ✅ | 3a | 10/25 |
-| 3c | 見失い・手の飛び・そっと置く・持ち主の切断 | [#41](https://github.com/hamachan64/TibLbeExhibit/issues/41)（PR [#57](https://github.com/hamachan64/TibLbeExhibit/pull/57)） | 👀 | 3b | 10/26 |
-| 4a | オープニング・保留・本編開始・結果 | [#42](https://github.com/hamachan64/TibLbeExhibit/issues/42) | ⬜ | 1（2・3 と並行可） | 10/24〜26 |
+| 3c | 見失い・手の飛び・そっと置く・持ち主の切断 | [#41](https://github.com/hamachan64/TibLbeExhibit/issues/41)（PR [#57](https://github.com/hamachan64/TibLbeExhibit/pull/57)） | ✅ | 3b | 10/26 |
+| 4a | オープニング・保留・本編開始・結果 | [#42](https://github.com/hamachan64/TibLbeExhibit/issues/42)（PR [#58](https://github.com/hamachan64/TibLbeExhibit/pull/58)） | 👀 | 1（2・3 と並行可） | 10/24〜26 |
 | 4b | 練習（荷台前の固定位置・色分け） | [#43](https://github.com/hamachan64/TibLbeExhibit/issues/43) | ⬜ | 2、4a | 10/27〜28 |
 | 5 | 運営UIの残り・記録 CSV | [#44](https://github.com/hamachan64/TibLbeExhibit/issues/44) | ⬜ | 1（並行可） | 10/27〜29 |
 | 6 | 連続稼働・実機での通し → 第1検証 | [#45](https://github.com/hamachan64/TibLbeExhibit/issues/45) | ⬜ | すべて（0b を含む） | 目標 10/30〜31。実機が遅れたら11月初め |
@@ -58,11 +58,11 @@
 | U-1 | 全端末の位置合わせの方法（hacha さんに確認。保留中） | 全体、#45 |
 | U-5 | ナレーションの文言（音声はユーザーが用意） | #47 |
 | U-7 | ランキングの単位とリセットの時期 | 追加要素 |
-| U-9 | 「一番高かったお宝」は元の価値か回収額か。損害額に回収しなかったお宝を含めるか | #42 |
 | U-18 | 番人の石像に見られて動いたときの減らし方 | 追加要素 |
 
 ## 最近決まったこと
 
+- 2026-10-21（#42）: 結果画面は「回収額／目標額」と「クリア・失敗」（届かなければ「あと N G でクリア」）だけ。「一番高かったお宝」「損害額」は出さない（U-9 は不要に）。目標額は本編中ずっと手元の帯（「残り 2:15 ／ 目標 2,500G」）に出し、届いた瞬間に全員へ「目標達成！」。体験者に見せる文字は頭について来る小さな面に出す。荷台の光と「ここへ運ぼう」はやめる（練習を荷台の前でやるので場所は伝わる。第1検証で迷う人がいたら足す）。保留は練習中だけで、合計が〔保留の上限〕で自動解除。オープニングの字幕はナレーション原稿の案を仮に入れた（U-5 は未決のまま）。企画書 4.2・4.3・5.4・5.7、要件 F-TUT-1・F-SCORE-2〜5、設計書 3.2・5章・9章を更新。
 - 2026-10-20（#41）: M を両手で持っていて**両手とも見失った**とき（猶予の間に残った手も見失ったときを含む）は、S と同じく〔見失い待ち〕。両手とも握ったまま戻れば持ち続け、どちらかが開いて戻るか時間切れならそっと置く。見失い待ち・そっと置くは持ち主の端末だけの状態（ホストは Held のまま、免除は `ThPoses` の `exempt` と `ThDamage` の `exemptA`）。持ち主の切断では、運営PCが最後に受けた位置から降ろす先を Raycast で決めて `ThForceRest` に載せる。開いて戻ったかは〔離す判定〕の間で見る。企画書 5.2・要件 F-GRAB-4・設計書 4.2/4.3/5章を更新。
 - 2026-10-20（#40）: M を両手で持った後に片手が外れたら、猶予の間に**その手でもう一度握れば**両手に戻る（ビームの当て直しは要らない）。片手を見失って猶予が切れたときは、#41 で Placing を作るまでは**落とす**扱い。「両手で持とう」は頭から M までの**水平の距離**で〔ビームの距離〕以内。企画書 5.2・要件 F-GRAB-4/F-ITEM-5・設計書 4.2/4.4 を更新。
 - 2026-10-19（#39）: 値段が「？」のお宝が仲間のお宝に当てられて減ったときは、「-90G」を出さずヒビと音だけ（値札も「？」のまま）。減額の免除は #39 で仕組み（`ThPoses` の `exempt` とホストのお宝ごとの判断）と「手元へ飛ぶ途中」まで作り、手の飛び・補正・そっと置く・見失い待ちは #41 で立てる。持っているお宝を障害物に押し付けても `OnCollisionEnter` は出る（エディタで確認）。企画書 5.3・要件 F-DMG-4・設計書 5章を更新。

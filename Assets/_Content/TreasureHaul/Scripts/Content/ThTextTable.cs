@@ -32,6 +32,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         PracticeDamageNote,
         TagYours,
         HintTwoHands,
+        /// <summary>使わない（2026-10-21、荷台の案内はやめた）。列挙からは消せないので残す</summary>
         HintGoHere,
         PriceUnknown,
         PriceFormat,
@@ -39,6 +40,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         DamageFormat,
         CollectFormat,
         CollectDamagedFormat,
+        /// <summary>使わない（2026-10-21、結果画面は回収額・目標額・クリアだけにした）。列挙からは消せないので残す</summary>
         ResultLossFormat,
         // 追加要素
         StatueNotice,
@@ -46,6 +48,32 @@ namespace STYLY.TIB_Template.TreasureHaul
         // #38
         /// <summary>荷台の表示板。回収した合計額（書式「{0:N0}G」）</summary>
         BoardTotalFormat,
+        // #42（オープニング・保留・本編開始・結果）
+        /// <summary>オープニングの字幕 1〜5（TREASURE_HAUL_NARRATION.md の op01〜op05 の案。U-5 は未決）</summary>
+        OpeningLine1,
+        OpeningLine2,
+        OpeningLine3,
+        OpeningLine4,
+        OpeningLine5,
+        /// <summary>本編の帯（書式「残り {0}:{1:00} ／ 目標 {2:N0}G」。分・秒・目標額）</summary>
+        HudPlayingFormat,
+        /// <summary>目標額に届いた瞬間に大きく出す</summary>
+        TargetReached,
+        /// <summary>結果（書式「{0:N0}G ／ 目標 {1:N0}G」。回収額・目標額）</summary>
+        ResultAmountFormat,
+        ResultClear,
+        /// <summary>結果（書式「あと {0:N0}G でクリア」。足りない額）</summary>
+        ResultFailFormat,
+        /// <summary>待機画面の小さなクレジット欄（N-9）</summary>
+        Credits,
+        // 運営UI
+        OpHold,
+        OpHoldRelease,
+        /// <summary>保留中の表示（書式「保留中（あと {0} 秒で自動解除）」）</summary>
+        OpHoldingFormat,
+        OpBeginPlay,
+        /// <summary>合計額と目標額（書式「合計 {0:N0}G ／ 目標 {1:N0}G」）</summary>
+        OpTotalFormat,
     }
 
     [Serializable]
