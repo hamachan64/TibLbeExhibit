@@ -1,0 +1,19 @@
+{
+    "name": "TibLbeExhibit.TreasureHaul.Editor",
+    "rootNamespace": "STYLY.TIB_Template.TreasureHaul.Editor",
+    "references": [
+        "TibLbeExhibit.TreasureHaul",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a81c90b3f2bc4904a35a886a5027af9, type: 3}
+  m_Name: ThFxCatalog
+  m_EditorClassIdentifier: TibLbeExhibit.TreasureHaul::STYLY.TIB_Template.TreasureHaul.ThFxCatalog
+  entries:
+  - id: 0
+    prefab: {fileID: 0}
+    material: {fileID: 2100000, guid: 220373b394fa145828a6fa69cddf25aa, type: 2}
+  - id: 1
+    prefab: {fileID: 0}
+    material: {fileID: 2100000, guid: ac57d8506f9c742bd87f059e2c55ffab, type: 2}
+  - id: 2
+    prefab: {fileID: 8556624865429012995, guid: abca3fb8ed3534f29b872afa6e90e232, type: 3}
+    material: {fileID: 0}
+  - id: 3
+    prefab: {fileID: 1362824584577266522, guid: 154f79e0ea7c14a389c3bfbbc9a5b283, type: 3}
+    material: {fileID: 0}
+  - id: 4
+    prefab: {fileID: 1076941667948218432, guid: 9899b19fb01c5461e8e5aedd66317a68, type: 3}
+    material: {fileID: 0}
+  - id: 5
+    prefab: {fileID: 5417791270101439668, guid: 483acecada99540ba81b2dd18e8cd7bf, type: 3}
+    material: {fileID: 0}
+  - id: 6
+    prefab: {fileID: 0}
+    material: {fileID: 0}

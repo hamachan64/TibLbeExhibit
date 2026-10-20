@@ -6,7 +6,8 @@
         "UnityEditor.TestRunner",
         "TibLbeExhibit.Core",
         "TibLbeExhibit.TreasureHaul",
-        "R3.Unity"
+        "R3.Unity",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [
         "Editor"

@@ -31,5 +31,46 @@ namespace STYLY.TIB_Template
         GiSpawnSS,
         /// <summary>宝籤（ロトリー）による新カード出現（引数: [0]=newItemId, [1]=cardId, [2..4]=位置xyz）</summary>
         GiSpawnLottery,
+
+        // ===== Treasure Haul（設計書 6.2）。引数は共通: [0]=RoundId（10進文字列。回が無いときは 0）、[1]=中身の JSON =====
+
+        /// <summary>ホスト→全員 状態（通し番号・状態・残り秒・シード・参加端末・ゲーム設定・パラメータ版・練習の色）</summary>
+        ThState,
+        /// <summary>ホスト→全員 定期の生存通知（通し番号・残り秒・合計額・パラメータ版）</summary>
+        ThHeartbeat,
+        /// <summary>端末→ホスト 再送要求を兼ねた状況報告（DeviceId・知っている RoundId・通し番号・パラメータ版）</summary>
+        ThResync,
+        /// <summary>ホスト→宛先 パラメータ JSON と版</summary>
+        ThParams,
+        /// <summary>端末→ホスト つかむ申請</summary>
+        ThGrab,
+        /// <summary>端末→ホスト M の両手成立</summary>
+        ThLift,
+        /// <summary>端末→ホスト 置いた・落とした・取りやめ・予約解除</summary>
+        ThRelease,
+        /// <summary>ホスト→全員 つかめた</summary>
+        ThGrabbed,
+        /// <summary>ホスト→全員 つかめなかった</summary>
+        ThGrabDenied,
+        /// <summary>ホスト→全員 M を持ち上げた</summary>
+        ThLifted,
+        /// <summary>ホスト→全員 お宝が解放された</summary>
+        ThFreed,
+        /// <summary>判定役→全員 持たれている間の位置（端末ごとに 1 つにまとめる）</summary>
+        ThPoses,
+        /// <summary>判定役→ホスト 置かれた（静止した）</summary>
+        ThRest,
+        /// <summary>判定役→ホスト 衝突による減額の報告</summary>
+        ThDamage,
+        /// <summary>判定役→ホスト 荷台への回収の報告</summary>
+        ThCollect,
+        /// <summary>ホスト→全員 減額を適用した</summary>
+        ThDamaged,
+        /// <summary>ホスト→全員 回収した</summary>
+        ThCollected,
+        /// <summary>ホスト→全員 その場にそっと置かせる</summary>
+        ThForceRest,
+        /// <summary>ホスト→全員 全お宝の状態表</summary>
+        ThItems,
     }
 }

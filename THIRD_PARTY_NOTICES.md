@@ -96,6 +96,7 @@
 | UniTask（`com.cysharp.unitask`） | 非同期処理 | MIT | 可 | 無料 | 要（ライセンス文の同梱） | 未確認 |
 | R3（`com.cysharp.r3`）、ObservableCollections.R3 | リアクティブ | MIT | 可 | 無料 | 要（ライセンス文の同梱） | 未確認 |
 | DOTween（`Assets/Plugins/Demigiant`） | アニメーション | DOTween の独自ライセンス（無料版） | 要確認 | 無料 | 要確認 | 未確認 |
+| Noto Sans JP（`Assets/_Content/Fonts/Noto_Sans_JP/`。入手元 Google Fonts） | 日本語の表示（TMP の SDF。#37 で足りない文字だけの予備フォントを同じ .ttf から作成） | SIL Open Font License 1.1（同梱の `OFL.txt` 原文で確認。商用・アプリへの組み込み・文字を絞った変換は可、フォント自体の単体販売は不可） | 可 | 無料 | 不要（フォントファイルを単体で再配布する場合はライセンス文を同梱。念のためクレジット欄に記載を推奨） | 確認済み（2026-10-18） |
 | ParrelSync | エディタでの複数起動 | MIT | 可（エディタのみ） | 無料 | ― | 未確認 |
 | uLoopMCP（`io.github.hatayama.uloopmcp`） | AI からのエディタ操作 | 要確認 | エディタのみ | 無料 | ― | 未確認 |
 | STYLY NetSync | 同期 | 要確認 | 要確認 | 要確認 | 要確認 | 未確認 |
