@@ -5,12 +5,14 @@ namespace STYLY.TIB_Template.TreasureHaul
     /// <summary>頭について来る面に出す内容の種類</summary>
     public enum ThPanelKind
     {
-        /// <summary>何も出さない（練習中・次の回を待っている間）</summary>
+        /// <summary>何も出さない（練習用お宝が割り当てられていない端末の練習中・次の回を待っている間）</summary>
         None,
         Waiting,
         Opening,
         Playing,
         Result,
+        /// <summary>練習の案内（#43。末尾に足した）</summary>
+        Practice,
     }
 
     /// <summary>面の判断への入力（端末の追従 <see cref="ClientRoundTracker"/> と合計額から作る）</summary>
@@ -25,6 +27,10 @@ namespace STYLY.TIB_Template.TreasureHaul
         public int Target;
         public int Total;
         public ThResultMsg Result;
+        /// <summary>自分の練習用お宝の状態（Tutorial のとき。無い・割り当てが無い端末は None で、案内を出さない）</summary>
+        public PracticeItemState Practice;
+        /// <summary>練習用お宝の価値（「+150G！」に出す）</summary>
+        public int PracticeValue;
     }
 
     /// <summary>面に出す内容と、この 1 回の更新で起きた合図</summary>
@@ -40,6 +46,9 @@ namespace STYLY.TIB_Template.TreasureHaul
         /// <summary>「目標達成！」を大きく出している間</summary>
         public bool ShowTargetReached;
         public ThResultMsg Result;
+        /// <summary>練習の案内の段階（Kind が Practice のとき）</summary>
+        public PracticeStep PracticeStep;
+        public int PracticeValue;
 
         // ---- 合図（その更新だけ true / 非 0） ----
         /// <summary>オープニングが始まった（効果音を鳴らす）</summary>
@@ -66,6 +75,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         bool _belowSeen;
         bool _reached;
         double _reachedAt;
+        readonly PracticeGuide _guide = new PracticeGuide();
 
         /// <summary>
         /// 残り秒を「分」と「秒」にする。<b>切り上げ</b>（135.0 → 2:15、134.2 → 2:15、0.1 → 0:01、0 → 0:00）。
@@ -99,6 +109,7 @@ namespace STYLY.TIB_Template.TreasureHaul
                 _lastLine = 0;
                 _belowSeen = false;
                 _reached = false;
+                _guide.Reset();
             }
 
             if (inp.State == RoundState.Waiting)
@@ -146,7 +157,13 @@ namespace STYLY.TIB_Template.TreasureHaul
                         f.Result = inp.Result;
                     }
                     break;
-                // Tutorial: 何も出さない（#43 で案内を足す）
+
+                case RoundState.Tutorial:
+                    // 練習の案内: 自分の練習用お宝がある端末だけ。割り当てのない端末は何も出さない
+                    f.PracticeStep = _guide.Update(inp.Practice, now);
+                    f.PracticeValue = inp.PracticeValue;
+                    if (f.PracticeStep != PracticeStep.None) f.Kind = ThPanelKind.Practice;
+                    break;
             }
             return f;
         }
@@ -169,6 +186,16 @@ namespace STYLY.TIB_Template.TreasureHaul
                 case ThPanelKind.Playing:
                     if (f.ShowTargetReached) { r.Main = t.Get(ThTextId.TargetReached); r.Large = true; }
                     else r.Main = t.Format(ThTextId.HudPlayingFormat, f.RemainMinutes, f.RemainSeconds, f.Target);
+                    break;
+                case ThPanelKind.Practice:
+                    switch (f.PracticeStep)
+                    {
+                        case PracticeStep.Grip: r.Main = t.Get(ThTextId.PracticeGrip); break;
+                        case PracticeStep.Carry: r.Main = t.Get(ThTextId.PracticeCarry); break;
+                        case PracticeStep.Release: r.Main = t.Get(ThTextId.PracticeRelease); break;
+                        case PracticeStep.Success: r.Main = t.Format(ThTextId.PracticeSuccessFormat, f.PracticeValue); r.Large = true; break;
+                        case PracticeStep.DamageNote: r.Main = t.Get(ThTextId.PracticeDamageNote); break;
+                    }
                     break;
                 case ThPanelKind.Result:
                     r.Main = t.Format(ThTextId.ResultAmountFormat, f.Result.collected, f.Result.target);

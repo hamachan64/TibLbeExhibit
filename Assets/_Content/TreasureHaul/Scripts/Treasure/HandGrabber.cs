@@ -165,6 +165,26 @@ namespace STYLY.TIB_Template.TreasureHaul
             _client.OnHandReleased(this, reason == GripReleaseReason.Lost);
         }
 
+        static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+        static readonly int ColorId = Shader.PropertyToID("_Color");
+        MaterialPropertyBlock _beamBlock;
+        Color? _beamColor;
+
+        /// <summary>ビームの色を変える（MaterialPropertyBlock。共有マテリアルは書き換えない）。同じ色なら何もしない</summary>
+        public void SetBeamColor(Color color)
+        {
+            if (_beam == null || (_beamColor.HasValue && _beamColor.Value == color)) return;
+            _beamColor = color;
+            _beamBlock ??= new MaterialPropertyBlock();
+            _beam.GetPropertyBlock(_beamBlock);
+            _beamBlock.SetColor(BaseColorId, color);
+            _beamBlock.SetColor(ColorId, color);
+            _beam.SetPropertyBlock(_beamBlock);
+        }
+
+        /// <summary>今のビームの色（まだ設定していなければ null = マテリアルの色のまま）</summary>
+        public Color? BeamColor => _beamColor;
+
         public void ClearAim() { _aimed = null; _lastAimed = null; _aimedHandle = -1; _lastAimedHandle = -1; }
     }
 }

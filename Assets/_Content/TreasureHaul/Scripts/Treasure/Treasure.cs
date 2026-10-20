@@ -167,6 +167,27 @@ namespace STYLY.TIB_Template.TreasureHaul
 
         public Collider[] BodyColliders => _bodyColliders;
 
+        static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+        static readonly int ColorId = Shader.PropertyToID("_Color");
+
+        /// <summary>
+        /// 本体（持ち手以外の MeshRenderer）を MaterialPropertyBlock で塗る（練習用お宝の色。共有マテリアルは書き換えない）。
+        /// 後から付くヒビ（子のプレハブ）は塗らない。
+        /// </summary>
+        public void PaintBody(Color color)
+        {
+            var skip = new System.Collections.Generic.HashSet<Renderer>(_handleRenderers ?? new Renderer[0]);
+            var block = new MaterialPropertyBlock();
+            foreach (var r in GetComponentsInChildren<MeshRenderer>(true))
+            {
+                if (skip.Contains(r)) continue;
+                r.GetPropertyBlock(block);
+                block.SetColor(BaseColorId, color);
+                block.SetColor(ColorId, color);
+                r.SetPropertyBlock(block);
+            }
+        }
+
         // ---- 持ち手の光 ----
 
         public void SetAimed(bool aimed)

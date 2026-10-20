@@ -74,6 +74,11 @@ namespace STYLY.TIB_Template.TreasureHaul
         OpBeginPlay,
         /// <summary>合計額と目標額（書式「合計 {0:N0}G ／ 目標 {1:N0}G」）</summary>
         OpTotalFormat,
+        // #43（練習）
+        /// <summary>練習の案内: 持てた後（持った瞬間の値札は今のまま）</summary>
+        PracticeCarry,
+        /// <summary>練習の案内: 持っているお宝が納品場所の範囲に入ったら</summary>
+        PracticeRelease,
     }
 
     [Serializable]

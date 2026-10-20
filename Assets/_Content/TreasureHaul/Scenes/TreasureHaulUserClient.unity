@@ -467,7 +467,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -577,6 +577,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: TibLbeExhibit.TreasureHaul::STYLY.TIB_Template.TreasureHaul.ThPlayerPanel
   _client: {fileID: 1258492435}
+  _treasure: {fileID: 1258492436}
   _follow: {fileID: 850292194}
   _group: {fileID: 850292195}
   _main: {fileID: 629964202}
@@ -586,6 +587,7 @@ MonoBehaviour:
   _offset: {x: 0, y: -0.18, z: 1}
   _mainSize: 48
   _largeSize: 88
+  _bandHeight: 110
 --- !u!114 &850292194
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -795,7 +797,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -1103,6 +1105,8 @@ GameObject:
   - component: {fileID: 1258492434}
   - component: {fileID: 1258492435}
   - component: {fileID: 1258492436}
+  - component: {fileID: 1258492438}
+  - component: {fileID: 1258492437}
   m_Layer: 0
   m_Name: TreasureHaul
   m_TagString: Untagged
@@ -1158,6 +1162,44 @@ MonoBehaviour:
   _right: {fileID: 1143659378}
   _labelFont: {fileID: 11400000, guid: ab041cb34e0c84558b8359ca7a47eff9, type: 2}
   _labelHeight: 0.3
+--- !u!114 &1258492437
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1258492432}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa420692c2d1c47eda82b52d617cb9ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TibLbeExhibit.TreasureHaul::STYLY.TIB_Template.TreasureHaul.PracticeHintHand
+  _client: {fileID: 1258492435}
+  _treasure: {fileID: 1258492436}
+  _rightModel: {fileID: 919132149155446097, guid: 56186ccf27ad7864681108ed88349071, type: 3}
+  _leftModel: {fileID: 919132149155446097, guid: bf7151579c38e2a44be94ba8773876c1, type: 3}
+  _material: {fileID: 2100000, guid: 24463d4460ac642ddb2bedaa7f758d7b, type: 2}
+  _font: {fileID: 11400000, guid: ab041cb34e0c84558b8359ca7a47eff9, type: 2}
+  _sideOffset: 0.15
+  _scale: 1.8
+  _headOffset: {x: 0.2, y: -0.22, z: 0.8}
+  _textDrop: 0.16
+  _textSize: 0.45
+  _halfCycleSeconds: 0.6
+--- !u!114 &1258492438
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1258492432}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35ac29f4bda704417a495486a204dcd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TibLbeExhibit.TreasureHaul::STYLY.TIB_Template.TreasureHaul.AvatarColorizer
+  _client: {fileID: 1258492435}
+  _tintMaterial: {fileID: 2100000, guid: 9bfcafd2fd9f34331b6c5b43a0a22371, type: 2}
 --- !u!1 &1424104152
 GameObject:
   m_ObjectHideFlags: 0
@@ -1316,7 +1358,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2

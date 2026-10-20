@@ -16,3 +16,4 @@ MonoBehaviour:
   audio: {fileID: 11400000, guid: 7d1f90f64ea2547afbda7fc7ed121c38, type: 2}
   fx: {fileID: 11400000, guid: acd996b5a5e264c29acb0c74028c48d0, type: 2}
   treasures: {fileID: 11400000, guid: 7eb4725c0b544410cb43033416794759, type: 2}
+  palette: {fileID: 11400000, guid: c10a7f63543e44fa49c8a1be2e55186b, type: 2}

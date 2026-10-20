@@ -14,6 +14,7 @@ namespace STYLY.TIB_Template.TreasureHaul
     public sealed class ThPlayerPanel : MonoBehaviour
     {
         [SerializeField] SessionClient _client;
+        [SerializeField, Tooltip("お宝の見た目（練習の案内で、持っているお宝が納品場所の範囲に入ったかを見る）。空なら実行時に探す")] TreasureClient _treasure;
         [SerializeField, Tooltip("頭について来る動き（この GameObject に付ける）")] LazyFollow _follow;
         [SerializeField, Tooltip("面全体の濃さ（フェード用）")] CanvasGroup _group;
         [SerializeField] TMP_Text _main;
@@ -34,6 +35,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         bool _shown;
         bool _lastBand;
         bool _hasLast;
+        bool _treasureSearched;
         ThPanelFrame _lastFrame;
 
         static double Now => Time.realtimeSinceStartupAsDouble;
@@ -71,6 +73,8 @@ namespace STYLY.TIB_Template.TreasureHaul
                 Target = t.Target,
                 Total = core.Total.CurrentValue,
                 Result = t.Result,
+                Practice = ClassifyPractice(core),
+                PracticeValue = core.Params.practice.practiceValue,
             };
             var frame = _presenter.Update(inp, Now);
             PlaySounds(frame);
@@ -81,8 +85,31 @@ namespace STYLY.TIB_Template.TreasureHaul
             Apply(frame, texts, false);
         }
 
+        /// <summary>自分の練習用お宝の状態（Tutorial のときだけ。練習用の表が無い・割り当てが無い端末は None）</summary>
+        PracticeItemState ClassifyPractice(SessionClientCore core)
+        {
+            if (core.Tracker.State.CurrentValue != RoundState.Tutorial) return PracticeItemState.None;
+            var table = core.Items.CurrentValue;
+            if (table == null || !table.IsPractice) return PracticeItemState.None;
+            var item = table.Get(core.OwnPracticeIndex);
+            if (item == null) return PracticeItemState.None;
+            bool inZone = false;
+            if (!item.Gone)
+            {
+                if (_treasure == null && !_treasureSearched)
+                {
+                    _treasureSearched = true;   // 探すのは 1 回だけ
+                    _treasure = FindFirstObjectByType<TreasureClient>();
+                    if (_treasure == null) Debug.LogWarning("[ThPlayerPanel] TreasureClient が見つからないので、練習の案内の段階 3（納品場所の範囲内）は出ません");
+                }
+                var t = _treasure != null ? _treasure.GetTreasure(item.Index) : null;
+                if (t != null) inZone = table.InCollectZone(t.transform.localPosition);   // 持っているお宝の今の位置（VenueRoot ローカル）
+            }
+            return PracticeGuide.Classify(item, inZone);
+        }
+
         static bool SameDisplay(in ThPanelFrame a, in ThPanelFrame b) =>
-            a.Kind == b.Kind && a.OpeningLine == b.OpeningLine && a.RemainMinutes == b.RemainMinutes && a.RemainSeconds == b.RemainSeconds
+            a.Kind == b.Kind && a.PracticeStep == b.PracticeStep && a.PracticeValue == b.PracticeValue && a.OpeningLine == b.OpeningLine && a.RemainMinutes == b.RemainMinutes && a.RemainSeconds == b.RemainSeconds
             && a.Target == b.Target && a.ShowTargetReached == b.ShowTargetReached && ReferenceEquals(a.Result, b.Result);
 
         void PlaySounds(in ThPanelFrame f)

@@ -18,11 +18,20 @@ namespace STYLY.TIB_Template.TreasureHaul.Editor
         public const string SourceFontPath = "Assets/_Content/Fonts/Noto_Sans_JP/NotoSansJP-VariableFont_wght.ttf";
         public const string ExtraFontPath = "Assets/_Content/Fonts/Noto_Sans_JP/NotoSansJP SDF - TreasureHaul Extra.asset";
         public const string TextTablePath = "Assets/_Content/TreasureHaul/Settings/ThTextTable.asset";
+        public const string PalettePath = "Assets/_Content/TreasureHaul/Settings/ThPlayerPalette.asset";
 
         /// <summary>書式の {0:N0} などを除いた文言の文字に、数字と「,」「G」「+」「-」を加えた集合（空白・改行は除く）。</summary>
-        public static string CollectCharacters(ThTextTable table)
+        public static string CollectCharacters(ThTextTable table, ThPlayerPalette palette = null)
         {
             var set = new SortedSet<char>();
+            // プレーヤーの色の記号（●▲■★）と名前も、練習用お宝の上などに出す
+            if (palette != null && palette.slots != null)
+                foreach (var slot in palette.slots)
+                {
+                    if (slot == null) continue;
+                    foreach (var ch in slot.symbol ?? "") set.Add(ch);
+                    foreach (var ch in slot.colorName ?? "") set.Add(ch);
+                }
             foreach (var e in table.entries)
             {
                 if (e == null || string.IsNullOrEmpty(e.text)) continue;
@@ -38,6 +47,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Editor
         public static void Run()
         {
             var table = AssetDatabase.LoadAssetAtPath(TextTablePath, typeof(ThTextTable)) as ThTextTable;
+            var palette = AssetDatabase.LoadAssetAtPath(PalettePath, typeof(ThPlayerPalette)) as ThPlayerPalette;
             var main = AssetDatabase.LoadAssetAtPath(MainFontPath, typeof(TMP_FontAsset)) as TMP_FontAsset;
             var source = AssetDatabase.LoadAssetAtPath(SourceFontPath, typeof(Font)) as Font;
             if (table == null || main == null || source == null)
@@ -48,7 +58,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Editor
 
             // 本体フォントに無い文字だけ（フォールバックは見ない）
             var missing = new StringBuilder();
-            foreach (var ch in CollectCharacters(table)) if (!main.HasCharacter(ch, false)) missing.Append(ch);
+            foreach (var ch in CollectCharacters(table, palette)) if (!main.HasCharacter(ch, false)) missing.Append(ch);
             string chars = missing.ToString();
             Debug.Log($"[ThFontExtraMenu] 本体フォントに無い文字 {chars.Length} 個: {chars}");
 

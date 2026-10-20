@@ -56,6 +56,36 @@ namespace STYLY.TIB_Template.TreasureHaul.Prototype
             EditorApplication.EnterPlaymode();
         }
 
+        /// <summary>#43 の結合確認: 運営PC（ホスト）役。練習を長くして、端末がそろったら自動で開始する。何も保存しない。</summary>
+        public static void PlayPracticeHost()
+        {
+            if (!Application.isBatchMode)
+            {
+                Debug.LogWarning("[ProtoBatchRunner] -batchmode でないので何もしません（メインのエディタでシーンを切り替えないため）");
+                return;
+            }
+            EditorSceneManager.OpenScene(OperatorScene, OpenSceneMode.Single);
+            var d = new GameObject("PracticeHostDriver").AddComponent<PracticeHostDriver>();
+            var n = System.Environment.GetEnvironmentVariable("TH_MIN_DEVICES");
+            if (int.TryParse(n, out int min)) d.MinDevices = min;
+            EditorApplication.EnterPlaymode();
+        }
+
+        const string UserScene = "Assets/_Content/TreasureHaul/Scenes/TreasureHaulUserClient.unity";
+
+        /// <summary>#43 の結合確認: 2 台目の端末役。UserClient シーンを Play する（仲間のアバターを見せる）。何も保存しない。</summary>
+        public static void PlayUserClient()
+        {
+            if (!Application.isBatchMode)
+            {
+                Debug.LogWarning("[ProtoBatchRunner] -batchmode でないので何もしません（メインのエディタでシーンを切り替えないため）");
+                return;
+            }
+            EditorSceneManager.OpenScene(UserScene, OpenSceneMode.Single);
+            new GameObject("AvatarWalkDriver").AddComponent<AvatarWalkDriver>();   // アバターの頭・体が動くかを見る
+            EditorApplication.EnterPlaymode();
+        }
+
         public static void PlayNet()
         {
             if (!Application.isBatchMode)
