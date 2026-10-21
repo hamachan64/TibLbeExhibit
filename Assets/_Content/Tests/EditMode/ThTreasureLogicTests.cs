@@ -143,7 +143,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
             CollectionAssert.IsEmpty(c.Validate(), string.Join("\n", c.Validate()));
             Assert.GreaterOrEqual(c.entries.Count(e => e.kind == TreasureKind.S && e.use), 2);
             Assert.GreaterOrEqual(c.entries.Count(e => e.kind == TreasureKind.M && e.use), 1);
-            Assert.AreEqual(2, c.entries.First(e => e.kind == TreasureKind.M).prefab.GetComponent<Treasure>().HandleCount);
+            Assert.IsNotNull(c.entries.First(e => e.kind == TreasureKind.M).prefab.GetComponentInChildren<MeshRenderer>(true));
         }
 
         [Test] public void Validateは欠けと重複を検出する()

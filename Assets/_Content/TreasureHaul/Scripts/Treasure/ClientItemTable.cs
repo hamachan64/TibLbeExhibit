@@ -48,8 +48,8 @@ namespace STYLY.TIB_Template.TreasureHaul
 
         // ---- M（両手で持つ。#40。設計書 4.4 の M の手順）。S では使わない ----
 
-        /// <summary>予約した持ち手の番号（Treasure.Handles の何番目か。-1 = 予約なし）</summary>
-        public int LockHandle = -1;
+        /// <summary>予約したつかむ範囲の番号（Treasure.GrabZones の何番目か。-1 = 予約なし）</summary>
+        public int LockZone = -1;
         /// <summary>予約した手（ThHand。-1 = なし）</summary>
         public int ReserveHand = -1;
         /// <summary>予約が認められた（ThGrabbed の reserve を受けた）</summary>
@@ -59,9 +59,9 @@ namespace STYLY.TIB_Template.TreasureHaul
         public double LiftSentAt;
         /// <summary>予約の承認が届く前に 2 本目の手が握った（承認の瞬間に持ち上げへ進む）</summary>
         public bool LiftQueued;
-        /// <summary>2 本目の手（ThHand。-1 = なし）と、握った持ち手の番号</summary>
+        /// <summary>2 本目の手（ThHand。-1 = なし）と、握ったつかむ範囲の番号</summary>
         public int SecondHand = -1;
-        public int SecondHandle = -1;
+        public int SecondZone = -1;
         /// <summary>予約した手を見失って〔見失い待ち〕の最中（始まった時刻）</summary>
         public bool ReserveLostWait;
         public double ReserveLostSince;
@@ -171,6 +171,8 @@ namespace STYLY.TIB_Template.TreasureHaul
         readonly ThParams _p;
         readonly Bounds _collectBounds;
         readonly List<ClientItem> _items = new List<ClientItem>();
+        // 番号 → お宝。番号は連続しなくてよい（練習用は 100〜）
+        readonly Dictionary<int, ClientItem> _byIndex = new Dictionary<int, ClientItem>();
         readonly Subject<ItemEvent> _events = new Subject<ItemEvent>();
         int _nextReqId;
         bool _noteShown;
@@ -181,27 +183,37 @@ namespace STYLY.TIB_Template.TreasureHaul
         public bool Frozen { get; private set; }
         /// <summary>「ぶつけると値段が下がる」の一文を、この回で出したか（回ごとに 1 回）</summary>
         public bool DamageNoteShown => _noteShown;
-        /// <summary>自分が参加端末で、Playing 中か（つかめる条件。TreasureClient が毎フレーム更新）</summary>
+        /// <summary>
+        /// つかめる局面か（つかめる条件。毎フレーム <see cref="SessionClientCore.UpdateGrabPhase"/> が更新）。
+        /// 本編の表: 自分が参加端末で Playing 中 / 練習用の表: 自分が参加端末で Tutorial 中
+        /// </summary>
         public bool ParticipantPlaying { get; set; }
+        /// <summary>練習用の表か（Tutorial の間だけ。お宝は練習用お宝だけ。減額の報告はしない）</summary>
+        public bool IsPractice { get; }
+        /// <summary>自分に割り当てられた練習用お宝の番号（練習用の表のうち、つかめるのはこれだけ。無ければ -1）</summary>
+        public int PracticeOwnIndex { get; set; } = -1;
 
-        public ClientItemTable(IThTransport tx, Func<long> roundId, Func<int> ownClientNo, ThParams p, ThTreasureSetup setup, IReadOnlyList<SpawnedTreasure> spawned)
+        public ClientItemTable(IThTransport tx, Func<long> roundId, Func<int> ownClientNo, ThParams p, ThTreasureSetup setup, IReadOnlyList<SpawnedTreasure> spawned, bool practice = false)
         {
+            IsPractice = practice;
             _tx = tx; _roundId = roundId; _ownClientNo = ownClientNo; _p = p;
             _collectBounds = setup.CollectBounds;
             foreach (var s in spawned)
             {
                 var rot = Quaternion.Euler(0f, s.YawDegrees, 0f);
-                _items.Add(new ClientItem
+                var row = new ClientItem
                 {
                     Index = s.Index, Kind = s.Kind, BaseValue = s.Value, Value = s.Value, CatalogIndex = s.CatalogIndex,
                     HomePos = s.LocalPosition, HomeRot = rot, RestPos = s.LocalPosition, RestRot = rot,
-                });
+                };
+                _items.Add(row);
+                _byIndex[row.Index] = row;
             }
         }
 
         public void Dispose() => _events.Dispose();
 
-        public ClientItem Get(int index) => index >= 0 && index < _items.Count ? _items[index] : null;
+        public ClientItem Get(int index) => _byIndex.TryGetValue(index, out var it) ? it : null;
 
         public bool InCollectZone(Vector3 localPos) => _collectBounds.Contains(localPos);
 
@@ -209,7 +221,8 @@ namespace STYLY.TIB_Template.TreasureHaul
         public bool IsGrabbable(ClientItem it) =>
             !Frozen && !it.Gone && (it.Kind == TreasureKind.S || it.Kind == TreasureKind.M) && it.State == ItemState.Resting
             && it.OwnerClientNo < 0 && !it.Mine && !it.PendingRest && !it.PendingCollect && !it.ReqPending
-            && !InCollectZone(it.RestPos);
+            && !InCollectZone(it.RestPos)
+            && (!IsPractice || it.Index == PracticeOwnIndex);   // 練習用の表は、自分に割り当てられたお宝だけ
 
         void Send<T>(Rpc rpc, T dto) where T : class => _tx.Send(rpc, ThMessages.Encode(_roundId(), dto));
         void Raise(ClientItem it, ItemEventKind k) => _events.OnNext(new ItemEvent(it, k));
@@ -349,7 +362,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         /// <param name="localPos">当たった点（VenueRoot ローカル）</param>
         public bool TryReportDamage(int index, int otherIndex, Vector3 localPos, float speed, double now = double.MaxValue)
         {
-            if (Frozen || !ParticipantPlaying) return false;
+            if (Frozen || !ParticipantPlaying || IsPractice) return false;   // 練習用お宝は減額しない
             var it = Get(index);
             if (it == null || it.Gone || !it.Mine || !it.Approved) return false;
             if (it.State != ItemState.Held && it.State != ItemState.Falling) return false;

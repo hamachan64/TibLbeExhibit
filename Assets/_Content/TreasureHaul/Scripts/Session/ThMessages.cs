@@ -19,7 +19,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         public string paramsVersion = "";
         /// <summary>ホストの起動ごとに変わる値（起動時の Unix ミリ秒）。運営PCの再起動を端末が見分けて、状況報告を送り直すため</summary>
         public long hostEpoch;
-        /// <summary>練習の色の割り当て（この PR では空。#43 で入れる）。participants と同じ順で色番号</summary>
+        /// <summary>練習の色の割り当て（#43）。participants と同じ順で色番号 0〜3（割り当てのない端末は -1）。Opening の間と古い送り手は空。Tutorial から Result まで載る</summary>
         public int[] tutorialColors = new int[0];
         /// <summary>お宝カタログのハッシュ（ホストの物。端末の物と違えば参加端末から外す）</summary>
         public string catalogHash = "";

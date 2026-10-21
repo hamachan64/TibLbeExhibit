@@ -9,8 +9,8 @@
 
 | | |
 | :--- | :--- |
-| **フェーズ** | 4a オープニング・保留・本編開始・結果（[#42](https://github.com/hamachan64/TibLbeExhibit/issues/42)）の PR [#58](https://github.com/hamachan64/TibLbeExhibit/pull/58) をレビュー中。コア（S・M）の持つ処理は 3c（#41、PR #57）までマージ済み（3b #40・3a #39・2 #38・1 #37・0a #36 も）。**実機は10月中の見込み**なので、それまではエディタ（XRI のシミュレーター・ParrelSync）で検証しながら進める |
-| **次にやること** | PR #58 をマージ → [#43](https://github.com/hamachan64/TibLbeExhibit/issues/43)（練習。荷台前の固定位置・色分け）。並行して [#44](https://github.com/hamachan64/TibLbeExhibit/issues/44)（運営UIの残り・記録 CSV）／ 素材 #46・#47・#48 |
+| **フェーズ** | 4b 練習（[#43](https://github.com/hamachan64/TibLbeExhibit/issues/43)）の PR [#60](https://github.com/hamachan64/TibLbeExhibit/pull/60) をレビュー中。4a（#42、PR #58）までマージ済み（光る持ち手の廃止・高い壁でビームを止める 3d PR #59、3c #41・3b #40・3a #39・2 #38・1 #37・0a #36 も）。回収地点の呼び方は「納品場所」に変えた。**実機は10月中の見込み**なので、それまではエディタ（XRI のシミュレーター・ParrelSync）で検証しながら進める |
+| **次にやること** | PR #60 をマージ。並行して [#44](https://github.com/hamachan64/TibLbeExhibit/issues/44)（運営UIの残り・記録 CSV）／ 素材 #46・#47・#48 |
 | **判断待ち** | 実機の入手（#49・#45 に必要）。U-1 は通し #45 までに必要。ほかは下の「判断待ち」 |
 | **締切** | 内容変更 **10/31**（あと11日）／最終データ 11/16／現地設営 11/17 |
 
@@ -27,8 +27,9 @@
 | 3a | 減額と表示（3回で壊れる） | [#39](https://github.com/hamachan64/TibLbeExhibit/issues/39)（PR [#55](https://github.com/hamachan64/TibLbeExhibit/pull/55)） | ✅ | 2 | 10/24 |
 | 3b | M（両手で持つ） | [#40](https://github.com/hamachan64/TibLbeExhibit/issues/40)（PR [#56](https://github.com/hamachan64/TibLbeExhibit/pull/56)） | ✅ | 3a | 10/25 |
 | 3c | 見失い・手の飛び・そっと置く・持ち主の切断 | [#41](https://github.com/hamachan64/TibLbeExhibit/issues/41)（PR [#57](https://github.com/hamachan64/TibLbeExhibit/pull/57)） | ✅ | 3b | 10/26 |
-| 4a | オープニング・保留・本編開始・結果 | [#42](https://github.com/hamachan64/TibLbeExhibit/issues/42)（PR [#58](https://github.com/hamachan64/TibLbeExhibit/pull/58)） | 👀 | 1（2・3 と並行可） | 10/24〜26 |
-| 4b | 練習（荷台前の固定位置・色分け） | [#43](https://github.com/hamachan64/TibLbeExhibit/issues/43) | ⬜ | 2、4a | 10/27〜28 |
+| 3d | 光る持ち手の廃止（お宝のどこでもつかめる・輪郭が光る）、高い壁でビームを止める | ―（PR [#59](https://github.com/hamachan64/TibLbeExhibit/pull/59)） | ✅ | 3c、ステージ変更の決定（2026-10-21） | 10/21 |
+| 4a | オープニング・保留・本編開始・結果 | [#42](https://github.com/hamachan64/TibLbeExhibit/issues/42)（PR [#58](https://github.com/hamachan64/TibLbeExhibit/pull/58)） | ✅ | 1（2・3 と並行可） | 10/24〜26 |
+| 4b | 練習（納品場所の前の固定位置・色分け） | [#43](https://github.com/hamachan64/TibLbeExhibit/issues/43)（PR [#60](https://github.com/hamachan64/TibLbeExhibit/pull/60)） | 👀 | 2、4a | 10/27〜28 |
 | 5 | 運営UIの残り・記録 CSV | [#44](https://github.com/hamachan64/TibLbeExhibit/issues/44) | ⬜ | 1（並行可） | 10/27〜29 |
 | 6 | 連続稼働・実機での通し → 第1検証 | [#45](https://github.com/hamachan64/TibLbeExhibit/issues/45) | ⬜ | すべて（0b を含む） | 目標 10/30〜31。実機が遅れたら11月初め |
 
@@ -36,7 +37,7 @@
 
 | 内容 | Issue | 状態 | メモ |
 | :--- | :--- | :---: | :--- |
-| お宝・荷台・瓦礫の 3D モデル | [#46](https://github.com/hamachan64/TibLbeExhibit/issues/46) | 🔨 | ブランチ `repo/feature-th-asset-models`。**モデリングは Codex + Blender MCP で行う**（ガードレールは `.codex/README.md`）。CC0 素材の取り込みと権利確認は人が行う。`THIRD_PARTY_NOTICES.md` に記録 |
+| お宝・納品場所・瓦礫の 3D モデル | [#46](https://github.com/hamachan64/TibLbeExhibit/issues/46) | 🔨 | ブランチ `repo/feature-th-asset-models`（worktree `TibLbeExhibit-assets`）。お宝 12 種（持ち手なし）と、高い壁の回廊ステージを Blender で制作済み。モデリングは Opus のサブエージェント、検収はメインのセッション。Unity への取り込みは未実施。`THIRD_PARTY_NOTICES.md` に記録（外部素材なし） |
 | オープニングのナレーション音声 | [#47](https://github.com/hamachan64/TibLbeExhibit/issues/47) | ⬜ | 原稿 `TREASURE_HAUL_NARRATION.md`。音声はユーザーが用意する |
 | 会場レイアウト（Environment） | [#48](https://github.com/hamachan64/TibLbeExhibit/issues/48) | ⬜ | 順4b と同じシーンを触るので同時に作業しない |
 
@@ -59,6 +60,7 @@
 | U-5 | ナレーションの文言（音声はユーザーが用意） | #47 |
 | U-7 | ランキングの単位とリセットの時期 | 追加要素 |
 | U-18 | 番人の石像に見られて動いたときの減らし方 | 追加要素 |
+| U-19 | 荷台（台車。運ぶ補助ツール）をゲームでどう使うか | #46 の後 |
 
 ## 最近決まったこと
 
@@ -68,6 +70,7 @@
 
 - 2026-10-21: ステージを「高い仮想の壁で区切った発掘中の遺跡の内部」に変更（R.E.P.O. の部屋＋家具の作りに寄せる）。お宝は床に直に置かず、祭壇・壁龕・棚・箱などの置き場所に毎回ランダムに置く。見本を見て、壁は 2.4m・天井なし、暗めの廃墟にすること、お宝を作り直すことが決まった。壁越しの仲間の見せ方とお宝の方向性は未定（企画書 7.1・7.2・12章、要件 F-ITEM-2・F-SAFE-2）。
 
+- 2026-10-21（#43）: 回収地点の呼び方を「荷台（搬出リフト）」から**「納品場所」**に変える。荷台（台車）はお宝を運ぶための補助ツールで、ゴールではない（#46 のブランチで制作中。ゲームでの扱いは U-19）。目的の一文は「宝を納品場所まで運ぼう。…」、オープニング字幕 op03 は「お宝を、納品場所まで運び出してくれ。」（U-5 は未決のまま）。コード・シーン上の名前（`CollectZone` 等）と仮の 3D は変えない。練習の案内は、持つ前「持ち手に手を向けて、握ろう」→ 持てたら「納品場所まで運ぼう」→ 範囲に入ったら「納品場所の上で手を開こう」→「+150G！」→ 本編まで「ぶつけると値段が下がる」。10秒のヒントは XR Hands のサンプルの手のモデルで「開く⇄握る」。色の割り当ては、端末番号の対応表（#44）ができるまで DeviceId の文字列順。仲間のアバターは、STYLY のアバターと同じ見た目のまま色を付ける（同じ計算の自作シェーダー `TIB/AvatarTint`。元のアバターも中央は不透明なので、本物の人との重なり方は実機で見る）。持ち手の廃止は別の担当者が進めている（#43 では持ち手に新しく頼らない）。企画書 5.5・12章、要件 F-TUT-3/7・U-19、設計書 3.4、ナレーション原稿、`THIRD_PARTY_NOTICES.md` を更新。
 - 2026-10-21（#42）: 結果画面は「回収額／目標額」と「クリア・失敗」（届かなければ「あと N G でクリア」）だけ。「一番高かったお宝」「損害額」は出さない（U-9 は不要に）。目標額は本編中ずっと手元の帯（「残り 2:15 ／ 目標 2,500G」）に出し、届いた瞬間に全員へ「目標達成！」。体験者に見せる文字は頭について来る小さな面に出す。荷台の光と「ここへ運ぼう」はやめる（練習を荷台の前でやるので場所は伝わる。第1検証で迷う人がいたら足す）。保留は練習中だけで、合計が〔保留の上限〕で自動解除。オープニングの字幕はナレーション原稿の案を仮に入れた（U-5 は未決のまま）。企画書 4.2・4.3・5.4・5.7、要件 F-TUT-1・F-SCORE-2〜5、設計書 3.2・5章・9章を更新。
 - 2026-10-20（#41）: M を両手で持っていて**両手とも見失った**とき（猶予の間に残った手も見失ったときを含む）は、S と同じく〔見失い待ち〕。両手とも握ったまま戻れば持ち続け、どちらかが開いて戻るか時間切れならそっと置く。見失い待ち・そっと置くは持ち主の端末だけの状態（ホストは Held のまま、免除は `ThPoses` の `exempt` と `ThDamage` の `exemptA`）。持ち主の切断では、運営PCが最後に受けた位置から降ろす先を Raycast で決めて `ThForceRest` に載せる。開いて戻ったかは〔離す判定〕の間で見る。企画書 5.2・要件 F-GRAB-4・設計書 4.2/4.3/5章を更新。
 - 2026-10-20（#40）: M を両手で持った後に片手が外れたら、猶予の間に**その手でもう一度握れば**両手に戻る（ビームの当て直しは要らない）。片手を見失って猶予が切れたときは、#41 で Placing を作るまでは**落とす**扱い。「両手で持とう」は頭から M までの**水平の距離**で〔ビームの距離〕以内。企画書 5.2・要件 F-GRAB-4/F-ITEM-5・設計書 4.2/4.4 を更新。

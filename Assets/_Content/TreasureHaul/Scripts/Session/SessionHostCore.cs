@@ -78,8 +78,20 @@ namespace STYLY.TIB_Template.TreasureHaul
         public HostItemTable Items => _items;
         /// <summary>本編で作った配置の指紋（ホストと端末で同じことを突き合わせる用のログ）</summary>
         public string SpawnFingerprint { get; private set; } = "";
-        /// <summary>回収した合計額</summary>
+        /// <summary>回収した合計額（本編のお宝だけ。練習用は入れない）</summary>
         public int TotalAmount => _items?.Total ?? 0;
+
+        // 練習（#43）
+        HostItemTable _practice;
+        readonly Dictionary<string, int> _colors = new Dictionary<string, int>();
+        long _colorsRound;
+        readonly Dictionary<string, double> _practiceDoneAt = new Dictionary<string, double>();
+        /// <summary>練習用お宝の状態表（Tutorial の間だけ。それ以外は null）</summary>
+        public HostItemTable PracticeItems => _practice;
+        /// <summary>DeviceId → 色番号（Opening → Tutorial で割り当て、その回の結果まで持つ。Waiting・新しい「開始」で消える。#44 が使う）</summary>
+        public IReadOnlyDictionary<string, int> ColorAssignments => _colors;
+        /// <summary>練習用お宝を回収した端末の DeviceId → 時刻（Tick の now。1 回だけ記録。Waiting・新しい「開始」で消える。#44 の記録の材料）</summary>
+        public IReadOnlyDictionary<string, double> PracticeCompletedAt => _practiceDoneAt;
 
         public SessionHostCore(IThTransport tx, ThParamsLoadResult initialParams, ThGameSettings settings, IEnumerable<string> settingsWarnings = null, long hostEpoch = 0, Func<int, string> resolveDeviceId = null, ThTreasureSetup treasureSetup = null, Func<Vector3, Vector3> placeSolver = null)
         {
@@ -151,6 +163,12 @@ namespace STYLY.TIB_Template.TreasureHaul
                 _items.ReleaseReservationsOf(deviceId);
                 _items.ForceRestItemsOf(deviceId, now);
             }
+            // 練習中に切れた端末の練習用お宝も、その場にそっと置かせる（置いた後は _practice.Tick が、範囲外ならつかめるに戻し、範囲内なら回収する）
+            else if (_practice != null && Machine.State == RoundState.Tutorial)
+            {
+                _practice.ReleaseReservationsOf(deviceId);
+                _practice.ForceRestItemsOf(deviceId, now);
+            }
             Refresh(now);
         }
 
@@ -159,6 +177,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         public bool Start(double now, long unixMs, int seed)
         {
             if (!Machine.TryStart(now, unixMs, seed)) return false;
+            ClearPracticeRound();
             // 版が違う端末にはその場で ThParams を送り直す（N-7）
             foreach (var d in Registry.Devices)
                 if (d.Connected && d.ParamsVersion != ParamsVersion && Due(_lastParamsSentAt, d.DeviceId, now)) SendParams(d.ClientNo);
@@ -221,12 +240,12 @@ namespace STYLY.TIB_Template.TreasureHaul
                 }));
             }
             _items?.Tick(now, Machine.State == RoundState.Playing);   // そっと置かせたお宝を、〔置く時間〕の後につかめる／回収にする
-            if (_items != null && _items.Items.Count > 0
-                && (Machine.State == RoundState.Tutorial || Machine.State == RoundState.Playing)
-                && now - _lastItemsSentAt >= Params.progress.itemsInterval)
+            _practice?.Tick(now, Machine.State == RoundState.Tutorial);
+            var sendTable = Machine.State == RoundState.Tutorial ? _practice : Machine.State == RoundState.Playing ? _items : null;
+            if (sendTable != null && sendTable.Items.Count > 0 && now - _lastItemsSentAt >= Params.progress.itemsInterval)
             {
                 _lastItemsSentAt = now;
-                _tx.Send(Rpc.ThItems, ThMessages.Encode(Machine.RoundId, _items.BuildItems()));
+                _tx.Send(Rpc.ThItems, ThMessages.Encode(Machine.RoundId, sendTable.BuildItems()));
             }
             Refresh(now);
         }
@@ -242,48 +261,55 @@ namespace STYLY.TIB_Template.TreasureHaul
                 || rpc == Rpc.ThDamage || rpc == Rpc.ThPoses) HandleItemMessage(rpc, senderClientNo, args, now);
         }
 
-        /// <summary>お宝のメッセージ（設計書 6.1）。RoundId・送り手が今の参加端末・本編（Playing）中のときだけ。</summary>
+        /// <summary>
+        /// お宝のメッセージ（設計書 6.1）。RoundId・送り手が今の参加端末のときだけ。
+        /// Playing 中は本編の表、Tutorial 中は練習用の表（ThGrab・ThRelease・ThRest・ThCollect・ThPoses だけ。ThDamage・ThLift は捨てる）。
+        /// </summary>
         void HandleItemMessage(Rpc rpc, int sender, string[] args, double now)
         {
-            if (_items == null || Machine.State != RoundState.Playing) return;
+            HostItemTable table;
+            if (Machine.State == RoundState.Playing) table = _items;
+            else if (Machine.State == RoundState.Tutorial && rpc != Rpc.ThDamage && rpc != Rpc.ThLift) table = _practice;
+            else return;
+            if (table == null) return;
             string device;
             switch (rpc)
             {
                 case Rpc.ThGrab:
                     if (!ThMessages.TryDecode(args, out long r1, out ThGrabMsg grab) || !Gate.Accept(r1, sender)) return;
                     device = Registry.GetDeviceId(sender);
-                    _items.OnGrab(device, sender, grab);
+                    table.OnGrab(device, sender, grab);
                     break;
                 case Rpc.ThLift:
                     if (!ThMessages.TryDecode(args, out long r7, out ThLiftMsg lift) || !Gate.Accept(r7, sender)) return;
                     device = Registry.GetDeviceId(sender);
-                    _items.OnLift(device, sender, lift);
+                    table.OnLift(device, sender, lift);
                     break;
                 case Rpc.ThRelease:
                     if (!ThMessages.TryDecode(args, out long r2, out ThReleaseMsg rel) || !Gate.Accept(r2, sender)) return;
                     device = Registry.GetDeviceId(sender);
-                    _items.OnRelease(device, rel);
+                    table.OnRelease(device, rel);
                     break;
                 case Rpc.ThRest:
                     if (!ThMessages.TryDecode(args, out long r3, out ThRestMsg rest) || !Gate.Accept(r3, sender)) return;
                     device = Registry.GetDeviceId(sender);
-                    _items.OnRest(device, rest);
+                    table.OnRest(device, rest, now);
                     break;
                 case Rpc.ThCollect:
                     if (!ThMessages.TryDecode(args, out long r4, out ThCollectMsg col) || !Gate.Accept(r4, sender)) return;
                     device = Registry.GetDeviceId(sender);
-                    _items.OnCollect(device, col);
+                    table.OnCollect(device, col, now);
                     break;
                 case Rpc.ThDamage:
                     if (!ThMessages.TryDecode(args, out long r5, out ThDamageMsg dmg) || !Gate.Accept(r5, sender)) return;
                     device = Registry.GetDeviceId(sender);
-                    _items.OnDamage(device, dmg, now);
+                    table.OnDamage(device, dmg, now);
                     break;
                 case Rpc.ThPoses:
                     // 位置は端末どうしで補間する。ホストは減額の免除の報告だけを読む
                     if (!ThMessages.TryDecode(args, out long r6, out ThPosesMsg poses) || !Gate.Accept(r6, sender)) return;
                     device = Registry.GetDeviceId(sender);
-                    _items.OnPoses(device, poses);
+                    table.OnPoses(device, poses);
                     break;
             }
         }
@@ -325,6 +351,7 @@ namespace STYLY.TIB_Template.TreasureHaul
 
         void SendState(double now)
         {
+            SyncItems();   // 遷移した直後の ThState に、色の割り当て・状態表が間に合うように
             var m = Machine;
             _tx.Send(Rpc.ThState, ThMessages.Encode(m.RoundId, new ThStateMsg
             {
@@ -336,7 +363,7 @@ namespace STYLY.TIB_Template.TreasureHaul
                 settings = Settings,
                 paramsVersion = ParamsVersion,
                 hostEpoch = HostEpoch,
-                tutorialColors = new int[0],
+                tutorialColors = PracticeColors.ToArray(m.Participants, _colors),
                 catalogHash = Registry.HostCatalogHash,
                 held = m.IsHeld,
                 target = TargetAmount,
@@ -402,6 +429,24 @@ namespace STYLY.TIB_Template.TreasureHaul
         void SyncItems()
         {
             var st = Machine.State;
+            // 練習: Tutorial に入ったら色を割り当て、練習用の表を作る。Tutorial を出たら表を捨てる（色は結果まで持つ）
+            if (st == RoundState.Waiting) ClearPracticeRound();
+            else if (st == RoundState.Tutorial && _colorsRound != Machine.RoundId)
+            {
+                _colors.Clear();
+                foreach (var kv in PracticeColors.Assign(Machine.Participants)) _colors[kv.Key] = kv.Value;
+                _colorsRound = Machine.RoundId;
+            }
+            if (st == RoundState.Tutorial && _practice == null && _setup != null && _setup.PracticeSlots.Count > 0 && _colorsRound == Machine.RoundId)
+            {
+                BuildPractice();
+                _lastItemsSentAt = double.NegativeInfinity;
+            }
+            else if (st != RoundState.Tutorial && _practice != null)
+            {
+                _practice = null;
+                _lastItemsSentAt = double.NegativeInfinity;
+            }
             if (st == RoundState.Waiting)
             {
                 _items = null;
@@ -420,6 +465,41 @@ namespace STYLY.TIB_Template.TreasureHaul
                 _itemsRound = Machine.RoundId;
                 _lastItemsSentAt = double.NegativeInfinity;
             }
+        }
+
+        /// <summary>色の割り当て・練習用の表・練習完了の記録を消す（待機に戻ったとき・新しい「開始」）</summary>
+        void ClearPracticeRound()
+        {
+            _colors.Clear();
+            _colorsRound = 0;
+            _practiceDoneAt.Clear();
+            _practice = null;
+        }
+
+        /// <summary>割り当てのある色ごとに、練習用お宝（番号 100＋色番号、S、練習お宝の価値、その色の TutorialSlot の位置）を 1 つ作る</summary>
+        void BuildPractice()
+        {
+            var spawned = new List<SpawnedTreasure>();
+            var deviceOf = new Dictionary<int, string>();
+            foreach (var kv in _colors) deviceOf[kv.Value] = kv.Key;
+            for (int color = 0; color < ThPractice.MaxColors && color < _setup.PracticeSlots.Count; color++)
+            {
+                if (!deviceOf.ContainsKey(color)) continue;
+                var slot = _setup.PracticeSlots[color];
+                spawned.Add(new SpawnedTreasure
+                {
+                    Index = ThPractice.IndexOf(color), Kind = TreasureKind.S, Value = Params.practice.practiceValue,
+                    PointIndex = -1, LocalPosition = slot.LocalPosition, YawDegrees = slot.YawDegrees, CatalogIndex = -1,
+                });
+            }
+            _practice = new HostItemTable(spawned, _setup.CollectBounds, (rpc, dto) => _tx.Send(rpc, ThMessages.EncodeObject(Machine.RoundId, dto)),
+                deviceId => Registry.Get(deviceId)?.ClientNo ?? -1, Params.treasure, Params.grip.placeSeconds, practiceTable: true);
+            if (_placeSolver != null) _practice.PlaceSolver = _placeSolver;
+            foreach (var it in _practice.Items) it.PracticeDevice = deviceOf[ThPractice.ColorOf(it.Index)];
+            _practice.PracticeCollected = (device, at) =>
+            {
+                if (!string.IsNullOrEmpty(device) && !_practiceDoneAt.ContainsKey(device)) _practiceDoneAt[device] = at;   // 1 回だけ
+            };
         }
 
         /// <summary>カタログのハッシュが合わない端末の警告を、起動時の警告に足す（運営UIに出る）</summary>

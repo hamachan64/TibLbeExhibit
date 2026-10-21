@@ -465,3 +465,20 @@
 - **シーンの YAML の差分で、オブジェクトが消えたように見えることがある**（uloop で編集して保存すると、ブロックの並びが変わる）。差分の `-` だけで判断せず、新しいファイルに `m_Name:` が残っているかを数えて確かめる。
 - 頭について来る面は XRI の `LazyFollow`（`UnityEngine.XR.Interaction.Toolkit.UI`）で作れる。`TibLbeExhibit.TreasureHaul.asmdef` に `Unity.XR.Interaction.Toolkit` の参照が要る。エディタの Game View は縦長で水平の視野が狭いので、面の幅の見え方は実機で確かめる。
 - 毎フレーム `ThTextTable.Format` を呼ぶと、`params object[]` とボクシングで GC が出続ける。表示に関わる値が前のフレームと同じなら組み立てを飛ばす。
+
+## 光る持ち手の廃止・高い壁でビームを止める（PR #59、2026-10-21）で分かったこと
+- **太さなしの Raycast は、始点を内側に含むコライダーに当たらない**。仮想の壁は体で通り抜けられるので、手のひらが壁の中や壁の向こうにあると、手のひらから撃つ壁の判定が素通りする。`CheckSphere(手のひら)` と、肩から手のひらへの `Linecast` で別に確かめる（`HandGrabber.IsHandBehindWall`）。
+- **SphereCast の `hit.distance` は球の中心が進んだ距離**で、触れた点より最大で半径ぶん手前の値になる。太さなしの壁の距離と比べると、薄い壁の裏に接した物が壁越しに選ばれる。候補ごとに、`ClosestPoint` で求めた点までの `Linecast` で壁を確かめる。
+- **同じ Rigidbody に付けた子のトリガーは、`SweepTest(QueryTriggerInteraction.Ignore)` にも質量・慣性にも入らない**。つかむ範囲を実行時に子のトリガーとして足しても、持っている物の追従や衝突には影響しない。
+- **背面法の輪郭は、角張った低ポリゴンのモデルを法線で押し出すと角に隙間が出る**。「メッシュの中心 → 頂点」の向きで押し出すと隙間が出にくい。ただし肉の薄い器では、内側の面が外へ出て筋が見えることがある。
+- **uloop-execute-dynamic-code では `AssetDatabase.DeleteAsset` が `DangerousApiCall` として拒否される**。アセットを消す必要があるときは、人に Unity 上で消してもらう（迂回しない）。
+- uloop で編集していると、関係のないマテリアル（例: `M_Prop_Lantern.mat` の `_EMISSION`）が再インポートで書き換わることがある。コミット前に `git status` で範囲外の変更を見つけ、`git checkout --` で戻す。
+
+## 練習・色分け（Issue #43、2026-10-21）で分かったこと
+- **STYLY のアバターのシェーダー（`Shader Graphs/Avatar`）には色の項目が無い**（`_thickness`・`_power` だけ。色は固定値と頂点カラー）。`MaterialPropertyBlock` だけでは塗れない。塗るときは同じ計算を再現した自作シェーダー（`TIB/AvatarTint`）へ塗る間だけ差し替える。**不透明の URP Lit に替えてはいけない**: 見た目が STYLY のアバターから変わり、MR では本物の人を覆う。なお元のアバターも、既定の `_thickness`=3 では中央が不透明（縁だけ透ける）。
+- 手書きの URP シェーダーで元の Shader Graph を再現するときは、ShadowCaster パス（元が影を落とすなら）、ステレオの記述（`UNITY_VERTEX_OUTPUT_STEREO` ほか）、`UnityPerMaterial` の CBUFFER、透明なら `_SURFACE_TYPE_TRANSPARENT`、Unity 6 の柔らかい影のキーワード（`_SHADOWS_SOFT_LOW/MEDIUM/HIGH`）、`_BlendModePreserveSpecular` の扱いまで合わせる（独立レビューで指摘された）。
+- `STYLY Default Avatar A 1` は `BodyTransformSolver.netSyncAvatar` が設定済みで、体は頭について動く（前の版 `A` の不具合は `A 1` では起きない）。
+- 練習のように「Tutorial だけの表」と「本編の表」を分けると、切断時の後片付け（`ForceRestItemsOf`）や Result の取りこぼし（Tutorial → Result に飛ぶ）が片方の表にしか効かない漏れが出やすい。状態ごとに「どの表が生きているか」を必ず確かめる。
+- 案内の段階を「持っているか」で決めるときは、手を開いた後の落下中・回収の承認待ちを「持っている」の続きとして扱わないと、成功の直前に1段目の案内がちらつく。
+- uloop の `run-tests` は、コンパイル直後だと Domain Reload 中で失敗する（JSON でなく「Unity is reloading」を返す）。少し待って再実行する。
+- 実装エージェントが ParrelSync 用に作ったクローン（`TibLbeExhibit_clone_1`）は、guard により `rm` で消せない。後片付けは人に頼む。

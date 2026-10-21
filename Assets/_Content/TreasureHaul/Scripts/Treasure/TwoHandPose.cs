@@ -4,7 +4,7 @@ namespace STYLY.TIB_Template.TreasureHaul
 {
     /// <summary>
     /// M を両手で持つときの目標の位置・向き（純粋。設計書 4.3）。
-    /// 位置は両手の中点。向きは、お宝の「予約した持ち手 → もう一方の持ち手」の向きを「予約した手 → もう一方の手」の向きに合わせ、
+    /// 位置は両手の中点。向きは、お宝の「予約したつかむ範囲 → もう一方のつかむ範囲」の向きを「予約した手 → もう一方の手」の向きに合わせ、
     /// お宝の上はできるだけ真上（両手を結ぶ線の回りにねじれない）にする。
     /// </summary>
     public static class TwoHandPose
@@ -14,9 +14,9 @@ namespace STYLY.TIB_Template.TreasureHaul
 
         /// <param name="reserveHand">予約した手の位置（ワールド）</param>
         /// <param name="secondHand">もう一方の手の位置（ワールド）</param>
-        /// <param name="axisLocal">お宝のローカルで「予約した持ち手 → もう一方の持ち手」のベクトル</param>
+        /// <param name="axisLocal">お宝のローカルで「予約したつかむ範囲 → もう一方のつかむ範囲」のベクトル</param>
         /// <param name="rotation">お宝の向き（ワールド）</param>
-        /// <returns>決められたら true（手が重なっている・持ち手が重なっているときは false）</returns>
+        /// <returns>決められたら true（手が重なっている・つかむ範囲が重なっているときは false）</returns>
         public static bool TrySolve(Vector3 reserveHand, Vector3 secondHand, Vector3 axisLocal, out Quaternion rotation)
         {
             rotation = Quaternion.identity;

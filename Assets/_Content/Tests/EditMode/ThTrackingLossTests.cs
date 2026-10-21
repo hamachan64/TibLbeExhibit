@@ -148,7 +148,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
                 Assert.IsTrue(Table.TryBeginGrab(i, t));
                 Table.OnGrabbed(new ThGrabbedMsg { item = i, clientNo = Own, reqId = It(i).MyReqId, gen = 1, value = 200 }, t + 0.05);
             }
-            /// <summary>M を両手で持つ（左手=持ち手0 で予約、右手=持ち手1 で両手成立）</summary>
+            /// <summary>M を両手で持つ（左手=つかむ範囲0 で予約、右手=つかむ範囲1 で両手成立）</summary>
             public void HoldM(double t = 0)
             {
                 Assert.IsTrue(Table.TryBeginLock(0, ThHand.Left, 0, t));
