@@ -28,8 +28,10 @@ namespace STYLY.TIB_Template.TreasureHaul
         public bool Gone;
         public Vector3 RestPos;
         public Quaternion RestRot = Quaternion.identity;
-        /// <summary>練習用か（#43 から。#38 では常に false）</summary>
+        /// <summary>練習用か（#43。練習用の表の行は true。練習用の表以外では、つかむ・回収・減額の対象にしない）</summary>
         public bool Practice;
+        /// <summary>練習用お宝を割り当てられた端末の DeviceId（つかめるのはこの端末だけ）</summary>
+        public string PracticeDevice;
         /// <summary>判定役から報告された減額の免除（ThPoses の exempt。設計書 5章）。持ち主が替わる・つかめるに戻る・回収・消滅で false に戻す</summary>
         public bool ExemptReported;
         /// <summary>判定役から最後に受けた位置・向き（ThPoses。VenueRoot ローカル）。持ち主の切断で降ろす先を決める元（#41）。HasLastPos=false なら置き位置を使う</summary>
@@ -52,6 +54,9 @@ namespace STYLY.TIB_Template.TreasureHaul
     public sealed class HostItemTable
     {
         readonly List<HostItem> _items = new List<HostItem>();
+        // 番号 → 行。番号は連続しなくてよい（練習用は 100〜）
+        readonly Dictionary<int, HostItem> _byIndex = new Dictionary<int, HostItem>();
+        readonly bool _practiceTable;
         readonly Bounds _collectBounds;
         readonly ThEmit _emit;
         readonly System.Func<string, int> _clientNoOf;
@@ -63,6 +68,10 @@ namespace STYLY.TIB_Template.TreasureHaul
         readonly Dictionary<long, double> _lastDamageAt = new Dictionary<long, double>();
 
         public IReadOnlyList<HostItem> Items => _items;
+        /// <summary>練習用の表か（Tutorial の間だけホストが持つ。行はすべて練習用で、回収しても合計額（Total）は変わらない）</summary>
+        public bool IsPracticeTable => _practiceTable;
+        /// <summary>練習用お宝を回収した（DeviceId = 割り当てられた端末、now）。1 つの練習用お宝につき 1 回だけ</summary>
+        public System.Action<string, double> PracticeCollected { get; set; }
         /// <summary>回収した合計額（本編のお宝だけ）</summary>
         public int Total { get; private set; }
         /// <summary>適用した減額の合計（回ごと。#42 の「今回の損害」、#44 の記録の材料。表示は作らない）</summary>
@@ -77,8 +86,9 @@ namespace STYLY.TIB_Template.TreasureHaul
         void LogLine(string s) => Log?.Invoke("[HostDamage] " + s);
 
         /// <param name="clientNoOf">DeviceId から今の ClientNo を引く（再接続で ClientNo が付け替わっても ThGrabbed・ThItems に今の番号を載せるため）。引けなければ -1 を返す</param>
-        public HostItemTable(IReadOnlyList<SpawnedTreasure> spawned, Bounds collectBounds, ThEmit emit, System.Func<string, int> clientNoOf = null, ThTreasureParams treasureParams = null, float placeSeconds = 0.3f)
+        public HostItemTable(IReadOnlyList<SpawnedTreasure> spawned, Bounds collectBounds, ThEmit emit, System.Func<string, int> clientNoOf = null, ThTreasureParams treasureParams = null, float placeSeconds = 0.3f, bool practiceTable = false)
         {
+            _practiceTable = practiceTable;
             _tp = treasureParams ?? new ThTreasureParams();
             _placeSeconds = placeSeconds;
             _clientNoOf = clientNoOf;
@@ -86,19 +96,25 @@ namespace STYLY.TIB_Template.TreasureHaul
             _emit = emit;
             foreach (var s in spawned)
             {
-                _items.Add(new HostItem
+                var row = new HostItem
                 {
+                    Practice = practiceTable,
                     Index = s.Index,
                     Kind = s.Kind,
                     BaseValue = s.Value,
                     Value = s.Value,
                     RestPos = s.LocalPosition,
                     RestRot = Quaternion.Euler(0f, s.YawDegrees, 0f),
-                });
+                };
+                _items.Add(row);
+                _byIndex[row.Index] = row;
             }
         }
 
-        public HostItem Get(int index) => index >= 0 && index < _items.Count ? _items[index] : null;
+        public HostItem Get(int index) => _byIndex.TryGetValue(index, out var it) ? it : null;
+
+        /// <summary>練習用でない表では練習用の行を扱わない（練習用の表の行は扱う）</summary>
+        bool Blocked(HostItem it) => it.Practice && !_practiceTable;
 
         public bool InCollectZone(Vector3 localPos) => _collectBounds.Contains(localPos);
 
@@ -126,7 +142,8 @@ namespace STYLY.TIB_Template.TreasureHaul
             bool kindOk = (it.Kind == TreasureKind.S && m.kind == (int)TreasureKind.S) || (it.Kind == TreasureKind.M && m.kind == (int)TreasureKind.M);
             bool ok = !it.Gone
                 && kindOk
-                && !it.Practice
+                && !Blocked(it)
+                && (!it.Practice || it.PracticeDevice == deviceId)   // 練習用は割り当てられた端末だけ
                 && it.State == ItemState.Resting
                 && !InCollectZone(it.RestPos);
             if (!ok)
@@ -232,7 +249,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             foreach (var it in _items)
             {
                 if (it.Gone || it.State != ItemState.Placing || now - it.PlaceSince < _placeSeconds) continue;
-                if (playing && !it.Practice && InCollectZone(it.RestPos)) Collect(it);   // 練習用は回収しない（合計に入れない）
+                if (playing && !Blocked(it) && InCollectZone(it.RestPos)) Collect(it, now);   // 練習用の行は、練習用の表の中だけ回収する（合計に入れない）
                 else FreeToRest(it);
             }
         }
@@ -298,31 +315,31 @@ namespace STYLY.TIB_Template.TreasureHaul
         }
 
         /// <summary>判定役の「止まった」。世代が一致すれば 1 回だけ受理（受理すると世代が進むので、送り直しは世代違いで捨てられる）</summary>
-        public void OnRest(string deviceId, ThRestMsg m)
+        public void OnRest(string deviceId, ThRestMsg m, double now = 0)
         {
             var it = Get(m.item);
-            if (it == null || it.Gone || it.Practice) return;
+            if (it == null || it.Gone || Blocked(it)) return;
             if (it.ControllerDevice != deviceId || m.gen != it.Gen) return;
             if (it.State != ItemState.Held && it.State != ItemState.Falling) return;
             it.RestPos = m.pos;
             it.RestRot = m.rot;
             // 荷台の回収範囲の中に置かれた（落下が止まった）なら、回収として扱う
-            if (InCollectZone(m.pos)) { Collect(it); return; }
+            if (InCollectZone(m.pos)) { Collect(it, now); return; }
             FreeToRest(it);
         }
 
         // ---- 回収 ----
 
-        public void OnCollect(string deviceId, ThCollectMsg m)
+        public void OnCollect(string deviceId, ThCollectMsg m, double now = 0)
         {
             var it = Get(m.item);
-            if (it == null || it.Gone || it.Practice) return;
+            if (it == null || it.Gone || Blocked(it)) return;
             if (it.ControllerDevice != deviceId || m.gen != it.Gen) return;
             if (it.State != ItemState.Held && it.State != ItemState.Falling && it.State != ItemState.Resting) return;
-            Collect(it);
+            Collect(it, now);
         }
 
-        void Collect(HostItem it)
+        void Collect(HostItem it, double now)
         {
             it.Gone = true;
             it.State = ItemState.Collected;
@@ -330,8 +347,9 @@ namespace STYLY.TIB_Template.TreasureHaul
             it.OwnerClientNo = -1;
             it.ExemptReported = false;
             it.Gen++;
-            Total += it.Value;
+            if (!it.Practice) Total += it.Value;   // 練習用は合計額に入れない（ThCollected の total は本編の合計のまま）
             _emit(Rpc.ThCollected, new ThCollectedMsg { item = it.Index, gen = it.Gen, total = Total, value = it.Value, damaged = it.Value < it.BaseValue });
+            if (it.Practice) PracticeCollected?.Invoke(it.PracticeDevice, now);
         }
 
         // ---- 免除の報告（ThPoses） ----

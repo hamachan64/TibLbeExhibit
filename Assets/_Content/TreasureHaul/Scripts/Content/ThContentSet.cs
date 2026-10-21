@@ -5,7 +5,7 @@ namespace STYLY.TIB_Template.TreasureHaul
 {
     /// <summary>
     /// 見た目・音・文言のまとめ役。SessionHost / SessionClient がこれ 1 つを持つ。
-    /// プレーヤーの色（#43）は、後からここに足す。
+    /// プレーヤーの色（#43）は palette。
     /// </summary>
     [CreateAssetMenu(fileName = "ThContentSet", menuName = "Treasure Haul/Content Set")]
     public sealed class ThContentSet : ScriptableObject
@@ -14,6 +14,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         public ThAudioCatalog audio;
         public ThFxCatalog fx;
         public ThTreasureCatalog treasures;
+        [Tooltip("プレーヤーの色（#43。ビーム・仲間のアバター・練習用お宝の色と記号）")] public ThPlayerPalette palette;
 
         /// <summary>重複・欠けの一覧（空なら問題なし）</summary>
         public List<string> Validate()
@@ -23,6 +24,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             if (audio == null) errors.Add("ThAudioCatalog が未設定"); else errors.AddRange(audio.Validate());
             if (fx == null) errors.Add("ThFxCatalog が未設定"); else errors.AddRange(fx.Validate());
             if (treasures == null) errors.Add("ThTreasureCatalog が未設定"); else errors.AddRange(treasures.Validate());
+            if (palette == null) errors.Add("ThPlayerPalette が未設定"); else errors.AddRange(palette.Validate());
             return errors;
         }
 

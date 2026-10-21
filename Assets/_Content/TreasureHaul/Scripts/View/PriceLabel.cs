@@ -42,9 +42,24 @@ namespace STYLY.TIB_Template.TreasureHaul
             return label;
         }
 
+        bool _fixed;
+
+        /// <summary>
+        /// 値段ではない固定の文字を出す札にする（練習用お宝の記号・「あなたの」。以後 <see cref="SetState"/> は何もしない）。
+        /// 色付きの記号は TMP のリッチテキスト（&lt;color=#RRGGBB&gt;）で入れる。
+        /// </summary>
+        public void SetFixedText(string text, float fontSize)
+        {
+            _fixed = true;
+            _tmp.text = text;
+            _tmp.fontSize = fontSize;
+            _tmp.richText = true;
+        }
+
         /// <summary>値札を更新する（変化したときだけ文字を作り直す）</summary>
         public void SetState(bool revealed, int value)
         {
+            if (_fixed) return;
             if (_hasState && revealed == _lastRevealed && (!revealed || value == _lastValue)) return;
             _hasState = true;
             _lastRevealed = revealed;

@@ -14,12 +14,14 @@ namespace STYLY.TIB_Template.TreasureHaul
         [SerializeField, Tooltip("配置候補点（並びは全端末で同じになるよう、ここで固定する）")] List<ThPlacementPoint> _points = new List<ThPlacementPoint>();
         [SerializeField, Tooltip("荷台の上の回収範囲（トリガー。VenueRoot に対して回転させない）")] BoxCollider _collectZone;
         [SerializeField, Tooltip("荷台の表示板")] CargoBoardView _board;
+        [SerializeField, Tooltip("練習用お宝の置き場所（色番号 0〜3 の 4 つ。納品場所の前）")] List<ThTutorialSlot> _tutorialSlots = new List<ThTutorialSlot>();
 
         public static ThVenue Instance { get; private set; }
 
         public Transform Root => _root != null ? _root : transform;
         public CargoBoardView Board => _board;
         public int PlacementPointCount => _points.Count;
+        public int TutorialSlotCount => _tutorialSlots.Count;
 
         void Awake() => Instance = this;
         void OnDestroy() { if (Instance == this) Instance = null; }
@@ -43,7 +45,27 @@ namespace STYLY.TIB_Template.TreasureHaul
         }
 
         /// <summary>パラメータの組み合わせ検査用（配置候補点の数）</summary>
-        public ThEnvironmentInfo CreateEnvironmentInfo() => new ThEnvironmentInfo { PlacementPointCount = _points.Count };
+        public ThEnvironmentInfo CreateEnvironmentInfo() => new ThEnvironmentInfo { PlacementPointCount = _points.Count, TutorialSlotCount = _tutorialSlots.Count };
+
+        /// <summary>練習用お宝の置き場所（色番号 → VenueRoot ローカルの位置・向き（Y 回転））。色番号の順に並べる。枠が 4 つに満たない・色番号が重なる・欠けるときは空（練習用お宝を作らない）</summary>
+        public IReadOnlyList<PracticeSlot> GetPracticeSlots()
+        {
+            var slots = new PracticeSlot?[ThPractice.MaxColors];
+            foreach (var s in _tutorialSlots)
+            {
+                if (s == null || s.ColorIndex < 0 || s.ColorIndex >= slots.Length || slots[s.ColorIndex].HasValue) return new PracticeSlot[0];
+                var local = Root.InverseTransformPoint(s.transform.position);
+                var fwd = Root.InverseTransformDirection(s.transform.forward);
+                slots[s.ColorIndex] = new PracticeSlot(new Vector3(local.x, 0f, local.z), Mathf.Atan2(fwd.x, fwd.z) * Mathf.Rad2Deg);
+            }
+            var list = new List<PracticeSlot>(slots.Length);
+            foreach (var s in slots)
+            {
+                if (!s.HasValue) return new PracticeSlot[0];
+                list.Add(s.Value);
+            }
+            return list;
+        }
 
         public ThTreasureSetup CreateSetup(ThTreasureCatalog catalog) => new ThTreasureSetup
         {
@@ -51,6 +73,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             Catalog = catalog != null ? catalog.ToSpawnEntries() : new List<SpawnCatalogEntry>(),
             CollectBounds = GetCollectBounds(),
             CatalogHash = catalog != null ? catalog.ComputeHash() : "",
+            PracticeSlots = GetPracticeSlots(),
         };
     }
 }

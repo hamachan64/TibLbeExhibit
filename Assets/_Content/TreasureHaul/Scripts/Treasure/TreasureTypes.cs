@@ -52,6 +52,27 @@ namespace STYLY.TIB_Template.TreasureHaul
         public PlacementPoint(Vector3 localPosition, int band) { LocalPosition = localPosition; Band = band; }
     }
 
+    /// <summary>練習用お宝の番号の約束（ホスト・端末・テストが同じ物を使う）。番号は <see cref="IndexBase"/> ＋ 色番号。本編のお宝は 0〜22 なので重ならない</summary>
+    public static class ThPractice
+    {
+        public const int IndexBase = 100;
+        /// <summary>色（と TutorialSlot）の数。最大参加人数と同じ</summary>
+        public const int MaxColors = 4;
+
+        public static int IndexOf(int color) => IndexBase + color;
+        public static bool IsPracticeIndex(int index) => index >= IndexBase && index < IndexBase + MaxColors;
+        /// <summary>練習用お宝の番号から色番号（練習用でなければ -1）</summary>
+        public static int ColorOf(int index) => IsPracticeIndex(index) ? index - IndexBase : -1;
+    }
+
+    /// <summary>練習用お宝の置き場所（TutorialSlot。VenueRoot のローカル座標。色番号 = 並びの添字）</summary>
+    public readonly struct PracticeSlot
+    {
+        public readonly Vector3 LocalPosition;
+        public readonly float YawDegrees;
+        public PracticeSlot(Vector3 localPosition, float yawDegrees) { LocalPosition = localPosition; YawDegrees = yawDegrees; }
+    }
+
     /// <summary>配置に使うカタログの 1 件（「使う」お宝だけ）。EntryIndex は ThTreasureCatalog.entries の何番目か</summary>
     public readonly struct SpawnCatalogEntry
     {
@@ -102,5 +123,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         public IReadOnlyList<SpawnCatalogEntry> Catalog = new SpawnCatalogEntry[0];
         public Bounds CollectBounds;
         public string CatalogHash = "";
+        /// <summary>練習用お宝の置き場所（色番号 0〜3 の順。TutorialSlot の無い環境では空 = 練習用お宝を作らない）</summary>
+        public IReadOnlyList<PracticeSlot> PracticeSlots = new PracticeSlot[0];
     }
 }

@@ -16,7 +16,7 @@ namespace STYLY.TIB_Template.TreasureHaul
 
         public ThContentSet Content => _content;
 
-        ThEnvironmentInfo _env;   // ThVenue から取る（Environment シーンの読み込み後。TutorialSlot の数は #43）
+        ThEnvironmentInfo _env;   // ThVenue から取る（Environment シーンの読み込み後。配置候補点・TutorialSlot の数）
         string _dataDir;
         NetSyncManager _nm;
 

@@ -43,10 +43,11 @@ namespace STYLY.TIB_Template.TreasureHaul
         readonly ReactiveProperty<ClientItemTable> _items = new ReactiveProperty<ClientItemTable>(null);
         readonly ReactiveProperty<int> _total = new ReactiveProperty<int>(0);
         long _itemsRound;
+        bool _itemsPractice;
         double _lastPoseSentAt = double.NegativeInfinity;
         IDisposable _stateSub;
 
-        /// <summary>今の回のお宝の表（本編に入ってから待機に戻るまで。回の途中から入った端末は null）</summary>
+        /// <summary>今の回のお宝の表（Tutorial では練習用お宝の表、Playing に入ると本編の表に替わる。待機に戻るまで。回の途中から入った端末は null）</summary>
         public ReadOnlyReactiveProperty<ClientItemTable> Items => _items;
         /// <summary>荷台に回収した合計額（ThCollected と ThHeartbeat から。待機に戻ったら 0）</summary>
         public ReadOnlyReactiveProperty<int> Total => _total;
@@ -85,6 +86,7 @@ namespace STYLY.TIB_Template.TreasureHaul
                 _items.Value = null;      // 購読者（TreasureClient）が見た目を消した後で捨てる
                 old?.Dispose();
                 _itemsRound = 0;
+                _itemsPractice = false;
                 SpawnFingerprint = "";
                 _total.Value = 0;
                 return;
@@ -96,23 +98,78 @@ namespace STYLY.TIB_Template.TreasureHaul
                 _items.Value = null;
                 stale?.Dispose();
                 _itemsRound = 0;
+                _itemsPractice = false;
                 SpawnFingerprint = "";
                 _total.Value = 0;
             }
             if (_setup == null || Tracker.WaitNextRound) return;
-            if (s == RoundState.Playing && (_items.Value == null || _itemsRound != Tracker.RoundId))
+            if (s == RoundState.Tutorial)
+            {
+                // 練習用お宝の表（割り当てのある色ごとに 1 つ。TutorialSlot の無い環境では作らない）
+                if (_items.Value == null && _setup.PracticeSlots.Count > 0) BuildPracticeTable();
+            }
+            else if (s == RoundState.Playing && (_items.Value == null || _itemsRound != Tracker.RoundId || _itemsPractice))
             {
                 var spawn = TreasureSpawner.Spawn(Tracker.Seed, Tracker.Participants.Length, Params, _setup.Points, _setup.Catalog);
                 SpawnFingerprint = spawn.Fingerprint();
-                _items.Value?.Dispose();
+                var old = _items.Value;   // 練習用の表。新しい表に替えて見た目を作り直させた後で捨てる（練習用お宝は全端末から消える）
                 _itemsRound = Tracker.RoundId;
+                _itemsPractice = false;
                 _total.Value = 0;
                 _items.Value = new ClientItemTable(_tx, () => Tracker.RoundId, () => OwnClientNo, Params, _setup, spawn.Items);
+                old?.Dispose();
             }
             else if (s == RoundState.Result)
             {
-                _items.Value?.Freeze();
+                if (_itemsPractice)
+                {
+                    // 本編の ThState を取りこぼして Tutorial から Result に飛んだ: 練習用の表は結果の間も残さず捨てる
+                    var old = _items.Value;
+                    _items.Value = null;
+                    old?.Dispose();
+                    _itemsRound = 0;
+                    _itemsPractice = false;
+                }
+                else _items.Value?.Freeze();
             }
+        }
+
+        void BuildPracticeTable()
+        {
+            var colors = new SortedSet<int>(Tracker.DeviceColors.Values);
+            var spawned = new List<SpawnedTreasure>();
+            foreach (int color in colors)
+            {
+                if (color < 0 || color >= _setup.PracticeSlots.Count) continue;
+                var slot = _setup.PracticeSlots[color];
+                spawned.Add(new SpawnedTreasure
+                {
+                    Index = ThPractice.IndexOf(color), Kind = TreasureKind.S, Value = Params.practice.practiceValue,
+                    PointIndex = -1, LocalPosition = slot.LocalPosition, YawDegrees = slot.YawDegrees, CatalogIndex = -1,
+                });
+            }
+            _itemsRound = Tracker.RoundId;
+            _itemsPractice = true;
+            _total.Value = 0;
+            _items.Value = new ClientItemTable(_tx, () => Tracker.RoundId, () => OwnClientNo, Params, _setup, spawned, practice: true)
+            {
+                PracticeOwnIndex = OwnPracticeIndex,
+            };
+        }
+
+        /// <summary>自分の練習用お宝の番号（色が無ければ -1）</summary>
+        public int OwnPracticeIndex => Tracker.OwnColor.CurrentValue >= 0 ? ThPractice.IndexOf(Tracker.OwnColor.CurrentValue) : -1;
+
+        /// <summary>
+        /// 表がつかめる局面かを更新する（毎フレーム）。本編の表: 参加端末で Playing 中 / 練習用の表: 参加端末で Tutorial 中。
+        /// 練習用の表でつかめるのは、自分に割り当てられた練習用お宝だけ。
+        /// </summary>
+        public void UpdateGrabPhase(ClientItemTable items)
+        {
+            if (items == null) return;
+            var state = Tracker.State.CurrentValue;
+            items.ParticipantPlaying = Tracker.IsParticipant.CurrentValue && state == (items.IsPractice ? RoundState.Tutorial : RoundState.Playing);
+            if (items.IsPractice) items.PracticeOwnIndex = OwnPracticeIndex;
         }
 
         /// <summary>持っているお宝の位置を送る間隔（〔位置の送信間隔〕）が来たか</summary>
@@ -217,7 +274,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             var items = _items.Value;
             if (items != null)
             {
-                items.ParticipantPlaying = Tracker.IsParticipant.CurrentValue && Tracker.State.CurrentValue == RoundState.Playing;
+                UpdateGrabPhase(items);
                 items.Tick(now);
             }
             if (Tracker.TryTakeResync(now)) SendResync(now);

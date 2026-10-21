@@ -35,6 +35,8 @@ namespace STYLY.TIB_Template.TreasureHaul
             /// <summary>今付けているヒビ（お宝の子）と、その段階（ぶつけた回数）</summary>
             public GameObject Crack;
             public int CrackStage;
+            /// <summary>練習用お宝の上の記号・「あなたの」（練習用以外は null）</summary>
+            public PriceLabel Tag;
         }
 
         /// <summary>M を両手で持っている間の状態（見た目の側。判断は ClientItemTable）</summary>
@@ -59,6 +61,8 @@ namespace STYLY.TIB_Template.TreasureHaul
         /// <summary>値札の上に重ねない高さ（m）。値札（高さ 0.3m）の上に、一文 → 「-NNG」の順に積む</summary>
         const float NoteOffset = 0.1f, AmountOffset = 0.18f;
         const float AmountFontSize = 1.0f, NoteFontSize = 0.45f;
+        /// <summary>練習用お宝の記号・「あなたの」: 値札（高さ 0.3m）の上に重ならない高さ（m）と文字の大きさ</summary>
+        const float TagOffset = 0.22f, TagFontSize = 0.7f;
         /// <summary>「両手で持とう」: 値札の上に重ねない高さ（m）・文字の大きさ・表示時間（秒）。読める長さの数秒（見た目の調整値なのでコードの定数）</summary>
         const float HintOffset = 0.12f, HintFontSize = 0.45f, HintSeconds = 4f;
         /// <summary>砕ける演出の片付けまでの秒数（プレハブが自分で消えない場合の保険）</summary>
@@ -124,12 +128,13 @@ namespace STYLY.TIB_Template.TreasureHaul
 
             double now = Now;
             ConfigureHands();
+            UpdateBeamColor();
             if (now >= _nextAvatarScan) { _nextAvatarScan = now + AvatarFallbackScanSeconds; RefreshAvatarColliders(); }
             if (_table == null) return;
 
             // 結果に入った後は位置も ThRest・ThCollect も送らない
             if (_table.Frozen) return;
-            _table.ParticipantPlaying = _core.Tracker.IsParticipant.CurrentValue && _core.Tracker.State.CurrentValue == RoundState.Playing;
+            _core.UpdateGrabPhase(_table);   // 本編の表は Playing 中、練習用の表は Tutorial 中だけつかめる
             var venueRoot = _venue.Root;
             var grip = Grip;
             UpdateTwoHands(now);
@@ -282,6 +287,20 @@ namespace STYLY.TIB_Template.TreasureHaul
                 if (h != null && h.Tracker != null) h.Tracker.Configure(g.gripThreshold, g.releaseThreshold, g.releaseHoldSeconds, g.trackingLossGrace);
         }
 
+        /// <summary>
+        /// 両手のビームの色。自分の色があれば Tutorial〜Result の間その色、待機中と色のない端末は既定の色（palette の defaultBeamColor）。
+        /// </summary>
+        void UpdateBeamColor()
+        {
+            var palette = _content != null ? _content.palette : null;
+            if (palette == null) return;
+            var state = _core.Tracker.State.CurrentValue;
+            bool active = state == RoundState.Tutorial || state == RoundState.Playing || state == RoundState.Result;
+            var color = active ? palette.BeamColor(_core.Tracker.OwnColor.CurrentValue) : palette.defaultBeamColor;
+            if (_left != null) _left.SetBeamColor(color);
+            if (_right != null) _right.SetBeamColor(color);
+        }
+
         void OnTableChanged(ClientItemTable table)
         {
             ClearViews();
@@ -302,10 +321,13 @@ namespace STYLY.TIB_Template.TreasureHaul
             var outline = fx?.Find(ThFxId.AimOutline)?.material;
             foreach (var m in table.Items)
             {
-                if (m.CatalogIndex < 0 || m.CatalogIndex >= catalog.entries.Count) { Debug.LogWarning($"[TreasureClient] お宝 {m.Index} の見た目がありません"); continue; }
-                var prefab = catalog.entries[m.CatalogIndex].prefab;
+                GameObject prefab;
+                if (table.IsPractice) prefab = catalog.practicePrefab;   // 練習用お宝（TH_Practice）。色は MaterialPropertyBlock で塗る
+                else if (m.CatalogIndex >= 0 && m.CatalogIndex < catalog.entries.Count) prefab = catalog.entries[m.CatalogIndex].prefab;
+                else prefab = null;
+                if (prefab == null) { Debug.LogWarning($"[TreasureClient] お宝 {m.Index} の見た目がありません"); continue; }
                 var go = Instantiate(prefab, _venue.Root);
-                go.name = $"Treasure_{m.Index}_{m.Kind}";
+                go.name = table.IsPractice ? $"Practice_{m.Index}" : $"Treasure_{m.Index}_{m.Kind}";
                 var t = go.GetComponent<Treasure>();
                 t.Initialize(m, Grip, outline, _treasureLayer, _grabZoneLayer);
                 t.ConfigureDamage(_core.Params.treasure.speedSmoothFrames, _core.Params.treasure.redamageInterval, _core.Params.grip.poseSendInterval, _core.Params.grip.followSpeedMax);
@@ -313,9 +335,24 @@ namespace STYLY.TIB_Template.TreasureHaul
                 t.Impacts.Subscribe(imp => OnImpact(t, imp)).AddTo(_tableSubs);
                 var label = PriceLabel.Create(_venue.Root, t.LabelAnchor, _labelHeight, _content.text, _labelFont);
                 label.SetState(m.Revealed, m.Value);
-                _views[m.Index] = new View { Treasure = t, Label = label };
+                var view = new View { Treasure = t, Label = label };
+                if (table.IsPractice) DecoratePractice(view, m);
+                _views[m.Index] = view;
                 IgnoreAvatars(t);
             }
+        }
+
+        /// <summary>練習用お宝: その色で塗り、上に色の記号（●▲■★）、自分のお宝にはさらに「あなたの」を出す。値札は本編と同じ（「？」→ 持った瞬間に値段）</summary>
+        void DecoratePractice(View v, ClientItem m)
+        {
+            var slot = _content.palette != null ? _content.palette.Get(ThPractice.ColorOf(m.Index)) : null;
+            if (slot == null) return;   // 色の一覧が無ければ塗らない・記号も出さない
+            v.Treasure.PaintBody(slot.practiceColor);
+            bool mine = m.Index == _table.PracticeOwnIndex;
+            string symbol = $"<color=#{ColorUtility.ToHtmlStringRGB(slot.practiceColor)}>{slot.symbol}</color>";
+            var tag = PriceLabel.Create(_venue.Root, v.Treasure.LabelAnchor, _labelHeight + TagOffset, _content.text, _labelFont);
+            tag.SetFixedText(mine ? _content.text.Get(ThTextId.TagYours) + "\n" + symbol : symbol, TagFontSize);
+            v.Tag = tag;
         }
 
         void ClearViews()
@@ -326,6 +363,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             {
                 if (kv.Value.Treasure != null) Destroy(kv.Value.Treasure.gameObject);   // ヒビはお宝の子なので一緒に消える
                 if (kv.Value.Label != null) Destroy(kv.Value.Label.gameObject);
+                if (kv.Value.Tag != null) Destroy(kv.Value.Tag.gameObject);
             }
             _views.Clear();
             foreach (var p in _popups) if (p != null) Destroy(p.gameObject);   // 表示中の「-NNG」・一文（Tween は SetLink で止まる）
@@ -590,6 +628,7 @@ namespace STYLY.TIB_Template.TreasureHaul
                     ReleaseHolder(m.Index);
                     if (t != null) Destroy(t.gameObject);
                     if (v.Label != null) Destroy(v.Label.gameObject);
+                    if (v.Tag != null) Destroy(v.Tag.gameObject);
                     break;
                 case ItemEventKind.Frozen:
                     ReleaseHolder(m.Index);
