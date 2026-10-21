@@ -482,3 +482,10 @@
 - 案内の段階を「持っているか」で決めるときは、手を開いた後の落下中・回収の承認待ちを「持っている」の続きとして扱わないと、成功の直前に1段目の案内がちらつく。
 - uloop の `run-tests` は、コンパイル直後だと Domain Reload 中で失敗する（JSON でなく「Unity is reloading」を返す）。少し待って再実行する。
 - 実装エージェントが ParrelSync 用に作ったクローン（`TibLbeExhibit_clone_1`）は、guard により `rm` で消せない。後片付けは人に頼む。
+
+## 運営UIの残り・記録 CSV（Issue #44、2026-10-21）で分かったこと
+- **クラウド（claude.ai/code）のセッションには Unity・uloop・.NET が無い**。コンパイル・EditMode テスト・シーン／プレハブの編集ができないので、コードとテストだけ書いてドラフト PR にし、ローカルの Unity で仕上げる（ユーザー承認済みの進め方）。新規 .cs の .meta は作らない（Unity が開いたときに作る。それをコミットしてもらう）。
+- シーンを結線できないときは、UI を実行時にコード（`GameObject` + `TextMeshProUGUI` / `Button` / `HorizontalLayoutGroup`）で作り、`[SerializeField]` の参照が未設定なら自動で作る形にすると、シーンを触らずに動く。
+- 文言を `ThTextTable.asset` に足せないときは、`ThTextTable` の組み込みの既定の文言（`Fallbacks`）に入れる。日本語フォントは **Static のアトラス**なので、新しい漢字（例「学」）や記号（✓・—）は四角になる。`ThFontExtraMenu.CollectCharacters` と `ThContentTests` の文字の検査は既定の文言も集めるようにしたので、ローカルで「文言の文字をフォントに足す」を実行するまで文字の検査テストは落ちる（それが正しい合図）。
+- `DeviceRegistry` を「未確認始まり」にすると、既存のテストのホスト・登録表がすべて参加できなくなる。テスト用は `operation.autoConfirmAlignment = true`（`Registry.AutoConfirm`）にする。
+- CSV を Excel で開いていると `FileShare.Read` の追記でも開けずに失敗する。`RoundLogger` は書けなかった行を覚えて、次の回の終わりに書き直す（アプリを閉じると消える）。

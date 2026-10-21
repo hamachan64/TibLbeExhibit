@@ -467,7 +467,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             if (!r.Applied) return;
 
             // 記録用（設計書 8章）: そのときの持ち主、いなければ判定役（最後に持った人）。誰も持ったことがなければ -1（当てた側の人には付けない）
-            string recordDevice = it.OwnerDevice ?? it.ControllerDevice ?? it.LastHolderDevice;   // 消滅で持ち主を外す前に控える（#44 の記録用）
+            string recordDevice = it.OwnerDevice ?? it.ControllerDevice;   // 消滅で持ち主を外す前に控える（#44 の記録用。ThDamaged.by と同じ人。誰もいなければ記録しない）
             int by = it.OwnerDevice != null ? CurrentNo(it.OwnerDevice, it.OwnerClientNo)
                 : it.ControllerDevice != null ? CurrentNo(it.ControllerDevice, it.ControllerClientNo)
                 : -1;

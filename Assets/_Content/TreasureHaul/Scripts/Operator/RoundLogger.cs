@@ -82,8 +82,8 @@ namespace STYLY.TIB_Template.TreasureHaul
             r.WasHeld ? l.Yes : l.No,
             r.HeldSeconds.ToString("0.0", CultureInfo.InvariantCulture),
             Int(r.CollectedAmount),
-            Int(r.TargetAmount),
-            r.TargetReached ? l.Yes : l.No,
+            r.TargetAmount > 0 ? Int(r.TargetAmount) : "",   // 本編に入らなかった回は目標が無いので空欄
+            r.TargetAmount > 0 ? (r.TargetReached ? l.Yes : l.No) : "",
             Int(r.DamageTotal),
         });
 
@@ -115,6 +115,11 @@ namespace STYLY.TIB_Template.TreasureHaul
 
         readonly string _logDirectory;
         readonly CsvLabels _labels;
+        // 書けなかった行（Excel で開いていて書けないなど）。次の Write で先に書き直す（起動中だけ。アプリを閉じると消える）
+        readonly List<(string path, string header, string rows)> _pending = new List<(string path, string header, string rows)>();
+
+        /// <summary>まだ書けていない書き込みの数（テスト・警告用）</summary>
+        public int PendingCount => _pending.Count;
 
         /// <param name="dataDirectory">persistentDataPath（テストでは一時フォルダ）</param>
         public RoundLogger(string dataDirectory, CsvLabels labels)
@@ -123,9 +128,20 @@ namespace STYLY.TIB_Template.TreasureHaul
             _labels = labels;
         }
 
-        /// <summary>1 回ぶんを書く。全部書けたら null、書けなかったファイルがあれば警告（rounds が失敗しても players は試す）</summary>
+        /// <summary>
+        /// 1 回ぶんを書く。前に書けなかった行があれば先に書き直す。全部書けたら null、書けなかったファイルがあれば警告
+        /// （rounds が失敗しても players は試す。書けなかった行は覚えておき、次の Write で書き直す）
+        /// </summary>
         public string Write(RoundRecord r)
         {
+            var jobs = new List<(string path, string header, string rows)>(_pending);
+            _pending.Clear();
+            jobs.Add((Path.Combine(_logDirectory, RoundCsv.RoundsFileName(r.StartedAt)), RoundCsv.RoundsHeaderLine(_labels), RoundCsv.RoundsRow(r, _labels)));
+            var players = new StringBuilder();
+            foreach (var p in r.Players()) players.Append(RoundCsv.PlayersRow(r, p));
+            if (players.Length > 0)
+                jobs.Add((Path.Combine(_logDirectory, RoundCsv.PlayersFileName(r.StartedAt)), RoundCsv.PlayersHeaderLine(_labels), players.ToString()));
+
             var warnings = new List<string>();
             try
             {
@@ -133,17 +149,17 @@ namespace STYLY.TIB_Template.TreasureHaul
             }
             catch (Exception e)
             {
-                return $"記録フォルダを作れません（{_logDirectory}）: {e.Message}";
+                _pending.AddRange(jobs);
+                return $"記録フォルダを作れません（{_logDirectory}）: {e.Message}（{_pending.Count} 件は次の回の終わりに書き直します）";
             }
-            Append(Path.Combine(_logDirectory, RoundCsv.RoundsFileName(r.StartedAt)), RoundCsv.RoundsHeaderLine(_labels), RoundCsv.RoundsRow(r, _labels), warnings);
-            var players = new StringBuilder();
-            foreach (var p in r.Players()) players.Append(RoundCsv.PlayersRow(r, p));
-            if (players.Length > 0)
-                Append(Path.Combine(_logDirectory, RoundCsv.PlayersFileName(r.StartedAt)), RoundCsv.PlayersHeaderLine(_labels), players.ToString(), warnings);
-            return warnings.Count == 0 ? null : string.Join(" / ", warnings);
+            foreach (var job in jobs)
+                if (!Append(job.path, job.header, job.rows, warnings)) _pending.Add(job);
+            if (warnings.Count == 0) return null;
+            return string.Join(" / ", warnings) + $"（{_pending.Count} 件は次の回の終わりに書き直します。CSV を開くときはコピーしてから開いてください）";
         }
 
-        static void Append(string path, string header, string rows, List<string> warnings)
+        /// <summary>書けたら true。書けなければ警告を足して false</summary>
+        static bool Append(string path, string header, string rows, List<string> warnings)
         {
             try
             {
@@ -163,10 +179,12 @@ namespace STYLY.TIB_Template.TreasureHaul
                     fs.Write(bytes, 0, bytes.Length);
                     fs.Flush(true);
                 }
+                return true;
             }
             catch (Exception e)
             {
                 warnings.Add($"{Path.GetFileName(path)} に書けません: {e.Message}");
+                return false;
             }
         }
     }

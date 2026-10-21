@@ -679,7 +679,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             r.WasHeld = Machine.WasHeld;
             r.HeldSeconds = Machine.HeldSeconds(now);
             r.CollectedAmount = TotalAmount;
-            r.TargetAmount = TargetFor(r.ParticipantCount, Params);
+            r.TargetAmount = r.ReachedPlaying ? TargetFor(r.ParticipantCount, Params) : 0;   // 本編に入らなかった回の目標額は 0（その回には目標が無かった）
             r.DamageTotal = _items?.DamageTotal ?? 0;
             r.SetColors(_colors);
             _roundFinished.OnNext(r);
@@ -689,6 +689,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         {
             SyncItems();
             UpdateWarnings();
+            if (_record != null && Machine.State == RoundState.Playing) _record.ReachedPlaying = true;
             if (_record != null && Machine.State != RoundState.Waiting)
                 _record.SetParticipants(Machine.Participants, Registry.Numbers.Compare, Registry.Numbers.NumberOf);   // Opening → Tutorial・Tutorial → Playing で減った分を追う
             var rows = DeviceRowBuilder.Build(Registry, Machine.State, _practiceDoneAt, now, Params.progress.statusInterval, Params.operation.batteryWarningPercent);

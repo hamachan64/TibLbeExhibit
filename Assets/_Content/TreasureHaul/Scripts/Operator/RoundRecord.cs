@@ -48,7 +48,10 @@ namespace STYLY.TIB_Template.TreasureHaul
         public bool WasHeld;
         public float HeldSeconds;
         public int CollectedAmount;
+        /// <summary>目標額。本編（Playing）に入らずに終わった回は 0（CSV では空欄）</summary>
         public int TargetAmount;
+        /// <summary>本編（Playing）に入ったか。入らずに中断した回は目標額を記録しない</summary>
+        public bool ReachedPlaying;
         /// <summary>適用した減額の合計（損害額）</summary>
         public int DamageTotal;
 

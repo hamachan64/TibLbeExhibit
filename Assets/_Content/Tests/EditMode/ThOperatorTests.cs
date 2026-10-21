@@ -331,7 +331,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
             public readonly SessionHostCore Host;
             public double Now = 100;
             public readonly List<RoundRecord> Finished = new List<RoundRecord>();
-            readonly IDisposable _sub;
+            public readonly IDisposable Subscription;
 
             public Rig(bool auto = true, bool slots = false, Action<ThParams> tweak = null)
             {
@@ -340,7 +340,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
                 p.progress.openingSeconds = 3; p.progress.practiceSeconds = 5; p.progress.playingSeconds = 30; p.progress.resultSeconds = 3;
                 tweak?.Invoke(p);
                 Host = new SessionHostCore(Tx, ThParamsLoader.Load(p, null, null), new ThGameSettings(), null, 0, null, MakeSetup(slots)) { OwnClientNo = 1 };
-                _sub = Host.RoundFinished.Subscribe(r => Finished.Add(r));
+                Subscription = Host.RoundFinished.Subscribe(r => Finished.Add(r));
             }
 
             public void Register(string id, int no) =>
@@ -671,6 +671,9 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
             Assert.AreEqual(1, rec.ParticipantCount, "中断しても参加端末の控えが残る");
             Assert.AreEqual(0, rec.CollectedAmount);
             Assert.IsFalse(rec.TargetReached);
+            Assert.IsFalse(rec.ReachedPlaying);
+            Assert.AreEqual(0, rec.TargetAmount, "本編に入らなかった回には目標額が無い");
+            StringAssert.Contains(",0,,,0\r\n", RoundCsv.RoundsRow(rec, Labels()), "回収額 0・目標額と目標達成は空欄・損害額 0");
         }
 
         [Test] public void 本編中の中断では回収額と減額が入る_待機中の中断は何も流れない()
@@ -997,10 +1000,10 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
             var playersPath = Path.Combine(_dir, "logs", "players_20261118.csv");
             var bytes = File.ReadAllBytes(roundsPath);
             CollectionAssert.AreEqual(new byte[] { 0xEF, 0xBB, 0xBF }, bytes.Take(3).ToArray(), "Excel 用の BOM");
-            var lines = File.ReadAllText(roundsPath).TrimStart('﻿').Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            var lines = File.ReadAllText(roundsPath).TrimStart('\uFEFF').Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
             Assert.AreEqual(2, lines.Length, "見出し + 1 行");
             Assert.IsTrue(lines[0].StartsWith("開始時刻,RoundId"));
-            var plines = File.ReadAllText(playersPath).TrimStart('﻿').Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            var plines = File.ReadAllText(playersPath).TrimStart('\uFEFF').Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
             Assert.AreEqual(3, plines.Length, "見出し + 参加端末 2 行");
 
             r.RoundId++;
@@ -1034,6 +1037,20 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
             string warning = null;
             Assert.DoesNotThrow(() => warning = logger.Write(MakeRecord()));
             Assert.IsNotNull(warning);
+        }
+
+        [Test] public void 書けなかった行は次のWriteで書き直す()
+        {
+            File.WriteAllText(_dir, "これはフォルダではなくファイル");   // logs フォルダを作れない
+            var logger = new RoundLogger(_dir, Labels());
+            Assert.IsNotNull(logger.Write(MakeRecord()));
+            Assert.AreEqual(2, logger.PendingCount, "rounds と players の 2 件を覚えている");
+            File.Delete(_dir);   // 書けるようにする
+            Assert.IsNull(logger.Write(MakeRecord()));
+            Assert.AreEqual(0, logger.PendingCount);
+            var rounds = File.ReadAllText(Path.Combine(_dir, "logs", RoundCsv.RoundsFileName(MakeRecord().StartedAt))).TrimStart('\uFEFF')
+                .Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            Assert.AreEqual(3, rounds.Length, "見出し + 書けなかった回 + 今回");
         }
 
         [Test] public void 参加端末が0台でもroundsは書きplayersは書かない()
