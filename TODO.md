@@ -10,7 +10,7 @@
 | | |
 | :--- | :--- |
 | **フェーズ** | 4b 練習（[#43](https://github.com/hamachan64/TibLbeExhibit/issues/43)）の PR [#60](https://github.com/hamachan64/TibLbeExhibit/pull/60) をレビュー中。4a（#42、PR #58）までマージ済み（光る持ち手の廃止・高い壁でビームを止める 3d PR #59、3c #41・3b #40・3a #39・2 #38・1 #37・0a #36 も）。回収地点の呼び方は「納品場所」に変えた。**実機は10月中の見込み**なので、それまではエディタ（XRI のシミュレーター・ParrelSync）で検証しながら進める |
-| **次にやること** | #44（運営UIの残り・記録 CSV）の PR をローカルの Unity でコンパイル・テスト・フォントの再生成をしてからレビュー（クラウドで書いたので未コンパイル）。並行して素材 #46・#47・#48 |
+| **次にやること** | #44（運営UIの残り・記録 CSV）の PR [#61](https://github.com/hamachan64/TibLbeExhibit/pull/61) をローカルの Unity でコンパイル・テスト・フォントの再生成をしてからレビュー（クラウドで書いたので未コンパイル）。並行して素材 #46・#47・#48 |
 | **判断待ち** | 実機の入手（#49・#45 に必要）。U-1 は通し #45 までに必要。ほかは下の「判断待ち」 |
 | **締切** | 内容変更 **10/31**（あと11日）／最終データ 11/16／現地設営 11/17 |
 
@@ -30,7 +30,7 @@
 | 3d | 光る持ち手の廃止（お宝のどこでもつかめる・輪郭が光る）、高い壁でビームを止める | ―（PR [#59](https://github.com/hamachan64/TibLbeExhibit/pull/59)） | ✅ | 3c、ステージ変更の決定（2026-10-21） | 10/21 |
 | 4a | オープニング・保留・本編開始・結果 | [#42](https://github.com/hamachan64/TibLbeExhibit/issues/42)（PR [#58](https://github.com/hamachan64/TibLbeExhibit/pull/58)） | ✅ | 1（2・3 と並行可） | 10/24〜26 |
 | 4b | 練習（納品場所の前の固定位置・色分け） | [#43](https://github.com/hamachan64/TibLbeExhibit/issues/43)（PR [#60](https://github.com/hamachan64/TibLbeExhibit/pull/60)） | 👀 | 2、4a | 10/27〜28 |
-| 5 | 運営UIの残り・記録 CSV | [#44](https://github.com/hamachan64/TibLbeExhibit/issues/44)（PR 準備中） | 👀 | 1（並行可） | 10/27〜29 |
+| 5 | 運営UIの残り・記録 CSV | [#44](https://github.com/hamachan64/TibLbeExhibit/issues/44)（PR [#61](https://github.com/hamachan64/TibLbeExhibit/pull/61)） | 👀 | 1（並行可） | 10/27〜29 |
 | 6 | 連続稼働・実機での通し → 第1検証 | [#45](https://github.com/hamachan64/TibLbeExhibit/issues/45) | ⬜ | すべて（0b を含む） | 目標 10/30〜31。実機が遅れたら11月初め |
 
 ## 素材（並行して進める）
