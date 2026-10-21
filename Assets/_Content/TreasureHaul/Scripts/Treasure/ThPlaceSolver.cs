@@ -5,7 +5,7 @@ namespace STYLY.TIB_Template.TreasureHaul
     /// <summary>
     /// 「そっと置く」の降ろす先を決める（設計書 4.2。物理の Raycast を使うので純粋クラスにはしない）。
     /// お宝の位置から真下へ Raycast し、当たった面の上の点を返す。対象は会場の物（床・荷台・瓦礫）だけで、
-    /// Treasure・TreasureHandle・HandBone のレイヤー、トリガー、アバターのコライダーは除く。何にも当たらなければ VenueRoot の床（ローカル y=0）。
+    /// Treasure・TreasureGrabZone・HandBone のレイヤー、トリガー、アバターのコライダーは除く。何にも当たらなければ VenueRoot の床（ローカル y=0）。
     /// お宝のプレハブは底が原点なので、当たった点をそのまま位置にする。端末とホスト（運営PC）の両方が使う。
     /// </summary>
     public static class ThPlaceSolver
@@ -18,7 +18,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         const float RayLength = 10f;
         static readonly RaycastHit[] s_hits = new RaycastHit[32];
 
-        static readonly string[] s_excludedNames = { "Treasure", "TreasureHandle", FingertipTouchCollider.HandBoneLayerName };
+        static readonly string[] s_excludedNames = { "Treasure", "TreasureGrabZone", FingertipTouchCollider.HandBoneLayerName };
         static int s_excluded = -1;
 
         static int ExcludedLayerMask()

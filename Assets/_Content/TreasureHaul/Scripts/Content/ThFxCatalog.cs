@@ -7,7 +7,9 @@ namespace STYLY.TIB_Template.TreasureHaul
     /// <summary>演出の ID。<b>末尾にだけ足す</b>（並べ替え・途中への挿入・削除をしない）。</summary>
     public enum ThFxId
     {
+        /// <summary>使わない（2026-10-21、光る持ち手は廃止した）。列挙からは消せないので残す</summary>
         HandleNormal,
+        /// <summary>使わない（2026-10-21、光る持ち手は廃止した。ビームの線は <see cref="Beam"/>）。列挙からは消せないので残す</summary>
         HandleAimed,
         DiscoverLight,
         Crack1,
@@ -15,6 +17,10 @@ namespace STYLY.TIB_Template.TreasureHaul
         Shatter,
         /// <summary>使わない（2026-10-21、荷台の案内はやめた）。列挙からは消せないので残す</summary>
         CargoGlow,
+        /// <summary>ビームが当たっているお宝全体の輪郭（背面法のマテリアル）</summary>
+        AimOutline,
+        /// <summary>ビームの線のマテリアル</summary>
+        Beam,
     }
 
     [Serializable]

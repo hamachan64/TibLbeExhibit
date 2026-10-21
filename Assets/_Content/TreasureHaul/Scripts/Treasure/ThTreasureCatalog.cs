@@ -13,7 +13,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         [Tooltip("お宝の ID（カタログの中で一意。ハッシュに入る）")] public string id = "";
         public TreasureKind kind = TreasureKind.S;
         public string displayName = "";
-        [Tooltip("モデルと持ち手を持つプレハブ（Treasure コンポーネント付き）")] public GameObject prefab;
+        [Tooltip("モデル（MeshRenderer）を持つプレハブ（Treasure コンポーネント付き。つかむ範囲は実行時に自動で作る）")] public GameObject prefab;
         [Tooltip("今回の展示で使うか")] public bool use = true;
     }
 
@@ -47,8 +47,7 @@ namespace STYLY.TIB_Template.TreasureHaul
                 if (e.prefab == null) { errors.Add($"プレハブが未設定です: {e.id}"); continue; }
                 var t = e.prefab.GetComponent<Treasure>();
                 if (t == null) { errors.Add($"プレハブに Treasure コンポーネントがありません: {e.id}"); continue; }
-                int need = e.kind == TreasureKind.M ? 2 : 1;
-                if (t.HandleCount < need) errors.Add($"持ち手が足りません（{e.kind} は {need} 個必要 / {t.HandleCount} 個）: {e.id}");
+                if (e.prefab.GetComponentInChildren<MeshRenderer>(true) == null) errors.Add($"プレハブに MeshRenderer がありません（持てる形ではありません）: {e.id}");
             }
             // 今回の展示で出す種類（S・M）は 1 件以上「使う」が必要。L・秘宝は追加要素なので 0 件でよい
             foreach (var k in new[] { TreasureKind.S, TreasureKind.M })

@@ -35,8 +35,6 @@ namespace STYLY.TIB_Template.TreasureHaul
     [RequireComponent(typeof(Rigidbody))]
     public sealed class Treasure : MonoBehaviour
     {
-        [SerializeField, Tooltip("光る持ち手のコライダー（ビームが当たる用。見た目より大きめ）。M は左右 2 つ")] Collider[] _handles = new Collider[0];
-        [SerializeField, Tooltip("持ち手の見た目（光らせる Renderer）")] Renderer[] _handleRenderers = new Renderer[0];
         [SerializeField, Tooltip("値札を出す位置")] Transform _labelAnchor;
         [SerializeField, Tooltip("手に持つときに手へ合わせる点（お宝のローカル座標。モデルの中心付近）")] Vector3 _holdPoint = new Vector3(0f, 0.1f, 0f);
 
@@ -46,10 +44,17 @@ namespace STYLY.TIB_Template.TreasureHaul
         const float SweepSkin = 0.002f;
         /// <summary>追従の回転の角速度の上限（rad/s）。手の向きが急に変わっても振り回さないため（試作 S-4 と同じ）</summary>
         const float MaxAngularSpeed = 30f;
+        /// <summary>つかむ範囲の箱を見た目より大きくする量（各辺に足す。m）</summary>
+        const float GrabZoneMargin = GrabZoneLayout.DefaultMargin;
+        static readonly int PushCenterId = Shader.PropertyToID("_PushCenter");
 
         Rigidbody _rb;
         ThGripParams _grip;
-        Material _handleNormal, _handleAimed;
+        Material _aimOutline;
+        /// <summary>つかむ範囲（ビームが当たる見えない箱。Initialize で自動生成。M は左右 2 つで、ローカル軸の負側が 0）</summary>
+        Collider[] _grabZones = new Collider[0];
+        /// <summary>ビームが当たっている間に光らせる輪郭（モデルの各 MeshRenderer と同じメッシュを背面法で描く子）</summary>
+        Renderer[] _outlines = new Renderer[0];
         Tween _flight;
         Transform _followTarget;
         Quaternion _followRelRot = Quaternion.identity;
@@ -71,25 +76,25 @@ namespace STYLY.TIB_Template.TreasureHaul
         bool _havePrev;
         Bounds _modelBounds;
 
-        public int HandleCount => _handles == null ? 0 : _handles.Length;
-        public Collider[] Handles => _handles;
+        public int GrabZoneCount => _grabZones == null ? 0 : _grabZones.Length;
+        public Collider[] GrabZones => _grabZones;
         /// <summary>
-        /// 手に合わせる点（お宝のローカル）。S は設定値。M（持ち手が 2 つ）は 2 つの持ち手の中点（両手の中点に置くため）。
+        /// 手に合わせる点（お宝のローカル）。S は設定値。M（つかむ範囲が 2 つ）は 2 つの範囲の中心の中点（両手の中点に置くため）。
         /// </summary>
         public Vector3 HoldPoint
         {
             get
             {
-                if (Model != null && Model.Kind == TreasureKind.M && HandleCount >= 2 && _handles[0] != null && _handles[1] != null)
-                    return (HandleLocalPosition(0) + HandleLocalPosition(1)) * 0.5f;
+                if (Model != null && Model.Kind == TreasureKind.M && GrabZoneCount >= 2 && _grabZones[0] != null && _grabZones[1] != null)
+                    return (GrabZoneLocalPosition(0) + GrabZoneLocalPosition(1)) * 0.5f;
                 return _holdPoint;
             }
         }
         /// <summary>手に合わせる点のワールド座標</summary>
         public Vector3 HoldPointWorld => transform.TransformPoint(HoldPoint);
-        /// <summary>持ち手 i の位置（お宝のローカル）。範囲外・欠けは原点</summary>
-        public Vector3 HandleLocalPosition(int i) =>
-            _handles != null && i >= 0 && i < _handles.Length && _handles[i] != null ? transform.InverseTransformPoint(_handles[i].transform.position) : Vector3.zero;
+        /// <summary>つかむ範囲 i の中心（お宝のローカル）。範囲外・欠けは原点</summary>
+        public Vector3 GrabZoneLocalPosition(int i) =>
+            _grabZones != null && i >= 0 && i < _grabZones.Length && _grabZones[i] != null ? transform.InverseTransformPoint(_grabZones[i].transform.position) : Vector3.zero;
         public Transform LabelAnchor => _labelAnchor != null ? _labelAnchor : transform;
         public ClientItem Model { get; private set; }
         public TreasureMode Mode { get; private set; } = TreasureMode.Kinematic;
@@ -106,16 +111,18 @@ namespace STYLY.TIB_Template.TreasureHaul
         /// 判断は <see cref="ClientItem.IsExemptAt"/>。
         /// </summary>
         public bool IsDamageExempt => Model != null ? Model.IsExemptAt(Time.realtimeSinceStartupAsDouble, IsFlying) : IsFlying;
-        /// <summary>モデル（持ち手を除く Renderer）の Treasure ローカルの大きさ。ヒビのプレハブを合わせる用</summary>
+        /// <summary>モデル（Initialize 時点の MeshRenderer）の Treasure ローカルの大きさ。ヒビのプレハブを合わせる用</summary>
         public Bounds ModelBounds => _modelBounds;
 
-        /// <summary>生成直後に呼ぶ。レイヤー（お宝本体 / 持ち手）と、持ち手の光り方を設定する。</summary>
-        public void Initialize(ClientItem model, ThGripParams grip, Material handleNormal, Material handleAimed, int treasureLayer, int handleLayer)
+        /// <summary>
+        /// 生成直後に呼ぶ。レイヤー（お宝本体 / つかむ範囲）を設定し、モデルの大きさからつかむ範囲の箱（トリガー）と、
+        /// ビームが当たっている間に光る輪郭を作る。aimOutline が null なら輪郭は作らない。
+        /// </summary>
+        public void Initialize(ClientItem model, ThGripParams grip, Material aimOutline, int treasureLayer, int grabZoneLayer)
         {
             Model = model;
             _grip = grip;
-            _handleNormal = handleNormal;
-            _handleAimed = handleAimed;
+            _aimOutline = aimOutline;
             _rb = GetComponent<Rigidbody>();
             _rb.useGravity = false;
             _rb.isKinematic = true;
@@ -123,16 +130,68 @@ namespace STYLY.TIB_Template.TreasureHaul
             _rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
             _rb.maxAngularVelocity = MaxAngularSpeed;
 
-            var handleSet = new System.Collections.Generic.HashSet<Collider>(_handles);
             var body = new System.Collections.Generic.List<Collider>();
             foreach (var c in GetComponentsInChildren<Collider>(true))
             {
-                if (handleSet.Contains(c)) { c.isTrigger = true; if (handleLayer >= 0) c.gameObject.layer = handleLayer; }
-                else { body.Add(c); if (treasureLayer >= 0) c.gameObject.layer = treasureLayer; }
+                body.Add(c);
+                if (treasureLayer >= 0) c.gameObject.layer = treasureLayer;
             }
             _bodyColliders = body.ToArray();
             _modelBounds = ComputeModelBounds();
+            BuildOutlines();
+            BuildGrabZones(grabZoneLayer);
             SetAimed(false);
+        }
+
+        /// <summary>つかむ範囲の箱を作る（<see cref="GrabZoneLayout"/>）。子に置き、トリガーにする</summary>
+        void BuildGrabZones(int grabZoneLayer)
+        {
+            var layout = GrabZoneLayout.Compute(_modelBounds, Model != null ? Model.Kind : TreasureKind.S, GrabZoneMargin);
+            _grabZones = new Collider[layout.Length];
+            for (int i = 0; i < layout.Length; i++)
+            {
+                var go = new GameObject("GrabZone_" + i);
+                go.transform.SetParent(transform, false);
+                go.transform.localPosition = layout[i].center;
+                if (grabZoneLayer >= 0) go.layer = grabZoneLayer;
+                var box = go.AddComponent<BoxCollider>();
+                box.isTrigger = true;
+                box.size = layout[i].size;
+                _grabZones[i] = box;
+            }
+        }
+
+        /// <summary>モデルの各 MeshRenderer と同じメッシュを共有する輪郭用の子を作る（初めは無効。影は落とさない・受けない）</summary>
+        void BuildOutlines()
+        {
+            if (_aimOutline == null) { _outlines = new Renderer[0]; return; }
+            var list = new System.Collections.Generic.List<Renderer>();
+            foreach (var r in GetComponentsInChildren<MeshRenderer>(true))
+            {
+                if (!r.enabled) continue;
+                var mf = r.GetComponent<MeshFilter>();
+                if (mf == null || mf.sharedMesh == null) continue;
+                var mesh = mf.sharedMesh;
+                var go = new GameObject("AimOutline");
+                go.transform.SetParent(r.transform, false);
+                var omf = go.AddComponent<MeshFilter>();
+                omf.sharedMesh = mesh;
+                var omr = go.AddComponent<MeshRenderer>();
+                var mats = new Material[Mathf.Max(1, mesh.subMeshCount)];
+                for (int i = 0; i < mats.Length; i++) mats[i] = _aimOutline;
+                omr.sharedMaterials = mats;
+                omr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                omr.receiveShadows = false;
+                omr.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
+                omr.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.Off;
+                // 「中心→頂点」の押し出しに使うメッシュの中心（オブジェクト空間）
+                var block = new MaterialPropertyBlock();
+                block.SetVector(PushCenterId, mesh.bounds.center);
+                omr.SetPropertyBlock(block);
+                omr.enabled = false;
+                list.Add(omr);
+            }
+            _outlines = list.ToArray();
         }
 
         /// <summary>衝撃の速さをならすフレーム数と再減額の間隔を設定する（P-4）</summary>
@@ -144,15 +203,13 @@ namespace STYLY.TIB_Template.TreasureHaul
             _redamageInterval = redamageInterval;
         }
 
-        /// <summary>持ち手以外の MeshRenderer を Treasure のローカル座標でまとめた箱（Initialize で 1 回。後から付く演出は含めない）</summary>
+        /// <summary>MeshRenderer を Treasure のローカル座標でまとめた箱（Initialize で 1 回。後から付く演出は含めない）</summary>
         Bounds ComputeModelBounds()
         {
-            var skip = new System.Collections.Generic.HashSet<Renderer>(_handleRenderers ?? new Renderer[0]);
             bool has = false;
             var result = new Bounds(Vector3.zero, Vector3.one * 0.2f);
             foreach (var r in GetComponentsInChildren<MeshRenderer>(true))
             {
-                if (skip.Contains(r)) continue;
                 var lb = r.localBounds;
                 for (int i = 0; i < 8; i++)
                 {
@@ -171,12 +228,12 @@ namespace STYLY.TIB_Template.TreasureHaul
         static readonly int ColorId = Shader.PropertyToID("_Color");
 
         /// <summary>
-        /// 本体（持ち手以外の MeshRenderer）を MaterialPropertyBlock で塗る（練習用お宝の色。共有マテリアルは書き換えない）。
+        /// 本体（輪郭以外の MeshRenderer）を MaterialPropertyBlock で塗る（練習用お宝の色。共有マテリアルは書き換えない）。
         /// 後から付くヒビ（子のプレハブ）は塗らない。
         /// </summary>
         public void PaintBody(Color color)
         {
-            var skip = new System.Collections.Generic.HashSet<Renderer>(_handleRenderers ?? new Renderer[0]);
+            var skip = new System.Collections.Generic.HashSet<Renderer>(_outlines);
             var block = new MaterialPropertyBlock();
             foreach (var r in GetComponentsInChildren<MeshRenderer>(true))
             {
@@ -188,20 +245,19 @@ namespace STYLY.TIB_Template.TreasureHaul
             }
         }
 
-        // ---- 持ち手の光 ----
+        // ---- 輪郭の光 ----
 
+        /// <summary>ビームが当たっている間、お宝全体の輪郭を光らせる</summary>
         public void SetAimed(bool aimed)
         {
             Aimed = aimed;
-            var mat = aimed ? _handleAimed : _handleNormal;
-            if (mat == null) return;
-            foreach (var r in _handleRenderers) if (r != null) r.sharedMaterial = mat;
+            foreach (var r in _outlines) if (r != null) r.enabled = aimed;
         }
 
-        public void SetHandlesActive(bool active)
+        public void SetGrabZonesActive(bool active)
         {
-            foreach (var c in _handles) if (c != null) c.enabled = active;
-            foreach (var r in _handleRenderers) if (r != null) r.enabled = active;
+            foreach (var c in _grabZones) if (c != null) c.enabled = active;
+            if (!active) SetAimed(false);
         }
 
         // ---- 動かし方 ----

@@ -13,16 +13,16 @@ namespace STYLY.TIB_Template.TreasureHaul
         // ---- ビームの対象 ----
 
         /// <summary>
-        /// この手・この持ち手を狙ってよいか。S と M の Resting は今までどおり（<see cref="IsGrabbable"/>）。
-        /// 自分が予約中の M は、予約していない方の手で、予約していない方の持ち手だけを対象にする。
+        /// この手・このつかむ範囲を狙ってよいか。S と M の Resting は今までどおり（<see cref="IsGrabbable"/>）。
+        /// 自分が予約中の M は、予約していない方の手で、予約していない方のつかむ範囲だけを対象にする。
         /// </summary>
-        public bool IsTargetFor(ClientItem it, ThHand hand, int handleIndex)
+        public bool IsTargetFor(ClientItem it, ThHand hand, int zoneIndex)
         {
             if (it == null) return false;
             if (IsOwnReservation(it))
             {
                 return !Frozen && !it.Gone && ParticipantPlaying && !it.LiftPending && !it.LiftQueued && !it.ReserveLostWait
-                    && (int)hand != it.ReserveHand && handleIndex != it.LockHandle;
+                    && (int)hand != it.ReserveHand && zoneIndex != it.LockZone;
             }
             return IsGrabbable(it);
         }
@@ -34,7 +34,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         // ---- 予約（手順 1・2） ----
 
         /// <summary>M を片手で握った。条件を満たせば予約を申請して Locked にする（お宝は動かさない）</summary>
-        public bool TryBeginLock(int index, ThHand hand, int handleIndex, double now)
+        public bool TryBeginLock(int index, ThHand hand, int zoneIndex, double now)
         {
             var it = Get(index);
             if (it == null || it.Kind != TreasureKind.M || !ParticipantPlaying || !IsGrabbable(it)) return false;
@@ -46,7 +46,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             it.State = ItemState.Locked;
             it.Interp.Clear();
             ClearTwoHand(it);
-            it.LockHandle = handleIndex;
+            it.LockZone = zoneIndex;
             it.ReserveHand = (int)hand;
             Send(Rpc.ThGrab, new ThGrabMsg { item = it.Index, reqId = it.MyReqId, gen = it.Gen, kind = (int)TreasureKind.M });
             Raise(it, ItemEventKind.LockStarted);
@@ -89,16 +89,16 @@ namespace STYLY.TIB_Template.TreasureHaul
         // ---- 両手成立（手順 3） ----
 
         /// <summary>
-        /// 自分が予約中の M を、予約していない方の手・持ち手で握った。予約が認められていれば ThLift を送って手元へ飛ばす。
+        /// 自分が予約中の M を、予約していない方の手・つかむ範囲で握った。予約が認められていれば ThLift を送って手元へ飛ばす。
         /// まだ承認待ちなら覚えておき、承認の瞬間に持ち上げへ進む。
         /// </summary>
-        public bool TryBeginLift(int index, ThHand hand, int handleIndex, double now)
+        public bool TryBeginLift(int index, ThHand hand, int zoneIndex, double now)
         {
             var it = Get(index);
-            if (it == null || !IsTargetFor(it, hand, handleIndex)) return false;
+            if (it == null || !IsTargetFor(it, hand, zoneIndex)) return false;
             if (!IsOwnReservation(it)) return false;
             it.SecondHand = (int)hand;
-            it.SecondHandle = handleIndex;
+            it.SecondZone = zoneIndex;
             if (it.Reserved) StartLift(it, now);
             else it.LiftQueued = true;
             return true;
@@ -177,7 +177,7 @@ namespace STYLY.TIB_Template.TreasureHaul
                     Unreserve(it);
                     return;
                 }
-                if (h == it.SecondHand && it.LiftQueued) { it.LiftQueued = false; it.SecondHand = -1; it.SecondHandle = -1; }   // 2 本目が先に開いた
+                if (h == it.SecondHand && it.LiftQueued) { it.LiftQueued = false; it.SecondHand = -1; it.SecondZone = -1; }   // 2 本目が先に開いた
                 return;
             }
 
@@ -300,13 +300,13 @@ namespace STYLY.TIB_Template.TreasureHaul
         /// <summary>M の状態（予約・持ち上げ・猶予・見失い待ち）を消す。申請が終わった・取りやめた・手放したとき</summary>
         static void ClearTwoHand(ClientItem it)
         {
-            it.LockHandle = -1;
+            it.LockZone = -1;
             it.ReserveHand = -1;
             it.Reserved = false;
             it.LiftPending = false;
             it.LiftQueued = false;
             it.SecondHand = -1;
-            it.SecondHandle = -1;
+            it.SecondZone = -1;
             it.ReserveLostWait = false;
             it.GraceActive = false;
             it.GraceHand = -1;
