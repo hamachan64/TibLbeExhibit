@@ -47,6 +47,9 @@ namespace STYLY.TIB_Template.TreasureHaul
         readonly ReactiveProperty<int> _holdRemaining = new ReactiveProperty<int>(0);
         readonly ReactiveProperty<int> _target = new ReactiveProperty<int>(0);
         readonly ReactiveProperty<int> _total = new ReactiveProperty<int>(0);
+        // #44
+        readonly ReactiveProperty<DeviceRowData[]> _devices = new ReactiveProperty<DeviceRowData[]>(new DeviceRowData[0]);
+        readonly Subject<RoundRecord> _roundFinished = new Subject<RoundRecord>();
 
         public ReadOnlyReactiveProperty<RoundState> State => _state;
         public ReadOnlyReactiveProperty<float> RemainingSeconds => _remaining;
@@ -65,6 +68,10 @@ namespace STYLY.TIB_Template.TreasureHaul
         public ReadOnlyReactiveProperty<int> Target => _target;
         /// <summary>回収した合計額</summary>
         public ReadOnlyReactiveProperty<int> Total => _total;
+        /// <summary>端末一覧（端末番号の順。未登録は後ろに DeviceId 順）。内容が変わったときだけ流れる（F-OPS-1）</summary>
+        public ReadOnlyReactiveProperty<DeviceRowData[]> Devices => _devices;
+        /// <summary>回が終わったとき（Result → Waiting、または中断）に 1 回流れる、その回の記録（F-OPS-7。RoundLogger が書く）</summary>
+        public Observable<RoundRecord> RoundFinished => _roundFinished;
 
         // お宝（#38）
         ThTreasureSetup _setup;
@@ -111,6 +118,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             _state.Dispose(); _remaining.Dispose(); _roundId.Dispose(); _connectedCount.Dispose();
             _eligibleCount.Dispose(); _paramsVersionRp.Dispose(); _warnings.Dispose();
             _held.Dispose(); _canHold.Dispose(); _holdRemaining.Dispose(); _target.Dispose(); _total.Dispose();
+            _devices.Dispose(); _roundFinished.Dispose();
         }
 
         void Adopt(ThParamsLoadResult p, ThGameSettings settings, IEnumerable<string> settingsWarnings)
@@ -120,11 +128,12 @@ namespace STYLY.TIB_Template.TreasureHaul
             ParamsJson = JsonUtility.ToJson(p.Params);
             Settings = settings ?? new ThGameSettings();
             Registry.HostParamsVersion = p.Version;
+            Registry.AutoConfirm = p.Params.operation.autoConfirmAlignment;   // 以後に登録・再接続する端末から効く
             Machine.TrySetTimes(p.Params.progress);
             var all = new List<string>(p.Warnings);
             if (settingsWarnings != null) all.AddRange(settingsWarnings);
             _baseWarnings = all.ToArray();
-            _warnings.Value = _baseWarnings;
+            UpdateWarnings();
             _paramsVersionRp.Value = p.Version;
         }
 
@@ -148,16 +157,37 @@ namespace STYLY.TIB_Template.TreasureHaul
             return true;
         }
 
+        /// <summary>端末番号の対応表（treasure_haul_devices.json）を差し替える。並び順・練習の色の順に使う。読み込みの警告は運営UIの警告に出る</summary>
+        public void SetDeviceNumbers(ThDeviceNumbers numbers, double now)
+        {
+            numbers = numbers ?? ThDeviceNumbers.Empty;
+            Registry.Numbers = numbers;
+            var w = new string[numbers.Warnings.Count];
+            for (int i = 0; i < w.Length; i++) w[i] = numbers.Warnings[i];
+            _numberWarnings = w;
+            Refresh(now);
+        }
+
         // ---- 端末の出入り ----
 
         // 端末の登録は ThResync（と ClientNo の付け替え）だけで行う。ステルスの運営PC・クローンを接続中に数えないため。
 
         public void OnClientDisconnected(int clientNo, double now)
         {
+            _now = now;
             var deviceId = Registry.GetDeviceId(clientNo);
             Registry.Disconnect(clientNo);
-            // 切断した端末の M の片手予約を解除し、持っている・判定役のお宝をその場にそっと置かせる（設計書 3.3、F-GRAB-8）
-            // TODO(#44): 見学への切り替え（運営PCの UI）でも同じく ReleaseReservationsOf と ForceRestItemsOf を呼ぶ
+            ReleaseItemsOf(deviceId, now);
+            Refresh(now);
+        }
+
+        /// <summary>
+        /// その端末の M の片手予約を解除し、持っている・判定役のお宝をその場にそっと置かせる（設計書 3.3、F-GRAB-8）。
+        /// 切断と、回の途中の見学・位置合わせ未確認への切り替えで使う。本編は本編の表、練習中は練習用の表。参加人数・目標額は変えない。
+        /// </summary>
+        void ReleaseItemsOf(string deviceId, double now)
+        {
+            if (deviceId == null) return;
             if (_items != null && Machine.State == RoundState.Playing)
             {
                 _items.ReleaseReservationsOf(deviceId);
@@ -169,7 +199,47 @@ namespace STYLY.TIB_Template.TreasureHaul
                 _practice.ReleaseReservationsOf(deviceId);
                 _practice.ForceRestItemsOf(deviceId, now);
             }
+        }
+
+        // ---- 見学・位置合わせ確認（F-OPS-4） ----
+
+        /// <summary>
+        /// 「見学」の切り替え。見学にした端末は、回の途中なら持っている・予約しているお宝を解放する。
+        /// 参加人数・目標額は変えない（本編開始時の参加端末のまま）。見学の間、その端末のつかむ申請は <see cref="HostMessageGate"/> が捨てる。
+        /// 参加に戻すと、本編開始時の参加端末に入っていた端末だけがすぐに再びつかめる【仮】（入っていなかった端末は次の回から）。
+        /// 知らない端末なら false。
+        /// </summary>
+        public bool SetSpectator(string deviceId, bool spectator, double now)
+        {
+            if (Registry.Get(deviceId) == null) return false;
+            _now = now;
+            Registry.SetSpectator(deviceId, spectator);
+            if (spectator) ReleaseItemsOf(deviceId, now);
             Refresh(now);
+            return true;
+        }
+
+        /// <summary>「位置合わせ確認」の切り替え。未確認にした端末の扱いは <see cref="SetSpectator"/> の見学と同じ。知らない端末なら false。</summary>
+        public bool SetAlignmentConfirmed(string deviceId, bool confirmed, double now)
+        {
+            if (Registry.Get(deviceId) == null) return false;
+            _now = now;
+            Registry.SetAlignmentConfirmed(deviceId, confirmed);
+            if (!confirmed) ReleaseItemsOf(deviceId, now);
+            Refresh(now);
+            return true;
+        }
+
+        public bool ToggleSpectator(string deviceId, double now)
+        {
+            var d = Registry.Get(deviceId);
+            return d != null && SetSpectator(deviceId, !d.Spectator, now);
+        }
+
+        public bool ToggleAlignmentConfirmed(string deviceId, double now)
+        {
+            var d = Registry.Get(deviceId);
+            return d != null && SetAlignmentConfirmed(deviceId, !d.AlignmentConfirmed, now);
         }
 
         // ---- 運営の操作 ----
@@ -177,7 +247,9 @@ namespace STYLY.TIB_Template.TreasureHaul
         public bool Start(double now, long unixMs, int seed)
         {
             if (!Machine.TryStart(now, unixMs, seed)) return false;
+            _now = now;
             ClearPracticeRound();
+            BeginRecord(now, unixMs);
             // 版が違う端末にはその場で ThParams を送り直す（N-7）
             foreach (var d in Registry.Devices)
                 if (d.Connected && d.ParamsVersion != ParamsVersion && Due(_lastParamsSentAt, d.DeviceId, now)) SendParams(d.ClientNo);
@@ -215,7 +287,10 @@ namespace STYLY.TIB_Template.TreasureHaul
 
         public bool Abort(double now)
         {
+            var before = Machine.State;
             if (!Machine.Abort(now)) return false;
+            _now = now;
+            FinishRound(true, before, now);   // お宝の表・参加端末の控えが残っているうちに記録する
             SendState(now);
             Refresh(now);
             return true;
@@ -225,7 +300,11 @@ namespace STYLY.TIB_Template.TreasureHaul
 
         public void Tick(double now)
         {
-            if (Machine.Tick(now)) SendState(now);
+            _now = now;
+            var before = Machine.State;
+            bool changed = Machine.Tick(now);
+            if (changed && before != RoundState.Waiting && Machine.State == RoundState.Waiting) FinishRound(false, before, now);   // Result → Waiting
+            if (changed) SendState(now);
             if (now - _lastHeartbeatAt >= Params.progress.heartbeatInterval)
             {
                 _lastHeartbeatAt = now;
@@ -255,8 +334,10 @@ namespace STYLY.TIB_Template.TreasureHaul
         public void OnRpc(Rpc rpc, int senderClientNo, string[] args, double now)
         {
             if (senderClientNo == OwnClientNo) return;   // 自分が送った RPC の戻り
+            _now = now;
             RebindSender(senderClientNo);
             if (rpc == Rpc.ThResync) HandleResync(senderClientNo, args, now);
+            else if (rpc == Rpc.ThStatus) HandleStatus(senderClientNo, args, now);
             else if (rpc == Rpc.ThGrab || rpc == Rpc.ThLift || rpc == Rpc.ThRelease || rpc == Rpc.ThRest || rpc == Rpc.ThCollect
                 || rpc == Rpc.ThDamage || rpc == Rpc.ThPoses) HandleItemMessage(rpc, senderClientNo, args, now);
         }
@@ -329,6 +410,16 @@ namespace STYLY.TIB_Template.TreasureHaul
             if (last.TryGetValue(deviceId, out var t) && now - t < Params.progress.resendInterval * 0.5) return false;
             last[deviceId] = now;
             return true;
+        }
+
+        /// <summary>端末の状況報告（手の認識・電池）。登録済みの端末だけ。ステルスの運営PC・クローンなど未登録の送り手は無視する</summary>
+        void HandleStatus(int sender, string[] args, double now)
+        {
+            if (!ThMessages.TryDecode(args, out long _, out ThStatusMsg msg)) return;
+            var deviceId = Registry.GetDeviceId(sender);
+            if (deviceId == null) return;
+            Registry.ReportStatus(deviceId, msg.hands, msg.battery, now);
+            Refresh(now);
         }
 
         void HandleResync(int sender, string[] args, double now)
@@ -434,7 +525,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             else if (st == RoundState.Tutorial && _colorsRound != Machine.RoundId)
             {
                 _colors.Clear();
-                foreach (var kv in PracticeColors.Assign(Machine.Participants)) _colors[kv.Key] = kv.Value;
+                foreach (var kv in PracticeColors.Assign(Machine.Participants, Registry.Numbers.Compare)) _colors[kv.Key] = kv.Value;   // 端末番号の順（未登録は後ろに DeviceId 順）
                 _colorsRound = Machine.RoundId;
             }
             if (st == RoundState.Tutorial && _practice == null && _setup != null && _setup.PracticeSlots.Count > 0 && _colorsRound == Machine.RoundId)
@@ -462,6 +553,7 @@ namespace STYLY.TIB_Template.TreasureHaul
                     deviceId => Registry.Get(deviceId)?.ClientNo ?? -1, Params.treasure, Params.grip.placeSeconds);
                 if (_placeSolver != null) _items.PlaceSolver = _placeSolver;
                 _items.Log = Debug.Log;
+                _items.Confirmed = OnItemConfirmed;
                 _itemsRound = Machine.RoundId;
                 _lastItemsSentAt = double.NegativeInfinity;
             }
@@ -498,36 +590,109 @@ namespace STYLY.TIB_Template.TreasureHaul
             foreach (var it in _practice.Items) it.PracticeDevice = deviceOf[ThPractice.ColorOf(it.Index)];
             _practice.PracticeCollected = (device, at) =>
             {
-                if (!string.IsNullOrEmpty(device) && !_practiceDoneAt.ContainsKey(device)) _practiceDoneAt[device] = at;   // 1 回だけ
+                if (string.IsNullOrEmpty(device) || _practiceDoneAt.ContainsKey(device)) return;
+                _practiceDoneAt[device] = at;   // 1 回だけ
+                _record?.NotePracticeDone(device, at);
             };
         }
 
-        /// <summary>カタログのハッシュが合わない端末の警告を、起動時の警告に足す（運営UIに出る）</summary>
-        void UpdateCatalogWarnings()
+        string[] _numberWarnings = new string[0];
+        readonly SortedDictionary<string, string> _runtimeWarnings = new SortedDictionary<string, string>(StringComparer.Ordinal);
+
+        /// <summary>実行中に起きた警告（記録 CSV を書けなかったなど）を運営UIの警告に足す。message が null なら消す。key ごとに 1 件</summary>
+        public void SetRuntimeWarning(string key, string message)
         {
-            List<string> extra = null;
+            if (string.IsNullOrEmpty(key)) return;
+            if (string.IsNullOrEmpty(message)) _runtimeWarnings.Remove(key);
+            else _runtimeWarnings[key] = message;
+            UpdateWarnings();
+        }
+
+        /// <summary>
+        /// 運営UIの警告を組み直す（起動時の警告 + 端末番号の警告 + 実行中の警告 + カタログのハッシュが合わない端末）。内容が変わったときだけ差し替える
+        /// </summary>
+        void UpdateWarnings()
+        {
+            var all = new List<string>(_baseWarnings);
+            all.AddRange(_numberWarnings);
+            foreach (var w in _runtimeWarnings.Values) all.Add(w);
             foreach (var d in Registry.Devices)
             {
                 if (!d.Connected || d.CatalogHash == Registry.HostCatalogHash) continue;
-                (extra ?? (extra = new List<string>())).Add($"お宝カタログのハッシュが違うので参加できません: {d.DeviceId}（端末 {d.CatalogHash} / 運営PC {Registry.HostCatalogHash}）");
+                all.Add($"お宝カタログのハッシュが違うので参加できません: {d.DeviceId}（端末 {d.CatalogHash} / 運営PC {Registry.HostCatalogHash}）");
             }
-            int n = extra?.Count ?? 0;
             var cur = _warnings.Value;
-            bool same = cur.Length == _baseWarnings.Length + n;
-            if (same)
-            {
-                for (int i = 0; i < n && same; i++) same = cur[_baseWarnings.Length + i] == extra[i];
-            }
+            bool same = cur.Length == all.Count;
+            for (int i = 0; same && i < cur.Length; i++) same = cur[i] == all[i];
             if (same) return;
-            var all = new List<string>(_baseWarnings);
-            if (extra != null) all.AddRange(extra);
             _warnings.Value = all.ToArray();
+        }
+
+        // ---- 1 回ごとの記録（F-OPS-7。ホストが確定した出来事だけから作る） ----
+
+        RoundRecord _record;
+        double _now;
+
+        void BeginRecord(double now, long unixMs)
+        {
+            _record = new RoundRecord
+            {
+                RoundId = Machine.RoundId,
+                StartedAt = DateTimeOffset.FromUnixTimeMilliseconds(unixMs).ToLocalTime(),   // 運営PCのローカル時刻（CSV の日付はこれで決める）
+                StartNow = now,
+                Mode = Settings.mode.ToString(),
+                Extras = RoundRecord.ExtrasOf(Settings),
+                GripStyle = Settings.gripStyle.ToString(),
+                ParamsVersion = ParamsVersion,
+            };
+            _record.SetParticipants(Machine.Participants, Registry.Numbers.Compare, Registry.Numbers.NumberOf);
+        }
+
+        /// <summary>ホストの状態表が確定した出来事（本編のお宝だけ。練習用の表には付けない）を記録へ渡す</summary>
+        void OnItemConfirmed(HostItemEvent e)
+        {
+            var rec = _record;
+            if (rec == null || e.Practice) return;
+            switch (e.Kind)
+            {
+                case HostItemEventKind.Grabbed:
+                case HostItemEventKind.Lifted:
+                    rec.NoteFirstHold(e.Device, _now);
+                    break;
+                case HostItemEventKind.Damaged:
+                    rec.NoteDamage(e.Device, e.Amount);
+                    break;
+                case HostItemEventKind.Collected:
+                    rec.NoteCollect(e.Device, e.Amount, _now);
+                    break;
+            }
+        }
+
+        /// <summary>回の終わり（Result → Waiting なら aborted=false、中断なら true）。記録を確定して <see cref="RoundFinished"/> へ流す</summary>
+        void FinishRound(bool aborted, RoundState stateAtEnd, double now)
+        {
+            var r = _record;
+            if (r == null) return;
+            _record = null;
+            r.Aborted = aborted;
+            r.AbortedState = aborted ? stateAtEnd : RoundState.Waiting;
+            r.WasHeld = Machine.WasHeld;
+            r.HeldSeconds = Machine.HeldSeconds(now);
+            r.CollectedAmount = TotalAmount;
+            r.TargetAmount = TargetFor(r.ParticipantCount, Params);
+            r.DamageTotal = _items?.DamageTotal ?? 0;
+            r.SetColors(_colors);
+            _roundFinished.OnNext(r);
         }
 
         void Refresh(double now)
         {
             SyncItems();
-            UpdateCatalogWarnings();
+            UpdateWarnings();
+            if (_record != null && Machine.State != RoundState.Waiting)
+                _record.SetParticipants(Machine.Participants, Registry.Numbers.Compare, Registry.Numbers.NumberOf);   // Opening → Tutorial・Tutorial → Playing で減った分を追う
+            var rows = DeviceRowBuilder.Build(Registry, Machine.State, _practiceDoneAt, now, Params.progress.statusInterval, Params.operation.batteryWarningPercent);
+            if (!DeviceRowData.SameList(_devices.Value, rows)) _devices.Value = rows;
             _state.Value = Machine.State;
             _remaining.Value = Machine.RemainingSeconds(now);
             _roundId.Value = Machine.RoundId;

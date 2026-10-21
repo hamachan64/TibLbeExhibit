@@ -37,7 +37,13 @@ namespace STYLY.TIB_Template.TreasureHaul
         [SerializeField] TMP_Text _beginPlayLabel;
         [SerializeField] TMP_Text _totalText;
 
+        // #44: 端末一覧（行は実行時にコードで作る）。未設定なら _devicesText と同じキャンバスの下に自動で作る
+        [SerializeField, Tooltip("端末一覧の行を並べる場所。未設定なら _devicesText と同じキャンバスの下に自動で作る")] RectTransform _deviceListRoot;
+        [SerializeField, Tooltip("「接続中の端末を書き出す」ボタン。未設定なら端末一覧の先頭に自動で作る")] Button _writeTemplateButton;
+
         ThTextTable _t;
+        readonly Dictionary<string, DeviceRowView> _rows = new Dictionary<string, DeviceRowView>();
+        TMP_Text _noDevicesText;
 
         static readonly Dictionary<RoundState, ThTextId> StateIds = new Dictionary<RoundState, ThTextId>
         {
@@ -99,6 +105,9 @@ namespace STYLY.TIB_Template.TreasureHaul
             core.Total.CombineLatest(core.Target, (tot, tgt) => (tot, tgt))
                 .Subscribe(x => _totalText.text = _t.Format(ThTextId.OpTotalFormat, x.tot, x.tgt)).AddTo(this);
 
+            BuildDeviceList();
+            core.Devices.Subscribe(rows => ApplyDevices(rows)).AddTo(this);
+
             _holdButton.OnClickAsObservable().Subscribe(_ => _host.RequestToggleHold()).AddTo(this);
             _beginPlayButton.OnClickAsObservable().Subscribe(_ => _host.RequestBeginPlay()).AddTo(this);
             _startButton.OnClickAsObservable().Subscribe(_ => _host.RequestStart()).AddTo(this);
@@ -109,6 +118,61 @@ namespace STYLY.TIB_Template.TreasureHaul
             }).AddTo(this);
 
             UpdateAbortLabelLoop(destroyCancellationToken).Forget();
+        }
+
+        // ---- 端末一覧（F-OPS-1/4） ----
+
+        /// <summary>置き場所が未設定なら作り、先頭に見出しと「接続中の端末を書き出す」ボタンを置く</summary>
+        void BuildDeviceList()
+        {
+            if (_deviceListRoot == null)
+            {
+                var parent = _devicesText != null ? _devicesText.transform.parent : transform;
+                var go = new GameObject("DeviceList", typeof(RectTransform));
+                go.transform.SetParent(parent, false);
+                _deviceListRoot = (RectTransform)go.transform;
+                _deviceListRoot.anchorMin = new Vector2(0.45f, 0.3f);
+                _deviceListRoot.anchorMax = new Vector2(0.98f, 0.75f);
+                _deviceListRoot.offsetMin = Vector2.zero;
+                _deviceListRoot.offsetMax = Vector2.zero;
+                var v = go.AddComponent<VerticalLayoutGroup>();
+                v.spacing = 4f;
+                v.childAlignment = TextAnchor.UpperLeft;
+                v.childControlWidth = true;
+                v.childControlHeight = true;
+                v.childForceExpandWidth = true;
+                v.childForceExpandHeight = false;
+            }
+            var title = DeviceRowView.Cell(_deviceListRoot, _devicesText, 400f);
+            title.text = _t.Get(ThTextId.OpDeviceListTitle);
+            if (_writeTemplateButton == null)
+            {
+                _writeTemplateButton = DeviceRowView.CreateButton(_deviceListRoot, _devicesText, 300f, out var label);
+                label.text = _t.Get(ThTextId.OpWriteDeviceTemplate);
+            }
+            _writeTemplateButton.OnClickAsObservable().Subscribe(_ => _host.RequestWriteDeviceTemplate()).AddTo(this);
+            _noDevicesText = DeviceRowView.Cell(_deviceListRoot, _devicesText, 400f);
+            _noDevicesText.text = _t.Get(ThTextId.OpNoDevices);
+        }
+
+        void ApplyDevices(DeviceRowData[] rows)
+        {
+            if (_deviceListRoot == null) return;
+            _noDevicesText.gameObject.SetActive(rows.Length == 0);
+            for (int i = 0; i < rows.Length; i++)
+            {
+                var d = rows[i];
+                if (!_rows.TryGetValue(d.DeviceId, out var row))
+                {
+                    row = DeviceRowView.Create(_deviceListRoot, _devicesText);
+                    string id = d.DeviceId;
+                    row.SpectatorButton.OnClickAsObservable().Subscribe(_ => _host.RequestToggleSpectator(id)).AddTo(row);
+                    row.AlignmentButton.OnClickAsObservable().Subscribe(_ => _host.RequestToggleAlignment(id)).AddTo(row);
+                    _rows[id] = row;
+                }
+                row.transform.SetAsLastSibling();   // 先頭から順に末尾へ回して、見出し・ボタンの後ろに一覧の順で並べる
+                row.Apply(d, _t);
+            }
         }
 
         async UniTaskVoid UpdateAbortLabelLoop(System.Threading.CancellationToken ct)

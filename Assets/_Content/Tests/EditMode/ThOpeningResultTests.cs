@@ -14,7 +14,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
 
         static HostRoundMachine InTutorial(out double now, float hold = 10f)
         {
-            var reg = new DeviceRegistry { HostParamsVersion = "v" };
+            var reg = new DeviceRegistry { HostParamsVersion = "v", AutoConfirm = true };
             reg.Connect("A", 2); reg.ReportParamsVersion("A", "v"); reg.ReportCatalogHash("A", "");
             var m = new HostRoundMachine(reg, Times(hold));
             now = 100;
@@ -81,7 +81,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
 
         [Test] public void Tutorial以外では保留も本編開始もできない()
         {
-            var reg = new DeviceRegistry { HostParamsVersion = "v" };
+            var reg = new DeviceRegistry { HostParamsVersion = "v", AutoConfirm = true };
             reg.Connect("A", 2); reg.ReportParamsVersion("A", "v"); reg.ReportCatalogHash("A", "");
             var m = new HostRoundMachine(reg, Times());
             Assert.IsFalse(m.TryHold(0)); Assert.IsFalse(m.TryBeginPlay(0)); Assert.IsFalse(m.TryReleaseHold(0));   // Waiting
@@ -94,7 +94,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
 
         [Test] public void 本編開始は保留中でも即Playingで参加端末が確定する()
         {
-            var reg = new DeviceRegistry { HostParamsVersion = "v" };
+            var reg = new DeviceRegistry { HostParamsVersion = "v", AutoConfirm = true };
             reg.Connect("A", 2); reg.ReportParamsVersion("A", "v"); reg.ReportCatalogHash("A", "");
             reg.Connect("B", 3); reg.ReportParamsVersion("B", "v"); reg.ReportCatalogHash("B", "");
             var m = new HostRoundMachine(reg, Times());
@@ -338,6 +338,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
             _net = new FakeNetwork();
             var node = _net.Add(HostNo);
             var p = new ThParams();
+            p.operation.autoConfirmAlignment = true;   // 位置合わせは確認済み始まりで検証する（#44: 既定は未確認始まり）
             p.progress.openingSeconds = 3; p.progress.practiceSeconds = 6; p.progress.holdMaxSeconds = 10; p.progress.playingSeconds = 30; p.progress.resultSeconds = 3;
             p.layout.rows[0].targetAmount = 100; p.layout.rows[1].targetAmount = 100;
             _host = new SessionHostCore(node, ThParamsLoader.Load(p, null, null), new ThGameSettings(), null, 0, no => _resolve.TryGetValue(no, out var v) ? v : null, MakeSetup());

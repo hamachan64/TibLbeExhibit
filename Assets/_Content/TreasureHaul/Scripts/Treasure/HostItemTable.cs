@@ -6,6 +6,27 @@ namespace STYLY.TIB_Template.TreasureHaul
     /// <summary>ホストが全員へ送るメッセージの出口（SessionHostCore が RoundId をつけて送る）</summary>
     public delegate void ThEmit(Rpc rpc, object dto);
 
+    /// <summary>ホストが確定した出来事の種類（記録用。#44）</summary>
+    public enum HostItemEventKind { Grabbed, Lifted, Damaged, Collected }
+
+    /// <summary>
+    /// ホストが確定した出来事 1 件（設計書 8章の個人の記録の材料）。Device は持った人・減額を記録する人・回収した人（判定役＝最後に持った人）。
+    /// 誰にも付けられないときは null。Amount は減額の額 / 回収した価値（Grabbed・Lifted は 0）。
+    /// </summary>
+    public readonly struct HostItemEvent
+    {
+        public readonly HostItemEventKind Kind;
+        public readonly string Device;
+        public readonly int Item;
+        public readonly bool Practice;
+        public readonly int Amount;
+
+        public HostItemEvent(HostItemEventKind kind, string device, int item, bool practice, int amount)
+        {
+            Kind = kind; Device = device; Item = item; Practice = practice; Amount = amount;
+        }
+    }
+
     /// <summary>ホストの状態表の 1 行（設計書 4.2）</summary>
     public sealed class HostItem
     {
@@ -19,6 +40,8 @@ namespace STYLY.TIB_Template.TreasureHaul
         /// <summary>判定役（今の持ち主、いなければ最後の持ち主）</summary>
         public string ControllerDevice;
         public int ControllerClientNo = -1;
+        /// <summary>最後に持ち主を認めた端末（切断などで判定役が外れても残る。記録用の「最後に持った人」。#44）</summary>
+        public string LastHolderDevice;
         public int Gen;
         public int BaseValue;
         public int Value;
@@ -72,6 +95,13 @@ namespace STYLY.TIB_Template.TreasureHaul
         public bool IsPracticeTable => _practiceTable;
         /// <summary>練習用お宝を回収した（DeviceId = 割り当てられた端末、now）。1 つの練習用お宝につき 1 回だけ</summary>
         public System.Action<string, double> PracticeCollected { get; set; }
+        /// <summary>
+        /// ホストが確定した出来事（持った・持ち上げた・減額を適用した・回収した）の出口。記録用（#44）。null なら出さない。
+        /// 再送への同じ返事・捨てた報告では呼ばない。
+        /// </summary>
+        public System.Action<HostItemEvent> Confirmed { get; set; }
+        void Confirm(HostItemEventKind kind, string device, HostItem it, int amount) =>
+            Confirmed?.Invoke(new HostItemEvent(kind, device, it.Index, it.Practice, amount));
         /// <summary>回収した合計額（本編のお宝だけ）</summary>
         public int Total { get; private set; }
         /// <summary>適用した減額の合計（回ごと。#42 の「今回の損害」、#44 の記録の材料。表示は作らない）</summary>
@@ -163,7 +193,9 @@ namespace STYLY.TIB_Template.TreasureHaul
             if (it.Kind == TreasureKind.S) it.Revealed = true;   // 以後ずっと公開
             it.ExemptReported = false;
             it.HasLastPos = false;   // 前の持ち主の位置を使わない
+            it.LastHolderDevice = deviceId;
             EmitGrabbed(it);
+            if (it.Kind == TreasureKind.S) Confirm(HostItemEventKind.Grabbed, deviceId, it, 0);   // M の片手予約は「持った」に数えない（Lifted で数える）
         }
 
         // ---- M の両手成立 ----
@@ -184,6 +216,7 @@ namespace STYLY.TIB_Template.TreasureHaul
                 it.Revealed = true;   // 以後ずっと公開
                 it.ExemptReported = false;
                 EmitLifted(it);
+                Confirm(HostItemEventKind.Lifted, deviceId, it, 0);
                 return;
             }
             if (match && it.State == ItemState.Held) { EmitLifted(it); return; }   // 同じ申請の再送
@@ -341,6 +374,7 @@ namespace STYLY.TIB_Template.TreasureHaul
 
         void Collect(HostItem it, double now)
         {
+            string collector = it.ControllerDevice ?? it.LastHolderDevice;
             it.Gone = true;
             it.State = ItemState.Collected;
             it.OwnerDevice = null;
@@ -350,6 +384,8 @@ namespace STYLY.TIB_Template.TreasureHaul
             if (!it.Practice) Total += it.Value;   // 練習用は合計額に入れない（ThCollected の total は本編の合計のまま）
             _emit(Rpc.ThCollected, new ThCollectedMsg { item = it.Index, gen = it.Gen, total = Total, value = it.Value, damaged = it.Value < it.BaseValue });
             if (it.Practice) PracticeCollected?.Invoke(it.PracticeDevice, now);
+            // 回収した人 = 判定役（最後に持った人）。切断などで判定役が外れていても、最後に持ち主を認めた端末を使う
+            Confirm(HostItemEventKind.Collected, collector, it, it.Value);
         }
 
         // ---- 免除の報告（ThPoses） ----
@@ -431,6 +467,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             if (!r.Applied) return;
 
             // 記録用（設計書 8章）: そのときの持ち主、いなければ判定役（最後に持った人）。誰も持ったことがなければ -1（当てた側の人には付けない）
+            string recordDevice = it.OwnerDevice ?? it.ControllerDevice ?? it.LastHolderDevice;   // 消滅で持ち主を外す前に控える（#44 の記録用）
             int by = it.OwnerDevice != null ? CurrentNo(it.OwnerDevice, it.OwnerClientNo)
                 : it.ControllerDevice != null ? CurrentNo(it.ControllerDevice, it.ControllerClientNo)
                 : -1;
@@ -453,6 +490,7 @@ namespace STYLY.TIB_Template.TreasureHaul
                 item = it.Index, gen = it.Gen, hits = it.Hits, amount = r.Amount, value = it.Value,
                 pos = pos, destroyed = r.Destroyed, by = by, revealed = it.Revealed,
             });
+            Confirm(HostItemEventKind.Damaged, recordDevice, it, r.Amount);
         }
 
         // ---- 状態表 ----
