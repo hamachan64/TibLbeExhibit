@@ -115,6 +115,8 @@ namespace STYLY.TIB_Template.TreasureHaul
         CsvAborted,
         CsvYes,
         CsvNo,
+        /// <summary>端末一覧の列見出し（カンマ区切りで 7 列: 端末番号・接続・位置合わせ・手・電池・練習・見学）</summary>
+        OpDeviceColumns,
     }
 
     [Serializable]
@@ -144,21 +146,21 @@ namespace STYLY.TIB_Template.TreasureHaul
             { ThTextId.OpDeviceUnregisteredFormat, "未登録 {0}" },
             { ThTextId.OpDeviceConnected, "接続" },
             { ThTextId.OpDeviceDisconnected, "切断" },
-            { ThTextId.OpAlignConfirmed, "位置合わせ 確認済み" },
-            { ThTextId.OpAlignUnconfirmed, "位置合わせ 未確認" },
+            { ThTextId.OpAlignConfirmed, "確認済み" },
+            { ThTextId.OpAlignUnconfirmed, "未確認" },
             { ThTextId.OpHandBoth, "両手" },
             { ThTextId.OpHandOne, "片手" },
             { ThTextId.OpHandNone, "なし" },
             { ThTextId.OpStatusUnknown, "不明" },
             { ThTextId.OpBatteryFormat, "{0}%" },
             { ThTextId.OpBatteryUnknown, "不明" },
-            { ThTextId.OpPracticeDone, "練習 済" },
-            { ThTextId.OpPracticeNotDone, "練習 未" },
+            { ThTextId.OpPracticeDone, "済" },
+            { ThTextId.OpPracticeNotDone, "未" },
             { ThTextId.OpSpectatorTag, "見学" },
             { ThTextId.OpParticipantTag, "参加" },
             { ThTextId.OpSetSpectator, "見学にする" },
             { ThTextId.OpClearSpectator, "参加に戻す" },
-            { ThTextId.OpConfirmAlignment, "位置合わせを確認" },
+            { ThTextId.OpConfirmAlignment, "確認する" },
             { ThTextId.OpUnconfirmAlignment, "確認を外す" },
             { ThTextId.OpWriteDeviceTemplate, "接続中の端末を書き出す" },
             { ThTextId.OpNoDevices, "端末がありません" },
@@ -168,6 +170,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             { ThTextId.CsvAborted, "中断" },
             { ThTextId.CsvYes, "はい" },
             { ThTextId.CsvNo, "いいえ" },
+            { ThTextId.OpDeviceColumns, "端末,接続,位置合わせ,手,電池,練習,見学" },
         };
 
         /// <summary>組み込みの既定の文言（予備フォントの文字集めに使う。ThFontExtraMenu）</summary>

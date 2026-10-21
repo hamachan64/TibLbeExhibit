@@ -489,3 +489,12 @@
 - 文言を `ThTextTable.asset` に足せないときは、`ThTextTable` の組み込みの既定の文言（`Fallbacks`）に入れる。日本語フォントは **Static のアトラス**なので、新しい漢字（例「学」）や記号（✓・—）は四角になる。`ThFontExtraMenu.CollectCharacters` と `ThContentTests` の文字の検査は既定の文言も集めるようにしたので、ローカルで「文言の文字をフォントに足す」を実行するまで文字の検査テストは落ちる（それが正しい合図）。
 - `DeviceRegistry` を「未確認始まり」にすると、既存のテストのホスト・登録表がすべて参加できなくなる。テスト用は `operation.autoConfirmAlignment = true`（`Registry.AutoConfirm`）にする。
 - CSV を Excel で開いていると `FileShare.Read` の追記でも開けずに失敗する。`RoundLogger` は書けなかった行を覚えて、次の回の終わりに書き直す（アプリを閉じると消える）。
+
+### #44 をローカルの Unity で仕上げたとき（2026-10-21）
+- **クラウドで書いたコードは、まずコンパイルで落ちることがある**（テストのヘルパーを別のテストクラスから呼んでいた CS0103）。引き継いだらコンパイル → EditMode の順に必ず通す。
+- **実行時にコードで作るボタンは、`LayoutElement` に高さも入れる**。`HorizontalLayoutGroup` / `VerticalLayoutGroup` の `childControlHeight = true` の下では、文字を持たない `Image` の推奨の高さは 0 なので、高さ 0 の押せないボタンになり、ラベルの文字が隣の行に重なる。
+- **運営UIは横長（キャンバス基準 1280×720、match 0.5）**。メインのエディタの Game View が縦長だと、はみ出しが分からない。dynamic code（Restricted）は `Assembly.GetType` と `File.WriteAllBytes` を止めるので、Game View の大きさの変更も画像の保存もできない。Play 中にキャンバスを一時的に `ScreenSpaceCamera`（`RenderTexture` 1920×1080 などのカメラ）にし、その RT を `RawImage` で Game View に重ねて `uloop screenshot` で撮ると、横長の見え方を確かめられる。終わったら `ScreenSpaceOverlay` に戻す。16:10（1440×900）ではキャンバスの幅が約 1214 に縮む。
+- **運営シーンはメインのエディタで、UserClient のビルドプロファイルのまま Play できる**（Environment シーンが UserClient のプロファイルにも入っている）。プロファイルを Operator（mac）に切り替えるとプラットフォームが変わり、全アセットの再インポートになるので避ける。端末役はクローン2台を `ProtoBatchRunner.PlayUserClient` で batchmode 起動し、NetSync サーバーはパッケージと同じ版を `uvx styly-netsync-server@0.17.4` で起動した。運営PC側は Play 後にリフレクションで `_serverAddress = "localhost"` にして `StopNetworking` → `StartNetworking`（1回目は Play 直後で効かず、数秒後にもう一度で接続）。
+- **「文言の文字をフォントに足す」は、Play を止めた直後に実行しない**。Play 直後に実行したら、本体フォントに無いはずの「学」が集める文字から漏れ、予備フォントから消えた（もう一度実行したら直った）。Play の後に実行したときは、ログの「本体フォントに無い文字」と、フォントの差分を確かめる。
+- **練習中に見学にした端末は、本編の参加端末から外れ、目標額もその人数分になる**（Tutorial → Playing で参加端末を確定するため。F-FLOW-4、企画書 4.2 の「見学にして本編を始める」）。「参加人数・目標額が変わらない」のは本編中に切り替えたとき。
+- `pgrep -f "<クローンのパス>"` は、バックグラウンドで起動したときの zsh の親プロセスも拾うので、`kill` に PID が2つ渡って失敗する。`Unity.app/Contents/MacOS/Unity -batchmode -projectPath <パス>` まで含めて絞る。

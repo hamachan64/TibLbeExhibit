@@ -7,7 +7,7 @@ namespace STYLY.TIB_Template.TreasureHaul
     /// <summary>
     /// 運営UIの端末一覧の 1 行（F-OPS-1/4）。プレハブを使わず、実行時にコードで作る（<see cref="Create"/>）。
     /// 表示する内容の判断は <see cref="DeviceRowData"/>（SessionHostCore が作る）にあり、ここは文字と色にするだけ。
-    /// 列: 端末番号 / 接続 / 位置合わせ / 手 / 電池 / 練習 / 見学 / [見学ボタン] / [位置合わせ確認ボタン]
+    /// 列: 端末番号 / 接続 / 位置合わせ / 手 / 電池 / 練習 / 見学 / [見学ボタン] / [位置合わせ確認ボタン]。列の名前は見出しの行（<see cref="CreateHeader"/>）に出す
     /// </summary>
     public sealed class DeviceRowView : MonoBehaviour
     {
@@ -16,6 +16,19 @@ namespace STYLY.TIB_Template.TreasureHaul
         static readonly Color WarningColor = new Color(1f, 0.55f, 0.1f, 1f);
         static readonly Color AttentionColor = new Color(1f, 0.9f, 0.3f, 1f);
 
+        /// <summary>一覧の文字の大きさ（キャンバス基準 1280×720 で。1080p の画面で 30px）</summary>
+        public const float FontSize = 20f;
+        /// <summary>1 行の高さ・ボタンの高さ</summary>
+        public const float RowHeight = 32f;
+        const float ButtonHeight = 30f;
+        const float Spacing = 6f;
+        /// <summary>
+        /// 列幅（端末番号・接続・位置合わせ・手・電池・練習・見学・[見学ボタン]・[確認ボタン]）。文字 20 で最も長い文言が入る幅。
+        /// 合計 約 740 で、運営UIの右側（16:10 の画面で約 750）に収まる。文言を長くしたら合わせて広げる。
+        /// </summary>
+        static readonly float[] ColumnWidths = { 135f, 44f, 104f, 44f, 52f, 44f, 44f, 112f, 112f };
+        const int TextColumns = 7;
+
         TMP_Text _number, _connection, _alignment, _hand, _battery, _practice, _spectator;
         TMP_Text _spectatorLabel, _alignmentLabel;
 
@@ -23,33 +36,54 @@ namespace STYLY.TIB_Template.TreasureHaul
         public Button SpectatorButton { get; private set; }
         public Button AlignmentButton { get; private set; }
 
-        /// <param name="style">フォント・文字の大きさ・色の見本（既存の運営UIの文字。日本語フォントを引き継ぐ）</param>
+        /// <param name="style">フォントの見本（既存の運営UIの文字。日本語フォントを引き継ぐ）</param>
         public static DeviceRowView Create(Transform parent, TMP_Text style)
         {
-            var go = new GameObject("DeviceRow", typeof(RectTransform));
-            go.transform.SetParent(parent, false);
+            var go = CreateRow(parent, "DeviceRow");
             var row = go.AddComponent<DeviceRowView>();
+            var c = new TMP_Text[TextColumns];
+            for (int i = 0; i < TextColumns; i++) c[i] = Cell(go.transform, style, ColumnWidths[i]);
+            row._number = c[0];
+            row._connection = c[1];
+            row._alignment = c[2];
+            row._hand = c[3];
+            row._battery = c[4];
+            row._practice = c[5];
+            row._spectator = c[6];
+            row.SpectatorButton = CreateButton(go.transform, style, ColumnWidths[7], out row._spectatorLabel);
+            row.AlignmentButton = CreateButton(go.transform, style, ColumnWidths[8], out row._alignmentLabel);
+            return row;
+        }
+
+        /// <summary>列見出しの行（<paramref name="headers"/> はカンマ区切りの見出し。ボタンの列は空ける）</summary>
+        public static void CreateHeader(Transform parent, TMP_Text style, string headers)
+        {
+            var go = CreateRow(parent, "DeviceHeader");
+            var names = headers.Split(',');
+            for (int i = 0; i < ColumnWidths.Length; i++)
+            {
+                var cell = Cell(go.transform, style, ColumnWidths[i]);
+                cell.text = i < TextColumns && i < names.Length ? names[i] : "";
+                cell.color = DimColor;
+            }
+        }
+
+        /// <summary>横に並べる行（高さ <see cref="RowHeight"/>）</summary>
+        public static GameObject CreateRow(Transform parent, string name)
+        {
+            var go = new GameObject(name, typeof(RectTransform));
+            go.transform.SetParent(parent, false);
             var layout = go.AddComponent<HorizontalLayoutGroup>();
-            layout.spacing = 8f;
+            layout.spacing = Spacing;
             layout.childAlignment = TextAnchor.MiddleLeft;
             layout.childControlWidth = true;
             layout.childControlHeight = true;
             layout.childForceExpandWidth = false;
             layout.childForceExpandHeight = false;
             var rowLe = go.AddComponent<LayoutElement>();
-            rowLe.preferredHeight = 40f;
-            rowLe.minHeight = 40f;
-
-            row._number = Cell(go.transform, style, 150f);
-            row._connection = Cell(go.transform, style, 70f);
-            row._alignment = Cell(go.transform, style, 190f);
-            row._hand = Cell(go.transform, style, 70f);
-            row._battery = Cell(go.transform, style, 70f);
-            row._practice = Cell(go.transform, style, 110f);
-            row._spectator = Cell(go.transform, style, 60f);
-            row.SpectatorButton = CreateButton(go.transform, style, 150f, out row._spectatorLabel);
-            row.AlignmentButton = CreateButton(go.transform, style, 200f, out row._alignmentLabel);
-            return row;
+            rowLe.preferredHeight = RowHeight;
+            rowLe.minHeight = RowHeight;
+            return go;
         }
 
         public static TMP_Text Cell(Transform parent, TMP_Text style, float width)
@@ -63,6 +97,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             var le = go.AddComponent<LayoutElement>();
             le.preferredWidth = width;
             le.minWidth = width;
+            le.preferredHeight = RowHeight;
             return tmp;
         }
 
@@ -74,9 +109,12 @@ namespace STYLY.TIB_Template.TreasureHaul
             image.color = new Color(0.25f, 0.25f, 0.3f, 1f);
             var button = go.AddComponent<Button>();
             button.targetGraphic = image;
+            // 高さも決める（親のレイアウトが子の高さを決めるので、無いと Image の推奨高さ 0 になって押せない）
             var le = go.AddComponent<LayoutElement>();
             le.preferredWidth = width;
             le.minWidth = width;
+            le.preferredHeight = ButtonHeight;
+            le.minHeight = ButtonHeight;
 
             var lgo = new GameObject("Label", typeof(RectTransform));
             lgo.transform.SetParent(go.transform, false);
@@ -94,11 +132,8 @@ namespace STYLY.TIB_Template.TreasureHaul
 
         static void StyleLike(TMP_Text tmp, TMP_Text style)
         {
-            if (style != null)
-            {
-                tmp.font = style.font;
-                tmp.fontSize = style.fontSize;
-            }
+            if (style != null) tmp.font = style.font;
+            tmp.fontSize = FontSize;
             tmp.color = NormalColor;
             tmp.textWrappingMode = TextWrappingModes.NoWrap;
         }

@@ -122,17 +122,19 @@ namespace STYLY.TIB_Template.TreasureHaul
 
         // ---- 端末一覧（F-OPS-1/4） ----
 
-        /// <summary>置き場所が未設定なら作り、先頭に見出しと「接続中の端末を書き出す」ボタンを置く</summary>
+        /// <summary>置き場所が未設定なら作り、先頭に「端末一覧 [接続中の端末を書き出す]」の行と列見出しの行を置く</summary>
         void BuildDeviceList()
         {
             if (_deviceListRoot == null)
             {
+                // 右上（左の状態表示の右・下の警告の文字より上）に置く。左の状態表示は最も長い行で幅 約 440（キャンバス基準 1280×720）、
+                // 警告の文字は下から 380 まで。16:10 の画面でもキャンバスの幅は約 1214 なので、0.37 から始めれば重ならない
                 var parent = _devicesText != null ? _devicesText.transform.parent : transform;
                 var go = new GameObject("DeviceList", typeof(RectTransform));
                 go.transform.SetParent(parent, false);
                 _deviceListRoot = (RectTransform)go.transform;
-                _deviceListRoot.anchorMin = new Vector2(0.45f, 0.3f);
-                _deviceListRoot.anchorMax = new Vector2(0.98f, 0.75f);
+                _deviceListRoot.anchorMin = new Vector2(0.37f, 0.57f);
+                _deviceListRoot.anchorMax = new Vector2(0.99f, 0.98f);
                 _deviceListRoot.offsetMin = Vector2.zero;
                 _deviceListRoot.offsetMax = Vector2.zero;
                 var v = go.AddComponent<VerticalLayoutGroup>();
@@ -143,14 +145,16 @@ namespace STYLY.TIB_Template.TreasureHaul
                 v.childForceExpandWidth = true;
                 v.childForceExpandHeight = false;
             }
-            var title = DeviceRowView.Cell(_deviceListRoot, _devicesText, 400f);
+            var titleRow = DeviceRowView.CreateRow(_deviceListRoot, "DeviceListTitle");
+            var title = DeviceRowView.Cell(titleRow.transform, _devicesText, 135f);
             title.text = _t.Get(ThTextId.OpDeviceListTitle);
             if (_writeTemplateButton == null)
             {
-                _writeTemplateButton = DeviceRowView.CreateButton(_deviceListRoot, _devicesText, 300f, out var label);
+                _writeTemplateButton = DeviceRowView.CreateButton(titleRow.transform, _devicesText, 240f, out var label);
                 label.text = _t.Get(ThTextId.OpWriteDeviceTemplate);
             }
             _writeTemplateButton.OnClickAsObservable().Subscribe(_ => _host.RequestWriteDeviceTemplate()).AddTo(this);
+            DeviceRowView.CreateHeader(_deviceListRoot, _devicesText, _t.Get(ThTextId.OpDeviceColumns));
             _noDevicesText = DeviceRowView.Cell(_deviceListRoot, _devicesText, 400f);
             _noDevicesText.text = _t.Get(ThTextId.OpNoDevices);
         }
