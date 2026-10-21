@@ -2,7 +2,7 @@
 
 Exports to Cart/Output/: ExcavationCart.fbx/.blend (runtime), Cart_Review.blend,
 cart_stats.json, Cart_WornPaint.png, empty.png / loaded.png previews.
-Reuses the stage's primitive helpers and original material atlas (Stage/build_stage.py).
+Uses the primitive helpers and original material atlas that the old stage builder had (copied in below).
 Keeps the user's active scene and objects intact. No external assets.
 Logical X=width, D=forward, H=up; Blender=(X,-D,H).
 Version history lives in Git (first draft: commit 07e74b8, Cart/ root files).
@@ -15,8 +15,147 @@ from mathutils import Vector, Matrix
 HERE = Path(__file__).resolve().parent
 OUT = HERE / 'Output'
 TREASURES = HERE.parent / 'Treasures'
-spec = importlib.util.spec_from_file_location('th_local_stage_tools', HERE.parent / 'Stage/build_stage.py')
-stage = importlib.util.module_from_spec(spec); spec.loader.exec_module(stage)
+
+
+# ---- helpers formerly imported from Stage/build_stage.py (that file was rewritten on 2026-10-21) ----
+def activate(objects):
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj in objects: obj.select_set(True)
+    bpy.context.view_layer.objects.active = objects[0]
+
+
+def bounds(objects):
+    points = [o.matrix_world @ Vector(c) for o in objects if o.type == 'MESH' for c in o.bound_box]
+    return [[min(p[i] for p in points), max(p[i] for p in points)] for i in range(3)]
+
+
+def stats(objects):
+    meshes = [o for o in objects if o.type == 'MESH']
+    for o in meshes: o.data.calc_loop_triangles()
+    return dict(meshes=len(meshes), triangles=sum(len(o.data.loop_triangles) for o in meshes),
+                vertices=sum(len(o.data.vertices) for o in meshes),
+                material_slots=sum(len(o.data.materials) for o in meshes))
+
+
+class StageBuilder:
+    """Primitive helpers and the original 8-swatch atlas, kept from the pre-2026-10-21 stage builder (the stage no longer uses them)."""
+    def make_base_materials(self, texture_dir=None):
+        """Original atlas and solid materials. The cart uses this without the stage
+        recolours; texture_dir=None packs the images without writing PNG files."""
+        colors = [(.16, .205, .20), (.34, .37, .32), (.10, .16, .15), (.055, .067, .07),
+                  (.28, .13, .067), (.47, .43, .30), (.54, .34, .09), (.09, .10, .085)]
+        metallic = [0, 0, .65, .75, .28, .35, .2, 0]
+        roughness = [.9, .85, .65, .55, .88, .66, .72, .96]
+        n = 128; rng = np.random.default_rng(4618)
+        basec = np.zeros((n, n * 8, 4), dtype=np.float32); metal = basec.copy(); rough = basec.copy()
+        y, x = np.mgrid[0:n, 0:n]
+        for tile, color in enumerate(colors):
+            coarse = rng.random((16, 16)); noise = np.repeat(np.repeat(coarse, 8, 0), 8, 1)
+            noise = .65 * noise + .35 * rng.random((n, n))
+            border = np.minimum.reduce([x, y, n - 1 - x, n - 1 - y]) / n
+            grime = np.clip((.2 - border) * 2.5, 0, .3)
+            value = .75 + .35 * noise - grime
+            rgb = np.array(color)[None, None, :] * value[..., None]
+            scratch = (rng.random((n, n)) > .992)  # small mineral inclusions
+            rgb[scratch] *= 1.3
+            basec[:, tile * n:(tile + 1) * n, :3] = np.clip(rgb, 0, 1)
+            metal[:, tile * n:(tile + 1) * n, :3] = metallic[tile]
+            rough[:, tile * n:(tile + 1) * n, :3] = np.clip(roughness[tile] + (noise - .5) * .12, 0, 1)[..., None]
+        images = []
+        for label, data in [('BaseColor', basec), ('Metallic', metal), ('Roughness', rough)]:
+            data[:, :, 3] = 1
+            im = bpy.data.images.new('THStage_' + label, width=n * 8, height=n, alpha=False)
+            if label != 'BaseColor': im.colorspace_settings.name = 'Non-Color'
+            im.pixels.foreach_set(data.ravel())
+            if texture_dir:
+                im.filepath_raw = str(texture_dir / ('Stage_' + label + '.png')); im.file_format = 'PNG'; im.save()
+            im.pack(); images.append(im)
+        self.surface = bpy.data.materials.new('THStage_SharedSurface'); self.surface.use_nodes = True
+        bs = next(n for n in self.surface.node_tree.nodes if n.type == 'BSDF_PRINCIPLED')
+        for im, socket in zip(images, ('Base Color', 'Metallic', 'Roughness')):
+            tex = self.surface.node_tree.nodes.new('ShaderNodeTexImage'); tex.image = im
+            self.surface.node_tree.links.new(tex.outputs['Color'], bs.inputs[socket])
+        self.amber = self.solid('THStage_AmberLocator', (.8, .32, .055, 1), 1.8)
+        self.teal = self.solid('THStage_ExtractionSignal', (.08, .6, .45, 1), 1.8)
+        self.dark = self.solid('THStage_DarkRecess', (.018, .023, .022, 1))
+        self.floor = self.solid('THStage_PREVIEW_RealFloor', (.24, .26, .26, 1))
+
+
+    def solid(self, name, color, emission=0):
+        m = bpy.data.materials.new(name); m.use_nodes = True
+        bs = next(n for n in m.node_tree.nodes if n.type == 'BSDF_PRINCIPLED')
+        bs.inputs['Base Color'].default_value = color; bs.inputs['Roughness'].default_value = .8
+        if emission:
+            bs.inputs['Emission Color'].default_value = color; bs.inputs['Emission Strength'].default_value = emission
+        return m
+
+    # ---- primitives; each module is a group of parts joined in finish() ----
+    def begin(self, name):
+        self.parts = []; self.name = name
+
+    def own(self, obj, label, tile, material=None):
+        obj.name = self.name + '_' + label
+        for c in list(obj.users_collection): c.objects.unlink(obj)
+        self.runtime.objects.link(obj); obj.parent = self.root
+        obj.data.materials.append(material or self.surface)
+        # Planar per-face UVs into the atlas tile.
+        uv = obj.data.uv_layers.new(name='UVMap') if not obj.data.uv_layers else obj.data.uv_layers.active
+        for poly in obj.data.polygons:
+            axis = max(range(3), key=lambda i: abs(poly.normal[i])); axes = [i for i in range(3) if i != axis]
+            coords = [obj.data.vertices[obj.data.loops[li].vertex_index].co for li in poly.loop_indices]
+            low = [min(v[a] for v in coords) for a in axes]; high = [max(v[a] for v in coords) for a in axes]
+            for li, v in zip(poly.loop_indices, coords):
+                u = (v[axes[0]] - low[0]) / max(1e-6, high[0] - low[0]); w = (v[axes[1]] - low[1]) / max(1e-6, high[1] - low[1])
+                uv.data[li].uv = ((tile + .07 + .86 * u) / 8, .07 + .86 * w)
+        self.parts.append(obj)
+        return obj
+
+    def box(self, label, pos, size, tile=0, bevel=.015, mat=None, rotation=0):
+        x, d, h = pos
+        bpy.ops.mesh.primitive_cube_add(size=1, location=(x, -d, h))
+        obj = bpy.context.object; obj.scale = size
+        activate([obj]); bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        if bevel:
+            mod = obj.modifiers.new('Worn bevel', 'BEVEL'); mod.width = min(bevel, min(size) * .2); mod.segments = 1
+            bpy.ops.object.modifier_apply(modifier=mod.name)
+        obj.rotation_euler.z = rotation
+        return self.own(obj, label, tile, mat)
+
+    def cylinder(self, label, pos, radius, depth, tile=0, vertices=12, rotation=(0, 0, 0), mat=None):
+        x, d, h = pos
+        bpy.ops.mesh.primitive_cylinder_add(vertices=vertices, radius=radius, depth=depth, location=(x, -d, h), rotation=rotation)
+        return self.own(bpy.context.object, label, tile, mat)
+
+    def patch(self, label, vertices, tile):
+        # Convex chipped patch, normal points out of the visible surface.
+        mesh = bpy.data.meshes.new(label)
+        mesh.from_pydata(vertices, [], [tuple(range(len(vertices)))]); mesh.update()
+        obj = bpy.data.objects.new(label, mesh); self.runtime.objects.link(obj)
+        return self.own(obj, label, tile)
+
+    def collider(self, name, pos, size):
+        self.colliders.append(dict(name=name, center_unity_xyz=[pos[0], pos[2], pos[1]], size_unity_xyz=[size[0], size[2], size[1]], rotation_unity_xyz=[0, 0, 0]))
+
+    def finish(self):
+        activate(self.parts); bpy.ops.object.join(); obj = bpy.context.object; obj.name = self.name
+        obj['module_id'] = self.name
+        old = list(obj.data.materials); unique = list(dict.fromkeys(old))
+        ids = [unique.index(old[p.material_index]) for p in obj.data.polygons]
+        obj.data.materials.clear()
+        for mat in unique: obj.data.materials.append(mat)
+        for poly, mi in zip(obj.data.polygons, ids): poly.material_index = mi
+        activate([obj]); bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+        self.modules.append(obj)
+        return obj
+
+
+
+class _Stage:   # keeps the stage.<name> call sites below unchanged
+    StageBuilder = StageBuilder
+    activate = staticmethod(activate); bounds = staticmethod(bounds); stats = staticmethod(stats)
+
+
+stage = _Stage
 
 
 class CartBuilder(stage.StageBuilder):
