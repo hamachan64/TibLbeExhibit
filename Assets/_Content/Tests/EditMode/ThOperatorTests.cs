@@ -296,6 +296,8 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
     /// <summary>ホスト（SessionHostCore）の見学・未確認・状況報告・記録（#44）。端末は偽の送信口で代用し、メッセージを直接渡す</summary>
     public class ThOperatorHostTests
     {
+        static CsvLabels Labels() => CsvLabels.From(ScriptableObject.CreateInstance<ThTextTable>());
+
         sealed class Sink : IThTransport
         {
             public readonly List<(Rpc rpc, string[] args)> Sent = new List<(Rpc, string[])>();
