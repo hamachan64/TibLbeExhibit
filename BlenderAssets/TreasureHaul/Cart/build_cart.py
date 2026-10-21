@@ -174,7 +174,7 @@ class CartBuilder(stage.StageBuilder):
 
     def cargo(self):
         # Review-only load; not exported with the cart.
-        for name, x, d in [('amphora', 0, .19), ('cup', -.17, -.20), ('statuette', .16, -.20)]:
+        for name, x, d in [('clay_amphora', 0, .19), ('clay_pot', -.17, -.20), ('bronze_figure', .16, -.20)]:
             with bpy.data.libraries.load(str(TREASURES / (name + '.blend')), link=False) as (src, dst): dst.objects = src.objects
             objects = [o for o in dst.objects if o and o.type in ('EMPTY', 'MESH')]
             for o in objects: self.preview.objects.link(o)

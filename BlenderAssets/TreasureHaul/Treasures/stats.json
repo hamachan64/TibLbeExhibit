@@ -1,152 +1,218 @@
 [
   {
-    "model": "mask",
-    "triangles": 4684,
+    "model": "clay_pot",
+    "triangles": 1688,
     "dimensions_m": [
-      0.19679248332977295,
-      0.09701476246118546,
-      0.3451747801154852
+      0.18128,
+      0.17449,
+      0.1806
     ],
-    "meshes": 2
+    "meshes": 1,
+    "grips": 0,
+    "treasure_class": "S",
+    "material_tier": "clay",
+    "value_band_g": [
+      100,
+      200
+    ],
+    "aim_zones": 1
   },
   {
-    "model": "cup",
-    "triangles": 4696,
+    "model": "bronze_figure",
+    "triangles": 2980,
     "dimensions_m": [
-      0.1900000050663948,
-      0.1379999965429306,
-      0.20900000631809235
+      0.1074,
+      0.08792,
+      0.30274
     ],
-    "meshes": 2
+    "meshes": 1,
+    "grips": 0,
+    "treasure_class": "S",
+    "material_tier": "bronze",
+    "value_band_g": [
+      200,
+      300
+    ],
+    "aim_zones": 1
   },
   {
-    "model": "statuette",
-    "triangles": 4600,
+    "model": "silver_mirror",
+    "triangles": 2944,
     "dimensions_m": [
-      0.11999999731779099,
-      0.11999999731779099,
-      0.29249998927116394
+      0.19054,
+      0.08319,
+      0.3084
     ],
-    "meshes": 2
+    "meshes": 1,
+    "grips": 0,
+    "treasure_class": "S",
+    "material_tier": "silver",
+    "value_band_g": [
+      300,
+      300
+    ],
+    "aim_zones": 1
   },
   {
-    "model": "scarab_amulet",
-    "triangles": 2456,
+    "model": "gold_mask",
+    "triangles": 2872,
     "dimensions_m": [
-      0.17900000512599945,
-      0.08300000056624413,
-      0.20800000429153442
+      0.17332,
+      0.1149,
+      0.23721
     ],
-    "meshes": 2
+    "meshes": 1,
+    "grips": 0,
+    "treasure_class": "S",
+    "material_tier": "gold",
+    "value_band_g": [
+      300,
+      300
+    ],
+    "aim_zones": 1
   },
   {
-    "model": "ceremonial_lamp",
-    "triangles": 3020,
+    "model": "clay_amphora",
+    "triangles": 3664,
     "dimensions_m": [
-      0.17800000309944153,
-      0.12800000607967377,
-      0.10600000619888306
+      0.26756,
+      0.22489,
+      0.38
     ],
-    "meshes": 2
+    "meshes": 1,
+    "grips": 0,
+    "treasure_class": "M",
+    "material_tier": "clay",
+    "value_band_g": [
+      400,
+      500
+    ],
+    "aim_zones": 2
   },
   {
-    "model": "amphora",
-    "triangles": 4064,
+    "model": "clay_offering_bowl",
+    "triangles": 1856,
     "dimensions_m": [
-      0.2900000214576721,
-      0.1899999976158142,
-      0.3799999952316284
+      0.21954,
+      0.21946,
+      0.109
     ],
-    "meshes": 3
+    "meshes": 1,
+    "grips": 0,
+    "treasure_class": "S",
+    "material_tier": "clay",
+    "value_band_g": [
+      100,
+      200
+    ],
+    "aim_zones": 1
   },
   {
-    "model": "inscribed_stele",
-    "triangles": 2104,
+    "model": "stone_beast",
+    "triangles": 2986,
     "dimensions_m": [
-      0.48799997568130493,
-      0.10215575993061066,
-      0.5249999761581421
+      0.10574,
+      0.10135,
+      0.21251
     ],
-    "meshes": 3
+    "meshes": 1,
+    "grips": 0,
+    "treasure_class": "S",
+    "material_tier": "stone",
+    "value_band_g": [
+      100,
+      200
+    ],
+    "aim_zones": 1
   },
   {
-    "model": "guardian_statue",
-    "triangles": 4740,
+    "model": "stone_unguent_jar",
+    "triangles": 2492,
     "dimensions_m": [
-      0.6539999842643738,
-      0.3500000089406967,
-      0.75
+      0.09346,
+      0.09345,
+      0.2497
     ],
-    "meshes": 3
+    "meshes": 1,
+    "grips": 0,
+    "treasure_class": "S",
+    "material_tier": "stone",
+    "value_band_g": [
+      200,
+      200
+    ],
+    "aim_zones": 1
   },
   {
-    "model": "relic_chest",
-    "triangles": 2508,
+    "model": "bronze_amulet_disc",
+    "triangles": 2504,
     "dimensions_m": [
-      0.8059999942779541,
-      0.42090897262096405,
-      0.4099999964237213
+      0.17,
+      0.06559,
+      0.23848
     ],
-    "meshes": 3
+    "meshes": 1,
+    "grips": 0,
+    "treasure_class": "S",
+    "material_tier": "bronze",
+    "value_band_g": [
+      200,
+      200
+    ],
+    "aim_zones": 1
   },
   {
-    "model": "sun_mask_secret",
-    "triangles": 4644,
+    "model": "stone_stele",
+    "triangles": 1512,
     "dimensions_m": [
-      0.2798677086830139,
-      0.09300000220537186,
-      0.3294746857136488
+      0.35756,
+      0.1484,
+      0.464
     ],
-    "meshes": 2
+    "meshes": 1,
+    "grips": 0,
+    "treasure_class": "M",
+    "material_tier": "stone",
+    "value_band_g": [
+      500,
+      600
+    ],
+    "aim_zones": 2
   },
   {
-    "model": "hand_mirror",
-    "triangles": 1668,
+    "model": "bronze_tripod_cauldron",
+    "triangles": 3728,
     "dimensions_m": [
-      0.21000000834465027,
-      0.05000000074505806,
-      0.3960000280482097
+      0.39178,
+      0.29613,
+      0.38836
     ],
-    "meshes": 2
+    "meshes": 1,
+    "grips": 0,
+    "treasure_class": "M",
+    "material_tier": "bronze",
+    "value_band_g": [
+      600,
+      600
+    ],
+    "aim_zones": 2
   },
   {
-    "model": "votive_bell",
-    "triangles": 1932,
+    "model": "gilded_sun_disc",
+    "triangles": 2868,
     "dimensions_m": [
-      0.20999999344348907,
-      0.20999999344348907,
-      0.26899999380111694
+      0.452,
+      0.15881,
+      0.512
     ],
-    "meshes": 2
-  },
-  {
-    "model": "perfume_jar",
-    "triangles": 1868,
-    "dimensions_m": [
-      0.18000000715255737,
-      0.18000000715255737,
-      0.328000009059906
+    "meshes": 1,
+    "grips": 0,
+    "treasure_class": "M",
+    "material_tier": "gold",
+    "value_band_g": [
+      700,
+      800
     ],
-    "meshes": 2
-  },
-  {
-    "model": "stamp_seal",
-    "triangles": 848,
-    "dimensions_m": [
-      0.13500000536441803,
-      0.12299999967217445,
-      0.281000018119812
-    ],
-    "meshes": 2
-  },
-  {
-    "model": "coin_casket",
-    "triangles": 4384,
-    "dimensions_m": [
-      0.24000000953674316,
-      0.20767007768154144,
-      0.24409350752830505
-    ],
-    "meshes": 2
+    "aim_zones": 2
   }
 ]

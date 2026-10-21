@@ -4,7 +4,7 @@ Unity の `Assets/` の外に置いている制作データ。版はフォルダ
 
 | フォルダ | 中身 | 作り方 |
 | --- | --- | --- |
-| [Treasures/](Treasures/README.md) | お宝 15 種の `.blend` と `.fbx` | `.blend` が正本。直接編集する |
+| [Treasures/](Treasures/README.md) | お宝（コア 12 種、持ち手なし）の `.blend` と `.fbx`、共有アトラス | `Treasures/build_treasures.py` で生成 |
 | [Stage/](Stage/README.md) | 5m × 11m のステージ。出力は `Stage/Output/` | `Stage/build_stage.py` で生成 |
 | [Cart/](Cart/README.md) | 台車。出力は `Cart/Output/` | `Cart/build_cart.py` で生成 |
 

@@ -21,9 +21,12 @@ CART = HERE.parent / 'Cart/Output/ExcavationCart.blend'
 RNG = random.Random(4618)
 
 # 23 preview finds: 14 S + 9 M (plan 6.1, 4 players). Index = slot - 1.
-TYPES = ['amphora', 'mask', 'inscribed_stele', 'cup', 'amphora', 'inscribed_stele', 'hand_mirror', 'amphora', 'statuette', 'inscribed_stele',
-         'amphora', 'stamp_seal', 'coin_casket', 'inscribed_stele', 'scarab_amulet', 'ceremonial_lamp', 'amphora', 'cup', 'statuette', 'votive_bell',
-         'perfume_jar', 'scarab_amulet', 'ceremonial_lamp']
+# Same slot-by-slot class order as before (14 S + 9 M); names are the handle-free set in Treasures/.
+# The committed Stage/Output was built with the previous set and is rebuilt with the walled stage.
+TYPES = ['clay_amphora', 'gold_mask', 'stone_stele', 'clay_pot', 'clay_amphora', 'stone_stele', 'silver_mirror', 'clay_amphora', 'bronze_figure', 'stone_stele',
+         'clay_amphora', 'stone_unguent_jar', 'clay_offering_bowl', 'stone_stele', 'bronze_amulet_disc', 'stone_beast', 'clay_amphora', 'clay_pot', 'bronze_figure', 'stone_beast',
+         'stone_unguent_jar', 'bronze_amulet_disc', 'clay_offering_bowl']
+M_MODELS = {'clay_amphora', 'stone_stele', 'bronze_tripod_cauldron', 'gilded_sun_disc'}
 HIDDEN = {0, 1, 4, 5, 6, 7, 8, 10, 11, 12, 14, 15, 16, 17, 19, 20, 21, 22}
 WEST = {19, 20, 21, 22}
 ROW3_X = (-1.4, -.95, -.5, 0, .5, .95, 1.4)
@@ -386,7 +389,7 @@ class StageBuilder:
             root.location = (0, 0, 0); bpy.context.view_layer.update(); bb = bounds(objects)
             width = bb[0][1] - bb[0][0]; depth = bb[1][1] - bb[1][0]; height = bb[2][1] - bb[2][0]
             h = .18 if d in (3.8, 8.1, 5.71) else .10
-            suspended = .035 if name in ('mask', 'hand_mirror') and hidden else 0
+            suspended = .035 if name in ('gold_mask', 'silver_mirror') and hidden else 0
             w = max(.33, width + .14); length = max(.33, depth + .12); t = .05
             row = 0 if i < 5 else 1 if i < 10 else 2 if i < 17 else None
             if row is not None:
@@ -433,7 +436,7 @@ class StageBuilder:
                         self.box('LintelStone', ((x0 + x1) / 2, d + side * length / 4, top - roof / 2), (x1 - x0, length / 2 + .004, roof), 4 if rng.random() < .3 else 1, .006)
                 if top + .018 < .795:
                     self.box('CapFragment', (x - w * .16, d - length * .1, top + .009), (w * .5, length * .6, .018), 4, .003)
-                if name in ('mask', 'hand_mirror'):
+                if name in ('gold_mask', 'silver_mirror'):
                     self.box('WallPeg', (x, d - length / 2 + t + .02, h + suspended + height * .56), (.04, .04, .025), 5, .003)
                 kind = 'west_aisle_wall_niche' if opening == 'west' else 'reverse_open_stone_niche'
                 discovery = [x - .7, d, 1.2] if opening == 'west' else [x, d + .7, 1.2]
@@ -447,7 +450,7 @@ class StageBuilder:
             self.collider(module, ((sb[0][0] + sb[0][1]) / 2, -(sb[1][0] + sb[1][1]) / 2, (sb[2][0] + sb[2][1]) / 2), (sb[0][1] - sb[0][0], sb[1][1] - sb[1][0], sb[2][1] - sb[2][0]))
             slot.update(position_unity_xyz=[root.location.x, root.location.z, -root.location.y], support_center_unity_xz=[x, d], position_blender_xyz=list(root.location), model=name, support_module=module, placement_kind=kind,
                         support_surface_height_m=h, rotation_blender_xyz=list(root.rotation_euler), hidden_intent=hidden, opening=opening,
-                        discovery_eye_unity_xyz=[discovery[0], discovery[2], discovery[1]], allowed_classes=['M' if name in ('amphora', 'inscribed_stele') else 'S'])
+                        discovery_eye_unity_xyz=[discovery[0], discovery[2], discovery[1]], allowed_classes=['M' if name in M_MODELS else 'S'])
             marker = next(o for o in self.runtime.objects if o.get('anchor_id') == slot['name']); marker.location = root.location
             marker['hidden_intent'] = hidden; marker['placement_kind'] = kind; marker['support_module'] = module
             self.sample_placements.append(dict(model=name, slot=slot['name'], class_name=slot['allowed_classes'][0], root_name=root.name))

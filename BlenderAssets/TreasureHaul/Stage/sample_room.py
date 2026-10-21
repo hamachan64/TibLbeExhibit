@@ -316,12 +316,14 @@ def place(name, host_xyz, rot=0.0, face=None):
     return root
 
 
-place('mask', (-2.34, 4.5, .95), rot=math.pi / 2)               # wall niche, faces into the room (+x)
-place('votive_bell', (-2.34, 5.6, .95), rot=math.pi / 2)        # second niche
-place('statuette', (-.35, 6.33, ALTAR_TOP), rot=math.pi)         # on the altar, faces back toward the room
-place('coin_casket', (-.85, 4.95, SARC_FLOOR), rot=math.pi)     # inside the opened sarcophagus
-place('cup', (TRAYS[1][0], TRAYS[1][1], TRAYS[1][2]), rot=math.pi)  # in a finds tray on the work table
-place('amphora', (-1.45, 6.15, STRAW_TOP), rot=0)                # in an open crate on straw
+place('silver_mirror', (-2.34, 4.5, .95), rot=math.pi / 2)      # wall niche, faces into the room (+x)
+place('bronze_amulet_disc', (-2.34, 5.6, .95), rot=math.pi / 2) # second niche
+place('bronze_figure', (-.78, 6.33, ALTAR_TOP), rot=math.pi)     # on the altar, faces back toward the room
+place('gilded_sun_disc', (-.12, 6.36, ALTAR_TOP), rot=math.pi)   # on the altar beside the figure
+place('gold_mask', (-1.24, 4.98, SARC_FLOOR), rot=math.pi)        # inside the opened sarcophagus, at the end the lid uncovers
+place('clay_offering_bowl', (TRAYS[1][0], TRAYS[1][1], TRAYS[1][2]), rot=math.pi)  # in a finds tray on the work table
+place('clay_pot', (TRAYS[0][0], TRAYS[0][1], TRAYS[0][2]), rot=math.pi)  # in the other finds tray
+place('clay_amphora', (-1.45, 6.15, STRAW_TOP), rot=0)           # in an open crate on straw
 
 # ---------------- light and cameras ----------------
 world = bpy.data.worlds.new('VenueLight'); scene.world = world; world.use_nodes = True
