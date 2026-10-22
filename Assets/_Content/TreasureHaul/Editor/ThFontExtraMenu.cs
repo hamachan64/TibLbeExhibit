@@ -37,6 +37,9 @@ namespace STYLY.TIB_Template.TreasureHaul.Editor
                 if (e == null || string.IsNullOrEmpty(e.text)) continue;
                 foreach (var ch in Regex.Replace(e.text, @"\{[^}]*\}", "")) set.Add(ch);
             }
+            // アセットに無い間に使う組み込みの既定の文言（#44 の運営UI・CSV）も集める
+            foreach (var text in ThTextTable.FallbackTexts)
+                foreach (var ch in Regex.Replace(text ?? "", @"\{[^}]*\}", "")) set.Add(ch);
             foreach (var ch in "0123456789,G+-") set.Add(ch);
             var sb = new StringBuilder();
             foreach (var ch in set) if (!char.IsWhiteSpace(ch) && !char.IsControl(ch)) sb.Append(ch);

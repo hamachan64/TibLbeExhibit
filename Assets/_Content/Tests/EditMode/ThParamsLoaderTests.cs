@@ -83,6 +83,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
                 {
                     if (f.FieldType.IsArray) { Walk(f.FieldType.GetElementType(), path + "." + f.Name); continue; }
                     if (f.FieldType.IsClass && f.FieldType != typeof(string)) { Walk(f.FieldType, path + "." + f.Name); continue; }
+                    if (f.FieldType == typeof(bool)) continue;   // 真偽値は数値ではないので Range を付けない（operation.autoConfirmAlignment。#44）
                     if (f.GetCustomAttributes(typeof(UnityEngine.RangeAttribute), false).Length == 0) { missing++; Debug.Log("Range 無し: " + path + "." + f.Name); }
                 }
             }

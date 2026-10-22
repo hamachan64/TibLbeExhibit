@@ -19,6 +19,12 @@ namespace STYLY.TIB_Template.TreasureHaul
         public string CatalogHash = "";
         /// <summary>回の途中から入ったので、この回は参加しない（Waiting に戻ったら解除）</summary>
         public bool WaitNextRound;
+        /// <summary>手の認識の台数（0 / 1 / 2）。未報告は -1（ThStatus。#44）</summary>
+        public int HandCount = -1;
+        /// <summary>電池残量（%）。未報告・取れない端末は -1（ThStatus。#44）</summary>
+        public int BatteryPercent = -1;
+        /// <summary>最後に ThStatus を受けた時刻（ホストの now）。未報告は負の無限大</summary>
+        public double StatusAt = double.NegativeInfinity;
     }
 
     /// <summary>
@@ -34,7 +40,23 @@ namespace STYLY.TIB_Template.TreasureHaul
         /// <summary>ホストのお宝カタログのハッシュ。参加できる条件の一つ（パラメータ版と同じ扱い）</summary>
         public string HostCatalogHash { get; set; } = "";
 
+        /// <summary>
+        /// 新しく登録された端末・再接続した端末を「位置合わせ確認済み」で始めるか（パラメータ operation.autoConfirmAlignment。
+        /// エディタの ParrelSync 検証用）。false なら「未確認」で始まる。
+        /// </summary>
+        public bool AutoConfirm { get; set; }
+        /// <summary>DeviceId → 端末番号の対応表（運営UIの並びと練習の色の順に使う。treasure_haul_devices.json）</summary>
+        public ThDeviceNumbers Numbers { get; set; } = ThDeviceNumbers.Empty;
+
         public IEnumerable<DeviceInfo> Devices => _byDevice.Values;
+
+        /// <summary>端末番号の順（未登録は後ろに DeviceId の文字列順）に並べた DeviceId</summary>
+        public List<string> SortedDeviceIds()
+        {
+            var list = new List<string>(_byDevice.Keys);
+            list.Sort(Numbers.Compare);
+            return list;
+        }
 
         /// <summary>接続中の端末数</summary>
         public int ConnectedCount
@@ -57,20 +79,15 @@ namespace STYLY.TIB_Template.TreasureHaul
 
             if (!_byDevice.TryGetValue(deviceId, out var d))
             {
-                // TODO(#44): 位置合わせ確認と見学を切り替える UI ができたら、新規登録は「未確認」始まりに変える。
-                //            #44 までは UI が無いので「確認済み・見学でない」で始める。
-                d = new DeviceInfo { DeviceId = deviceId, AlignmentConfirmed = true, Spectator = false };
+                // 新しい端末は「未確認」で始まる（運営UIで確認するまで参加できない）。autoConfirm のときだけ確認済み
+                d = new DeviceInfo { DeviceId = deviceId, AlignmentConfirmed = AutoConfirm, Spectator = false };
                 _byDevice[deviceId] = d;
             }
             else
             {
                 if (d.Connected && d.ClientNo != clientNo) _byClientNo.Remove(d.ClientNo);
-                if (!d.Connected)
-                {
-                    // TODO(#44): 位置合わせ確認 UI ができたら、再接続した端末は「未確認のまま」にする（切断で未確認に戻す処理は今のまま）。
-                    //            #44 までは UI が無く復帰できなくなるので、再接続したら「確認済み」に戻す。
-                    d.AlignmentConfirmed = true;
-                }
+                // 再接続した端末は「未確認のまま」（切断で未確認に戻している）。autoConfirm のときだけ確認済みで戻る
+                if (!d.Connected) d.AlignmentConfirmed = AutoConfirm;
             }
             d.ClientNo = clientNo;
             d.Connected = true;
@@ -91,6 +108,10 @@ namespace STYLY.TIB_Template.TreasureHaul
             d.Connected = false;
             d.ClientNo = -1;
             d.AlignmentConfirmed = false;
+            // 切断した端末の手・電池は「不明」に戻す
+            d.HandCount = -1;
+            d.BatteryPercent = -1;
+            d.StatusAt = double.NegativeInfinity;
         }
 
         public void ReportParamsVersion(string deviceId, string version)
@@ -105,7 +126,17 @@ namespace STYLY.TIB_Template.TreasureHaul
             if (d != null) d.CatalogHash = hash ?? "";
         }
 
-        // #44 の UI から使う。
+        /// <summary>ThStatus の受信。handCount は 0〜2（範囲外は不明 -1）、batteryPercent は 0〜100（範囲外は不明 -1）</summary>
+        public void ReportStatus(string deviceId, int handCount, int batteryPercent, double now)
+        {
+            var d = Get(deviceId);
+            if (d == null) return;
+            d.HandCount = handCount >= 0 && handCount <= 2 ? handCount : -1;
+            d.BatteryPercent = batteryPercent >= 0 && batteryPercent <= 100 ? batteryPercent : -1;
+            d.StatusAt = now;
+        }
+
+        // #44 の運営UI（SessionHostCore.SetSpectator / SetAlignmentConfirmed）から使う。
         public void SetAlignmentConfirmed(string deviceId, bool confirmed) { var d = Get(deviceId); if (d != null) d.AlignmentConfirmed = confirmed; }
         public void SetSpectator(string deviceId, bool spectator) { var d = Get(deviceId); if (d != null) d.Spectator = spectator; }
 

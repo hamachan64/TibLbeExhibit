@@ -19,6 +19,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         ThEnvironmentInfo _env;   // ThVenue から取る（Environment シーンの読み込み後。配置候補点・TutorialSlot の数）
         string _dataDir;
         NetSyncManager _nm;
+        RoundLogger _roundLogger;
 
         public SessionHostCore Core { get; private set; }
 
@@ -34,7 +35,21 @@ namespace STYLY.TIB_Template.TreasureHaul
             Core = new SessionHostCore(new RpcManagerTransport(), p, settings, settingsWarnings, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 no => _nm != null ? _nm.GetDeviceIdByClientNo(no) : null, null,
                 local => ThPlaceSolver.Solve(ThVenue.Instance != null ? ThVenue.Instance.Root : null, local));   // 持ち主の切断で降ろす先（Environment の床・荷台・瓦礫への Raycast）
+            Core.SetDeviceNumbers(ThSettingsFiles.LoadDeviceNumbers(_dataDir), Now);   // 端末番号の対応表（無ければ全端末が「未登録」）
+            // 1 回ごとの記録（CSV）。書けなくても進行は止めず、運営UIの警告に出す
+            var table = _content != null && _content.text != null ? _content.text : ScriptableObject.CreateInstance<ThTextTable>();
+            _roundLogger = new RoundLogger(_dataDir, CsvLabels.From(table));
+            Core.RoundFinished.Subscribe(rec => OnRoundFinished(rec)).AddTo(this);
             foreach (var w in Core.Warnings.CurrentValue) Debug.LogWarning("[SessionHost] " + w);
+        }
+
+        void OnRoundFinished(RoundRecord record)
+        {
+            string warning;
+            try { warning = _roundLogger.Write(record); }
+            catch (Exception e) { warning = "記録を書けません: " + e.Message; }   // 書き込みの失敗で進行を止めない
+            Core.SetRuntimeWarning("roundlog", warning);
+            if (warning != null) Debug.LogWarning("[SessionHost] " + warning);
         }
 
         ThParamsLoadResult LoadParams(out string warning)
@@ -84,7 +99,7 @@ namespace STYLY.TIB_Template.TreasureHaul
                 Debug.Log($"[SessionHost] ready clientNo={_nm.ClientNo} deviceId={_nm.DeviceId} paramsVersion={Core.ParamsVersion}");
 
                 // 端末の登録は ThResync で行う（ステルスの運営PC・クローンを数えない）。切断だけ NetSync のイベントを使う。
-                foreach (var rpc in new[] { Rpc.ThResync, Rpc.ThGrab, Rpc.ThLift, Rpc.ThRelease, Rpc.ThRest, Rpc.ThCollect, Rpc.ThDamage, Rpc.ThPoses })
+                foreach (var rpc in new[] { Rpc.ThResync, Rpc.ThGrab, Rpc.ThLift, Rpc.ThRelease, Rpc.ThRest, Rpc.ThCollect, Rpc.ThDamage, Rpc.ThPoses, Rpc.ThStatus })
                 {
                     var r = rpc;
                     RpcManager.Instance.AsObservable(r)
@@ -150,10 +165,34 @@ namespace STYLY.TIB_Template.TreasureHaul
             if (Core == null || Core.Machine.State != RoundState.Waiting) return false;
             var p = LoadParams(out _);
             var s = LoadSettings(out var sw);
+            Core.SetDeviceNumbers(ThSettingsFiles.LoadDeviceNumbers(_dataDir), Now);   // 端末番号の対応表も読み直す
             bool ok = Core.ReloadParams(p, s, sw, Now);
             foreach (var w in Core.Warnings.CurrentValue) Debug.LogWarning("[SessionHost] " + w);
             Debug.Log($"[SessionHost] params reloaded version={Core.ParamsVersion}");
             return ok;
+        }
+
+        /// <summary>端末の「見学」の切り替え（F-OPS-4）</summary>
+        public bool RequestToggleSpectator(string deviceId) => Core != null && Core.ToggleSpectator(deviceId, Now);
+
+        /// <summary>端末の「位置合わせ確認」の切り替え（F-OPS-4）</summary>
+        public bool RequestToggleAlignment(string deviceId) => Core != null && Core.ToggleAlignmentConfirmed(deviceId, Now);
+
+        /// <summary>
+        /// 端末番号の雛形を書き出す（接続中の端末のうち、ファイルに無いものを number=0 で足す。既存の行は残す）。
+        /// 書けなければ警告に出す。書いたら読み直して反映する。
+        /// </summary>
+        public bool RequestWriteDeviceTemplate()
+        {
+            if (Core == null) return false;
+            var ids = new System.Collections.Generic.List<string>();
+            foreach (var d in Core.Registry.Devices) if (d.Connected) ids.Add(d.DeviceId);
+            var error = ThSettingsFiles.WriteDeviceTemplate(_dataDir, ids);
+            Core.SetRuntimeWarning("devicetemplate", error);
+            if (error != null) { Debug.LogWarning("[SessionHost] " + error); return false; }
+            Core.SetDeviceNumbers(ThSettingsFiles.LoadDeviceNumbers(_dataDir), Now);
+            Debug.Log($"[SessionHost] device template written: {ThSettingsFiles.DevicesPath(_dataDir)}");
+            return true;
         }
 
         public void SaveSettings(ThGameSettings settings) => ThSettingsFiles.SaveSettings(_dataDir, settings);
