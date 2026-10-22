@@ -37,7 +37,7 @@
 
 | 内容 | Issue | 状態 | メモ |
 | :--- | :--- | :---: | :--- |
-| お宝・納品場所・瓦礫の 3D モデル | [#46](https://github.com/hamachan64/TibLbeExhibit/issues/46) | 🔨 | ブランチ `repo/feature-th-asset-models`（worktree `TibLbeExhibit-assets`）。お宝 12 種（持ち手なし）と、高い壁の回廊ステージを Blender で制作し、Unity に取り込み済み（2026-10-22。お宝プレハブ・カタログ、Environment のステージ・置き場所 34・焼き込みの灯り。仕様 `.claude/loops/20261021-th-asset-import.md`）。push・PR はユーザーの指示待ち。古いお宝のプレハブ・材質の削除が残っている（uloop の安全検査で止まった）。`THIRD_PARTY_NOTICES.md` に記録（外部素材なし） |
+| お宝・納品場所・瓦礫の 3D モデル | [#46](https://github.com/hamachan64/TibLbeExhibit/issues/46) | 🔨 | ブランチ `repo/feature-th-asset-models`（worktree `TibLbeExhibit-assets`）。お宝 12 種（持ち手なし）と、高い壁の回廊ステージを Blender で制作し、Unity に取り込み済み（2026-10-22。お宝プレハブ・カタログ、Environment のステージ・置き場所 34・焼き込みの灯り。仕様 `.claude/loops/20261021-th-asset-import.md`）。push・PR はユーザーの指示待ち。`THIRD_PARTY_NOTICES.md` に記録（外部素材なし） |
 | オープニングのナレーション音声 | [#47](https://github.com/hamachan64/TibLbeExhibit/issues/47) | ⬜ | 原稿 `TREASURE_HAUL_NARRATION.md`。音声はユーザーが用意する |
 | 会場レイアウト（Environment） | [#48](https://github.com/hamachan64/TibLbeExhibit/issues/48) | ⬜ | 順4b と同じシーンを触るので同時に作業しない |
 
