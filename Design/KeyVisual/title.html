@@ -10,10 +10,10 @@
   @font-face { font-family: "KV Noto"; font-weight: 700; src: url("../../Assets/_Content/Fonts/Noto_Sans_JP/static/NotoSansJP-Bold.ttf"); }
   html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #000; }
   .kv { position: relative; width: 1920px; height: 1080px; background: url("render/kv_3d_full.png") center / cover no-repeat; }
-  /* Darken the lower left so the title reads over the floor. */
+  /* Darken the upper left (cavern rock) so the title reads. */
   .kv::before { content: ""; position: absolute; inset: 0;
-    background: radial-gradient(ellipse 1150px 520px at 0% 100%, rgba(5,6,9,.88) 0%, rgba(5,6,9,.55) 45%, rgba(5,6,9,0) 100%); }
-  .block { position: absolute; left: 92px; bottom: 78px; }
+    background: radial-gradient(ellipse 1100px 560px at 0% 0%, rgba(5,6,9,.85) 0%, rgba(5,6,9,.5) 45%, rgba(5,6,9,0) 100%); }
+  .block { position: absolute; left: 88px; top: 70px; }
   .title { font: 900 168px/0.9 "KV Noto", sans-serif; letter-spacing: -.01em; margin: 0;
     background: linear-gradient(to bottom, #fff4d6 0%, #f6d27a 48%, #d18a22 100%);
     -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
