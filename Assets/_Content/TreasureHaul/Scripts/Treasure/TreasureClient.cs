@@ -271,12 +271,25 @@ namespace STYLY.TIB_Template.TreasureHaul
                     board.SetVisible(x.state == RoundState.Tutorial || x.state == RoundState.Playing || x.state == RoundState.Result);
                 });
             }
+            core.HandCountProvider = TrackedHandCount;   // 状況報告（ThStatus）で運営UIの端末一覧に出す
             _configuredFor = null;
             var fx = _content?.fx;
             var beamMat = fx?.Find(ThFxId.Beam)?.material;
             if (_left != null) _left.Initialize(this, _left.Tracker, _left.GetComponent<LineRenderer>(), beamMat, _grabZoneLayer, _wallLayer);
             if (_right != null) _right.Initialize(this, _right.Tracker, _right.GetComponent<LineRenderer>(), beamMat, _grabZoneLayer, _wallLayer);
         }
+
+        /// <summary>手の認識の台数（追跡できていて手のひらが取れている手の数。0〜2）</summary>
+        int TrackedHandCount()
+        {
+            int n = 0;
+            if (IsHandTracked(_left)) n++;
+            if (IsHandTracked(_right)) n++;
+            return n;
+        }
+
+        static bool IsHandTracked(HandGrabber h) =>
+            h != null && h.Tracker != null && h.Tracker.IsTracked.CurrentValue && h.Tracker.HasPalm;
 
         void ConfigureHands()
         {

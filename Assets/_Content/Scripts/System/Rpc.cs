@@ -72,5 +72,7 @@ namespace STYLY.TIB_Template
         ThForceRest,
         /// <summary>ホスト→全員 全お宝の状態表</summary>
         ThItems,
+        /// <summary>端末→ホスト 状況報告（手の認識状態・電池残量。〔状況報告の間隔〕ごと。#44）</summary>
+        ThStatus,
     }
 }

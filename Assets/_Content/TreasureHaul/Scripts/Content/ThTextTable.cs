@@ -79,6 +79,44 @@ namespace STYLY.TIB_Template.TreasureHaul
         PracticeCarry,
         /// <summary>練習の案内: 持っているお宝が納品場所の範囲に入ったら</summary>
         PracticeRelease,
+        // #44（端末一覧・見学・位置合わせ確認・記録 CSV）。アセットに無い間は <see cref="ThTextTable"/> の組み込みの既定の文言を使う
+        OpDeviceListTitle,
+        /// <summary>端末番号（書式「端末 {0}」）</summary>
+        OpDeviceNumberFormat,
+        /// <summary>未登録の端末（書式「未登録 {0}」。DeviceId の末尾 6 文字）</summary>
+        OpDeviceUnregisteredFormat,
+        OpDeviceConnected,
+        OpDeviceDisconnected,
+        OpAlignConfirmed,
+        OpAlignUnconfirmed,
+        OpHandBoth,
+        OpHandOne,
+        OpHandNone,
+        /// <summary>手の認識・電池が届いていない（または古い）</summary>
+        OpStatusUnknown,
+        /// <summary>電池（書式「{0}%」）</summary>
+        OpBatteryFormat,
+        OpBatteryUnknown,
+        OpPracticeDone,
+        OpPracticeNotDone,
+        OpSpectatorTag,
+        OpParticipantTag,
+        OpSetSpectator,
+        OpClearSpectator,
+        OpConfirmAlignment,
+        OpUnconfirmAlignment,
+        OpWriteDeviceTemplate,
+        OpNoDevices,
+        /// <summary>rounds CSV の見出し（カンマ区切りで 15 列）</summary>
+        CsvRoundsHeader,
+        /// <summary>players CSV の見出し（カンマ区切りで 11 列）</summary>
+        CsvPlayersHeader,
+        CsvCompleted,
+        CsvAborted,
+        CsvYes,
+        CsvNo,
+        /// <summary>端末一覧の列見出し（カンマ区切りで 7 列: 端末番号・接続・位置合わせ・手・電池・練習・見学）</summary>
+        OpDeviceColumns,
     }
 
     [Serializable]
@@ -96,6 +134,47 @@ namespace STYLY.TIB_Template.TreasureHaul
     public sealed class ThTextTable : ScriptableObject
     {
         public List<ThTextEntry> entries = DefaultEntries();
+
+        /// <summary>
+        /// #44 で足した ID の組み込みの既定の文言。アセット（ThTextTable.asset）に項目が無い・空のときに使う（アセットの値が優先）。
+        /// アセットへ移したら、ここから消してよい。
+        /// </summary>
+        static readonly Dictionary<ThTextId, string> Fallbacks = new Dictionary<ThTextId, string>
+        {
+            { ThTextId.OpDeviceListTitle, "端末一覧" },
+            { ThTextId.OpDeviceNumberFormat, "端末 {0}" },
+            { ThTextId.OpDeviceUnregisteredFormat, "未登録 {0}" },
+            { ThTextId.OpDeviceConnected, "接続" },
+            { ThTextId.OpDeviceDisconnected, "切断" },
+            { ThTextId.OpAlignConfirmed, "確認済み" },
+            { ThTextId.OpAlignUnconfirmed, "未確認" },
+            { ThTextId.OpHandBoth, "両手" },
+            { ThTextId.OpHandOne, "片手" },
+            { ThTextId.OpHandNone, "なし" },
+            { ThTextId.OpStatusUnknown, "不明" },
+            { ThTextId.OpBatteryFormat, "{0}%" },
+            { ThTextId.OpBatteryUnknown, "不明" },
+            { ThTextId.OpPracticeDone, "済" },
+            { ThTextId.OpPracticeNotDone, "未" },
+            { ThTextId.OpSpectatorTag, "見学" },
+            { ThTextId.OpParticipantTag, "参加" },
+            { ThTextId.OpSetSpectator, "見学にする" },
+            { ThTextId.OpClearSpectator, "参加に戻す" },
+            { ThTextId.OpConfirmAlignment, "確認する" },
+            { ThTextId.OpUnconfirmAlignment, "確認を外す" },
+            { ThTextId.OpWriteDeviceTemplate, "接続中の端末を書き出す" },
+            { ThTextId.OpNoDevices, "端末がありません" },
+            { ThTextId.CsvRoundsHeader, "開始時刻,RoundId,終わり方,中断した状態,人数,モード,追加要素,持ち方,パラメータ版,保留の有無,延長秒,回収額,目標額,目標達成,損害額" },
+            { ThTextId.CsvPlayersHeader, "RoundId,端末番号,DeviceId,色番号,練習完了秒,初めて持った秒,初めて回収した秒,回収した数,回収額,減額の回数,減額の額" },
+            { ThTextId.CsvCompleted, "完了" },
+            { ThTextId.CsvAborted, "中断" },
+            { ThTextId.CsvYes, "はい" },
+            { ThTextId.CsvNo, "いいえ" },
+            { ThTextId.OpDeviceColumns, "端末,接続,位置合わせ,手,電池,練習,見学" },
+        };
+
+        /// <summary>組み込みの既定の文言（予備フォントの文字集めに使う。ThFontExtraMenu）</summary>
+        public static IEnumerable<string> FallbackTexts => Fallbacks.Values;
 
         Dictionary<ThTextId, string> _map;
         readonly HashSet<ThTextId> _warned = new HashSet<ThTextId>();
@@ -131,6 +210,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         {
             if (_map == null) Build();
             if (_map.TryGetValue(id, out var s) && !string.IsNullOrEmpty(s)) return s;
+            if (Fallbacks.TryGetValue(id, out var fallback)) return fallback;
             if (_warned.Add(id)) Debug.LogWarning($"[ThTextTable] 文言がありません: {id}");
             return id.ToString();
         }
@@ -156,10 +236,10 @@ namespace STYLY.TIB_Template.TreasureHaul
             {
                 if (e == null) { errors.Add("空の要素があります"); continue; }
                 if (!seen.Add(e.id)) errors.Add($"ID が重複しています: {e.id}");
-                if (string.IsNullOrWhiteSpace(e.text)) errors.Add($"文言が空です: {e.id}");
+                if (string.IsNullOrWhiteSpace(e.text) && !Fallbacks.ContainsKey(e.id)) errors.Add($"文言が空です: {e.id}");
             }
             foreach (ThTextId id in Enum.GetValues(typeof(ThTextId)))
-                if (!seen.Contains(id)) errors.Add($"文言が欠けています: {id}");
+                if (!seen.Contains(id) && !Fallbacks.ContainsKey(id)) errors.Add($"文言が欠けています: {id}");
             return errors;
         }
     }

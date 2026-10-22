@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -52,9 +53,12 @@ namespace STYLY.TIB_Template.TreasureHaul
     {
         public const string ParamsFileName = "treasure_haul_params.json";
         public const string SettingsFileName = "treasure_haul_settings.json";
+        /// <summary>DeviceId → 端末番号（運営PCだけのファイル。設計書 7章）</summary>
+        public const string DevicesFileName = "treasure_haul_devices.json";
 
         public static string ParamsPath(string directory) => Path.Combine(directory, ParamsFileName);
         public static string SettingsPath(string directory) => Path.Combine(directory, SettingsFileName);
+        public static string DevicesPath(string directory) => Path.Combine(directory, DevicesFileName);
 
         /// <summary>ファイルが無い → null。読めない → null と警告。</summary>
         public static string ReadTextOrNull(string path, out string warning)
@@ -76,6 +80,30 @@ namespace STYLY.TIB_Template.TreasureHaul
             var text = ReadTextOrNull(SettingsPath(directory), out warning);
             if (warning != null) return new ThGameSettings();
             return ThGameSettings.Parse(text, out warning);
+        }
+
+        /// <summary>端末番号の対応表を読む。ファイルが無い → 空の表（警告なし）。読めない・壊れている → 空の表と警告</summary>
+        public static ThDeviceNumbers LoadDeviceNumbers(string directory)
+        {
+            var text = ReadTextOrNull(DevicesPath(directory), out var warning);
+            return ThDeviceNumbers.Parse(text, warning);
+        }
+
+        /// <summary>雛形を書き出す。成功なら null、失敗・書いてはいけないとき（既存のファイルが壊れている）は理由</summary>
+        public static string WriteDeviceTemplate(string directory, IEnumerable<string> connectedDeviceIds)
+        {
+            try
+            {
+                var current = LoadDeviceNumbers(directory);
+                if (current.Broken) return $"{DevicesFileName} が壊れているので上書きしません。直してから書き出してください";
+                Directory.CreateDirectory(directory);
+                File.WriteAllText(DevicesPath(directory), current.BuildTemplateJson(connectedDeviceIds));
+                return null;
+            }
+            catch (Exception e)
+            {
+                return $"{DevicesFileName} を書き出せません: {e.Message}";
+            }
         }
 
         public static void SaveSettings(string directory, ThGameSettings settings)

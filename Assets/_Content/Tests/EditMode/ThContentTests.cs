@@ -105,6 +105,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
             Assert.IsNotNull(font);
             var sb = new System.Text.StringBuilder();
             foreach (var e in Table().entries) sb.Append(Regex.Replace(e.text, @"\{[^}]*\}", ""));
+            foreach (var text in ThTextTable.FallbackTexts) sb.Append(Regex.Replace(text, @"\{[^}]*\}", ""));   // アセットに無い間の既定の文言（#44）
             sb.Append("0123456789,G+-");
             var chars = new HashSet<char>();
             foreach (var ch in sb.ToString()) if (!char.IsWhiteSpace(ch)) chars.Add(ch);

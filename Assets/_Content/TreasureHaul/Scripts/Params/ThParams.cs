@@ -27,6 +27,8 @@ namespace STYLY.TIB_Template.TreasureHaul
         [Range(0.1f, 10f)] public float resendInterval = 0.5f;
         /// <summary>RPC の上限（回/秒。ConfigureRpcLimit）</summary>
         [Range(10, 300)] public int rpcLimit = 60;
+        /// <summary>【仮】状況報告（ThStatus。手の認識・電池）の送信間隔（秒）。この 3 倍を過ぎて届かない値は運営UIで「不明」</summary>
+        [Range(0.5f, 30f)] public float statusInterval = 2f;
     }
 
     /// <summary>P-2 練習</summary>
@@ -149,6 +151,11 @@ namespace STYLY.TIB_Template.TreasureHaul
         [Range(0, 100)] public int batteryWarningPercent = 20;
         /// <summary>「中断」の確認の待ち（秒）。1回目を押してから、この時間内にもう一度押すと中断</summary>
         [Range(1f, 30f)] public float abortConfirmSeconds = 3f;
+        /// <summary>
+        /// true なら、新しく登録された端末・再接続した端末を「位置合わせ確認済み」で始める（エディタの ParrelSync 検証用）。
+        /// false（初期値）なら「未確認」で始まり、運営UIで確認するまで参加できない。
+        /// </summary>
+        public bool autoConfirmAlignment = false;
     }
 
     /// <summary>全パラメータ。JSON のキーはフィールド名（グループ単位で書ける）。</summary>

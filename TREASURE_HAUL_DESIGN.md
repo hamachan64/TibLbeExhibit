@@ -62,7 +62,7 @@
 ### 3.3 接続と参加端末（F-FLOW-4/7、F-OPS-1/4）
 - 端末は起動後、NetSync の自動接続で運営PCとつながり、Waiting になる。切断後は自動で再接続する（S-3: サーバーの再起動後1秒以内）。
 - 端末は DeviceId で識別する（ClientNo は再接続で変わるので、今の接続を引くためだけに使う）。DeviceId→端末番号の対応表は、運営PCだけの別ファイル（7章）。
-- `DeviceRegistry` は、切断した端末を「位置合わせ未確認」に戻す。（#44 で確認の UI ができるまでは、再接続した端末を確認済みに戻す。）
+- `DeviceRegistry` は、切断した端末を「位置合わせ未確認」に戻す。新しく登録された端末・再接続した端末は「未確認」で始まり、運営UIで確認するまで参加できない（#44）。パラメータ `operation.autoConfirmAlignment`（初期値 false）が true のときだけ、確認済みで始まる（エディタの ParrelSync 検証用）。
 - 端末の登録は `ThResync`（状況報告）から行う。NetSync の接続イベントは、ステルスの運営PC（ParrelSync のクローンを含む）でも発火するので、登録には使わない（切断イベントは使う）。
 - **ClientNo の入れ替わり**: サーバーの再起動では、接続・切断のイベントなしに端末どうしの ClientNo が入れ替わることがある。端末は自分の ClientNo が変わったら報告し直し、ホストは受け取ったメッセージごとに送り手の DeviceId を NetSync（`GetDeviceIdByClientNo`）で引き直して、対応表を付け替える。
 - 参加端末＝接続中・位置合わせ確認済み・見学でない・パラメータ版が一致・次の回を待っていない、の端末。参加していない端末はお宝を表示するが持てない。「開始」時は版の一致を問わずに候補に入れ、オープニングの終わり（Opening→Tutorial）で版が一致していない端末を外す（7章）。
@@ -71,11 +71,12 @@
   - 見学・未確認の間は、その端末のつかむ申請を認めない。
   - 参加に戻したとき、その回の本編開始時の参加端末に入っていた端末は、その時点から再びつかめる【仮】。入っていなかった端末は次の回から。
 - DeviceId は NetSync が持っている（`NetSyncManager.Instance.DeviceId`。他の端末のは `GetDeviceIdByClientNo` / `GetClientNoByDeviceId`。S-3 で確認）。Android では権限が取れなければ `SystemInfo.deviceUniqueIdentifier` を使う（パッケージの処理）。
-- バッテリーは既存のユーザー変数 `BatteryLevel`（NetSync が送る）。手の認識状態は、本作の起動処理でユーザー変数に書く。
+- **手の認識状態と電池残量**（#44）: 端末が `ThStatus`（端末→ホスト、〔状況報告の間隔〕初期値 2 秒。`progress.statusInterval`）で送る。手は `HandGrabber` の追跡状態（追跡できていて手のひらが取れている手の数 0〜2）、電池は `SystemInfo.batteryLevel`（取れなければ -1。PICO で取れるかは実機で確認）。ホストは受け取った時刻と値を端末ごとに持ち、〔状況報告の間隔〕×3 を過ぎて届かない値・切断した端末の値は運営UIで「不明」にする。登録されていない送り手（ステルスの運営PC・クローン）の `ThStatus` は無視する。
+- **運営UIからの見学・位置合わせ確認の切り替え**（#44）は `SessionHostCore.SetSpectator` / `SetAlignmentConfirmed`。見学・未確認にした端末は、切断と同じ処理（`ReleaseReservationsOf` / `ForceRestItemsOf`）でお宝を解放する。受け付けの判定は `HostMessageGate`（`IsEligible`）がそのまま行うので、見学・未確認の間のつかむ申請は捨てられる。参加端末の一覧（`Participants`）は変えないので、参加人数・目標額は変わらず、本編開始時の参加端末に入っていた端末だけが、参加に戻したときにすぐ再びつかめる。入っていなかった端末は次の回から。
 
 ### 3.4 練習（F-TUT）
 - 練習用お宝の置き場所4か所（`ThTutorialSlot`。色番号 0〜3 を持つ）は Environment の `VenueRoot` の下に手で置く（納品場所の前 1m に横一列。#43）。`ThVenue` が色番号の順に `ThTreasureSetup.PracticeSlots` へ渡す。4つそろっていない・色番号が重なるときは練習用お宝を作らない。
-- Tutorial に入るとき、ホストは参加端末を端末番号の小さい順に色番号 0〜3（＝`TutorialSlot`）へ割り当て、`ThState.tutorialColors`（`participants` と同じ順。割り当てのない端末は -1）で配る。端末番号の対応表（7章）ができるまでは DeviceId の文字列順（`PracticeColors`。#44 で差し替える）。割り当ては DeviceId → 色番号でホストが回の間持ち、本編で参加端末が減っても残った端末の色は変えない。Waiting・新しい「開始」で消す。各端末は自分のビームと練習用お宝を割り当ての色にし、自分のお宝の上に「あなたの」と出す。
+- Tutorial に入るとき、ホストは参加端末を端末番号の小さい順に色番号 0〜3（＝`TutorialSlot`）へ割り当て、`ThState.tutorialColors`（`participants` と同じ順。割り当てのない端末は -1）で配る。端末番号の対応表（7章）に無い端末は、登録済みの後ろに DeviceId の文字列順（`PracticeColors` に `ThDeviceNumbers.Compare` を渡す。#44）。割り当ては DeviceId → 色番号でホストが回の間持ち、本編で参加端末が減っても残った端末の色は変えない。Waiting・新しい「開始」で消す。各端末は自分のビームと練習用お宝を割り当ての色にし、自分のお宝の上に「あなたの」と出す。
 - **プレーヤーの色**（#43、2026-10-18 追加）: 割り当てた色は、その回の結果まで続く（本編でもビームとアバターは同じ色。R.E.P.O と同じく、プレーヤーを色で見分けられるようにする。企画書 1章。色の選び方や見た目は R.E.P.O に似せない）。待機中と、割り当てのない端末は既定の色。
   - 色と見た目は ScriptableObject `ThPlayerPalette` 1つで一括管理する。4枠それぞれに、名前・記号（●▲■★）・ビームの色・アバターの色（ビームと同じ系統）・練習用お宝の色、必要ならアバターのテクスチャの差し替えを持つ。既定の色も持つ。ビルドに入れる（運営PCのファイルで変えるパラメータ〔7章〕とは分ける）。
   - NetSync のアバター（STYLY のテンプレート）は**そのまま表示する**。他の人のアバター（`STYLY Default Avatar A 1`）の頭・手・体のメッシュを、その人の割り当ての色で塗る。DeviceId から `GetClientNoByDeviceId` で今の ClientNo を引き、その人のアバターを探す。塗るときは `MaterialPropertyBlock` を使い、共有のマテリアルを書き換えない。自分のアバター（`Avatar Local (Transparent)`）は見えないので塗らない。
@@ -209,6 +210,7 @@
 | :--- | :--- | :--- |
 | ThState / ThHeartbeat | ホスト | 3.2 |
 | ThResync | 端末 | 状況報告兼再送要求（3.2） |
+| ThStatus | 端末 | 手の認識の台数（0〜2）と電池残量（%）。〔状況報告の間隔〕ごと（3.3、#44） |
 | ThParams | ホスト | パラメータ JSON と版（7章） |
 | ThGrab / ThLift / ThRelease | 端末 | つかむ申請（申請ID・種類 S/M 予約）/ M の両手成立 / 置いた・落とした・取りやめ・予約解除（4.4） |
 | ThGrabbed / ThGrabDenied / ThLifted / ThFreed | ホスト | 4.2、4.4 |
@@ -232,6 +234,9 @@
 - **版**: 重ねた後の値を `JsonUtility.ToJson` した文字列のハッシュ先頭8桁。
 - **配布**: 「開始」のたびに `ThState` に版を載せ、版が違う端末にはその場で `ThParams` を送り直す（N-7）。オープニング中に一致しなければ、その端末は参加端末に入れず、運営UIに「版の不一致で除外」と出す。
 - **運営PCだけのファイル**: `treasure_haul_settings.json`（モード、追加要素、持ち方。`ThState` で配る）、`treasure_haul_devices.json`（DeviceId→端末番号。予備機も含めて会場で登録）。
+  - `treasure_haul_devices.json` の形: `{ "devices": [ { "deviceId": "...", "number": 1 } ] }`。番号は手で編集する。0・載っていない端末は「未登録」で、一覧では登録済みの後ろに DeviceId の文字列順で並べる。練習の色の割り当て順も同じ並び（`ThDeviceNumbers.Compare`）。
+  - 起動時と、待機中の「再読み込み」で読む。壊れた JSON は全端末を未登録として扱い、同じ番号の重複とともに運営UIの警告に出す。
+  - 雛形は運営UIの「接続中の端末を書き出す」ボタンで作る（既存の行はそのまま残し、無い端末を number=0 で足す。既存のファイルが壊れているときは上書きしない）。
 - 雛形の JSON は、組み込みの値を書き出すエディタメニューで作る。
 
 ---
@@ -239,12 +244,18 @@
 ## 8. 運営PC
 
 - `OperatorView`: 端末一覧（F-OPS-1）、状態・残り時間・合計額（F-OPS-2）、開始／保留／本編開始／中断（F-OPS-3）、見学・位置合わせ確認（F-OPS-4）、パラメータ版・警告・再読み込み、ゲーム設定*（F-OPS-5）。
-- `RoundLogger`: `rounds_YYYYMMDD.csv`・`players_YYYYMMDD.csv`（F-OPS-7）。1行ごとに書き込みを確定させる。
+  - 端末一覧（#44）: 画面の右上（左の状態表示の右、警告の文字より上）。先頭に「端末一覧 [接続中の端末を書き出す]」の行と列見出しの行。1 行 = 1 端末。列は 端末番号（未登録は「未登録」＋DeviceId の末尾 6 文字）／接続（接続・切断）／位置合わせ（確認済み・未確認）／手（両手・片手・なし・不明）／電池（%。〔電池の警告〕以下は警告色、不明は「不明」）／練習（Tutorial〜Result の間だけ「済」・「未」）／見学（見学・参加）。行ごとに「見学にする／参加に戻す」と「確認する／確認を外す」のボタン。端末番号の順に並べる。文字はキャンバス基準で 20、1 行の幅は約 740 で、16:9・16:10 の画面に収まる。
+  - 一覧の中身は `SessionHostCore.Devices`（`DeviceRowData` の配列。内容が変わったときだけ流れる）。行（`DeviceRowView`）はプレハブを使わず実行時にコードで作る。置き場所（`OperatorView._deviceListRoot`）が未設定なら `_devicesText` と同じキャンバスの下に自動で作る。
+- `RoundLogger`: `persistentDataPath/logs/rounds_YYYYMMDD.csv`・`players_YYYYMMDD.csv`（F-OPS-7）。日付は運営PCのローカル日付で、回の開始時刻で決める。回が終わる（Result→Waiting）か中断したときに、`SessionHostCore.RoundFinished` で流れる `RoundRecord` を 1 回ぶん追記する（rounds に 1 行、players に参加端末ごとに 1 行）。1行ごとに書き込みを確定させる（開いて書いて閉じる）。ファイルが無い（または空）なら見出し行から書く。UTF-8（BOM 付き）、カンマ・改行・ダブルクォートを含む値はクォートする。書けなかったら運営UIの警告に出し、進行は止めない。
+  - rounds の列: 開始時刻（ローカル ISO 8601）, RoundId, 終わり方（完了／中断）, 中断した状態, 人数, モード, 追加要素（有効なものを「|」でつなぐ）, 持ち方, パラメータ版, 保留の有無, 延長秒, 回収額, 目標額, 目標達成, 損害額。
+  - players の列: RoundId, 端末番号, DeviceId, 色番号, 練習完了, 初めて持った, 初めて回収した（各「秒」は回の開始からの経過秒。無ければ空欄）, 回収した数, 回収額, 減額の回数, 減額の額。
+  - 見出し・「完了」「中断」「はい」「いいえ」の文言は `ThTextTable`（`CsvRoundsHeader` ほか）。アセットに項目が無い間は `ThTextTable` に組み込んだ既定の文言を使う。
 - 個人の記録は、**ホストが確定した出来事だけ**から作る（端末の申告は使わない）。
   - 初めて持った時刻: S は `ThGrabbed`、M は `ThLifted`（M の片手予約は含めない）
   - 減額の回数と額: ホストが適用した減額（`ThDamaged`）だけ。重複として捨てた報告、免除で適用しなかった分は含めない。確定した時点のそのお宝の持ち主（いなければ最後に持った人）に記録する
-  - 回収: `ThCollected`。回収した人は最後に持った人
+  - 回収: `ThCollected`。回収した人は最後に持った人（切断などで判定役が外れていても、最後に持ち主を認めた端末）
   - 練習完了: 練習用お宝の回収の確定（3.4）
+  - 実装: `HostItemTable.Confirmed`（`HostItemEvent`: 持った・持ち上げた・減額・回収。DeviceId 付き）を `SessionHostCore` が本編の状態表にだけ付け、`RoundRecord`（純粋クラス）へ渡す。練習完了は `PracticeCollected`。再送への同じ返事・捨てた報告では出さない。
 - ランキング*は U-7 が決まってから、Core の `LeaderboardTracker` を使えるか判断する（今は個人スコアを集計する作り）。
 
 ---

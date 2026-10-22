@@ -22,9 +22,9 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
 
     public class DeviceRegistryTests
     {
-        static DeviceRegistry Make(string version = "v1")
+        static DeviceRegistry Make(string version = "v1", bool auto = true)
         {
-            var r = new DeviceRegistry { HostParamsVersion = version };
+            var r = new DeviceRegistry { HostParamsVersion = version, AutoConfirm = auto };
             return r;
         }
 
@@ -58,7 +58,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
             r.Disconnect(3);
             Assert.IsFalse(r.IsEligible("devA"));
             r.Connect("devA", 8);
-            Assert.IsTrue(r.IsEligible("devA"), "#44 までは再接続で確認済みに戻す");
+            Assert.IsTrue(r.IsEligible("devA"), "autoConfirm なら再接続で確認済みに戻る");
         }
 
         [Test] public void 次の回を待つ端末は参加できないがWaitingで解除される()
@@ -77,7 +77,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
         {
             var r = Make();
             r.Connect("devA", 3);
-            Assert.IsTrue(r.Get("devA").AlignmentConfirmed);   // この PR の既定は確認済み
+            Assert.IsTrue(r.Get("devA").AlignmentConfirmed);   // autoConfirm のときは確認済み始まり
             r.Disconnect(3);
             Assert.IsFalse(r.Get("devA").Connected);
             Assert.IsFalse(r.Get("devA").AlignmentConfirmed);
@@ -118,7 +118,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
     {
         sealed class Ctx
         {
-            public DeviceRegistry Reg = new DeviceRegistry { HostParamsVersion = "v1" };
+            public DeviceRegistry Reg = new DeviceRegistry { HostParamsVersion = "v1", AutoConfirm = true };
             public ThProgressParams Times = new ThProgressParams { openingSeconds = 3, practiceSeconds = 5, playingSeconds = 10, resultSeconds = 3 };
             public HostRoundMachine M;
             public Ctx(int devices = 2)
@@ -303,7 +303,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
     {
         static (HostRoundMachine m, DeviceRegistry r, HostMessageGate g) Make()
         {
-            var r = new DeviceRegistry { HostParamsVersion = "v1" };
+            var r = new DeviceRegistry { HostParamsVersion = "v1", AutoConfirm = true };
             var m = new HostRoundMachine(r, new ThProgressParams());
             foreach (var (id, no) in new[] { ("a", 10), ("b", 11) }) { r.Connect(id, no); r.ReportParamsVersion(id, "v1"); }
             r.Connect("c", 12); r.ReportParamsVersion("c", "v1");

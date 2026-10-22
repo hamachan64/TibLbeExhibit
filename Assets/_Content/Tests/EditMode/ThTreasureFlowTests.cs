@@ -505,6 +505,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
         static ThParams ShortParams()
         {
             var p = new ThParams();
+            p.operation.autoConfirmAlignment = true;   // 位置合わせは確認済み始まりで検証する（#44: 既定は未確認始まり）
             p.progress.openingSeconds = 3; p.progress.practiceSeconds = 5; p.progress.playingSeconds = 30; p.progress.resultSeconds = 3;
             p.grip.approvalWaitSeconds = 3;   // 結合テストで、ThItems による追いつきが待ち上限より先になる経路を固定するため
             return p;

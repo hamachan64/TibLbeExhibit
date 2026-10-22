@@ -72,6 +72,16 @@ namespace STYLY.TIB_Template.TreasureHaul
         public string catalogHash = "";
     }
 
+    /// <summary>端末→ホスト 状況報告（#44。〔状況報告の間隔〕ごと）。RoundId 引数には「知っている RoundId」を入れる（ホストは使わない）</summary>
+    [Serializable]
+    public class ThStatusMsg
+    {
+        /// <summary>手の認識の台数（0 / 1 / 2）。取れない端末は -1</summary>
+        public int hands = -1;
+        /// <summary>電池残量（%）。取れない端末は -1</summary>
+        public int battery = -1;
+    }
+
     [Serializable]
     public class ThParamsMsg
     {

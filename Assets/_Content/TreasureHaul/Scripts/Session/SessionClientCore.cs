@@ -45,7 +45,23 @@ namespace STYLY.TIB_Template.TreasureHaul
         long _itemsRound;
         bool _itemsPractice;
         double _lastPoseSentAt = double.NegativeInfinity;
+        double _lastStatusSentAt = double.NegativeInfinity;
         IDisposable _stateSub;
+
+        /// <summary>
+        /// 手の認識の台数（0 / 1 / 2）を返す関数（TreasureClient が両手の追跡状態から渡す）。null なら「不明」（-1）として報告する。
+        /// 状況報告（ThStatus）の送信時に読む。
+        /// </summary>
+        public Func<int> HandCountProvider { get; set; }
+        /// <summary>電池残量（%。取れなければ -1）を返す関数。既定は <see cref="DefaultBatteryPercent"/>（テストでは差し替える）</summary>
+        public Func<int> BatteryPercentProvider { get; set; } = DefaultBatteryPercent;
+
+        /// <summary>SystemInfo.batteryLevel（0〜1。取れない端末・エディタは -1）を % にする。実機で取れるかは未確認（PICO）</summary>
+        public static int DefaultBatteryPercent()
+        {
+            float level = SystemInfo.batteryLevel;
+            return level < 0f ? -1 : Mathf.Clamp(Mathf.RoundToInt(level * 100f), 0, 100);
+        }
 
         /// <summary>今の回のお宝の表（Tutorial では練習用お宝の表、Playing に入ると本編の表に替わる。待機に戻るまで。回の途中から入った端末は null）</summary>
         public ReadOnlyReactiveProperty<ClientItemTable> Items => _items;
@@ -278,6 +294,16 @@ namespace STYLY.TIB_Template.TreasureHaul
                 items.Tick(now);
             }
             if (Tracker.TryTakeResync(now)) SendResync(now);
+            if (now - _lastStatusSentAt >= Params.progress.statusInterval) SendStatus(now);
+        }
+
+        /// <summary>状況報告（手の認識・電池）を送る。ホストは受け取った時刻から〔状況報告の間隔〕×3 を過ぎると「不明」にする</summary>
+        void SendStatus(double now)
+        {
+            _lastStatusSentAt = now;
+            int hands = HandCountProvider != null ? HandCountProvider() : -1;
+            int battery = BatteryPercentProvider != null ? BatteryPercentProvider() : -1;
+            _tx.Send(Rpc.ThStatus, ThMessages.Encode(Tracker.RoundId, new ThStatusMsg { hands = hands, battery = battery }));
         }
 
         void SendResync(double now)
