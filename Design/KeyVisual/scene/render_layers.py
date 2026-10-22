@@ -6,7 +6,8 @@ Set SCALE = 50 for a quick preview.
 
 Outputs (in Design/KeyVisual/render/):
   kv_3d_full.png   ruins + venue placeholder + placeholder people (with post: haze, bloom, vignette)
-  kv_3d_plate.png  same, without people (plate for compositing photographed people)
+  kv_3d_plate.png  same, without people and their palm beams (plate for compositing photographed people;
+                   the flying disc and its debris stay)
   kv_3d_ruins.png  ruins and floor only, venue transparent (to drop in a real venue photo)
 """
 import os
@@ -39,19 +40,10 @@ os.makedirs(OUT, exist_ok=True)
 
 people = bpy.data.collections["KV_People"]
 venue = bpy.data.collections["KV_Venue"]
-# The bronze cauldron carried by the blue player belongs with the people.
-carried = bpy.data.objects["bronze_tripod_cauldron_Root.001"]
-carried_objs = [carried] + list(carried.children_recursive)
-
-
-def set_hidden(objs, hidden):
-    for o in objs:
-        o.hide_render = hidden
 
 
 def render(name, show_people, show_venue, transparent):
     people.hide_render = not show_people
-    set_hidden(carried_objs, not show_people)
     venue.hide_render = not show_venue
     sc.render.film_transparent = transparent
     sc.render.image_settings.color_mode = "RGBA" if transparent else "RGB"
@@ -66,7 +58,6 @@ render("kv_3d_plate.png", False, True, False)
 render("kv_3d_ruins.png", False, False, True)
 # Leave the file showing the full frame.
 people.hide_render = False
-set_hidden(carried_objs, False)
 venue.hide_render = False
 sc.render.film_transparent = False
 sc.render.use_compositing = True

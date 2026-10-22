@@ -10,23 +10,24 @@
   @font-face { font-family: "KV Noto"; font-weight: 700; src: url("../../Assets/_Content/Fonts/Noto_Sans_JP/static/NotoSansJP-Bold.ttf"); }
   html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #000; }
   .kv { position: relative; width: 1920px; height: 1080px; background: url("render/kv_3d_full.png") center / cover no-repeat; }
-  /* Darken the top a little so the title reads over the venue ceiling. */
-  .kv::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 420px;
-    background: linear-gradient(to bottom, rgba(6,8,12,.72), rgba(6,8,12,0)); }
-  .title { position: absolute; top: 58px; left: 0; right: 0; text-align: center;
-    font: 900 132px/1 "KV Noto", sans-serif; letter-spacing: .02em; color: #f4e3b8;
-    background: linear-gradient(to bottom, #fff3d2 0%, #f1cf7c 55%, #c98d2e 100%);
+  /* Darken the lower left so the title reads over the floor. */
+  .kv::before { content: ""; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 1150px 520px at 0% 100%, rgba(5,6,9,.88) 0%, rgba(5,6,9,.55) 45%, rgba(5,6,9,0) 100%); }
+  .block { position: absolute; left: 92px; bottom: 78px; }
+  .title { font: 900 168px/0.9 "KV Noto", sans-serif; letter-spacing: -.01em; margin: 0;
+    background: linear-gradient(to bottom, #fff4d6 0%, #f6d27a 48%, #d18a22 100%);
     -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 4px 0 rgba(40,22,6,.9)) drop-shadow(0 10px 24px rgba(0,0,0,.6)); }
-  .catch { position: absolute; top: 214px; left: 0; right: 0; text-align: center;
-    font: 700 46px/1 "KV Noto", sans-serif; letter-spacing: .18em; color: #fff;
-    text-shadow: 0 2px 0 rgba(0,0,0,.7), 0 6px 18px rgba(0,0,0,.6); }
+    filter: drop-shadow(0 5px 0 #2a1604) drop-shadow(0 14px 28px rgba(0,0,0,.7)); }
+  .catch { margin-top: 26px; font: 700 50px/1 "KV Noto", sans-serif; letter-spacing: .14em; color: #fff;
+    text-shadow: 0 3px 0 rgba(0,0,0,.75), 0 8px 20px rgba(0,0,0,.6); }
 </style>
 </head>
 <body>
   <div class="kv">
-    <div class="title">Treasure Haul</div>
-    <div class="catch">見つけて、運んで、壊すな。</div>
+    <div class="block">
+      <div class="title">Treasure<br>Haul</div>
+      <div class="catch">見つけて、運んで、壊すな。</div>
+    </div>
   </div>
 </body>
 </html>
