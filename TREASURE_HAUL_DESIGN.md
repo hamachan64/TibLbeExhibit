@@ -92,11 +92,21 @@
 ## 4. お宝
 
 ### 4.1 配置（F-ITEM-1/2）
-- `TreasureSpawner`（純粋ロジック）が、シード＋参加人数＋P-5 の表＋配置候補点から配置と値段を出す。乱数は `System.Random(seed)`。
-- 配置候補点は Environment に手で置き、納品場所からの距離帯を持たせる。縁の余白・納品場所の前には置かない。
-- **お宝カタログ**（#38）: お宝の見た目は ScriptableObject `ThTreasureCatalog` 1つで一括管理する。1件＝種類（S／M、追加要素の L*・秘宝*）、表示名、プレハブ（モデルの MeshRenderer だけ。持ち手のメッシュは持たない。つかむ範囲の箱は `Treasure.Initialize` が `ModelBounds` から実行時に自動で作る: S は1つ、M は水平の長い軸で左右に分けた2つ。余白 0.02m。割り付けは `GrabZoneLayout`。ビームが当たっている間に光る輪郭は、モデルの各 MeshRenderer と同じメッシュを背面法（`TIB/TreasureHaul/AimOutline`）で描く子として自動で作る）、今回の展示で使うか。練習用お宝のプレハブもここに持つ。
-  - `TreasureSpawner` は各枠の種類・値段を決めた後、同じ乱数で、その種類の「使う」お宝からプレハブを選ぶ（全端末で同じ見た目になる）。
-  - カタログはビルドに入れる（運営PCのファイルで変えるパラメータ〔7章〕とは分ける）。ビルドの違いで選ばれる見た目がずれないよう、カタログの「使う」お宝の並びのハッシュを、パラメータ版と同じく端末とホストで照合する。
+- `TreasureSpawner`（純粋ロジック）が、シード＋参加人数＋P-5 の表＋置き場所（配置候補点）＋カタログから、置き場所・お宝・値段を出す。乱数は `System.Random(seed)` 1 つ。
+- **置き場所**（`ThPlacementPoint`。Environment のステージ `TreasureSlot_NN`）は、置ける種類（S・M のフラグ）、入る大きさ（幅・奥行・高さ m）、正面の向き（Y 回転。度）、ゾーン名、隠す意図、距離帯（0〜2）を持つ。距離帯はゾーンから決まる: `block_front`・`corridor_w`・`corridor_e` → 0 / `front_room`・`back_room`・`cross` → 1 / `hall` → 2。納品場所の前・縁の余白には置かない。純粋側の `PlacementPoint` にも同じ情報が渡る。
+- **配置の規則**（2026-10-21。値段は P-4 の S・M の範囲ではなく、お宝ごとの帯で決める）:
+  1. M は「M を置ける」置き場所にだけ、S は「S を置ける」置き場所にだけ置く。
+  2. お宝の大きさ（幅・奥行・高さ）が置き場所の入る大きさ以下のお宝だけを選ぶ（お宝の正面を置き場所の正面に向けた寸法で比べる）。
+  3. 同じお宝（同じ ID）を水平距離 1.5m 未満の置き場所に置かない。条件を満たす候補が無いときだけ外し、`Warnings` に書く。
+  4. お宝の選び方は距離帯で偏らせる: 候補を「値段の帯の中央値の安い順（同じなら ID 順）」に並べ、帯 0 は 2 回引いて小さい方、帯 1 は 1 回、帯 2 は 2 回引いて大きい方の添字。
+  5. 値段はそのお宝の帯の中で 100G 刻み。引き方は 4. と同じ。
+  6. 向きは置き場所の正面の向き（ランダムの Y 回転はしない）。
+  7. 置き場所や候補が足りずに出現数を満たせないときは、置ける数だけ置いて `Warnings` に書く。
+- **乱数の順番**（変えると全端末の配置が変わる。`TreasureSpawner` の summary と同じ）: ①置き場所のシャッフル（Fisher-Yates、全点） → ②置き場所の選択（乱数なし。シャッフル順に M を出現数だけ、次に S を出現数だけ。番号はシャッフル順） → ③お宝の選択（番号順。距離帯で偏らせた 1〜2 回） → ④値段（番号順。同じ引き方）。辞書の列挙順などに頼らない。
+- 実際のステージの 34 か所（M を置けるのは 11 か所）と 12 種のカタログで、1〜4 人の出現数をシード 0〜999 で置いても、規則 1・2 を破らず出現数を満たし、規則 3 を外す回数は 0（EditMode テスト `ThPlacementTests`）。
+- **お宝カタログ**（#38）: お宝の見た目は ScriptableObject `ThTreasureCatalog` 1つで一括管理する。1件＝種類（S／M、追加要素の L*・秘宝*）、表示名、**値段の帯（`valueMin`〜`valueMax`。100G 刻み。Blender の `stats.json` の `value_band_g`）**、**大きさ（幅・奥行・高さ m。プレハブのモデルの外形から求めた値。エディタのメニュー「Tools/Treasure Haul/お宝カタログの大きさを入れ直す」で入れ直す）**、プレハブ（モデルの MeshRenderer だけ。持ち手のメッシュは持たない。つかむ範囲の箱は `Treasure.Initialize` が `ModelBounds` から実行時に自動で作る: S は1つ、M は水平の長い軸で左右に分けた2つ。余白 0.02m。割り付けは `GrabZoneLayout`。ビームが当たっている間に光る輪郭は、モデルの各 MeshRenderer と同じメッシュを背面法（`TIB/TreasureHaul/AimOutline`）で描く子として自動で作る）、今回の展示で使うか。練習用お宝のプレハブもここに持つ。
+  - 上の配置の規則のとおり、`TreasureSpawner` が置き場所に入るお宝を選び、その帯の中で値段を決める（全端末で同じ見た目・同じ値段になる）。プレハブは、ルートに `Treasure`、子にモデル（底の中心が原点で底が y=0、正面がローカル +Z）。
+  - カタログはビルドに入れる（運営PCのファイルで変えるパラメータ〔7章〕とは分ける）。ビルドの違いで選ばれる見た目がずれないよう、カタログの「使う」お宝の並び（種類・ID・値段の帯・大きさ〔mm に丸める〕）のハッシュを、パラメータ版と同じく端末とホストで照合する。
   - #46 で届いたモデルは、カタログに足すだけで使えるようにする。
 
 ### 4.2 状態
@@ -158,6 +168,16 @@
 
 ### 4.5 持ち方の切り替え（F-GRAB-9*）
 - `HandGrabber` の「ビームの長さ」と「つかんだ後の目標の決め方」を差し替えられる形にしておく。
+
+### 4.6 会場（ステージ）の取り込みと灯り（#46、2026-10-21）
+- **作り方**: Blender の出力（`BlenderAssets/TreasureHaul/Stage/Output/`）を `Assets/_Content/TreasureHaul/Models/Stage/` にコピーし、エディタのメニュー「Tools/Treasure Haul/ステージを作り直す（stage_layout.json）」（`ThStageBuilder`）が Environment シーンの `VenueRoot/Stage` を作り直す（何度実行しても同じ。前の `Stage` と古い仮の会場〔`PlacementPoints`・`Rubble`・仮の荷台〕を消してから作る）。素材だけの取り込みは「ステージの素材を取り込む」、灯りの焼き込みは「ステージの灯りを焼く」。
+- **取り込み設定**: 14 モジュールの FBX は法線 Import・Scale Factor 1・読み書き可（MeshCollider のため）・ライトマップ用 UV を生成。材質は URP Lit の 1 つ `TH_StageAtlas.mat`（BaseMap / MetallicGlossMap=`Stage_Atlas_MetallicSmoothness.png`〔`ThAtlasPacker` で Metallic・Roughness から作る。sRGB オフ〕/ Emission）。
+- **X 軸の反転**: FBX は Unity に取り込むと X が反転する（Unity の X = -Blender の X）。JSON のコライダー・置き場所は Blender の X のまま Unity の座標に直してあるので、モジュールの親 `Modules` の `localScale` を (-1, 1, 1) にして合わせる（`ThStageBuilder.ModuleScale`）。Bake Axis Conversion は使わない（向きが 180° 回る）。EditMode テスト `ThStageTests` で、前の部屋の扉が西・奥の部屋の扉が東であること、メッシュの外形と JSON の箱が 5cm 以内で一致することを確かめる。
+- **コライダー**: 壁 78（JSON の `wall` の箱。`ThWall` レイヤー）、壁龕の縁 15（`niche_lip` の箱。Default）、箱の家具 8（`ExtractionBay`・`EntryCamp` の `solid`。Default）、メッシュの家具 5（置き場所のある家具のモジュールの非凸 MeshCollider。Default。置き場所が外形の箱の中にあるので箱は使わない）。
+- **置き場所・練習・回収**: `TreasureSlot_01〜34`（`ThPlacementPoint`。JSON の番号順に `ThVenue` へ）、練習の枠 `TutorialSlot_0〜3`（X の小さい方から色番号 0、奥行 2.5）、`CollectZone`（回収範囲）、`CargoBoard`（表示板）を JSON の位置に合わせる。
+- **灯り**: JSON の `Light_*`（23 個）をすべて **Baked** の灯りにする。`Light_Lamp_*`・`Light_WorkLamp_*`（11）は暖色 3000K のスポット（範囲 3m・角度 100°・`aim_unity_xyz` を向く。強さは Blender の W 数 ÷ 40）、`Light_Bulb_*`（12）は 2700K の点光源（範囲 1.5m・強さ 1.0）。ライトマップは `ThEnvironmentLighting.lighting`（ProgressiveCPU、40 texels/unit、最大 1024、NonDirectional、Auto Generate オフ）で焼く。
+- **ライトプローブ**: 動くお宝のために、`Stage/LightProbes` に高さ 0.3 / 1.0 / 1.6m の 3 段、X 0.8m 間隔（±0.4・±1.2・±2.0）× 奥行 0.8m 間隔（0.4〜10.8）の格子を置く（壁・家具の外形の箱の中は除く。202 個）。追加ロードした Environment のライトプローブは、UserClient から `AdditiveSceneLoader` で読み込んだ後も自動で効く（PlayMode で、読み込み後のプローブ数 202・位置ごとに違う SH を確認）ので、`LightProbes.TetrahedralizeAsync()` の呼び出しは要らない。
+- **エディタでの確認の道具**: `ThLoopbackHarness`（TreasureHaul/Editor）が、NetSync のサーバーが無くても、UserClient ＋ Environment の PlayMode の中で運営PC（`SessionHostCore`）と端末 4 台（`SessionClientCore`。1 台だけ本物の `SessionClient` に差し込む）をメモリ上の通信でつなぎ、手（握り・手のひらの位置）をスクリプトから動かす。
 
 ---
 

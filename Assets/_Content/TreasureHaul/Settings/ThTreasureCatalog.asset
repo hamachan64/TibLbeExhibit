@@ -13,24 +13,124 @@ MonoBehaviour:
   m_Name: ThTreasureCatalog
   m_EditorClassIdentifier: TibLbeExhibit.TreasureHaul::STYLY.TIB_Template.TreasureHaul.ThTreasureCatalog
   entries:
-  - id: s_cup
+  - id: clay_pot
     kind: 0
-    displayName: "\u676F"
-    prefab: {fileID: 5443521396822353533, guid: 9528eb6fb5ffc4c49825aa0b2b6aef83, type: 3}
+    displayName: "\u571F\u306E\u5C0F\u58FA"
+    prefab: {fileID: 7517248486277071075, guid: d14350e7199a4774db269cc8d277e08d, type: 3}
     use: 1
-  - id: s_mask
+    valueMin: 100
+    valueMax: 200
+    width: 0.18127781
+    depth: 0.1744875
+    height: 0.18060005
+  - id: clay_offering_bowl
     kind: 0
-    displayName: "\u4EEE\u9762"
-    prefab: {fileID: 9081025299999245414, guid: 4177cf1a2b11d49b4805553e93078c5f, type: 3}
+    displayName: "\u4F9B\u7269\u306E\u9262"
+    prefab: {fileID: 6971278439156129161, guid: a56ca6e795f5a83489cfb5036c8a92a4, type: 3}
     use: 1
-  - id: s_idol
+    valueMin: 100
+    valueMax: 200
+    width: 0.21954337
+    depth: 0.21946293
+    height: 0.10900004
+  - id: stone_beast
     kind: 0
-    displayName: "\u5C0F\u50CF"
-    prefab: {fileID: 5771065869259685380, guid: 597df1ee8831b4b3fa51941b4a37d6c0, type: 3}
+    displayName: "\u89D2\u306E\u3042\u308B\u9CE5\u306E\u7ACB\u50CF"
+    prefab: {fileID: 6785002641675907257, guid: b88f1ce6b7a751c4db4a06222c3a5dc2, type: 3}
     use: 1
-  - id: m_urn
+    valueMin: 100
+    valueMax: 200
+    width: 0.1057399
+    depth: 0.10134846
+    height: 0.21250531
+  - id: stone_unguent_jar
+    kind: 0
+    displayName: "\u9999\u6CB9\u58FA"
+    prefab: {fileID: 2624945032359420855, guid: 3a9329d63a3cb5c4086f204dbe2391fb, type: 3}
+    use: 1
+    valueMin: 200
+    valueMax: 200
+    width: 0.09346102
+    depth: 0.09345416
+    height: 0.24970004
+  - id: bronze_amulet_disc
+    kind: 0
+    displayName: "\u8B77\u7B26\u76E4"
+    prefab: {fileID: 5604669351417526816, guid: be6eacc67c634cf40b555b69361ecb27, type: 3}
+    use: 1
+    valueMin: 200
+    valueMax: 200
+    width: 0.17
+    depth: 0.0655925
+    height: 0.23848048
+  - id: bronze_figure
+    kind: 0
+    displayName: "\u7ACB\u50CF"
+    prefab: {fileID: 617078227400567286, guid: e6d9eeff4e8f41c4cbf9b98d7d601d58, type: 3}
+    use: 1
+    valueMin: 200
+    valueMax: 300
+    width: 0.10740301
+    depth: 0.08792254
+    height: 0.3027356
+  - id: silver_mirror
+    kind: 0
+    displayName: "\u624B\u93E1"
+    prefab: {fileID: 5369456994395648983, guid: 7a6b3f7d1ddd654499b456e8488d762b, type: 3}
+    use: 1
+    valueMin: 300
+    valueMax: 300
+    width: 0.19053614
+    depth: 0.083189115
+    height: 0.30840003
+  - id: gold_mask
+    kind: 0
+    displayName: "\u5C0F\u3055\u306A\u4EEE\u9762"
+    prefab: {fileID: 9071582032813783216, guid: d4cdd5e27eb684646b91784fb755f0b7, type: 3}
+    use: 1
+    valueMin: 300
+    valueMax: 300
+    width: 0.1733177
+    depth: 0.114902265
+    height: 0.23720688
+  - id: clay_amphora
     kind: 1
-    displayName: "\u58FA"
-    prefab: {fileID: 1466847696703119055, guid: 57ca11065edd64a659fd3cd70c5815ec, type: 3}
+    displayName: "\u5927\u58FA"
+    prefab: {fileID: 6969393500410585423, guid: 9eec47df1290b9548a2487e05bcb6cc0, type: 3}
     use: 1
+    valueMin: 400
+    valueMax: 500
+    width: 0.26756462
+    depth: 0.224894
+    height: 0.38000005
+  - id: stone_stele
+    kind: 1
+    displayName: "\u77F3\u7891"
+    prefab: {fileID: 6225537050834881433, guid: 2feb3b0d839832649987d9e2f625fa05, type: 3}
+    use: 1
+    valueMin: 500
+    valueMax: 600
+    width: 0.35756195
+    depth: 0.14839949
+    height: 0.46400005
+  - id: bronze_tripod_cauldron
+    kind: 1
+    displayName: "\u4E09\u811A\u306E\u5927\u91DC"
+    prefab: {fileID: 6072464773156730056, guid: 3ef2c8e80a38a4f4486468b55089a495, type: 3}
+    use: 1
+    valueMin: 600
+    valueMax: 600
+    width: 0.39177638
+    depth: 0.29612634
+    height: 0.38836014
+  - id: gilded_sun_disc
+    kind: 1
+    displayName: "\u65E5\u8F2A\u76E4"
+    prefab: {fileID: 6334472678958591700, guid: 8e1195554e5745a4cb35683f25e9d4b5, type: 3}
+    use: 1
+    valueMin: 700
+    valueMax: 800
+    width: 0.45200002
+    depth: 0.158812
+    height: 0.5120001
   practicePrefab: {fileID: 4708044317000063054, guid: 87a9be90af988437e9caa84e2bb7babb, type: 3}

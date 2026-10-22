@@ -20,8 +20,8 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
 
         static readonly SpawnCatalogEntry[] Catalog =
         {
-            new SpawnCatalogEntry(TreasureKind.S, 0), new SpawnCatalogEntry(TreasureKind.S, 1),
-            new SpawnCatalogEntry(TreasureKind.M, 2),
+            new SpawnCatalogEntry(TreasureKind.S, 0, "s0", 100, 200), new SpawnCatalogEntry(TreasureKind.S, 1, "s1", 200, 300),
+            new SpawnCatalogEntry(TreasureKind.M, 2, "m2", 500, 700),
         };
 
         // ---- TreasureSpawner ----
@@ -56,7 +56,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
                 var row = p.layout.rows[players - 1];
                 Assert.AreEqual(row.spawnS, r.Items.Count(t => t.Kind == TreasureKind.S), $"{players}人 S");
                 Assert.AreEqual(row.spawnM, r.Items.Count(t => t.Kind == TreasureKind.M), $"{players}人 M");
-                CollectionAssert.IsEmpty(r.Warnings);
+                Assert.IsFalse(r.Warnings.Any(w => !w.Contains("決まりを外しました")), string.Join("/", r.Warnings));   // お宝が 2 種しかない合成データなので、1.5m の決まりは外れることがある
             }
         }
 
@@ -67,18 +67,17 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
             Assert.AreEqual(p.layout.rows[3].spawnS + p.layout.rows[3].spawnM, TreasureSpawner.Spawn(1, 9, p, Points(), Catalog).Items.Count);
         }
 
-        [Test] public void 値段は100G刻みで範囲内()
+        [Test] public void 値段はそのお宝の帯の中で100G刻み()
         {
             var p = new ThParams();
             for (int seed = 0; seed < 50; seed++)
             {
                 foreach (var t in TreasureSpawner.Spawn(seed, 4, p, Points(), Catalog).Items)
                 {
-                    int min = t.Kind == TreasureKind.M ? p.treasure.mValueMin : p.treasure.sValueMin;
-                    int max = t.Kind == TreasureKind.M ? p.treasure.mValueMax : p.treasure.sValueMax;
+                    var e = Catalog[t.CatalogIndex];
                     Assert.AreEqual(0, t.Value % 100);
-                    Assert.GreaterOrEqual(t.Value, min);
-                    Assert.LessOrEqual(t.Value, max);
+                    Assert.GreaterOrEqual(t.Value, e.ValueMin);
+                    Assert.LessOrEqual(t.Value, e.ValueMax);
                 }
             }
         }
@@ -127,9 +126,10 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
                 if (t.Kind == TreasureKind.M) Assert.AreEqual(2, t.CatalogIndex);
                 else Assert.That(t.CatalogIndex, Is.EqualTo(0).Or.EqualTo(1));
             }
-            // 種類に合う使うお宝が無ければ -1
+            // M の使うお宝が無ければ M は置かず、警告する
             var onlyS = TreasureSpawner.Spawn(3, 4, new ThParams(), Points(), new[] { new SpawnCatalogEntry(TreasureKind.S, 0) });
-            Assert.IsTrue(onlyS.Items.Where(t => t.Kind == TreasureKind.M).All(t => t.CatalogIndex == -1));
+            Assert.IsFalse(onlyS.Items.Any(t => t.Kind == TreasureKind.M));
+            Assert.IsNotEmpty(onlyS.Warnings);
         }
 
         // ---- ThTreasureCatalog ----
@@ -166,13 +166,14 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
 
         [Test] public void ハッシュは並びが同じなら同じで1件違えば変わる()
         {
-            string Hash(params (TreasureKind, string)[] e) => ThTreasureCatalog.ComputeHash(e);
-            var a = Hash((TreasureKind.S, "x"), (TreasureKind.S, "y"), (TreasureKind.M, "z"));
-            Assert.AreEqual(a, Hash((TreasureKind.S, "x"), (TreasureKind.S, "y"), (TreasureKind.M, "z")));
+            ThTreasureEntry E(TreasureKind k, string id) => new ThTreasureEntry { id = id, kind = k, valueMin = 100, valueMax = 200, width = 0.2f, depth = 0.2f, height = 0.2f };
+            string Hash(params ThTreasureEntry[] e) => ThTreasureCatalog.ComputeHash(e);
+            var a = Hash(E(TreasureKind.S, "x"), E(TreasureKind.S, "y"), E(TreasureKind.M, "z"));
+            Assert.AreEqual(a, Hash(E(TreasureKind.S, "x"), E(TreasureKind.S, "y"), E(TreasureKind.M, "z")));
             Assert.AreEqual(8, a.Length);
-            Assert.AreNotEqual(a, Hash((TreasureKind.S, "x"), (TreasureKind.S, "y"), (TreasureKind.M, "w")));
-            Assert.AreNotEqual(a, Hash((TreasureKind.S, "x"), (TreasureKind.S, "y")));
-            Assert.AreNotEqual(a, Hash((TreasureKind.S, "y"), (TreasureKind.S, "x"), (TreasureKind.M, "z")));
+            Assert.AreNotEqual(a, Hash(E(TreasureKind.S, "x"), E(TreasureKind.S, "y"), E(TreasureKind.M, "w")));
+            Assert.AreNotEqual(a, Hash(E(TreasureKind.S, "x"), E(TreasureKind.S, "y")));
+            Assert.AreNotEqual(a, Hash(E(TreasureKind.S, "y"), E(TreasureKind.S, "x"), E(TreasureKind.M, "z")));
         }
 
         [Test] public void 使わないお宝はハッシュに入らない()

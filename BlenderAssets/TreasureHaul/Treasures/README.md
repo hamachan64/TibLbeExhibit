@@ -42,9 +42,12 @@
 - 確認：`blender -b --factory-startup --python ../verify_treasures.py`（12 種の FBX と blend を読み込み直し、三角形数・寸法・UV・底・材質 1 つ・Emission なし・Aim ゾーンを確認する。結果は `verification.json`）
 - 一覧画像：`blender -b --factory-startup --python ../render_treasures.py`
 
-## Unity に取り込むとき（未実施）
-- モデルの Normals は「Import」にする（カスタム法線を使っているため）。
-- アトラスの Metallic と Roughness は別々の画像になっている。URP Lit 用に「R=金属度・A=滑らかさ」の 1 枚へ変換が必要。
+## Unity に取り込むとき（実施済み。2026-10-21）
+- 取り込み先: `Assets/_Content/TreasureHaul/Models/Treasures/`（FBX 12 個とアトラス）。FBX は Scale Factor 1・Normals = Import・Tangents = None・マテリアルは取り込まない。凸の `MeshCollider` に使うので Read/Write は有効。
+- **向き**: FBX のルートは X 軸 270.02° 回転して取り込まれ、そのまま Blender の Z 上・-Y 正面が Unity の Y 上・+Z 正面になる（数値で確認済み: 底 y=0、正面 +Z、回転のみで反転なし）。プレハブでは、モデルの子に FBX のメッシュを直接付け、ローカル回転を (270°, 0, 0) にしている。`Aim_*` の空オブジェクトはプレハブに残していない（つかむ範囲は `GrabZoneLayout` が実行時に作る）。
+- **アトラス**: Metallic と Roughness は、エディタのメニュー「Tools/Treasure Haul/お宝のアトラスを変換する（MetallicSmoothness）」（`ThAtlasPacker`）で 1 枚（`Treasure_Atlas_MetallicSmoothness.png`。R=金属度、A=1-粗さ、G・B=0、sRGB オフ）にする。再実行すると同じ物を上書きする。材質は `Materials/TH_TreasureAtlas.mat`（URP Lit。BaseMap=BaseColor、MetallicGlossMap=上の 1 枚、Smoothness の出どころ=Metallic の Alpha）の 1 つを 12 種が共有する。
+- **プレハブ**: `Prefabs/Treasures/TH_<S|M>_<PascalName>`（例 `TH_S_ClayPot`、`TH_M_GildedSunDisc`）。値段の札の位置はモデルの上端の 5cm 上。練習用の `Prefabs/TH_Practice` は土の小壺のモデル。
+- **カタログ**: `Settings/ThTreasureCatalog` に 12 件（ID はモデル名、値段の帯は `stats.json` のとおり、大きさはプレハブの外形から。メニュー「Tools/Treasure Haul/お宝カタログの大きさを入れ直す」で入れ直す）。
 - 手鏡（`silver_mirror`）は奥行きが浅く、約 12° 傾くと倒れる。
 
 ## これまでの経緯

@@ -1,0 +1,6265 @@
+{
+  "venue": {
+    "width_m": 5,
+    "length_m": 11,
+    "depth_m": 11,
+    "origin": "centre of the entrance edge, floor",
+    "blender_from_unity": "(X, -Z, Y)",
+    "unity_from_logical": "(x, h, d)"
+  },
+  "layout": {
+    "type": "B. ring corridor",
+    "wall_height_m": 2.4,
+    "ceiling": false,
+    "outer_walls": {
+      "center_x": 2.38,
+      "thickness": 0.2,
+      "depth": [
+        3.2,
+        11.0
+      ]
+    },
+    "block": {
+      "outer_x": 1.08,
+      "depth": [
+        3.9,
+        8.2
+      ],
+      "thickness": 0.2,
+      "chamfer": 0.3,
+      "partition_depth": 6.05,
+      "partition_thickness": 0.3,
+      "front_room_door": {
+        "face": "west",
+        "depth": [
+          4.7,
+          5.9
+        ]
+      },
+      "back_room_door": {
+        "face": "east",
+        "depth": [
+          6.6,
+          7.8
+        ]
+      }
+    },
+    "corridor_width_nominal_m": 1.2,
+    "cross_corridor_depth": [
+      8.2,
+      9.4
+    ],
+    "hall": {
+      "depth": [
+        9.6,
+        10.8
+      ],
+      "partition_center_depth": 9.5,
+      "opening_half_width": 1.05
+    },
+    "entrance_zone": {
+      "depth": [
+        0,
+        3.2
+      ],
+      "tall_walls": false
+    }
+  },
+  "runtime_stats": {
+    "meshes": 14,
+    "triangles": 82789,
+    "vertices": 44062,
+    "material_slots": 14
+  },
+  "preview_treasure_stats": {
+    "meshes": 23,
+    "triangles": 61032,
+    "vertices": 30970,
+    "material_slots": 23
+  },
+  "module_stats": [
+    {
+      "name": "THStage_OuterWall_W",
+      "beam_blocking": true,
+      "kind": "wall",
+      "meshes": 1,
+      "triangles": 12264,
+      "vertices": 6427,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_OuterWall_E",
+      "beam_blocking": true,
+      "kind": "wall",
+      "meshes": 1,
+      "triangles": 9794,
+      "vertices": 5139,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_BackWall",
+      "beam_blocking": true,
+      "kind": "wall",
+      "meshes": 1,
+      "triangles": 6666,
+      "vertices": 3521,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_Block_Shell",
+      "beam_blocking": true,
+      "kind": "wall",
+      "meshes": 1,
+      "triangles": 20954,
+      "vertices": 11021,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_Block_Partition",
+      "beam_blocking": true,
+      "kind": "wall",
+      "meshes": 1,
+      "triangles": 3978,
+      "vertices": 2121,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_HallPartitions",
+      "beam_blocking": true,
+      "kind": "wall",
+      "meshes": 1,
+      "triangles": 5466,
+      "vertices": 2878,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_ExtractionBay",
+      "beam_blocking": false,
+      "kind": "furniture",
+      "meshes": 1,
+      "triangles": 3146,
+      "vertices": 1688,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_EntryCamp",
+      "beam_blocking": false,
+      "kind": "furniture",
+      "meshes": 1,
+      "triangles": 2654,
+      "vertices": 1484,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_BlockFront_Altar",
+      "beam_blocking": false,
+      "kind": "furniture",
+      "meshes": 1,
+      "triangles": 504,
+      "vertices": 276,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_FrontRoom_Furniture",
+      "beam_blocking": false,
+      "kind": "furniture",
+      "meshes": 1,
+      "triangles": 2948,
+      "vertices": 1616,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_BackRoom_Furniture",
+      "beam_blocking": false,
+      "kind": "furniture",
+      "meshes": 1,
+      "triangles": 4086,
+      "vertices": 2200,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_Corridor_Props",
+      "beam_blocking": false,
+      "kind": "furniture",
+      "meshes": 1,
+      "triangles": 4484,
+      "vertices": 2426,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_Hall_Furniture",
+      "beam_blocking": false,
+      "kind": "furniture",
+      "meshes": 1,
+      "triangles": 5602,
+      "vertices": 2968,
+      "material_slots": 1
+    },
+    {
+      "name": "THStage_GroundFragments",
+      "beam_blocking": false,
+      "kind": "decor_ground",
+      "meshes": 1,
+      "triangles": 243,
+      "vertices": 297,
+      "material_slots": 1
+    }
+  ],
+  "material": {
+    "name": "THStage_Atlas",
+    "count": 1,
+    "textures": [
+      "textures/Stage_Atlas_BaseColor.png",
+      "textures/Stage_Atlas_Metallic.png",
+      "textures/Stage_Atlas_Roughness.png",
+      "textures/Stage_Atlas_Emission.png"
+    ],
+    "atlas_px": [
+      1024,
+      1024
+    ],
+    "cell_px": 128,
+    "tiles": {
+      "stone_a": {
+        "cell": [
+          0,
+          0
+        ],
+        "size_cells": [
+          2,
+          2
+        ],
+        "emissive": false
+      },
+      "stone_b": {
+        "cell": [
+          2,
+          0
+        ],
+        "size_cells": [
+          2,
+          2
+        ],
+        "emissive": false
+      },
+      "stone_c": {
+        "cell": [
+          4,
+          0
+        ],
+        "size_cells": [
+          2,
+          2
+        ],
+        "emissive": false
+      },
+      "stone_damp": {
+        "cell": [
+          6,
+          0
+        ],
+        "size_cells": [
+          2,
+          2
+        ],
+        "emissive": false
+      },
+      "stone_dust": {
+        "cell": [
+          0,
+          2
+        ],
+        "size_cells": [
+          2,
+          2
+        ],
+        "emissive": false
+      },
+      "stone_dark": {
+        "cell": [
+          2,
+          2
+        ],
+        "size_cells": [
+          2,
+          2
+        ],
+        "emissive": false
+      },
+      "relief": {
+        "cell": [
+          4,
+          2
+        ],
+        "size_cells": [
+          2,
+          2
+        ],
+        "emissive": false
+      },
+      "mural_a": {
+        "cell": [
+          6,
+          2
+        ],
+        "size_cells": [
+          2,
+          1
+        ],
+        "emissive": false
+      },
+      "mural_b": {
+        "cell": [
+          6,
+          3
+        ],
+        "size_cells": [
+          2,
+          1
+        ],
+        "emissive": false
+      },
+      "plaster": {
+        "cell": [
+          0,
+          4
+        ],
+        "size_cells": [
+          1,
+          1
+        ],
+        "emissive": false
+      },
+      "wood_dark": {
+        "cell": [
+          1,
+          4
+        ],
+        "size_cells": [
+          1,
+          1
+        ],
+        "emissive": false
+      },
+      "wood_light": {
+        "cell": [
+          2,
+          4
+        ],
+        "size_cells": [
+          1,
+          1
+        ],
+        "emissive": false
+      },
+      "straw": {
+        "cell": [
+          3,
+          4
+        ],
+        "size_cells": [
+          1,
+          1
+        ],
+        "emissive": false
+      },
+      "canvas": {
+        "cell": [
+          4,
+          4
+        ],
+        "size_cells": [
+          1,
+          1
+        ],
+        "emissive": false
+      },
+      "metal_paint": {
+        "cell": [
+          5,
+          4
+        ],
+        "size_cells": [
+          1,
+          1
+        ],
+        "emissive": false
+      },
+      "metal_dark": {
+        "cell": [
+          6,
+          4
+        ],
+        "size_cells": [
+          1,
+          1
+        ],
+        "emissive": false
+      },
+      "plastic": {
+        "cell": [
+          7,
+          4
+        ],
+        "size_cells": [
+          1,
+          1
+        ],
+        "emissive": false
+      },
+      "tag": {
+        "cell": [
+          0,
+          5
+        ],
+        "size_cells": [
+          1,
+          1
+        ],
+        "emissive": false
+      },
+      "metal_bare": {
+        "cell": [
+          1,
+          5
+        ],
+        "size_cells": [
+          1,
+          1
+        ],
+        "emissive": false
+      },
+      "soil": {
+        "cell": [
+          2,
+          5
+        ],
+        "size_cells": [
+          1,
+          1
+        ],
+        "emissive": false
+      },
+      "moss": {
+        "cell": [
+          3,
+          5
+        ],
+        "size_cells": [
+          1,
+          1
+        ],
+        "emissive": false
+      },
+      "paving": {
+        "cell": [
+          4,
+          5
+        ],
+        "size_cells": [
+          1,
+          1
+        ],
+        "emissive": false
+      },
+      "glow_lamp": {
+        "cell": [
+          5,
+          5
+        ],
+        "size_cells": [
+          1,
+          1
+        ],
+        "emissive": true
+      },
+      "glow_screen": {
+        "cell": [
+          6,
+          5
+        ],
+        "size_cells": [
+          1,
+          1
+        ],
+        "emissive": true
+      },
+      "hazard": {
+        "cell": [
+          7,
+          5
+        ],
+        "size_cells": [
+          1,
+          1
+        ],
+        "emissive": false
+      },
+      "amber": {
+        "cell": [
+          0,
+          6
+        ],
+        "size_cells": [
+          1,
+          1
+        ],
+        "emissive": false
+      },
+      "teal_paint": {
+        "cell": [
+          1,
+          6
+        ],
+        "size_cells": [
+          1,
+          1
+        ],
+        "emissive": false
+      }
+    },
+    "emission": "Only the glow_lamp and glow_screen tiles are non-black in the Emission map."
+  },
+  "colliders": [
+    {
+      "name": "OuterWall_W",
+      "module": "THStage_OuterWall_W",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.4,
+      "center_unity_xyz": [
+        -2.380000114440918,
+        1.2,
+        3.75
+      ],
+      "size_unity_xyz": [
+        1.0999999999999996,
+        2.4,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -2.380000114440918,
+          3.75
+        ],
+        "size_xd": [
+          1.0999999999999996,
+          0.2
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 0.0,
+        "h1": 2.4
+      }
+    },
+    {
+      "name": "OuterWall_W",
+      "module": "THStage_OuterWall_W",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.4,
+      "center_unity_xyz": [
+        -2.380000114440918,
+        1.2,
+        5.449999809265137
+      ],
+      "size_unity_xyz": [
+        1.5,
+        2.4,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -2.380000114440918,
+          5.449999809265137
+        ],
+        "size_xd": [
+          1.5,
+          0.2
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 0.0,
+        "h1": 2.4
+      }
+    },
+    {
+      "name": "OuterWall_W",
+      "module": "THStage_OuterWall_W",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.4,
+      "center_unity_xyz": [
+        -2.380000114440918,
+        1.2,
+        8.225000381469727
+      ],
+      "size_unity_xyz": [
+        3.250000000000001,
+        2.4,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -2.380000114440918,
+          8.225000381469727
+        ],
+        "size_xd": [
+          3.250000000000001,
+          0.2
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 0.0,
+        "h1": 2.4
+      }
+    },
+    {
+      "name": "OuterWall_W",
+      "module": "THStage_OuterWall_W",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.4,
+      "center_unity_xyz": [
+        -2.380000114440918,
+        1.2,
+        10.625
+      ],
+      "size_unity_xyz": [
+        0.7499998117422102,
+        2.4,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -2.380000114440918,
+          10.625
+        ],
+        "size_xd": [
+          0.7499998117422102,
+          0.2
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 0.0,
+        "h1": 2.4
+      }
+    },
+    {
+      "name": "OuterWall_W_NicheBelow",
+      "module": "THStage_OuterWall_W",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 0.95,
+      "center_unity_xyz": [
+        -2.380000114440918,
+        0.475,
+        4.5
+      ],
+      "size_unity_xyz": [
+        0.40000000000000036,
+        0.95,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -2.380000114440918,
+          4.5
+        ],
+        "size_xd": [
+          0.40000000000000036,
+          0.2
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 0.0,
+        "h1": 0.95
+      }
+    },
+    {
+      "name": "OuterWall_W_NicheAbove",
+      "module": "THStage_OuterWall_W",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.4,
+      "center_unity_xyz": [
+        -2.380000114440918,
+        1.895,
+        4.5
+      ],
+      "size_unity_xyz": [
+        0.40000000000000036,
+        1.01,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -2.380000114440918,
+          4.5
+        ],
+        "size_xd": [
+          0.40000000000000036,
+          0.2
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 1.3900000000000001,
+        "h1": 2.4
+      }
+    },
+    {
+      "name": "OuterWall_W_NicheBack",
+      "module": "THStage_OuterWall_W",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.39,
+      "center_unity_xyz": [
+        -2.495000123977661,
+        1.17,
+        4.5
+      ],
+      "size_unity_xyz": [
+        0.40000000000000036,
+        0.43999999999999995,
+        0.01
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -2.495000123977661,
+          4.5
+        ],
+        "size_xd": [
+          0.40000000000000036,
+          0.01
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 0.95,
+        "h1": 1.39
+      }
+    },
+    {
+      "name": "OuterWall_W_NicheLip",
+      "module": "THStage_OuterWall_W",
+      "kind": "niche_lip",
+      "beam_blocking": false,
+      "height_m": 0.954,
+      "center_unity_xyz": [
+        -2.267500162124634,
+        0.9339999999999999,
+        4.5
+      ],
+      "size_unity_xyz": [
+        0.4200000000000004,
+        0.04,
+        0.025
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -2.267500162124634,
+          4.5
+        ],
+        "size_xd": [
+          0.4200000000000004,
+          0.025
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 0.9139999999999999,
+        "h1": 0.954
+      }
+    },
+    {
+      "name": "OuterWall_W_NicheBelow",
+      "module": "THStage_OuterWall_W",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.03,
+      "center_unity_xyz": [
+        -2.380000114440918,
+        0.515,
+        6.400000095367432
+      ],
+      "size_unity_xyz": [
+        0.40000000000000036,
+        1.03,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -2.380000114440918,
+          6.400000095367432
+        ],
+        "size_xd": [
+          0.40000000000000036,
+          0.2
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 0.0,
+        "h1": 1.03
+      }
+    },
+    {
+      "name": "OuterWall_W_NicheAbove",
+      "module": "THStage_OuterWall_W",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.75,
+      "center_unity_xyz": [
+        -2.380000114440918,
+        1.61,
+        6.400000095367432
+      ],
+      "size_unity_xyz": [
+        0.40000000000000036,
+        0.28000000000000025,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -2.380000114440918,
+          6.400000095367432
+        ],
+        "size_xd": [
+          0.40000000000000036,
+          0.2
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 1.47,
+        "h1": 1.7500000000000002
+      }
+    },
+    {
+      "name": "OuterWall_W_NicheBack",
+      "module": "THStage_OuterWall_W",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.47,
+      "center_unity_xyz": [
+        -2.495000123977661,
+        1.25,
+        6.400000095367432
+      ],
+      "size_unity_xyz": [
+        0.40000000000000036,
+        0.43999999999999995,
+        0.01
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -2.495000123977661,
+          6.400000095367432
+        ],
+        "size_xd": [
+          0.40000000000000036,
+          0.01
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 1.03,
+        "h1": 1.47
+      }
+    },
+    {
+      "name": "OuterWall_W_NicheLip",
+      "module": "THStage_OuterWall_W",
+      "kind": "niche_lip",
+      "beam_blocking": false,
+      "height_m": 1.034,
+      "center_unity_xyz": [
+        -2.267500162124634,
+        1.014,
+        6.400000095367432
+      ],
+      "size_unity_xyz": [
+        0.4200000000000004,
+        0.04,
+        0.025
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -2.267500162124634,
+          6.400000095367432
+        ],
+        "size_xd": [
+          0.4200000000000004,
+          0.025
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 0.994,
+        "h1": 1.034
+      }
+    },
+    {
+      "name": "OuterWall_W_NicheBelow",
+      "module": "THStage_OuterWall_W",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.05,
+      "center_unity_xyz": [
+        -2.380000114440918,
+        0.525,
+        10.050000190734863
+      ],
+      "size_unity_xyz": [
+        0.3999999999999986,
+        1.05,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -2.380000114440918,
+          10.050000190734863
+        ],
+        "size_xd": [
+          0.3999999999999986,
+          0.2
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 0.0,
+        "h1": 1.05
+      }
+    },
+    {
+      "name": "OuterWall_W_NicheAbove",
+      "module": "THStage_OuterWall_W",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.4,
+      "center_unity_xyz": [
+        -2.380000114440918,
+        1.9449999999999998,
+        10.050000190734863
+      ],
+      "size_unity_xyz": [
+        0.3999999999999986,
+        0.9099999999999999,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -2.380000114440918,
+          10.050000190734863
+        ],
+        "size_xd": [
+          0.3999999999999986,
+          0.2
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 1.4899999999999998,
+        "h1": 2.4
+      }
+    },
+    {
+      "name": "OuterWall_W_NicheBack",
+      "module": "THStage_OuterWall_W",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.49,
+      "center_unity_xyz": [
+        -2.495000123977661,
+        1.27,
+        10.050000190734863
+      ],
+      "size_unity_xyz": [
+        0.3999999999999986,
+        0.43999999999999995,
+        0.01
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -2.495000123977661,
+          10.050000190734863
+        ],
+        "size_xd": [
+          0.3999999999999986,
+          0.01
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 1.05,
+        "h1": 1.49
+      }
+    },
+    {
+      "name": "OuterWall_W_NicheLip",
+      "module": "THStage_OuterWall_W",
+      "kind": "niche_lip",
+      "beam_blocking": false,
+      "height_m": 1.054,
+      "center_unity_xyz": [
+        -2.267500162124634,
+        1.034,
+        10.050000190734863
+      ],
+      "size_unity_xyz": [
+        0.4199999999999986,
+        0.04,
+        0.025
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -2.267500162124634,
+          10.050000190734863
+        ],
+        "size_xd": [
+          0.4199999999999986,
+          0.025
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 1.014,
+        "h1": 1.054
+      }
+    },
+    {
+      "name": "OuterWall_E",
+      "module": "THStage_OuterWall_E",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.55,
+      "center_unity_xyz": [
+        2.380000114440918,
+        0.775,
+        5.150000095367432
+      ],
+      "size_unity_xyz": [
+        3.8999999999999995,
+        1.55,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          2.380000114440918,
+          5.150000095367432
+        ],
+        "size_xd": [
+          3.8999999999999995,
+          0.2
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 0.0,
+        "h1": 1.55
+      }
+    },
+    {
+      "name": "OuterWall_E",
+      "module": "THStage_OuterWall_E",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.4,
+      "center_unity_xyz": [
+        2.380000114440918,
+        1.2,
+        8.625
+      ],
+      "size_unity_xyz": [
+        2.25,
+        2.4,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          2.380000114440918,
+          8.625
+        ],
+        "size_xd": [
+          2.25,
+          0.2
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 0.0,
+        "h1": 2.4
+      }
+    },
+    {
+      "name": "OuterWall_E",
+      "module": "THStage_OuterWall_E",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.4,
+      "center_unity_xyz": [
+        2.380000114440918,
+        1.2,
+        10.574999809265137
+      ],
+      "size_unity_xyz": [
+        0.8499998117422116,
+        2.4,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          2.380000114440918,
+          10.574999809265137
+        ],
+        "size_xd": [
+          0.8499998117422116,
+          0.2
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 0.0,
+        "h1": 2.4
+      }
+    },
+    {
+      "name": "OuterWall_E_NicheBelow",
+      "module": "THStage_OuterWall_E",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 0.9,
+      "center_unity_xyz": [
+        2.380000114440918,
+        0.44999999999999996,
+        7.300000190734863
+      ],
+      "size_unity_xyz": [
+        0.40000000000000036,
+        0.8999999999999999,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          2.380000114440918,
+          7.300000190734863
+        ],
+        "size_xd": [
+          0.40000000000000036,
+          0.2
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 0.0,
+        "h1": 0.8999999999999999
+      }
+    },
+    {
+      "name": "OuterWall_E_NicheAbove",
+      "module": "THStage_OuterWall_E",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.55,
+      "center_unity_xyz": [
+        2.380000114440918,
+        1.4449999999999998,
+        7.300000190734863
+      ],
+      "size_unity_xyz": [
+        0.40000000000000036,
+        0.2100000000000002,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          2.380000114440918,
+          7.300000190734863
+        ],
+        "size_xd": [
+          0.40000000000000036,
+          0.2
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 1.3399999999999999,
+        "h1": 1.5499999999999998
+      }
+    },
+    {
+      "name": "OuterWall_E_NicheBack",
+      "module": "THStage_OuterWall_E",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.34,
+      "center_unity_xyz": [
+        2.495000123977661,
+        1.1199999999999999,
+        7.300000190734863
+      ],
+      "size_unity_xyz": [
+        0.40000000000000036,
+        0.43999999999999995,
+        0.01
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          2.495000123977661,
+          7.300000190734863
+        ],
+        "size_xd": [
+          0.40000000000000036,
+          0.01
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 0.8999999999999999,
+        "h1": 1.3399999999999999
+      }
+    },
+    {
+      "name": "OuterWall_E_NicheLip",
+      "module": "THStage_OuterWall_E",
+      "kind": "niche_lip",
+      "beam_blocking": false,
+      "height_m": 0.904,
+      "center_unity_xyz": [
+        2.267500162124634,
+        0.8839999999999999,
+        7.300000190734863
+      ],
+      "size_unity_xyz": [
+        0.4200000000000004,
+        0.04,
+        0.025
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          2.267500162124634,
+          7.300000190734863
+        ],
+        "size_xd": [
+          0.4200000000000004,
+          0.025
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 0.8639999999999999,
+        "h1": 0.9039999999999999
+      }
+    },
+    {
+      "name": "OuterWall_E_NicheBelow",
+      "module": "THStage_OuterWall_E",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.0,
+      "center_unity_xyz": [
+        2.380000114440918,
+        0.5,
+        9.949999809265137
+      ],
+      "size_unity_xyz": [
+        0.3999999999999986,
+        1.0,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          2.380000114440918,
+          9.949999809265137
+        ],
+        "size_xd": [
+          0.3999999999999986,
+          0.2
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 0.0,
+        "h1": 1.0
+      }
+    },
+    {
+      "name": "OuterWall_E_NicheAbove",
+      "module": "THStage_OuterWall_E",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.4,
+      "center_unity_xyz": [
+        2.380000114440918,
+        1.92,
+        9.949999809265137
+      ],
+      "size_unity_xyz": [
+        0.3999999999999986,
+        0.96,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          2.380000114440918,
+          9.949999809265137
+        ],
+        "size_xd": [
+          0.3999999999999986,
+          0.2
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 1.44,
+        "h1": 2.4
+      }
+    },
+    {
+      "name": "OuterWall_E_NicheBack",
+      "module": "THStage_OuterWall_E",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.44,
+      "center_unity_xyz": [
+        2.495000123977661,
+        1.22,
+        9.949999809265137
+      ],
+      "size_unity_xyz": [
+        0.3999999999999986,
+        0.43999999999999995,
+        0.01
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          2.495000123977661,
+          9.949999809265137
+        ],
+        "size_xd": [
+          0.3999999999999986,
+          0.01
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 1.0,
+        "h1": 1.44
+      }
+    },
+    {
+      "name": "OuterWall_E_NicheLip",
+      "module": "THStage_OuterWall_E",
+      "kind": "niche_lip",
+      "beam_blocking": false,
+      "height_m": 1.004,
+      "center_unity_xyz": [
+        2.267500162124634,
+        0.984,
+        9.949999809265137
+      ],
+      "size_unity_xyz": [
+        0.4199999999999986,
+        0.04,
+        0.025
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          2.267500162124634,
+          9.949999809265137
+        ],
+        "size_xd": [
+          0.4199999999999986,
+          0.025
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 0.964,
+        "h1": 1.004
+      }
+    },
+    {
+      "name": "BackWall",
+      "module": "THStage_BackWall",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.4,
+      "center_unity_xyz": [
+        0.0,
+        1.2,
+        10.899999618530273
+      ],
+      "size_unity_xyz": [
+        4.560000009034809,
+        2.4,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.0,
+          10.899999618530273
+        ],
+        "size_xd": [
+          4.560000009034809,
+          0.2
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 2.4
+      }
+    },
+    {
+      "name": "Block_Front",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.1,
+      "center_unity_xyz": [
+        -0.6924999952316284,
+        1.05,
+        4.0
+      ],
+      "size_unity_xyz": [
+        0.18499995236451702,
+        2.1,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -0.6924999952316284,
+          4.0
+        ],
+        "size_xd": [
+          0.18499995236451702,
+          0.2
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 2.1
+      }
+    },
+    {
+      "name": "Block_Front",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.1,
+      "center_unity_xyz": [
+        0.29249995946884155,
+        1.05,
+        4.0
+      ],
+      "size_unity_xyz": [
+        0.9849999909075111,
+        2.1,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.29249995946884155,
+          4.0
+        ],
+        "size_xd": [
+          0.9849999909075111,
+          0.2
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 2.1
+      }
+    },
+    {
+      "name": "Block_Front_NicheBelow",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.0,
+      "center_unity_xyz": [
+        -0.40000003576278687,
+        0.5,
+        4.0
+      ],
+      "size_unity_xyz": [
+        0.4,
+        1.0,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -0.40000003576278687,
+          4.0
+        ],
+        "size_xd": [
+          0.4,
+          0.2
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 1.0
+      }
+    },
+    {
+      "name": "Block_Front_NicheAbove",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.1,
+      "center_unity_xyz": [
+        -0.40000003576278687,
+        1.77,
+        4.0
+      ],
+      "size_unity_xyz": [
+        0.4,
+        0.6600000000000001,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -0.40000003576278687,
+          4.0
+        ],
+        "size_xd": [
+          0.4,
+          0.2
+        ],
+        "angle_rad": 0.0,
+        "h0": 1.44,
+        "h1": 2.1
+      }
+    },
+    {
+      "name": "Block_Front_NicheBack",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.44,
+      "center_unity_xyz": [
+        -0.40000003576278687,
+        1.22,
+        3.9075000286102295
+      ],
+      "size_unity_xyz": [
+        0.4,
+        0.43999999999999995,
+        0.015000000000000013
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -0.40000003576278687,
+          3.9075000286102295
+        ],
+        "size_xd": [
+          0.4,
+          0.015000000000000013
+        ],
+        "angle_rad": 0.0,
+        "h0": 1.0,
+        "h1": 1.44
+      }
+    },
+    {
+      "name": "Block_Front_NicheLip",
+      "module": "THStage_Block_Shell",
+      "kind": "niche_lip",
+      "beam_blocking": false,
+      "height_m": 1.004,
+      "center_unity_xyz": [
+        -0.40000003576278687,
+        0.984,
+        4.112500190734863
+      ],
+      "size_unity_xyz": [
+        0.42000000000000004,
+        0.04,
+        0.025
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -0.40000003576278687,
+          4.112500190734863
+        ],
+        "size_xd": [
+          0.42000000000000004,
+          0.025
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.964,
+        "h1": 1.004
+      }
+    },
+    {
+      "name": "Block_ChamferFE",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.4,
+      "center_unity_xyz": [
+        0.859289288520813,
+        1.2,
+        4.120710849761963
+      ],
+      "size_unity_xyz": [
+        0.4342640094651806,
+        2.4,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -44.999980681307356,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.859289288520813,
+          4.120710849761963
+        ],
+        "size_xd": [
+          0.4342640094651806,
+          0.2
+        ],
+        "angle_rad": 0.7853978262226544,
+        "h0": 0.0,
+        "h1": 2.4
+      }
+    },
+    {
+      "name": "Block_East",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.16,
+      "center_unity_xyz": [
+        0.9800000190734863,
+        1.08,
+        4.372499942779541
+      ],
+      "size_unity_xyz": [
+        0.35500021460066744,
+        2.16,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.9800000190734863,
+          4.372499942779541
+        ],
+        "size_xd": [
+          0.35500021460066744,
+          0.2
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 0.0,
+        "h1": 2.16
+      }
+    },
+    {
+      "name": "Block_East",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.16,
+      "center_unity_xyz": [
+        0.9800000190734863,
+        1.08,
+        5.150000095367432
+      ],
+      "size_unity_xyz": [
+        0.39999999999999947,
+        2.16,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.9800000190734863,
+          5.150000095367432
+        ],
+        "size_xd": [
+          0.39999999999999947,
+          0.2
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 0.0,
+        "h1": 2.16
+      }
+    },
+    {
+      "name": "Block_East",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.4,
+      "center_unity_xyz": [
+        0.9800000190734863,
+        1.2,
+        6.175000190734863
+      ],
+      "size_unity_xyz": [
+        0.8499999999999996,
+        2.4,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.9800000190734863,
+          6.175000190734863
+        ],
+        "size_xd": [
+          0.8499999999999996,
+          0.2
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 0.0,
+        "h1": 2.4
+      }
+    },
+    {
+      "name": "Block_East",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.78,
+      "center_unity_xyz": [
+        0.9800000190734863,
+        0.8900000000000001,
+        7.852499961853027
+      ],
+      "size_unity_xyz": [
+        0.10499994155982328,
+        1.7800000000000002,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.9800000190734863,
+          7.852499961853027
+        ],
+        "size_xd": [
+          0.10499994155982328,
+          0.2
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 0.0,
+        "h1": 1.7800000000000002
+      }
+    },
+    {
+      "name": "Block_East_NicheBelow",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 0.95,
+      "center_unity_xyz": [
+        0.9800000190734863,
+        0.475,
+        4.75
+      ],
+      "size_unity_xyz": [
+        0.40000000000000036,
+        0.95,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.9800000190734863,
+          4.75
+        ],
+        "size_xd": [
+          0.40000000000000036,
+          0.2
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 0.0,
+        "h1": 0.95
+      }
+    },
+    {
+      "name": "Block_East_NicheAbove",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.16,
+      "center_unity_xyz": [
+        0.9800000190734863,
+        1.775,
+        4.75
+      ],
+      "size_unity_xyz": [
+        0.40000000000000036,
+        0.7700000000000002,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.9800000190734863,
+          4.75
+        ],
+        "size_xd": [
+          0.40000000000000036,
+          0.2
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 1.3899999999999997,
+        "h1": 2.16
+      }
+    },
+    {
+      "name": "Block_East_NicheBack",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.39,
+      "center_unity_xyz": [
+        0.8875000476837158,
+        1.17,
+        4.75
+      ],
+      "size_unity_xyz": [
+        0.40000000000000036,
+        0.43999999999999995,
+        0.015000000000000013
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.8875000476837158,
+          4.75
+        ],
+        "size_xd": [
+          0.40000000000000036,
+          0.015000000000000013
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 0.95,
+        "h1": 1.39
+      }
+    },
+    {
+      "name": "Block_East_NicheLip",
+      "module": "THStage_Block_Shell",
+      "kind": "niche_lip",
+      "beam_blocking": false,
+      "height_m": 0.954,
+      "center_unity_xyz": [
+        1.0924999713897705,
+        0.9339999999999999,
+        4.75
+      ],
+      "size_unity_xyz": [
+        0.4200000000000004,
+        0.04,
+        0.025
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          1.0924999713897705,
+          4.75
+        ],
+        "size_xd": [
+          0.4200000000000004,
+          0.025
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 0.9139999999999999,
+        "h1": 0.954
+      }
+    },
+    {
+      "name": "Block_East_NicheBelow",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.05,
+      "center_unity_xyz": [
+        0.9800000190734863,
+        0.525,
+        5.550000190734863
+      ],
+      "size_unity_xyz": [
+        0.40000000000000036,
+        1.05,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.9800000190734863,
+          5.550000190734863
+        ],
+        "size_xd": [
+          0.40000000000000036,
+          0.2
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 0.0,
+        "h1": 1.05
+      }
+    },
+    {
+      "name": "Block_East_NicheAbove",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.4,
+      "center_unity_xyz": [
+        0.9800000190734863,
+        1.9449999999999998,
+        5.550000190734863
+      ],
+      "size_unity_xyz": [
+        0.40000000000000036,
+        0.9099999999999999,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.9800000190734863,
+          5.550000190734863
+        ],
+        "size_xd": [
+          0.40000000000000036,
+          0.2
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 1.4899999999999998,
+        "h1": 2.4
+      }
+    },
+    {
+      "name": "Block_East_NicheBack",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.49,
+      "center_unity_xyz": [
+        1.0724999904632568,
+        1.27,
+        5.550000190734863
+      ],
+      "size_unity_xyz": [
+        0.40000000000000036,
+        0.43999999999999995,
+        0.015000000000000013
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          1.0724999904632568,
+          5.550000190734863
+        ],
+        "size_xd": [
+          0.40000000000000036,
+          0.015000000000000013
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 1.05,
+        "h1": 1.49
+      }
+    },
+    {
+      "name": "Block_East_NicheLip",
+      "module": "THStage_Block_Shell",
+      "kind": "niche_lip",
+      "beam_blocking": false,
+      "height_m": 1.054,
+      "center_unity_xyz": [
+        0.8675000071525574,
+        1.034,
+        5.550000190734863
+      ],
+      "size_unity_xyz": [
+        0.4200000000000004,
+        0.04,
+        0.025
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.8675000071525574,
+          5.550000190734863
+        ],
+        "size_xd": [
+          0.4200000000000004,
+          0.025
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 1.014,
+        "h1": 1.054
+      }
+    },
+    {
+      "name": "Block_East_Lintel",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.14,
+      "center_unity_xyz": [
+        0.9800000190734863,
+        2.08,
+        7.199999809265137
+      ],
+      "size_unity_xyz": [
+        1.2000000000000002,
+        0.1200000000000001,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.9800000190734863,
+          7.199999809265137
+        ],
+        "size_xd": [
+          1.2000000000000002,
+          0.2
+        ],
+        "angle_rad": 1.5707963267948966,
+        "h0": 2.02,
+        "h1": 2.14
+      }
+    },
+    {
+      "name": "Block_ChamferBE",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.4,
+      "center_unity_xyz": [
+        0.8592895865440369,
+        1.2,
+        7.9792890548706055
+      ],
+      "size_unity_xyz": [
+        0.4342633329747877,
+        2.4,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -135.00002173353013,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.8592895865440369,
+          7.9792890548706055
+        ],
+        "size_xd": [
+          0.4342633329747877,
+          0.2
+        ],
+        "angle_rad": 2.356194869514004,
+        "h0": 0.0,
+        "h1": 2.4
+      }
+    },
+    {
+      "name": "Block_Back",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.1,
+      "center_unity_xyz": [
+        0.7175002098083496,
+        1.0499999999999998,
+        8.09999942779541
+      ],
+      "size_unity_xyz": [
+        0.135000429202238,
+        2.0999999999999996,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -180.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.7175002098083496,
+          8.09999942779541
+        ],
+        "size_xd": [
+          0.135000429202238,
+          0.2
+        ],
+        "angle_rad": 3.141592653589793,
+        "h0": 0.0,
+        "h1": 2.0999999999999996
+      }
+    },
+    {
+      "name": "Block_Back",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.78,
+      "center_unity_xyz": [
+        0.025000035762786865,
+        0.8899999999999999,
+        8.09999942779541
+      ],
+      "size_unity_xyz": [
+        0.45000000000000007,
+        1.7799999999999998,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -180.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.025000035762786865,
+          8.09999942779541
+        ],
+        "size_xd": [
+          0.45000000000000007,
+          0.2
+        ],
+        "angle_rad": 3.141592653589793,
+        "h0": 0.0,
+        "h1": 1.7799999999999998
+      }
+    },
+    {
+      "name": "Block_Back",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.1,
+      "center_unity_xyz": [
+        -0.6924999356269836,
+        1.0499999999999998,
+        8.09999942779541
+      ],
+      "size_unity_xyz": [
+        0.18499999828068203,
+        2.0999999999999996,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -180.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -0.6924999356269836,
+          8.09999942779541
+        ],
+        "size_xd": [
+          0.18499999828068203,
+          0.2
+        ],
+        "angle_rad": 3.141592653589793,
+        "h0": 0.0,
+        "h1": 2.0999999999999996
+      }
+    },
+    {
+      "name": "Block_Back_NicheBelow",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 0.95,
+      "center_unity_xyz": [
+        0.45000001788139343,
+        0.475,
+        8.09999942779541
+      ],
+      "size_unity_xyz": [
+        0.4,
+        0.95,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -180.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.45000001788139343,
+          8.09999942779541
+        ],
+        "size_xd": [
+          0.4,
+          0.2
+        ],
+        "angle_rad": 3.141592653589793,
+        "h0": 0.0,
+        "h1": 0.95
+      }
+    },
+    {
+      "name": "Block_Back_NicheAbove",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.1,
+      "center_unity_xyz": [
+        0.45000001788139343,
+        1.7449999999999997,
+        8.09999942779541
+      ],
+      "size_unity_xyz": [
+        0.4,
+        0.7099999999999997,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -180.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.45000001788139343,
+          8.09999942779541
+        ],
+        "size_xd": [
+          0.4,
+          0.2
+        ],
+        "angle_rad": 3.141592653589793,
+        "h0": 1.3899999999999997,
+        "h1": 2.0999999999999996
+      }
+    },
+    {
+      "name": "Block_Back_NicheBack",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.39,
+      "center_unity_xyz": [
+        0.45000001788139343,
+        1.17,
+        8.007499694824219
+      ],
+      "size_unity_xyz": [
+        0.4,
+        0.43999999999999995,
+        0.015000000000000013
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -180.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.45000001788139343,
+          8.007499694824219
+        ],
+        "size_xd": [
+          0.4,
+          0.015000000000000013
+        ],
+        "angle_rad": 3.141592653589793,
+        "h0": 0.95,
+        "h1": 1.39
+      }
+    },
+    {
+      "name": "Block_Back_NicheLip",
+      "module": "THStage_Block_Shell",
+      "kind": "niche_lip",
+      "beam_blocking": false,
+      "height_m": 0.954,
+      "center_unity_xyz": [
+        0.45000001788139343,
+        0.9339999999999999,
+        8.212499618530273
+      ],
+      "size_unity_xyz": [
+        0.42000000000000004,
+        0.04,
+        0.025
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -180.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.45000001788139343,
+          8.212499618530273
+        ],
+        "size_xd": [
+          0.42000000000000004,
+          0.025
+        ],
+        "angle_rad": 3.141592653589793,
+        "h0": 0.9139999999999999,
+        "h1": 0.954
+      }
+    },
+    {
+      "name": "Block_Back_NicheBelow",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 0.95,
+      "center_unity_xyz": [
+        -0.40000003576278687,
+        0.475,
+        8.09999942779541
+      ],
+      "size_unity_xyz": [
+        0.3999999999999999,
+        0.95,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -180.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -0.40000003576278687,
+          8.09999942779541
+        ],
+        "size_xd": [
+          0.3999999999999999,
+          0.2
+        ],
+        "angle_rad": 3.141592653589793,
+        "h0": 0.0,
+        "h1": 0.95
+      }
+    },
+    {
+      "name": "Block_Back_NicheAbove",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.1,
+      "center_unity_xyz": [
+        -0.40000003576278687,
+        1.7449999999999997,
+        8.09999942779541
+      ],
+      "size_unity_xyz": [
+        0.3999999999999999,
+        0.7099999999999997,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -180.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -0.40000003576278687,
+          8.09999942779541
+        ],
+        "size_xd": [
+          0.3999999999999999,
+          0.2
+        ],
+        "angle_rad": 3.141592653589793,
+        "h0": 1.3899999999999997,
+        "h1": 2.0999999999999996
+      }
+    },
+    {
+      "name": "Block_Back_NicheBack",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.39,
+      "center_unity_xyz": [
+        -0.40000003576278687,
+        1.17,
+        8.007499694824219
+      ],
+      "size_unity_xyz": [
+        0.3999999999999999,
+        0.43999999999999995,
+        0.015000000000000013
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -180.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -0.40000003576278687,
+          8.007499694824219
+        ],
+        "size_xd": [
+          0.3999999999999999,
+          0.015000000000000013
+        ],
+        "angle_rad": 3.141592653589793,
+        "h0": 0.95,
+        "h1": 1.39
+      }
+    },
+    {
+      "name": "Block_Back_NicheLip",
+      "module": "THStage_Block_Shell",
+      "kind": "niche_lip",
+      "beam_blocking": false,
+      "height_m": 0.954,
+      "center_unity_xyz": [
+        -0.40000003576278687,
+        0.9339999999999999,
+        8.212499618530273
+      ],
+      "size_unity_xyz": [
+        0.41999999999999993,
+        0.04,
+        0.025
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -180.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -0.40000003576278687,
+          8.212499618530273
+        ],
+        "size_xd": [
+          0.41999999999999993,
+          0.025
+        ],
+        "angle_rad": 3.141592653589793,
+        "h0": 0.9139999999999999,
+        "h1": 0.954
+      }
+    },
+    {
+      "name": "Block_ChamferBW",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.4,
+      "center_unity_xyz": [
+        -0.859289288520813,
+        1.2,
+        7.979288578033447
+      ],
+      "size_unity_xyz": [
+        0.4342640094651806,
+        2.4,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        135.00001931869264,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -0.859289288520813,
+          7.979288578033447
+        ],
+        "size_xd": [
+          0.4342640094651806,
+          0.2
+        ],
+        "angle_rad": -2.3561948273671387,
+        "h0": 0.0,
+        "h1": 2.4
+      }
+    },
+    {
+      "name": "Block_West",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.13,
+      "center_unity_xyz": [
+        -0.9800000190734863,
+        1.065,
+        7.627499580383301
+      ],
+      "size_unity_xyz": [
+        0.5549996423960775,
+        2.13,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -0.9800000190734863,
+          7.627499580383301
+        ],
+        "size_xd": [
+          0.5549996423960775,
+          0.2
+        ],
+        "angle_rad": -1.5707963267948966,
+        "h0": 0.0,
+        "h1": 2.13
+      }
+    },
+    {
+      "name": "Block_West",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.78,
+      "center_unity_xyz": [
+        -0.9800000190734863,
+        0.89,
+        6.425000190734863
+      ],
+      "size_unity_xyz": [
+        1.05,
+        1.78,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -0.9800000190734863,
+          6.425000190734863
+        ],
+        "size_xd": [
+          1.05,
+          0.2
+        ],
+        "angle_rad": -1.5707963267948966,
+        "h0": 0.0,
+        "h1": 1.78
+      }
+    },
+    {
+      "name": "Block_West",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.78,
+      "center_unity_xyz": [
+        -0.9800000190734863,
+        0.89,
+        4.447499752044678
+      ],
+      "size_unity_xyz": [
+        0.5050001182849306,
+        1.78,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -0.9800000190734863,
+          4.447499752044678
+        ],
+        "size_xd": [
+          0.5050001182849306,
+          0.2
+        ],
+        "angle_rad": -1.5707963267948966,
+        "h0": 0.0,
+        "h1": 1.78
+      }
+    },
+    {
+      "name": "Block_West_NicheBelow",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.0,
+      "center_unity_xyz": [
+        -0.9800000190734863,
+        0.5,
+        7.150000095367432
+      ],
+      "size_unity_xyz": [
+        0.3999999999999999,
+        1.0,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -0.9800000190734863,
+          7.150000095367432
+        ],
+        "size_xd": [
+          0.3999999999999999,
+          0.2
+        ],
+        "angle_rad": -1.5707963267948966,
+        "h0": 0.0,
+        "h1": 1.0
+      }
+    },
+    {
+      "name": "Block_West_NicheAbove",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.78,
+      "center_unity_xyz": [
+        -0.9800000190734863,
+        1.6099999999999999,
+        7.150000095367432
+      ],
+      "size_unity_xyz": [
+        0.3999999999999999,
+        0.3400000000000001,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -0.9800000190734863,
+          7.150000095367432
+        ],
+        "size_xd": [
+          0.3999999999999999,
+          0.2
+        ],
+        "angle_rad": -1.5707963267948966,
+        "h0": 1.44,
+        "h1": 1.7799999999999998
+      }
+    },
+    {
+      "name": "Block_West_NicheBack",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.44,
+      "center_unity_xyz": [
+        -0.8875000476837158,
+        1.22,
+        7.150000095367432
+      ],
+      "size_unity_xyz": [
+        0.3999999999999999,
+        0.43999999999999995,
+        0.015000000000000013
+      ],
+      "rotation_unity_xyz": [
+        0,
+        90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -0.8875000476837158,
+          7.150000095367432
+        ],
+        "size_xd": [
+          0.3999999999999999,
+          0.015000000000000013
+        ],
+        "angle_rad": -1.5707963267948966,
+        "h0": 1.0,
+        "h1": 1.44
+      }
+    },
+    {
+      "name": "Block_West_NicheLip",
+      "module": "THStage_Block_Shell",
+      "kind": "niche_lip",
+      "beam_blocking": false,
+      "height_m": 1.004,
+      "center_unity_xyz": [
+        -1.0924999713897705,
+        0.984,
+        7.150000095367432
+      ],
+      "size_unity_xyz": [
+        0.41999999999999993,
+        0.04,
+        0.025
+      ],
+      "rotation_unity_xyz": [
+        0,
+        90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -1.0924999713897705,
+          7.150000095367432
+        ],
+        "size_xd": [
+          0.41999999999999993,
+          0.025
+        ],
+        "angle_rad": -1.5707963267948966,
+        "h0": 0.964,
+        "h1": 1.004
+      }
+    },
+    {
+      "name": "Block_West_Lintel",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.14,
+      "center_unity_xyz": [
+        -0.9800000190734863,
+        2.08,
+        5.300000190734863
+      ],
+      "size_unity_xyz": [
+        1.2000000000000002,
+        0.1200000000000001,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        90.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -0.9800000190734863,
+          5.300000190734863
+        ],
+        "size_xd": [
+          1.2000000000000002,
+          0.2
+        ],
+        "angle_rad": -1.5707963267948966,
+        "h0": 2.02,
+        "h1": 2.14
+      }
+    },
+    {
+      "name": "Block_ChamferFW",
+      "module": "THStage_Block_Shell",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.4,
+      "center_unity_xyz": [
+        -0.859289288520813,
+        1.2,
+        4.120710372924805
+      ],
+      "size_unity_xyz": [
+        0.4342640094651806,
+        2.4,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        44.999980681307356,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -0.859289288520813,
+          4.120710372924805
+        ],
+        "size_xd": [
+          0.4342640094651806,
+          0.2
+        ],
+        "angle_rad": -0.7853978262226544,
+        "h0": 0.0,
+        "h1": 2.4
+      }
+    },
+    {
+      "name": "Block_Partition",
+      "module": "THStage_Block_Partition",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.13,
+      "center_unity_xyz": [
+        -0.7699999809265137,
+        1.0650000000000002,
+        6.050000190734863
+      ],
+      "size_unity_xyz": [
+        0.2400000000000001,
+        2.1300000000000003,
+        0.3
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -0.7699999809265137,
+          6.050000190734863
+        ],
+        "size_xd": [
+          0.2400000000000001,
+          0.3
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 2.1300000000000003
+      }
+    },
+    {
+      "name": "Block_Partition",
+      "module": "THStage_Block_Partition",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.13,
+      "center_unity_xyz": [
+        -5.960464477539063e-08,
+        1.0650000000000002,
+        6.050000190734863
+      ],
+      "size_unity_xyz": [
+        0.5,
+        2.1300000000000003,
+        0.3
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -5.960464477539063e-08,
+          6.050000190734863
+        ],
+        "size_xd": [
+          0.5,
+          0.3
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 2.1300000000000003
+      }
+    },
+    {
+      "name": "Block_Partition",
+      "module": "THStage_Block_Partition",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.13,
+      "center_unity_xyz": [
+        0.7699998617172241,
+        1.0650000000000002,
+        6.050000190734863
+      ],
+      "size_unity_xyz": [
+        0.23999994685140802,
+        2.1300000000000003,
+        0.3
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.7699998617172241,
+          6.050000190734863
+        ],
+        "size_xd": [
+          0.23999994685140802,
+          0.3
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 2.1300000000000003
+      }
+    },
+    {
+      "name": "Block_Partition_NicheBelow",
+      "module": "THStage_Block_Partition",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 0.9,
+      "center_unity_xyz": [
+        -0.45000001788139343,
+        0.44999999999999996,
+        6.050000190734863
+      ],
+      "size_unity_xyz": [
+        0.4,
+        0.8999999999999999,
+        0.3
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -0.45000001788139343,
+          6.050000190734863
+        ],
+        "size_xd": [
+          0.4,
+          0.3
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 0.8999999999999999
+      }
+    },
+    {
+      "name": "Block_Partition_NicheAbove",
+      "module": "THStage_Block_Partition",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.13,
+      "center_unity_xyz": [
+        -0.45000001788139343,
+        1.735,
+        6.050000190734863
+      ],
+      "size_unity_xyz": [
+        0.4,
+        0.7900000000000005,
+        0.3
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -0.45000001788139343,
+          6.050000190734863
+        ],
+        "size_xd": [
+          0.4,
+          0.3
+        ],
+        "angle_rad": 0.0,
+        "h0": 1.3399999999999999,
+        "h1": 2.1300000000000003
+      }
+    },
+    {
+      "name": "Block_Partition_NicheBack",
+      "module": "THStage_Block_Partition",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.34,
+      "center_unity_xyz": [
+        -0.45000001788139343,
+        1.1199999999999999,
+        6.170000076293945
+      ],
+      "size_unity_xyz": [
+        0.4,
+        0.43999999999999995,
+        0.06
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -0.45000001788139343,
+          6.170000076293945
+        ],
+        "size_xd": [
+          0.4,
+          0.06
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.8999999999999999,
+        "h1": 1.3399999999999999
+      }
+    },
+    {
+      "name": "Block_Partition_NicheLip",
+      "module": "THStage_Block_Partition",
+      "kind": "niche_lip",
+      "beam_blocking": false,
+      "height_m": 0.904,
+      "center_unity_xyz": [
+        -0.45000001788139343,
+        0.8839999999999999,
+        5.887500286102295
+      ],
+      "size_unity_xyz": [
+        0.42000000000000004,
+        0.04,
+        0.025
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -0.45000001788139343,
+          5.887500286102295
+        ],
+        "size_xd": [
+          0.42000000000000004,
+          0.025
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.8639999999999999,
+        "h1": 0.9039999999999999
+      }
+    },
+    {
+      "name": "Block_Partition_NicheBelow",
+      "module": "THStage_Block_Partition",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 0.9,
+      "center_unity_xyz": [
+        0.44999992847442627,
+        0.44999999999999996,
+        6.050000190734863
+      ],
+      "size_unity_xyz": [
+        0.3999999999999999,
+        0.8999999999999999,
+        0.3
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.44999992847442627,
+          6.050000190734863
+        ],
+        "size_xd": [
+          0.3999999999999999,
+          0.3
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 0.8999999999999999
+      }
+    },
+    {
+      "name": "Block_Partition_NicheAbove",
+      "module": "THStage_Block_Partition",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.13,
+      "center_unity_xyz": [
+        0.44999992847442627,
+        1.735,
+        6.050000190734863
+      ],
+      "size_unity_xyz": [
+        0.3999999999999999,
+        0.7900000000000005,
+        0.3
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.44999992847442627,
+          6.050000190734863
+        ],
+        "size_xd": [
+          0.3999999999999999,
+          0.3
+        ],
+        "angle_rad": 0.0,
+        "h0": 1.3399999999999999,
+        "h1": 2.1300000000000003
+      }
+    },
+    {
+      "name": "Block_Partition_NicheBack",
+      "module": "THStage_Block_Partition",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.34,
+      "center_unity_xyz": [
+        0.44999992847442627,
+        1.1199999999999999,
+        6.170000076293945
+      ],
+      "size_unity_xyz": [
+        0.3999999999999999,
+        0.43999999999999995,
+        0.06
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.44999992847442627,
+          6.170000076293945
+        ],
+        "size_xd": [
+          0.3999999999999999,
+          0.06
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.8999999999999999,
+        "h1": 1.3399999999999999
+      }
+    },
+    {
+      "name": "Block_Partition_NicheLip",
+      "module": "THStage_Block_Partition",
+      "kind": "niche_lip",
+      "beam_blocking": false,
+      "height_m": 0.904,
+      "center_unity_xyz": [
+        0.44999992847442627,
+        0.8839999999999999,
+        5.887500286102295
+      ],
+      "size_unity_xyz": [
+        0.41999999999999993,
+        0.04,
+        0.025
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.44999992847442627,
+          5.887500286102295
+        ],
+        "size_xd": [
+          0.41999999999999993,
+          0.025
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.8639999999999999,
+        "h1": 0.9039999999999999
+      }
+    },
+    {
+      "name": "HallPartition_W",
+      "module": "THStage_HallPartitions",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.99,
+      "center_unity_xyz": [
+        -1.9700000286102295,
+        0.995,
+        9.5
+      ],
+      "size_unity_xyz": [
+        0.6399999999999997,
+        1.99,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -1.9700000286102295,
+          9.5
+        ],
+        "size_xd": [
+          0.6399999999999997,
+          0.2
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 1.99
+      }
+    },
+    {
+      "name": "HallPartition_W",
+      "module": "THStage_HallPartitions",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.99,
+      "center_unity_xyz": [
+        -1.149999976158142,
+        0.995,
+        9.5
+      ],
+      "size_unity_xyz": [
+        0.20000001630475484,
+        1.99,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -1.149999976158142,
+          9.5
+        ],
+        "size_xd": [
+          0.20000001630475484,
+          0.2
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 1.99
+      }
+    },
+    {
+      "name": "HallPartition_W_NicheBelow",
+      "module": "THStage_HallPartitions",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 0.95,
+      "center_unity_xyz": [
+        -1.4500000476837158,
+        0.475,
+        9.5
+      ],
+      "size_unity_xyz": [
+        0.3999999999999999,
+        0.95,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -1.4500000476837158,
+          9.5
+        ],
+        "size_xd": [
+          0.3999999999999999,
+          0.2
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 0.95
+      }
+    },
+    {
+      "name": "HallPartition_W_NicheAbove",
+      "module": "THStage_HallPartitions",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.99,
+      "center_unity_xyz": [
+        -1.4500000476837158,
+        1.69,
+        9.5
+      ],
+      "size_unity_xyz": [
+        0.3999999999999999,
+        0.6000000000000001,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -1.4500000476837158,
+          9.5
+        ],
+        "size_xd": [
+          0.3999999999999999,
+          0.2
+        ],
+        "angle_rad": 0.0,
+        "h0": 1.39,
+        "h1": 1.99
+      }
+    },
+    {
+      "name": "HallPartition_W_NicheBack",
+      "module": "THStage_HallPartitions",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.39,
+      "center_unity_xyz": [
+        -1.4500000476837158,
+        1.17,
+        9.592499732971191
+      ],
+      "size_unity_xyz": [
+        0.3999999999999999,
+        0.43999999999999995,
+        0.015000000000000013
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -1.4500000476837158,
+          9.592499732971191
+        ],
+        "size_xd": [
+          0.3999999999999999,
+          0.015000000000000013
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.95,
+        "h1": 1.39
+      }
+    },
+    {
+      "name": "HallPartition_W_NicheLip",
+      "module": "THStage_HallPartitions",
+      "kind": "niche_lip",
+      "beam_blocking": false,
+      "height_m": 0.954,
+      "center_unity_xyz": [
+        -1.4500000476837158,
+        0.9339999999999999,
+        9.387499809265137
+      ],
+      "size_unity_xyz": [
+        0.41999999999999993,
+        0.04,
+        0.025
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -1.4500000476837158,
+          9.387499809265137
+        ],
+        "size_xd": [
+          0.41999999999999993,
+          0.025
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.9139999999999999,
+        "h1": 0.954
+      }
+    },
+    {
+      "name": "HallPartition_E",
+      "module": "THStage_HallPartitions",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.4,
+      "center_unity_xyz": [
+        1.149999976158142,
+        1.2,
+        9.5
+      ],
+      "size_unity_xyz": [
+        0.1999999999999999,
+        2.4,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          1.149999976158142,
+          9.5
+        ],
+        "size_xd": [
+          0.1999999999999999,
+          0.2
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 2.4
+      }
+    },
+    {
+      "name": "HallPartition_E",
+      "module": "THStage_HallPartitions",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.1,
+      "center_unity_xyz": [
+        1.9700000286102295,
+        1.05,
+        9.5
+      ],
+      "size_unity_xyz": [
+        0.6400000163047546,
+        2.1,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          1.9700000286102295,
+          9.5
+        ],
+        "size_xd": [
+          0.6400000163047546,
+          0.2
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 2.1
+      }
+    },
+    {
+      "name": "HallPartition_E_NicheBelow",
+      "module": "THStage_HallPartitions",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.0,
+      "center_unity_xyz": [
+        1.4499999284744263,
+        0.5,
+        9.5
+      ],
+      "size_unity_xyz": [
+        0.39999999999999997,
+        1.0,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          1.4499999284744263,
+          9.5
+        ],
+        "size_xd": [
+          0.39999999999999997,
+          0.2
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 1.0
+      }
+    },
+    {
+      "name": "HallPartition_E_NicheAbove",
+      "module": "THStage_HallPartitions",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 2.4,
+      "center_unity_xyz": [
+        1.4499999284744263,
+        1.92,
+        9.5
+      ],
+      "size_unity_xyz": [
+        0.39999999999999997,
+        0.96,
+        0.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          1.4499999284744263,
+          9.5
+        ],
+        "size_xd": [
+          0.39999999999999997,
+          0.2
+        ],
+        "angle_rad": 0.0,
+        "h0": 1.44,
+        "h1": 2.4
+      }
+    },
+    {
+      "name": "HallPartition_E_NicheBack",
+      "module": "THStage_HallPartitions",
+      "kind": "wall",
+      "beam_blocking": true,
+      "height_m": 1.44,
+      "center_unity_xyz": [
+        1.4499999284744263,
+        1.22,
+        9.592499732971191
+      ],
+      "size_unity_xyz": [
+        0.39999999999999997,
+        0.43999999999999995,
+        0.015000000000000013
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          1.4499999284744263,
+          9.592499732971191
+        ],
+        "size_xd": [
+          0.39999999999999997,
+          0.015000000000000013
+        ],
+        "angle_rad": 0.0,
+        "h0": 1.0,
+        "h1": 1.44
+      }
+    },
+    {
+      "name": "HallPartition_E_NicheLip",
+      "module": "THStage_HallPartitions",
+      "kind": "niche_lip",
+      "beam_blocking": false,
+      "height_m": 1.004,
+      "center_unity_xyz": [
+        1.4499999284744263,
+        0.984,
+        9.387499809265137
+      ],
+      "size_unity_xyz": [
+        0.42,
+        0.04,
+        0.025
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          1.4499999284744263,
+          9.387499809265137
+        ],
+        "size_xd": [
+          0.42,
+          0.025
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.964,
+        "h1": 1.004
+      }
+    },
+    {
+      "name": "ReceiverSide_-1",
+      "module": "THStage_ExtractionBay",
+      "kind": "solid",
+      "beam_blocking": false,
+      "height_m": 0.45,
+      "center_unity_xyz": [
+        -1.34,
+        0.225,
+        1.2
+      ],
+      "size_unity_xyz": [
+        0.3,
+        0.45,
+        1.52
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -1.34,
+          1.2
+        ],
+        "size_xd": [
+          0.3,
+          1.52
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 0.45
+      }
+    },
+    {
+      "name": "ReceiverSide_+1",
+      "module": "THStage_ExtractionBay",
+      "kind": "solid",
+      "beam_blocking": false,
+      "height_m": 0.45,
+      "center_unity_xyz": [
+        1.34,
+        0.225,
+        1.2
+      ],
+      "size_unity_xyz": [
+        0.3,
+        0.45,
+        1.52
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          1.34,
+          1.2
+        ],
+        "size_xd": [
+          0.3,
+          1.52
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 0.45
+      }
+    },
+    {
+      "name": "ReceiverBack",
+      "module": "THStage_ExtractionBay",
+      "kind": "solid",
+      "beam_blocking": false,
+      "height_m": 0.72,
+      "center_unity_xyz": [
+        0,
+        0.36,
+        0.35
+      ],
+      "size_unity_xyz": [
+        3,
+        0.72,
+        0.34
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0,
+          0.35
+        ],
+        "size_xd": [
+          3,
+          0.34
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 0.72
+      }
+    },
+    {
+      "name": "ControlPod",
+      "module": "THStage_ExtractionBay",
+      "kind": "solid",
+      "beam_blocking": false,
+      "height_m": 0.78,
+      "center_unity_xyz": [
+        -1.34,
+        0.39,
+        1.85
+      ],
+      "size_unity_xyz": [
+        0.32,
+        0.78,
+        0.32
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -1.34,
+          1.85
+        ],
+        "size_xd": [
+          0.32,
+          0.32
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 0.78
+      }
+    },
+    {
+      "name": "Generator",
+      "module": "THStage_EntryCamp",
+      "kind": "solid",
+      "beam_blocking": false,
+      "height_m": 0.56,
+      "center_unity_xyz": [
+        2.0,
+        0.28,
+        1.0
+      ],
+      "size_unity_xyz": [
+        0.46,
+        0.56,
+        0.7
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          2.0,
+          1.0
+        ],
+        "size_xd": [
+          0.46,
+          0.7
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 0.56
+      }
+    },
+    {
+      "name": "CampCrates",
+      "module": "THStage_EntryCamp",
+      "kind": "solid",
+      "beam_blocking": false,
+      "height_m": 0.8,
+      "center_unity_xyz": [
+        -2.02,
+        0.4,
+        1.1
+      ],
+      "size_unity_xyz": [
+        0.66,
+        0.8,
+        1.24
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -2.02,
+          1.1
+        ],
+        "size_xd": [
+          0.66,
+          1.24
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 0.8
+      }
+    },
+    {
+      "name": "Lamp_EntryW",
+      "module": "THStage_EntryCamp",
+      "kind": "solid",
+      "beam_blocking": false,
+      "height_m": 1.6,
+      "center_unity_xyz": [
+        -2.2,
+        0.8,
+        2.72
+      ],
+      "size_unity_xyz": [
+        0.42,
+        1.6,
+        0.42
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -2.2,
+          2.72
+        ],
+        "size_xd": [
+          0.42,
+          0.42
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 1.6
+      }
+    },
+    {
+      "name": "Lamp_EntryE",
+      "module": "THStage_EntryCamp",
+      "kind": "solid",
+      "beam_blocking": false,
+      "height_m": 1.6,
+      "center_unity_xyz": [
+        2.2,
+        0.8,
+        2.72
+      ],
+      "size_unity_xyz": [
+        0.42,
+        1.6,
+        0.42
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          2.2,
+          2.72
+        ],
+        "size_xd": [
+          0.42,
+          0.42
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 1.6
+      }
+    },
+    {
+      "name": "BlockFrontAltar",
+      "module": "THStage_BlockFront_Altar",
+      "kind": "solid",
+      "beam_blocking": false,
+      "height_m": 0.74,
+      "center_unity_xyz": [
+        0,
+        0.37,
+        3.645
+      ],
+      "size_unity_xyz": [
+        1.32,
+        0.74,
+        0.5099999999999997
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0,
+          3.645
+        ],
+        "size_xd": [
+          1.32,
+          0.5099999999999997
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 0.74
+      }
+    },
+    {
+      "name": "FR_Sarcophagus",
+      "module": "THStage_FrontRoom_Furniture",
+      "kind": "solid",
+      "beam_blocking": false,
+      "height_m": 0.66,
+      "center_unity_xyz": [
+        0.5,
+        0.33,
+        5.29
+      ],
+      "size_unity_xyz": [
+        0.7,
+        0.66,
+        1.2
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.5,
+          5.29
+        ],
+        "size_xd": [
+          0.7,
+          1.2
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 0.66
+      }
+    },
+    {
+      "name": "BR_Altar",
+      "module": "THStage_BackRoom_Furniture",
+      "kind": "solid",
+      "beam_blocking": false,
+      "height_m": 0.82,
+      "center_unity_xyz": [
+        -0.29,
+        0.41,
+        6.48
+      ],
+      "size_unity_xyz": [
+        1.1800000000000002,
+        0.82,
+        0.6000000000000004
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -0.29,
+          6.48
+        ],
+        "size_xd": [
+          1.1800000000000002,
+          0.6000000000000004
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 0.82
+      }
+    },
+    {
+      "name": "BR_Crate",
+      "module": "THStage_BackRoom_Furniture",
+      "kind": "solid",
+      "beam_blocking": false,
+      "height_m": 0.46,
+      "center_unity_xyz": [
+        0.6,
+        0.23,
+        6.42
+      ],
+      "size_unity_xyz": [
+        0.48,
+        0.46,
+        0.4
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0.6,
+          6.42
+        ],
+        "size_xd": [
+          0.48,
+          0.4
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 0.46
+      }
+    },
+    {
+      "name": "BR_Shelf",
+      "module": "THStage_BackRoom_Furniture",
+      "kind": "solid",
+      "beam_blocking": false,
+      "height_m": 1.2,
+      "center_unity_xyz": [
+        -0.4,
+        0.6,
+        7.85
+      ],
+      "size_unity_xyz": [
+        0.88,
+        1.2,
+        0.3
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -0.4,
+          7.85
+        ],
+        "size_xd": [
+          0.88,
+          0.3
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 1.2
+      }
+    },
+    {
+      "name": "X_CrateW",
+      "module": "THStage_Corridor_Props",
+      "kind": "solid",
+      "beam_blocking": false,
+      "height_m": 0.46,
+      "center_unity_xyz": [
+        -2.01,
+        0.23,
+        9.15
+      ],
+      "size_unity_xyz": [
+        0.52,
+        0.46,
+        0.44
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -2.291831180523293,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -2.01,
+          9.15
+        ],
+        "size_xd": [
+          0.52,
+          0.44
+        ],
+        "angle_rad": 0.04,
+        "h0": 0.0,
+        "h1": 0.46
+      }
+    },
+    {
+      "name": "X_PalletE",
+      "module": "THStage_Corridor_Props",
+      "kind": "solid",
+      "beam_blocking": false,
+      "height_m": 0.16,
+      "center_unity_xyz": [
+        2.01,
+        0.08,
+        9.15
+      ],
+      "size_unity_xyz": [
+        0.52,
+        0.16,
+        0.46
+      ],
+      "rotation_unity_xyz": [
+        0,
+        2.291831180523293,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          2.01,
+          9.15
+        ],
+        "size_xd": [
+          0.52,
+          0.46
+        ],
+        "angle_rad": -0.04,
+        "h0": 0.0,
+        "h1": 0.16
+      }
+    },
+    {
+      "name": "Hall_Altar",
+      "module": "THStage_Hall_Furniture",
+      "kind": "solid",
+      "beam_blocking": false,
+      "height_m": 0.84,
+      "center_unity_xyz": [
+        0,
+        0.42,
+        10.49
+      ],
+      "size_unity_xyz": [
+        1.1,
+        0.84,
+        0.62
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          0,
+          10.49
+        ],
+        "size_xd": [
+          1.1,
+          0.62
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 0.84
+      }
+    },
+    {
+      "name": "HallE_Plinth",
+      "module": "THStage_Hall_Furniture",
+      "kind": "solid",
+      "beam_blocking": false,
+      "height_m": 0.62,
+      "center_unity_xyz": [
+        2.02,
+        0.31,
+        10.56
+      ],
+      "size_unity_xyz": [
+        0.5,
+        0.62,
+        0.5
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          2.02,
+          10.56
+        ],
+        "size_xd": [
+          0.5,
+          0.5
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 0.62
+      }
+    },
+    {
+      "name": "HallE_Crate",
+      "module": "THStage_Hall_Furniture",
+      "kind": "solid",
+      "beam_blocking": false,
+      "height_m": 0.46,
+      "center_unity_xyz": [
+        1.4,
+        0.23,
+        10.57
+      ],
+      "size_unity_xyz": [
+        0.52,
+        0.46,
+        0.42
+      ],
+      "rotation_unity_xyz": [
+        0,
+        1.7188733853924696,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          1.4,
+          10.57
+        ],
+        "size_xd": [
+          0.52,
+          0.42
+        ],
+        "angle_rad": -0.03,
+        "h0": 0.0,
+        "h1": 0.46
+      }
+    },
+    {
+      "name": "HallW_Ossuary",
+      "module": "THStage_Hall_Furniture",
+      "kind": "solid",
+      "beam_blocking": false,
+      "height_m": 0.58,
+      "center_unity_xyz": [
+        -2.0,
+        0.29,
+        10.22
+      ],
+      "size_unity_xyz": [
+        0.54,
+        0.58,
+        1.06
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -0.0,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -2.0,
+          10.22
+        ],
+        "size_xd": [
+          0.54,
+          1.06
+        ],
+        "angle_rad": 0.0,
+        "h0": 0.0,
+        "h1": 0.58
+      }
+    },
+    {
+      "name": "HallW_Pallet",
+      "module": "THStage_Hall_Furniture",
+      "kind": "solid",
+      "beam_blocking": false,
+      "height_m": 0.16,
+      "center_unity_xyz": [
+        -1.4,
+        0.08,
+        10.56
+      ],
+      "size_unity_xyz": [
+        0.54,
+        0.16,
+        0.44
+      ],
+      "rotation_unity_xyz": [
+        0,
+        -1.7188733853924696,
+        0
+      ],
+      "footprint_logical": {
+        "center_xd": [
+          -1.4,
+          10.56
+        ],
+        "size_xd": [
+          0.54,
+          0.44
+        ],
+        "angle_rad": 0.03,
+        "h0": 0.0,
+        "h1": 0.16
+      }
+    }
+  ],
+  "collider_status": "Boxes with yaw: wall pieces split around doors and niches (beam_blocking=True), and furniture envelopes (beam_blocking=False).",
+  "markers": [
+    {
+      "name": "CollectionVolume",
+      "role": "collection_volume",
+      "position_unity_xyz": [
+        0,
+        0.49,
+        1.2
+      ],
+      "position_blender_xyz": [
+        0.0,
+        -1.2000000476837158,
+        0.49000000953674316
+      ],
+      "size": [
+        2.3,
+        0.92,
+        1.56
+      ]
+    },
+    {
+      "name": "ScoreBoardAnchor",
+      "role": "nonphysical_ui_anchor",
+      "position_unity_xyz": [
+        0,
+        1.5,
+        0.32
+      ],
+      "position_blender_xyz": [
+        0.0,
+        -0.3199999928474426,
+        1.5
+      ]
+    },
+    {
+      "name": "Tutorial_01",
+      "role": "tutorial",
+      "position_unity_xyz": [
+        -1.2,
+        0,
+        2.5
+      ],
+      "position_blender_xyz": [
+        -1.2000000476837158,
+        -2.5,
+        0.0
+      ]
+    },
+    {
+      "name": "Tutorial_02",
+      "role": "tutorial",
+      "position_unity_xyz": [
+        -0.4,
+        0,
+        2.5
+      ],
+      "position_blender_xyz": [
+        -0.4000000059604645,
+        -2.5,
+        0.0
+      ]
+    },
+    {
+      "name": "Tutorial_03",
+      "role": "tutorial",
+      "position_unity_xyz": [
+        0.4,
+        0,
+        2.5
+      ],
+      "position_blender_xyz": [
+        0.4000000059604645,
+        -2.5,
+        0.0
+      ]
+    },
+    {
+      "name": "Tutorial_04",
+      "role": "tutorial",
+      "position_unity_xyz": [
+        1.2,
+        0,
+        2.5
+      ],
+      "position_blender_xyz": [
+        1.2000000476837158,
+        -2.5,
+        0.0
+      ]
+    },
+    {
+      "name": "TreasureSlot_01",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        -0.3,
+        0.721,
+        3.645
+      ],
+      "position_blender_xyz": [
+        -0.30000001192092896,
+        -3.6449999809265137,
+        0.7210000157356262
+      ],
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "host_type": "altar",
+      "surface_height_m": 0.721,
+      "zone": "block_front",
+      "hidden_intent": false,
+      "facing_unity_xz": [
+        0.0,
+        -1.0
+      ],
+      "rotation_blender_z": 3.14159,
+      "max_item_size_m": [
+        0.48,
+        0.4,
+        0.9
+      ],
+      "host_module": "THStage_BlockFront_Altar"
+    },
+    {
+      "name": "TreasureSlot_02",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        0.3,
+        0.721,
+        3.645
+      ],
+      "position_blender_xyz": [
+        0.30000001192092896,
+        -3.6449999809265137,
+        0.7210000157356262
+      ],
+      "allowed_classes": [
+        "S"
+      ],
+      "host_type": "altar",
+      "surface_height_m": 0.721,
+      "zone": "block_front",
+      "hidden_intent": false,
+      "facing_unity_xz": [
+        0.0,
+        -1.0
+      ],
+      "rotation_blender_z": 3.14159,
+      "max_item_size_m": [
+        0.48,
+        0.4,
+        0.9
+      ],
+      "host_module": "THStage_BlockFront_Altar"
+    },
+    {
+      "name": "TreasureSlot_03",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        0.5,
+        0.24,
+        5.4894
+      ],
+      "position_blender_xyz": [
+        0.5,
+        -5.4893999099731445,
+        0.23999999463558197
+      ],
+      "allowed_classes": [
+        "S"
+      ],
+      "host_type": "sarcophagus",
+      "surface_height_m": 0.24,
+      "zone": "front_room",
+      "hidden_intent": true,
+      "facing_unity_xz": [
+        -1.0,
+        0.0
+      ],
+      "rotation_blender_z": -1.5708,
+      "max_item_size_m": [
+        0.5,
+        0.44,
+        0.5
+      ],
+      "host_module": "THStage_FrontRoom_Furniture",
+      "note": "inside, the open end"
+    },
+    {
+      "name": "TreasureSlot_04",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        -0.45000001788139343,
+        0.9039999999999999,
+        6.007500171661377
+      ],
+      "position_blender_xyz": [
+        -0.45000001788139343,
+        -6.007500171661377,
+        0.9039999842643738
+      ],
+      "allowed_classes": [
+        "S"
+      ],
+      "host_type": "niche",
+      "surface_height_m": 0.904,
+      "zone": "front_room",
+      "hidden_intent": true,
+      "facing_unity_xz": [
+        0.0,
+        -1.0
+      ],
+      "rotation_blender_z": 3.14159,
+      "max_item_size_m": [
+        0.38,
+        0.255,
+        0.42
+      ],
+      "host_module": "THStage_Block_Partition"
+    },
+    {
+      "name": "TreasureSlot_05",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        0.44999992847442627,
+        0.9039999999999999,
+        6.007500171661377
+      ],
+      "position_blender_xyz": [
+        0.44999992847442627,
+        -6.007500171661377,
+        0.9039999842643738
+      ],
+      "allowed_classes": [
+        "S"
+      ],
+      "host_type": "niche",
+      "surface_height_m": 0.904,
+      "zone": "front_room",
+      "hidden_intent": true,
+      "facing_unity_xz": [
+        0.0,
+        -1.0
+      ],
+      "rotation_blender_z": 3.14159,
+      "max_item_size_m": [
+        0.38,
+        0.255,
+        0.42
+      ],
+      "host_module": "THStage_Block_Partition"
+    },
+    {
+      "name": "TreasureSlot_06",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        -0.40000003576278687,
+        1.004,
+        4.019999980926514
+      ],
+      "position_blender_xyz": [
+        -0.40000003576278687,
+        -4.019999980926514,
+        1.003999948501587
+      ],
+      "allowed_classes": [
+        "S"
+      ],
+      "host_type": "niche",
+      "surface_height_m": 1.004,
+      "zone": "front_room",
+      "hidden_intent": true,
+      "facing_unity_xz": [
+        -0.0,
+        1.0
+      ],
+      "rotation_blender_z": -0.0,
+      "max_item_size_m": [
+        0.38,
+        0.2,
+        0.42
+      ],
+      "host_module": "THStage_Block_Shell"
+    },
+    {
+      "name": "TreasureSlot_07",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        0.9600000381469727,
+        1.054,
+        5.550000190734863
+      ],
+      "position_blender_xyz": [
+        0.9600000381469727,
+        -5.550000190734863,
+        1.0540000200271606
+      ],
+      "allowed_classes": [
+        "S"
+      ],
+      "host_type": "niche",
+      "surface_height_m": 1.054,
+      "zone": "front_room",
+      "hidden_intent": true,
+      "facing_unity_xz": [
+        -1.0,
+        0.0
+      ],
+      "rotation_blender_z": -1.5708,
+      "max_item_size_m": [
+        0.38,
+        0.2,
+        0.42
+      ],
+      "host_module": "THStage_Block_Shell",
+      "note": "above the sarcophagus"
+    },
+    {
+      "name": "TreasureSlot_08",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        -0.56,
+        0.801,
+        6.48
+      ],
+      "position_blender_xyz": [
+        -0.5600000023841858,
+        -6.480000019073486,
+        0.8009999990463257
+      ],
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "host_type": "altar",
+      "surface_height_m": 0.801,
+      "zone": "back_room",
+      "hidden_intent": true,
+      "facing_unity_xz": [
+        0.0,
+        1.0
+      ],
+      "rotation_blender_z": 0.0,
+      "max_item_size_m": [
+        0.48,
+        0.4,
+        0.9
+      ],
+      "host_module": "THStage_BackRoom_Furniture"
+    },
+    {
+      "name": "TreasureSlot_09",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        -0.02,
+        0.801,
+        6.48
+      ],
+      "position_blender_xyz": [
+        -0.019999999552965164,
+        -6.480000019073486,
+        0.8009999990463257
+      ],
+      "allowed_classes": [
+        "M"
+      ],
+      "host_type": "altar",
+      "surface_height_m": 0.801,
+      "zone": "back_room",
+      "hidden_intent": true,
+      "facing_unity_xz": [
+        0.0,
+        1.0
+      ],
+      "rotation_blender_z": 0.0,
+      "max_item_size_m": [
+        0.48,
+        0.4,
+        0.9
+      ],
+      "host_module": "THStage_BackRoom_Furniture"
+    },
+    {
+      "name": "TreasureSlot_10",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        0.6,
+        0.28,
+        6.42
+      ],
+      "position_blender_xyz": [
+        0.6000000238418579,
+        -6.420000076293945,
+        0.2800000011920929
+      ],
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "host_type": "crate",
+      "surface_height_m": 0.28,
+      "zone": "back_room",
+      "hidden_intent": true,
+      "facing_unity_xz": [
+        -0.9578,
+        0.2873
+      ],
+      "rotation_blender_z": -1.27934,
+      "max_item_size_m": [
+        0.42,
+        0.34,
+        0.9
+      ],
+      "host_module": "THStage_BackRoom_Furniture"
+    },
+    {
+      "name": "TreasureSlot_11",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        -0.62,
+        0.531,
+        7.85
+      ],
+      "position_blender_xyz": [
+        -0.6200000047683716,
+        -7.849999904632568,
+        0.531000018119812
+      ],
+      "allowed_classes": [
+        "S"
+      ],
+      "host_type": "shelf",
+      "surface_height_m": 0.531,
+      "zone": "back_room",
+      "hidden_intent": true,
+      "facing_unity_xz": [
+        0.0,
+        -1.0
+      ],
+      "rotation_blender_z": 3.14159,
+      "max_item_size_m": [
+        0.34,
+        0.24,
+        0.4
+      ],
+      "host_module": "THStage_BackRoom_Furniture"
+    },
+    {
+      "name": "TreasureSlot_12",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        -0.18,
+        0.531,
+        7.85
+      ],
+      "position_blender_xyz": [
+        -0.18000000715255737,
+        -7.849999904632568,
+        0.531000018119812
+      ],
+      "allowed_classes": [
+        "S"
+      ],
+      "host_type": "shelf",
+      "surface_height_m": 0.531,
+      "zone": "back_room",
+      "hidden_intent": true,
+      "facing_unity_xz": [
+        0.0,
+        -1.0
+      ],
+      "rotation_blender_z": 3.14159,
+      "max_item_size_m": [
+        0.34,
+        0.24,
+        0.4
+      ],
+      "host_module": "THStage_BackRoom_Furniture"
+    },
+    {
+      "name": "TreasureSlot_13",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        -0.4,
+        1.051,
+        7.85
+      ],
+      "position_blender_xyz": [
+        -0.4000000059604645,
+        -7.849999904632568,
+        1.0509999990463257
+      ],
+      "allowed_classes": [
+        "S"
+      ],
+      "host_type": "shelf",
+      "surface_height_m": 1.051,
+      "zone": "back_room",
+      "hidden_intent": true,
+      "facing_unity_xz": [
+        0.0,
+        -1.0
+      ],
+      "rotation_blender_z": 3.14159,
+      "max_item_size_m": [
+        0.34,
+        0.24,
+        0.5
+      ],
+      "host_module": "THStage_BackRoom_Furniture"
+    },
+    {
+      "name": "TreasureSlot_14",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        -2.37250018119812,
+        0.954,
+        4.5
+      ],
+      "position_blender_xyz": [
+        -2.37250018119812,
+        -4.5,
+        0.9539999961853027
+      ],
+      "allowed_classes": [
+        "S"
+      ],
+      "host_type": "niche",
+      "surface_height_m": 0.954,
+      "zone": "corridor_w",
+      "hidden_intent": false,
+      "facing_unity_xz": [
+        1.0,
+        -0.0
+      ],
+      "rotation_blender_z": 1.5708,
+      "max_item_size_m": [
+        0.38,
+        0.225,
+        0.42
+      ],
+      "host_module": "THStage_OuterWall_W"
+    },
+    {
+      "name": "TreasureSlot_15",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        -2.37250018119812,
+        1.034,
+        6.400000095367432
+      ],
+      "position_blender_xyz": [
+        -2.37250018119812,
+        -6.400000095367432,
+        1.034000039100647
+      ],
+      "allowed_classes": [
+        "S"
+      ],
+      "host_type": "niche",
+      "surface_height_m": 1.034,
+      "zone": "corridor_w",
+      "hidden_intent": false,
+      "facing_unity_xz": [
+        1.0,
+        -0.0
+      ],
+      "rotation_blender_z": 1.5708,
+      "max_item_size_m": [
+        0.38,
+        0.225,
+        0.42
+      ],
+      "host_module": "THStage_OuterWall_W"
+    },
+    {
+      "name": "TreasureSlot_16",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        -2.37250018119812,
+        1.054,
+        10.050000190734863
+      ],
+      "position_blender_xyz": [
+        -2.37250018119812,
+        -10.050000190734863,
+        1.0540000200271606
+      ],
+      "allowed_classes": [
+        "S"
+      ],
+      "host_type": "niche",
+      "surface_height_m": 1.054,
+      "zone": "hall",
+      "hidden_intent": true,
+      "facing_unity_xz": [
+        1.0,
+        -0.0
+      ],
+      "rotation_blender_z": 1.5708,
+      "max_item_size_m": [
+        0.38,
+        0.225,
+        0.42
+      ],
+      "host_module": "THStage_OuterWall_W"
+    },
+    {
+      "name": "TreasureSlot_17",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        -1.0,
+        1.004,
+        7.150000095367432
+      ],
+      "position_blender_xyz": [
+        -1.0,
+        -7.150000095367432,
+        1.003999948501587
+      ],
+      "allowed_classes": [
+        "S"
+      ],
+      "host_type": "niche",
+      "surface_height_m": 1.004,
+      "zone": "corridor_w",
+      "hidden_intent": false,
+      "facing_unity_xz": [
+        -1.0,
+        -0.0
+      ],
+      "rotation_blender_z": -1.5708,
+      "max_item_size_m": [
+        0.38,
+        0.2,
+        0.42
+      ],
+      "host_module": "THStage_Block_Shell"
+    },
+    {
+      "name": "TreasureSlot_18",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        1.0,
+        0.954,
+        4.75
+      ],
+      "position_blender_xyz": [
+        1.0,
+        -4.75,
+        0.9539999961853027
+      ],
+      "allowed_classes": [
+        "S"
+      ],
+      "host_type": "niche",
+      "surface_height_m": 0.954,
+      "zone": "corridor_e",
+      "hidden_intent": false,
+      "facing_unity_xz": [
+        1.0,
+        -0.0
+      ],
+      "rotation_blender_z": 1.5708,
+      "max_item_size_m": [
+        0.38,
+        0.2,
+        0.42
+      ],
+      "host_module": "THStage_Block_Shell"
+    },
+    {
+      "name": "TreasureSlot_19",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        2.37250018119812,
+        0.9039999999999999,
+        7.300000190734863
+      ],
+      "position_blender_xyz": [
+        2.37250018119812,
+        -7.300000190734863,
+        0.9039999842643738
+      ],
+      "allowed_classes": [
+        "S"
+      ],
+      "host_type": "niche",
+      "surface_height_m": 0.904,
+      "zone": "corridor_e",
+      "hidden_intent": false,
+      "facing_unity_xz": [
+        -1.0,
+        0.0
+      ],
+      "rotation_blender_z": -1.5708,
+      "max_item_size_m": [
+        0.38,
+        0.225,
+        0.42
+      ],
+      "host_module": "THStage_OuterWall_E"
+    },
+    {
+      "name": "TreasureSlot_20",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        2.37250018119812,
+        1.004,
+        9.949999809265137
+      ],
+      "position_blender_xyz": [
+        2.37250018119812,
+        -9.949999809265137,
+        1.003999948501587
+      ],
+      "allowed_classes": [
+        "S"
+      ],
+      "host_type": "niche",
+      "surface_height_m": 1.004,
+      "zone": "hall",
+      "hidden_intent": true,
+      "facing_unity_xz": [
+        -1.0,
+        0.0
+      ],
+      "rotation_blender_z": -1.5708,
+      "max_item_size_m": [
+        0.38,
+        0.225,
+        0.42
+      ],
+      "host_module": "THStage_OuterWall_E"
+    },
+    {
+      "name": "TreasureSlot_21",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        0.45000001788139343,
+        0.954,
+        8.119999885559082
+      ],
+      "position_blender_xyz": [
+        0.45000001788139343,
+        -8.119999885559082,
+        0.9539999961853027
+      ],
+      "allowed_classes": [
+        "S"
+      ],
+      "host_type": "niche",
+      "surface_height_m": 0.954,
+      "zone": "cross",
+      "hidden_intent": false,
+      "facing_unity_xz": [
+        0.0,
+        1.0
+      ],
+      "rotation_blender_z": 0.0,
+      "max_item_size_m": [
+        0.38,
+        0.2,
+        0.42
+      ],
+      "host_module": "THStage_Block_Shell"
+    },
+    {
+      "name": "TreasureSlot_22",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        -0.40000003576278687,
+        0.954,
+        8.119999885559082
+      ],
+      "position_blender_xyz": [
+        -0.40000003576278687,
+        -8.119999885559082,
+        0.9539999961853027
+      ],
+      "allowed_classes": [
+        "S"
+      ],
+      "host_type": "niche",
+      "surface_height_m": 0.954,
+      "zone": "cross",
+      "hidden_intent": false,
+      "facing_unity_xz": [
+        0.0,
+        1.0
+      ],
+      "rotation_blender_z": 0.0,
+      "max_item_size_m": [
+        0.38,
+        0.2,
+        0.42
+      ],
+      "host_module": "THStage_Block_Shell"
+    },
+    {
+      "name": "TreasureSlot_23",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        -1.4500000476837158,
+        0.954,
+        9.479999542236328
+      ],
+      "position_blender_xyz": [
+        -1.4500000476837158,
+        -9.479999542236328,
+        0.9539999961853027
+      ],
+      "allowed_classes": [
+        "S"
+      ],
+      "host_type": "niche",
+      "surface_height_m": 0.954,
+      "zone": "cross",
+      "hidden_intent": false,
+      "facing_unity_xz": [
+        0.0,
+        -1.0
+      ],
+      "rotation_blender_z": 3.14159,
+      "max_item_size_m": [
+        0.38,
+        0.2,
+        0.42
+      ],
+      "host_module": "THStage_HallPartitions"
+    },
+    {
+      "name": "TreasureSlot_24",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        1.4499999284744263,
+        1.004,
+        9.479999542236328
+      ],
+      "position_blender_xyz": [
+        1.4499999284744263,
+        -9.479999542236328,
+        1.003999948501587
+      ],
+      "allowed_classes": [
+        "S"
+      ],
+      "host_type": "niche",
+      "surface_height_m": 1.004,
+      "zone": "cross",
+      "hidden_intent": false,
+      "facing_unity_xz": [
+        0.0,
+        -1.0
+      ],
+      "rotation_blender_z": 3.14159,
+      "max_item_size_m": [
+        0.38,
+        0.2,
+        0.42
+      ],
+      "host_module": "THStage_HallPartitions"
+    },
+    {
+      "name": "TreasureSlot_25",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        -2.01,
+        0.28,
+        9.15
+      ],
+      "position_blender_xyz": [
+        -2.009999990463257,
+        -9.149999618530273,
+        0.2800000011920929
+      ],
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "host_type": "crate",
+      "surface_height_m": 0.28,
+      "zone": "cross",
+      "hidden_intent": false,
+      "facing_unity_xz": [
+        0.5145,
+        -0.8575
+      ],
+      "rotation_blender_z": 2.60117,
+      "max_item_size_m": [
+        0.42,
+        0.34,
+        0.9
+      ],
+      "host_module": "THStage_Corridor_Props"
+    },
+    {
+      "name": "TreasureSlot_26",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        2.01,
+        0.151,
+        9.15
+      ],
+      "position_blender_xyz": [
+        2.009999990463257,
+        -9.149999618530273,
+        0.1509999930858612
+      ],
+      "allowed_classes": [
+        "M"
+      ],
+      "host_type": "pallet",
+      "surface_height_m": 0.151,
+      "zone": "cross",
+      "hidden_intent": false,
+      "facing_unity_xz": [
+        -0.5145,
+        -0.8575
+      ],
+      "rotation_blender_z": -2.60117,
+      "max_item_size_m": [
+        0.46,
+        0.38,
+        0.9
+      ],
+      "host_module": "THStage_Corridor_Props"
+    },
+    {
+      "name": "TreasureSlot_27",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        -0.25,
+        0.821,
+        10.55
+      ],
+      "position_blender_xyz": [
+        -0.25,
+        -10.550000190734863,
+        0.8209999799728394
+      ],
+      "allowed_classes": [
+        "M"
+      ],
+      "host_type": "altar",
+      "surface_height_m": 0.821,
+      "zone": "hall",
+      "hidden_intent": false,
+      "facing_unity_xz": [
+        0.0,
+        -1.0
+      ],
+      "rotation_blender_z": 3.14159,
+      "max_item_size_m": [
+        0.46,
+        0.3,
+        1.0
+      ],
+      "host_module": "THStage_Hall_Furniture"
+    },
+    {
+      "name": "TreasureSlot_28",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        0.25,
+        0.821,
+        10.55
+      ],
+      "position_blender_xyz": [
+        0.25,
+        -10.550000190734863,
+        0.8209999799728394
+      ],
+      "allowed_classes": [
+        "M"
+      ],
+      "host_type": "altar",
+      "surface_height_m": 0.821,
+      "zone": "hall",
+      "hidden_intent": false,
+      "facing_unity_xz": [
+        0.0,
+        -1.0
+      ],
+      "rotation_blender_z": 3.14159,
+      "max_item_size_m": [
+        0.46,
+        0.3,
+        1.0
+      ],
+      "host_module": "THStage_Hall_Furniture"
+    },
+    {
+      "name": "TreasureSlot_29",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        -0.3,
+        0.451,
+        10.3
+      ],
+      "position_blender_xyz": [
+        -0.30000001192092896,
+        -10.300000190734863,
+        0.45100000500679016
+      ],
+      "allowed_classes": [
+        "S"
+      ],
+      "host_type": "altar",
+      "surface_height_m": 0.451,
+      "zone": "hall",
+      "hidden_intent": false,
+      "facing_unity_xz": [
+        0.0,
+        -1.0
+      ],
+      "rotation_blender_z": 3.14159,
+      "max_item_size_m": [
+        0.28,
+        0.19,
+        0.6
+      ],
+      "host_module": "THStage_Hall_Furniture",
+      "note": "front step of the altar"
+    },
+    {
+      "name": "TreasureSlot_30",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        0.3,
+        0.451,
+        10.3
+      ],
+      "position_blender_xyz": [
+        0.30000001192092896,
+        -10.300000190734863,
+        0.45100000500679016
+      ],
+      "allowed_classes": [
+        "S"
+      ],
+      "host_type": "altar",
+      "surface_height_m": 0.451,
+      "zone": "hall",
+      "hidden_intent": false,
+      "facing_unity_xz": [
+        0.0,
+        -1.0
+      ],
+      "rotation_blender_z": 3.14159,
+      "max_item_size_m": [
+        0.28,
+        0.19,
+        0.6
+      ],
+      "host_module": "THStage_Hall_Furniture",
+      "note": "front step of the altar"
+    },
+    {
+      "name": "TreasureSlot_31",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        2.02,
+        0.621,
+        10.56
+      ],
+      "position_blender_xyz": [
+        2.0199999809265137,
+        -10.5600004196167,
+        0.6209999918937683
+      ],
+      "allowed_classes": [
+        "M"
+      ],
+      "host_type": "plinth",
+      "surface_height_m": 0.621,
+      "zone": "hall",
+      "hidden_intent": true,
+      "facing_unity_xz": [
+        -0.7809,
+        -0.6247
+      ],
+      "rotation_blender_z": -2.24554,
+      "max_item_size_m": [
+        0.4,
+        0.4,
+        1.0
+      ],
+      "host_module": "THStage_Hall_Furniture"
+    },
+    {
+      "name": "TreasureSlot_32",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        1.4,
+        0.28,
+        10.57
+      ],
+      "position_blender_xyz": [
+        1.399999976158142,
+        -10.569999694824219,
+        0.2800000011920929
+      ],
+      "allowed_classes": [
+        "S",
+        "M"
+      ],
+      "host_type": "crate",
+      "surface_height_m": 0.28,
+      "zone": "hall",
+      "hidden_intent": true,
+      "facing_unity_xz": [
+        0.0,
+        -1.0
+      ],
+      "rotation_blender_z": 3.14159,
+      "max_item_size_m": [
+        0.42,
+        0.32,
+        0.9
+      ],
+      "host_module": "THStage_Hall_Furniture"
+    },
+    {
+      "name": "TreasureSlot_33",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        -2.0,
+        0.24,
+        10.39
+      ],
+      "position_blender_xyz": [
+        -2.0,
+        -10.390000343322754,
+        0.23999999463558197
+      ],
+      "allowed_classes": [
+        "S"
+      ],
+      "host_type": "sarcophagus",
+      "surface_height_m": 0.24,
+      "zone": "hall",
+      "hidden_intent": true,
+      "facing_unity_xz": [
+        1.0,
+        0.0
+      ],
+      "rotation_blender_z": 1.5708,
+      "max_item_size_m": [
+        0.4,
+        0.3,
+        0.45
+      ],
+      "host_module": "THStage_Hall_Furniture",
+      "note": "ossuary chest, the open end"
+    },
+    {
+      "name": "TreasureSlot_34",
+      "role": "treasure_slot",
+      "position_unity_xyz": [
+        -1.4,
+        0.151,
+        10.56
+      ],
+      "position_blender_xyz": [
+        -1.399999976158142,
+        -10.5600004196167,
+        0.1509999930858612
+      ],
+      "allowed_classes": [
+        "M"
+      ],
+      "host_type": "pallet",
+      "surface_height_m": 0.151,
+      "zone": "hall",
+      "hidden_intent": true,
+      "facing_unity_xz": [
+        0.0,
+        -1.0
+      ],
+      "rotation_blender_z": 3.14159,
+      "max_item_size_m": [
+        0.46,
+        0.36,
+        0.9
+      ],
+      "host_module": "THStage_Hall_Furniture"
+    },
+    {
+      "name": "Light_Lamp_EntryW",
+      "role": "light_anchor",
+      "position_unity_xyz": [
+        -2.0902780732424127,
+        1.52,
+        2.768591138992646
+      ],
+      "position_blender_xyz": [
+        -2.090278148651123,
+        -2.7685911655426025,
+        1.5199999809265137
+      ],
+      "aim_unity_xyz": [
+        -0.1,
+        0.75,
+        3.65
+      ],
+      "suggested": "spot, warm ~3000K, range ~3 m, cone ~100 deg",
+      "blender_watts": 320
+    },
+    {
+      "name": "Light_Lamp_EntryE",
+      "role": "light_anchor",
+      "position_unity_xyz": [
+        2.178758100617381,
+        1.52,
+        2.8381049605673643
+      ],
+      "position_blender_xyz": [
+        2.178758144378662,
+        -2.8381049633026123,
+        1.5199999809265137
+      ],
+      "aim_unity_xyz": [
+        1.7,
+        0.6,
+        5.5
+      ],
+      "suggested": "spot, warm ~3000K, range ~3 m, cone ~100 deg",
+      "blender_watts": 320
+    },
+    {
+      "name": "Light_WorkLamp_03",
+      "role": "light_anchor",
+      "position_unity_xyz": [
+        0.40148454593068317,
+        2.0500000000000003,
+        5.717399032694518
+      ],
+      "position_blender_xyz": [
+        0.40148454904556274,
+        -5.7173991203308105,
+        2.049999952316284
+      ],
+      "aim_unity_xyz": [
+        0.5,
+        0.25,
+        5.45
+      ],
+      "suggested": "spot, warm ~3000K, range ~3 m, cone ~100 deg",
+      "blender_watts": 300
+    },
+    {
+      "name": "Light_WorkLamp_04",
+      "role": "light_anchor",
+      "position_unity_xyz": [
+        0.20215284994499222,
+        1.3499999999999999,
+        7.81995102829949
+      ],
+      "position_blender_xyz": [
+        0.20215284824371338,
+        -7.819951057434082,
+        1.350000023841858
+      ],
+      "aim_unity_xyz": [
+        -0.35,
+        0.8,
+        6.55
+      ],
+      "suggested": "spot, warm ~3000K, range ~3 m, cone ~100 deg",
+      "blender_watts": 260
+    },
+    {
+      "name": "Light_WorkLamp_05",
+      "role": "light_anchor",
+      "position_unity_xyz": [
+        -0.16875412006385143,
+        2.0500000000000003,
+        6.388525645592595
+      ],
+      "position_blender_xyz": [
+        -0.16875411570072174,
+        -6.388525485992432,
+        2.049999952316284
+      ],
+      "aim_unity_xyz": [
+        -0.4,
+        0.5,
+        7.85
+      ],
+      "suggested": "spot, warm ~3000K, range ~3 m, cone ~100 deg",
+      "blender_watts": 220
+    },
+    {
+      "name": "Light_WorkLamp_06",
+      "role": "light_anchor",
+      "position_unity_xyz": [
+        0.5424049025201266,
+        2.0199999999999996,
+        8.323518428664752
+      ],
+      "position_blender_xyz": [
+        0.5424048900604248,
+        -8.323518753051758,
+        2.0199999809265137
+      ],
+      "aim_unity_xyz": [
+        1.9,
+        0.3,
+        9.0
+      ],
+      "suggested": "spot, warm ~3000K, range ~3 m, cone ~100 deg",
+      "blender_watts": 220
+    },
+    {
+      "name": "Light_WorkLamp_07",
+      "role": "light_anchor",
+      "position_unity_xyz": [
+        -0.6702866409350929,
+        2.0199999999999996,
+        8.32757218462678
+      ],
+      "position_blender_xyz": [
+        -0.6702866554260254,
+        -8.327571868896484,
+        2.0199999809265137
+      ],
+      "aim_unity_xyz": [
+        -1.9,
+        0.3,
+        9.0
+      ],
+      "suggested": "spot, warm ~3000K, range ~3 m, cone ~100 deg",
+      "blender_watts": 220
+    },
+    {
+      "name": "Light_WorkLamp_08",
+      "role": "light_anchor",
+      "position_unity_xyz": [
+        -0.5244774681949748,
+        1.58,
+        10.657367359811547
+      ],
+      "position_blender_xyz": [
+        -0.524477481842041,
+        -10.657367706298828,
+        1.5800000429153442
+      ],
+      "aim_unity_xyz": [
+        -0.186,
+        0.85,
+        10.4
+      ],
+      "suggested": "spot, warm ~3000K, range ~3 m, cone ~100 deg",
+      "blender_watts": 240
+    },
+    {
+      "name": "Light_WorkLamp_09",
+      "role": "light_anchor",
+      "position_unity_xyz": [
+        0.5244775777920663,
+        1.32,
+        10.65736737245306
+      ],
+      "position_blender_xyz": [
+        0.5244776010513306,
+        -10.657367706298828,
+        1.3200000524520874
+      ],
+      "aim_unity_xyz": [
+        0.186,
+        0.85,
+        10.4
+      ],
+      "suggested": "spot, warm ~3000K, range ~3 m, cone ~100 deg",
+      "blender_watts": 240
+    },
+    {
+      "name": "Light_WorkLamp_10",
+      "role": "light_anchor",
+      "position_unity_xyz": [
+        -1.8513770214134373,
+        1.91,
+        9.7894594551752
+      ],
+      "position_blender_xyz": [
+        -1.851377010345459,
+        -9.789459228515625,
+        1.909999966621399
+      ],
+      "aim_unity_xyz": [
+        -1.9,
+        0.3,
+        10.3
+      ],
+      "suggested": "spot, warm ~3000K, range ~3 m, cone ~100 deg",
+      "blender_watts": 240
+    },
+    {
+      "name": "Light_WorkLamp_11",
+      "role": "light_anchor",
+      "position_unity_xyz": [
+        1.928658898581165,
+        2.02,
+        9.788087088384357
+      ],
+      "position_blender_xyz": [
+        1.9286588430404663,
+        -9.788086891174316,
+        2.0199999809265137
+      ],
+      "aim_unity_xyz": [
+        1.8,
+        0.4,
+        10.5
+      ],
+      "suggested": "spot, warm ~3000K, range ~3 m, cone ~100 deg",
+      "blender_watts": 240
+    },
+    {
+      "name": "Light_Bulb_01",
+      "role": "light_anchor",
+      "position_unity_xyz": [
+        -2.25,
+        2.21,
+        4.099999904632568
+      ],
+      "position_blender_xyz": [
+        -2.25,
+        -4.099999904632568,
+        2.2100000381469727
+      ],
+      "suggested": "point, warm ~2700K, range ~1.5 m, weak",
+      "blender_watts": 18
+    },
+    {
+      "name": "Light_Bulb_02",
+      "role": "light_anchor",
+      "position_unity_xyz": [
+        -2.25,
+        1.5600000000000003,
+        5.350000381469727
+      ],
+      "position_blender_xyz": [
+        -2.25,
+        -5.350000381469727,
+        1.559999942779541
+      ],
+      "suggested": "point, warm ~2700K, range ~1.5 m, weak",
+      "blender_watts": 18
+    },
+    {
+      "name": "Light_Bulb_03",
+      "role": "light_anchor",
+      "position_unity_xyz": [
+        -2.25,
+        1.5600000000000003,
+        6.600000381469727
+      ],
+      "position_blender_xyz": [
+        -2.25,
+        -6.600000381469727,
+        1.559999942779541
+      ],
+      "suggested": "point, warm ~2700K, range ~1.5 m, weak",
+      "blender_watts": 18
+    },
+    {
+      "name": "Light_Bulb_04",
+      "role": "light_anchor",
+      "position_unity_xyz": [
+        -2.25,
+        2.21,
+        7.850000381469727
+      ],
+      "position_blender_xyz": [
+        -2.25,
+        -7.850000381469727,
+        2.2100000381469727
+      ],
+      "suggested": "point, warm ~2700K, range ~1.5 m, weak",
+      "blender_watts": 18
+    },
+    {
+      "name": "Light_Bulb_05",
+      "role": "light_anchor",
+      "position_unity_xyz": [
+        -2.25,
+        2.21,
+        9.100000381469727
+      ],
+      "position_blender_xyz": [
+        -2.25,
+        -9.100000381469727,
+        2.2100000381469727
+      ],
+      "suggested": "point, warm ~2700K, range ~1.5 m, weak",
+      "blender_watts": 18
+    },
+    {
+      "name": "Light_Bulb_06",
+      "role": "light_anchor",
+      "position_unity_xyz": [
+        -2.25,
+        2.21,
+        10.350000381469727
+      ],
+      "position_blender_xyz": [
+        -2.25,
+        -10.350000381469727,
+        2.2100000381469727
+      ],
+      "suggested": "point, warm ~2700K, range ~1.5 m, weak",
+      "blender_watts": 18
+    },
+    {
+      "name": "Light_Bulb_07",
+      "role": "light_anchor",
+      "position_unity_xyz": [
+        2.25,
+        1.36,
+        4.099999904632568
+      ],
+      "position_blender_xyz": [
+        2.25,
+        -4.099999904632568,
+        1.3600000143051147
+      ],
+      "suggested": "point, warm ~2700K, range ~1.5 m, weak",
+      "blender_watts": 18
+    },
+    {
+      "name": "Light_Bulb_08",
+      "role": "light_anchor",
+      "position_unity_xyz": [
+        2.25,
+        1.1,
+        5.350000381469727
+      ],
+      "position_blender_xyz": [
+        2.25,
+        -5.350000381469727,
+        1.100000023841858
+      ],
+      "suggested": "point, warm ~2700K, range ~1.5 m, weak",
+      "blender_watts": 18
+    },
+    {
+      "name": "Light_Bulb_09",
+      "role": "light_anchor",
+      "position_unity_xyz": [
+        2.25,
+        1.36,
+        6.600000381469727
+      ],
+      "position_blender_xyz": [
+        2.25,
+        -6.600000381469727,
+        1.3600000143051147
+      ],
+      "suggested": "point, warm ~2700K, range ~1.5 m, weak",
+      "blender_watts": 18
+    },
+    {
+      "name": "Light_Bulb_10",
+      "role": "light_anchor",
+      "position_unity_xyz": [
+        2.25,
+        2.0300000000000002,
+        7.850000381469727
+      ],
+      "position_blender_xyz": [
+        2.25,
+        -7.850000381469727,
+        2.0299999713897705
+      ],
+      "suggested": "point, warm ~2700K, range ~1.5 m, weak",
+      "blender_watts": 18
+    },
+    {
+      "name": "Light_Bulb_11",
+      "role": "light_anchor",
+      "position_unity_xyz": [
+        2.25,
+        1.7400000000000002,
+        9.100000381469727
+      ],
+      "position_blender_xyz": [
+        2.25,
+        -9.100000381469727,
+        1.7400000095367432
+      ],
+      "suggested": "point, warm ~2700K, range ~1.5 m, weak",
+      "blender_watts": 18
+    },
+    {
+      "name": "Light_Bulb_12",
+      "role": "light_anchor",
+      "position_unity_xyz": [
+        2.25,
+        2.21,
+        10.350000381469727
+      ],
+      "position_blender_xyz": [
+        2.25,
+        -10.350000381469727,
+        2.2100000381469727
+      ],
+      "suggested": "point, warm ~2700K, range ~1.5 m, weak",
+      "blender_watts": 18
+    }
+  ],
+  "slots": {
+    "count": 34,
+    "by_class": {
+      "M": 6,
+      "S": 23,
+      "S/M": 5
+    },
+    "by_zone": {
+      "back_room": 6,
+      "block_front": 2,
+      "corridor_e": 2,
+      "corridor_w": 3,
+      "cross": 6,
+      "front_room": 5,
+      "hall": 10
+    },
+    "by_host": {
+      "altar": 8,
+      "crate": 3,
+      "niche": 15,
+      "pallet": 2,
+      "plinth": 1,
+      "sarcophagus": 2,
+      "shelf": 3
+    },
+    "hidden_intent": 17,
+    "selection_rule": "Each round pick 23 slots (4 players: 14 S + 9 M). An M needs a slot whose allowed_classes has M. Check max_item_size_m ([width, depth, height] in the item frame, front = facing) against the model; place the model base centre on the slot point and turn it so its front faces facing_unity_xz (Blender: rotation_blender_z on the model root). Never place the same model on two slots closer than neighbour_rule_m (horizontal); the preview also gives the deepest M slots the most valuable models.",
+    "neighbour_rule_m": 1.5
+  },
+  "sample_placements": [
+    {
+      "slot": "TreasureSlot_32",
+      "model": "bronze_tripod_cauldron",
+      "class_name": "M",
+      "root_name": "bronze_tripod_cauldron_Root"
+    },
+    {
+      "slot": "TreasureSlot_34",
+      "model": "gilded_sun_disc",
+      "class_name": "M",
+      "root_name": "gilded_sun_disc_Root"
+    },
+    {
+      "slot": "TreasureSlot_27",
+      "model": "bronze_tripod_cauldron",
+      "class_name": "M",
+      "root_name": "bronze_tripod_cauldron_Root.001"
+    },
+    {
+      "slot": "TreasureSlot_28",
+      "model": "gilded_sun_disc",
+      "class_name": "M",
+      "root_name": "gilded_sun_disc_Root.001"
+    },
+    {
+      "slot": "TreasureSlot_25",
+      "model": "stone_stele",
+      "class_name": "M",
+      "root_name": "stone_stele_Root"
+    },
+    {
+      "slot": "TreasureSlot_26",
+      "model": "stone_stele",
+      "class_name": "M",
+      "root_name": "stone_stele_Root.001"
+    },
+    {
+      "slot": "TreasureSlot_09",
+      "model": "clay_amphora",
+      "class_name": "M",
+      "root_name": "clay_amphora_Root"
+    },
+    {
+      "slot": "TreasureSlot_08",
+      "model": "stone_stele",
+      "class_name": "M",
+      "root_name": "stone_stele_Root.002"
+    },
+    {
+      "slot": "TreasureSlot_01",
+      "model": "clay_amphora",
+      "class_name": "M",
+      "root_name": "clay_amphora_Root.001"
+    },
+    {
+      "slot": "TreasureSlot_04",
+      "model": "bronze_figure",
+      "class_name": "S",
+      "root_name": "bronze_figure_Root"
+    },
+    {
+      "slot": "TreasureSlot_14",
+      "model": "stone_unguent_jar",
+      "class_name": "S",
+      "root_name": "stone_unguent_jar_Root"
+    },
+    {
+      "slot": "TreasureSlot_11",
+      "model": "silver_mirror",
+      "class_name": "S",
+      "root_name": "silver_mirror_Root"
+    },
+    {
+      "slot": "TreasureSlot_03",
+      "model": "silver_mirror",
+      "class_name": "S",
+      "root_name": "silver_mirror_Root.001"
+    },
+    {
+      "slot": "TreasureSlot_10",
+      "model": "bronze_amulet_disc",
+      "class_name": "S",
+      "root_name": "bronze_amulet_disc_Root"
+    },
+    {
+      "slot": "TreasureSlot_15",
+      "model": "gold_mask",
+      "class_name": "S",
+      "root_name": "gold_mask_Root"
+    },
+    {
+      "slot": "TreasureSlot_07",
+      "model": "stone_beast",
+      "class_name": "S",
+      "root_name": "stone_beast_Root"
+    },
+    {
+      "slot": "TreasureSlot_22",
+      "model": "stone_beast",
+      "class_name": "S",
+      "root_name": "stone_beast_Root.001"
+    },
+    {
+      "slot": "TreasureSlot_20",
+      "model": "clay_offering_bowl",
+      "class_name": "S",
+      "root_name": "clay_offering_bowl_Root"
+    },
+    {
+      "slot": "TreasureSlot_05",
+      "model": "stone_unguent_jar",
+      "class_name": "S",
+      "root_name": "stone_unguent_jar_Root.001"
+    },
+    {
+      "slot": "TreasureSlot_23",
+      "model": "clay_pot",
+      "class_name": "S",
+      "root_name": "clay_pot_Root"
+    },
+    {
+      "slot": "TreasureSlot_02",
+      "model": "clay_offering_bowl",
+      "class_name": "S",
+      "root_name": "clay_offering_bowl_Root.001"
+    },
+    {
+      "slot": "TreasureSlot_21",
+      "model": "gold_mask",
+      "class_name": "S",
+      "root_name": "gold_mask_Root.001"
+    },
+    {
+      "slot": "TreasureSlot_33",
+      "model": "bronze_amulet_disc",
+      "class_name": "S",
+      "root_name": "bronze_amulet_disc_Root.001"
+    }
+  ],
+  "preview_only": "floor, 23 treasures, lights, camera (Stage_Review.blend only; not in the stage FBX)",
+  "unity_imported": false,
+  "pico_fps_measured": false
+}

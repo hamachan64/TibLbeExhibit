@@ -37,7 +37,7 @@
 
 | 内容 | Issue | 状態 | メモ |
 | :--- | :--- | :---: | :--- |
-| お宝・納品場所・瓦礫の 3D モデル | [#46](https://github.com/hamachan64/TibLbeExhibit/issues/46) | 🔨 | ブランチ `repo/feature-th-asset-models`（worktree `TibLbeExhibit-assets`）。お宝 12 種（持ち手なし）と、高い壁の回廊ステージを Blender で制作済み。モデリングは Opus のサブエージェント、検収はメインのセッション。Unity への取り込みは未実施。`THIRD_PARTY_NOTICES.md` に記録（外部素材なし） |
+| お宝・納品場所・瓦礫の 3D モデル | [#46](https://github.com/hamachan64/TibLbeExhibit/issues/46) | 🔨 | ブランチ `repo/feature-th-asset-models`（worktree `TibLbeExhibit-assets`）。お宝 12 種（持ち手なし）と、高い壁の回廊ステージを Blender で制作し、Unity に取り込み済み（2026-10-22。お宝プレハブ・カタログ、Environment のステージ・置き場所 34・焼き込みの灯り。仕様 `.claude/loops/20261021-th-asset-import.md`）。push・PR はユーザーの指示待ち。古いお宝のプレハブ・材質の削除が残っている（uloop の安全検査で止まった）。`THIRD_PARTY_NOTICES.md` に記録（外部素材なし） |
 | オープニングのナレーション音声 | [#47](https://github.com/hamachan64/TibLbeExhibit/issues/47) | ⬜ | 原稿 `TREASURE_HAUL_NARRATION.md`。音声はユーザーが用意する |
 | 会場レイアウト（Environment） | [#48](https://github.com/hamachan64/TibLbeExhibit/issues/48) | ⬜ | 順4b と同じシーンを触るので同時に作業しない |
 
@@ -63,6 +63,8 @@
 | U-19 | 荷台（台車。運ぶ補助ツール）をゲームでどう使うか | #46 の後 |
 
 ## 最近決まったこと
+
+- 2026-10-22（#46）: お宝の値段は、お宝ごとの素材の帯（土器 100〜200G … 日輪盤 700〜800G）で決める。奥の置き場所ほど高い素材のお宝が選ばれやすい（P-4 の S・M の値段の範囲は使わなくなった）。配置は置き場所の種類・入る大きさ・同じお宝を 1.5m 以内に並べない決まりを守り、向きは置き場所の正面。置き場所の属性もハッシュで端末と運営PCの間で照合する。灯りは焼き込み（23 個、ライトマップ 512×3 枚）＋ライトプローブ。練習用お宝は土の小壺に体験者の色を付ける。壁越しの仲間の見せ方は後回し。設計書 4.1・4.6、要件 F-ITEM-1、企画書 5.2 を更新。
 
 - 2026-10-21: ステージの割り付けを「回廊」に決定（中央の 2 部屋の塊を回る通路＋奥の大広間。置き場所 34 か所から毎回 23 か所、同じ種類は 1.5m 以内に並べない）。お宝は、架空の古代文明の出土品 12 種（持ち手なし、S 8・M 4）に作り直した（`BlenderAssets/TreasureHaul/Treasures/`）。どちらも Unity への取り込みは未実施。
 

@@ -403,9 +403,10 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
 
             // 回収（端末の申請を経由せず、ホストの状態表に直接入れる）
             var items = _host.Items;
-            items.OnGrab("devA", 2, new ThGrabMsg { item = 0, reqId = 1, gen = 0, kind = 0 });
-            items.OnRelease("devA", new ThReleaseMsg { item = 0, reqId = 1, gen = 1, reason = 1 });
-            items.OnCollect("devA", new ThCollectMsg { item = 0, gen = 1 });
+            int sIdx = System.Linq.Enumerable.First(items.Items, it => it.Kind == TreasureKind.S).Index;   // 番号は置き場所のシャッフル順なので、S のお宝を探す
+            items.OnGrab("devA", 2, new ThGrabMsg { item = sIdx, reqId = 1, gen = 0, kind = 0 });
+            items.OnRelease("devA", new ThReleaseMsg { item = sIdx, reqId = 1, gen = 1, reason = 1 });
+            items.OnCollect("devA", new ThCollectMsg { item = sIdx, gen = 1 });
             _net.Pump();
             Advance(0.3);
             Assert.GreaterOrEqual(_host.TotalAmount, 100);
@@ -500,9 +501,10 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
             _host.Start(_now, 5000, 7); _net.Pump();
             Advance(3.3); Advance(6.3);
             var items = _host.Items;
-            items.OnGrab("devA", 2, new ThGrabMsg { item = 0, reqId = 1, gen = 0, kind = 0 });
-            items.OnRelease("devA", new ThReleaseMsg { item = 0, reqId = 1, gen = 1, reason = 1 });
-            items.OnCollect("devA", new ThCollectMsg { item = 0, gen = 1 });
+            int sIdx = System.Linq.Enumerable.First(items.Items, it => it.Kind == TreasureKind.S).Index;   // 番号は置き場所のシャッフル順なので、S のお宝を探す
+            items.OnGrab("devA", 2, new ThGrabMsg { item = sIdx, reqId = 1, gen = 0, kind = 0 });
+            items.OnRelease("devA", new ThReleaseMsg { item = sIdx, reqId = 1, gen = 1, reason = 1 });
+            items.OnCollect("devA", new ThCollectMsg { item = sIdx, gen = 1 });
             Advance(30.3);
             Assert.AreEqual(RoundState.Result, a.Tracker.State.CurrentValue);
             int collected = a.Tracker.Result.collected;

@@ -5,7 +5,7 @@ namespace STYLY.TIB_Template.TreasureHaul
 {
     /// <summary>
     /// 仮の会場（Environment の VenueRoot）をまとめて参照する部品（設計書 1章・4.1）。
-    /// 同期する位置はすべて VenueRoot のローカル座標。配置候補点（ローカル座標と距離帯）と、荷台の回収範囲（VenueRoot ローカルの Bounds）を返す。
+    /// 同期する位置はすべて VenueRoot のローカル座標。配置候補点（ローカル座標・距離帯・置ける種類・入る大きさ・向き）と、荷台の回収範囲（VenueRoot ローカルの Bounds）を返す。
     /// VenueRoot は回転・拡縮しない前提（荷台の回収範囲を軸並行の Bounds で表すため）。
     /// </summary>
     public sealed class ThVenue : MonoBehaviour
@@ -29,7 +29,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         public IReadOnlyList<PlacementPoint> GetPlacementPoints()
         {
             var list = new List<PlacementPoint>(_points.Count);
-            foreach (var p in _points) list.Add(new PlacementPoint(Root.InverseTransformPoint(p.transform.position), p.Band));
+            foreach (var p in _points) list.Add(p.ToPlacementPoint(Root.InverseTransformPoint(p.transform.position)));
             return list;
         }
 
@@ -45,7 +45,17 @@ namespace STYLY.TIB_Template.TreasureHaul
         }
 
         /// <summary>パラメータの組み合わせ検査用（配置候補点の数）</summary>
-        public ThEnvironmentInfo CreateEnvironmentInfo() => new ThEnvironmentInfo { PlacementPointCount = _points.Count, TutorialSlotCount = _tutorialSlots.Count };
+        public ThEnvironmentInfo CreateEnvironmentInfo()
+        {
+            int m = 0, sCount = 0;
+            foreach (var p in _points)
+            {
+                if (p == null) continue;
+                if (p.AllowM) m++;
+                if (p.AllowS) sCount++;
+            }
+            return new ThEnvironmentInfo { PlacementPointCount = _points.Count, TutorialSlotCount = _tutorialSlots.Count, MPointCount = m, SPointCount = sCount };
+        }
 
         /// <summary>練習用お宝の置き場所（色番号 → VenueRoot ローカルの位置・向き（Y 回転））。色番号の順に並べる。枠が 4 つに満たない・色番号が重なる・欠けるときは空（練習用お宝を作らない）</summary>
         public IReadOnlyList<PracticeSlot> GetPracticeSlots()
@@ -67,13 +77,17 @@ namespace STYLY.TIB_Template.TreasureHaul
             return list;
         }
 
-        public ThTreasureSetup CreateSetup(ThTreasureCatalog catalog) => new ThTreasureSetup
+        public ThTreasureSetup CreateSetup(ThTreasureCatalog catalog)
         {
-            Points = GetPlacementPoints(),
+            var points = GetPlacementPoints();
+            return new ThTreasureSetup
+        {
+            Points = points,
             Catalog = catalog != null ? catalog.ToSpawnEntries() : new List<SpawnCatalogEntry>(),
             CollectBounds = GetCollectBounds(),
-            CatalogHash = catalog != null ? catalog.ComputeHash() : "",
+            CatalogHash = ThTreasureSetup.ComputeHash(catalog != null ? catalog.ComputeHash() : "", points),
             PracticeSlots = GetPracticeSlots(),
-        };
+            };
+        }
     }
 }

@@ -10,5 +10,9 @@ namespace STYLY.TIB_Template.TreasureHaul
         public int? PlacementPointCount;
         /// <summary>TutorialSlot の数</summary>
         public int? TutorialSlotCount;
+        /// <summary>M を置ける配置候補点の数</summary>
+        public int? MPointCount;
+        /// <summary>S を置ける配置候補点の数</summary>
+        public int? SPointCount;
     }
 }

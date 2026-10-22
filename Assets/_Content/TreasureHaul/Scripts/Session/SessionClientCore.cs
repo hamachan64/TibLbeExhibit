@@ -112,6 +112,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             {
                 var spawn = TreasureSpawner.Spawn(Tracker.Seed, Tracker.Participants.Length, Params, _setup.Points, _setup.Catalog);
                 SpawnFingerprint = spawn.Fingerprint();
+                foreach (var w in spawn.Warnings) Debug.LogWarning("[SessionClient] 配置の警告: " + w);
                 var old = _items.Value;   // 練習用の表。新しい表に替えて見た目を作り直させた後で捨てる（練習用お宝は全端末から消える）
                 _itemsRound = Tracker.RoundId;
                 _itemsPractice = false;

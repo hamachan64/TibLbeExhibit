@@ -198,6 +198,12 @@ namespace STYLY.TIB_Template.TreasureHaul
                         errors.Add($"{i + 1} 人の出現数 {r.spawnS + r.spawnM} が配置候補点 {points} より多い");
                 }
             }
+            if (env?.MPointCount is int mPoints)
+                for (int i = 0; i < p.layout.rows.Length; i++)
+                    if (p.layout.rows[i].spawnM > mPoints) errors.Add($"{i + 1} 人の M の出現数 {p.layout.rows[i].spawnM} が M を置ける配置候補点 {mPoints} より多い");
+            if (env?.SPointCount is int sPoints)
+                for (int i = 0; i < p.layout.rows.Length; i++)
+                    if (p.layout.rows[i].spawnS > sPoints) errors.Add($"{i + 1} 人の S の出現数 {p.layout.rows[i].spawnS} が S を置ける配置候補点 {sPoints} より多い");
             return errors;
         }
     }

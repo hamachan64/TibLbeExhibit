@@ -15,12 +15,19 @@ namespace STYLY.TIB_Template.TreasureHaul
         public string displayName = "";
         [Tooltip("モデル（MeshRenderer）を持つプレハブ（Treasure コンポーネント付き。つかむ範囲は実行時に自動で作る）")] public GameObject prefab;
         [Tooltip("今回の展示で使うか")] public bool use = true;
+        [Tooltip("値段の帯の下限（G。100 刻み）")] public int valueMin = 100;
+        [Tooltip("値段の帯の上限（G。100 刻み）")] public int valueMax = 100;
+        [Tooltip("大きさ（幅 m。正面を向けたときの X。プレハブのモデルの外形から入れ直す）")] public float width;
+        [Tooltip("大きさ（奥行 m。Z）")] public float depth;
+        [Tooltip("大きさ（高さ m。Y）")] public float height;
+
+        public Vector3 Size => new Vector3(width, depth, height);
     }
 
     /// <summary>
-    /// お宝の見た目の一覧（設計書 4.1・9.1）。1 件＝種類（S/M、追加要素の L*・秘宝*）、表示名、プレハブ、今回の展示で使うか。
+    /// お宝の見た目の一覧（設計書 4.1・9.1）。1 件＝種類（S/M、追加要素の L*・秘宝*）、表示名、プレハブ、今回の展示で使うか、値段の帯（valueMin〜valueMax）、大きさ（幅・奥行・高さ）。
     /// 練習用お宝のプレハブも持つ。ビルドに入れる（運営PCのファイルで変えるパラメータとは分ける）。
-    /// 「使う」お宝の並び（種類と ID）のハッシュを、端末とホストで照合する。
+    /// 「使う」お宝の並び（種類・ID・値段の帯・大きさ）のハッシュを、端末とホストで照合する。
     /// </summary>
     [CreateAssetMenu(fileName = "ThTreasureCatalog", menuName = "Treasure Haul/Treasure Catalog")]
     public sealed class ThTreasureCatalog : ScriptableObject
@@ -44,6 +51,9 @@ namespace STYLY.TIB_Template.TreasureHaul
                 if (!e.use) continue;
                 usedCount.TryGetValue(e.kind, out int c);
                 usedCount[e.kind] = c + 1;
+                if (e.valueMin <= 0 || e.valueMax < e.valueMin || e.valueMin % TreasureSpawner.ValueStep != 0 || e.valueMax % TreasureSpawner.ValueStep != 0)
+                    errors.Add($"値段の帯が不正です（正の 100 刻みで、下限 <= 上限）: {e.id} {e.valueMin}〜{e.valueMax}");
+                if (e.width <= 0f || e.depth <= 0f || e.height <= 0f) errors.Add($"大きさが未設定です（お宝カタログの大きさを入れ直してください）: {e.id}");
                 if (e.prefab == null) { errors.Add($"プレハブが未設定です: {e.id}"); continue; }
                 var t = e.prefab.GetComponent<Treasure>();
                 if (t == null) { errors.Add($"プレハブに Treasure コンポーネントがありません: {e.id}"); continue; }
@@ -57,18 +67,20 @@ namespace STYLY.TIB_Template.TreasureHaul
             return errors;
         }
 
-        /// <summary>「使う」お宝の並び（種類と ID）の SHA-256 先頭 8 桁（16進小文字）</summary>
+        /// <summary>「使う」お宝の並び（種類・ID・値段の帯・大きさ（mm に丸める））の SHA-256 先頭 8 桁（16進小文字）</summary>
         public string ComputeHash()
         {
-            var list = new List<(TreasureKind, string)>();
-            foreach (var e in entries) if (e != null && e.use) list.Add((e.kind, e.id));
+            var list = new List<ThTreasureEntry>();
+            foreach (var e in entries) if (e != null && e.use) list.Add(e);
             return ComputeHash(list);
         }
 
-        public static string ComputeHash(IEnumerable<(TreasureKind kind, string id)> usedEntries)
+        public static string ComputeHash(IEnumerable<ThTreasureEntry> usedEntries)
         {
             var sb = new StringBuilder();
-            foreach (var (kind, id) in usedEntries) sb.Append((int)kind).Append(':').Append(id).Append(';');
+            foreach (var e in usedEntries)
+                sb.Append((int)e.kind).Append(':').Append(e.id).Append(':').Append(e.valueMin).Append('-').Append(e.valueMax).Append(':')
+                  .Append(Mm(e.width)).Append('x').Append(Mm(e.depth)).Append('x').Append(Mm(e.height)).Append(';');
             byte[] bytes;
             using (var sha = SHA256.Create()) bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(sb.ToString()));
             var o = new StringBuilder();
@@ -76,12 +88,14 @@ namespace STYLY.TIB_Template.TreasureHaul
             return o.ToString();
         }
 
+        static int Mm(float meters) => Mathf.RoundToInt(meters * 1000f);
+
         /// <summary>配置に渡す「使う」お宝の一覧（EntryIndex は entries の添字）</summary>
         public List<SpawnCatalogEntry> ToSpawnEntries()
         {
             var list = new List<SpawnCatalogEntry>();
             for (int i = 0; i < entries.Count; i++)
-                if (entries[i] != null && entries[i].use) list.Add(new SpawnCatalogEntry(entries[i].kind, i));
+                if (entries[i] != null && entries[i].use) list.Add(new SpawnCatalogEntry(entries[i].kind, i, entries[i].id, entries[i].valueMin, entries[i].valueMax, entries[i].Size));
             return list;
         }
     }

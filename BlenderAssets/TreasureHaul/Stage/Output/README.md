@@ -1,6 +1,6 @@
 # Treasure Haul ステージの出力 — 発掘中の遺跡（B. 回廊）
 
-2026-10-21。`../build_stage.py` の出力。作り直すたびに上書きする。**Blender 上の成果物であり、Unity への取り込みと PICO 実機での確認はしていない。**
+2026-10-21。`../build_stage.py` の出力。作り直すたびに上書きする。Unity への取り込みは済み（下の「Unity に取り込んだ結果」）。**PICO 実機での確認はしていない。**
 
 ![入口（練習の列）から見た目線 1.65m](01_entrance_eye.jpg)
 
@@ -74,8 +74,16 @@
 
 ## 判定の限界と未確認
 - Blender 内の形と光線の判定。パススルーの映像との対比、値札、他の体験者による遮り、身長の違いは考えていない。
-- **Unity への取り込み、コンパイル、URP での見え方、PICO での 72fps は未確認**。Unity の X 軸の符号（左右）も取り込み時に確かめること。
-- Unity では Metallic と Roughness を「R=金属度・A=滑らかさ」の 1 枚に変換する必要がある。Normals は「Import」（カスタム法線を使っている）。
+- **PICO での 72fps、パススルーの明るい会場との見え方、壁の高さ・通路の幅が体の動きで窮屈でないかは未確認**（実機で確かめる）。
+
+## Unity に取り込んだ結果（2026-10-21、#46）
+取り込みと作り直しは `Assets/_Content/TreasureHaul/Editor/ThStageBuilder.cs`（メニュー Tools/Treasure Haul/「ステージの素材を取り込む」「ステージを作り直す（stage_layout.json）」「ステージの灯りを焼く」）。何度実行しても同じ結果になる。詳細は `TREASURE_HAUL_DESIGN.md` 4.6。
+- **コピー先**: `Assets/_Content/TreasureHaul/Models/Stage/`（14 モジュールの FBX、`Stage_Atlas_{BaseColor,Metallic,Roughness,Emission}.png`、`stage_layout.json`）。`textures/` の古い `Stage_*.png` は使わない。
+- **取り込み設定**: Normals = Import、Scale Factor 1、Read/Write オン、ライトマップ用 UV を生成、材質は取り込まない。Metallic・Roughness は `ThAtlasPacker` で「R=金属度・A=滑らかさ（1-粗さ）」の 1 枚（`Stage_Atlas_MetallicSmoothness.png`、sRGB オフ）にし、URP Lit の `TH_StageAtlas.mat`（Emission あり）で使う。
+- **X 軸は反転して取り込まれる**: FBX を Unity に取り込むと、メッシュの X が反転する（例: `THStage_OuterWall_W.fbx` の外形は X=+2.38 に出る）。直し方は、モジュールをまとめた `Stage/Modules` の localScale を (-1, 1, 1) にすること。Bake Axis Conversion をオンにすると 180° 回って奥行が負になるので使わない。
+  確認（EditMode テスト `ThStageTests`）: `Block_Shell` に対して高さ 1.2m・奥行 5.3 で X=-1.5 から +X へ撃つと、壁に当たらず部屋に入る。X=+1.5 から -X へ撃つと X≈+0.90 の面（壁龕の奥）に当たる。奥行 7.2 では X=+1.5 から -X へは入れ、X=-1.5 から +X へは X≈-0.90 の面に当たる。壁のモジュールのメッシュの外形と JSON の箱の差は最大 2.5cm。
+- **コライダー**: 壁 78（`ThWall`）・壁龕の縁 15・箱の家具 8（`ExtractionBay`・`EntryCamp`）・メッシュの家具 5（非凸 MeshCollider）。34 か所の置き場所の真上から撃つと、すべて置き場所の高さ（誤差 4mm 以内）の面に当たる。
+- **灯り**: `Light_*` 23 個を Baked の灯りに（スポット 11・点光源 12）。ライトマップ 3 枚（512×512）、ライトプローブ 202 個。
 
 ## 残っている古いファイル（削除が必要）
 次は旧版の出力で、もう作られない。削除はガードレールに止められたため残している：`eye.png`、`eye_west.png`、`overview.png`、`peek_sheet.png`、`top.png`、`textures/Stage_BaseColor.png`、`textures/Stage_Metallic.png`、`textures/Stage_Roughness.png`。
