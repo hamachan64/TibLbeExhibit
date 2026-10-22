@@ -4,6 +4,10 @@
 >
 > 2026-10-19: `BlenderAssets/TreasureHaul/Stage/Revision2/`〜`Revision6/` は作業ツリーから削除した（Git の履歴には残っている）。下の記録で「同フォルダーのREADME」とあるものは履歴から参照する。現在の出力 `Stage/Output/`（`Stage/build_stage.py` で生成。旧 Revision7）も、同じ自作の形状・自作アトラスだけでできていて、外部の素材・サービスは追加していない。
 
+## 追加記録: キービジュアルの 3D 版 (2026-10-22)
+
+`Design/KeyVisual/scene/` と `render/` は、自作のステージ・お宝のモデルと、ローカル Blender MCP で作った仮の人物（簡単な人型）・仮の会場（箱と面光源）だけで描いた。商用可（自作物）／第三者素材・実在の人物・ブランド・R.E.P.O. 素材なし／無料・生成サービスやクレジット消費なし／外部ダウンロード・API キー利用なし、の4点を確認。文字は Noto Sans JP（下の表）。
+
 ## 追加記録: 遺跡の風化・床際改修 (2026-10-19)
 
 `BlenderAssets/TreasureHaul/Stage/Revision4/` の石積み、漆喰、土・敷石と共有アトラスはローカルBlender MCPで自作。商用可（自作物）／第三者素材・R.E.P.O.アセット不使用／無料・クレジット消費なし／外部ダウンロード・APIキー利用なし、の4点を確認。既存の自作お宝と台車は確認用に再利用。
@@ -97,6 +101,7 @@
 | R3（`com.cysharp.r3`）、ObservableCollections.R3 | リアクティブ | MIT | 可 | 無料 | 要（ライセンス文の同梱） | 未確認 |
 | DOTween（`Assets/Plugins/Demigiant`） | アニメーション | DOTween の独自ライセンス（無料版） | 要確認 | 無料 | 要確認 | 未確認 |
 | Noto Sans JP（`Assets/_Content/Fonts/Noto_Sans_JP/`。入手元 Google Fonts） | 日本語の表示（TMP の SDF。#37 で足りない文字だけの予備フォントを同じ .ttf から作成） | SIL Open Font License 1.1（同梱の `OFL.txt` 原文で確認。商用・アプリへの組み込み・文字を絞った変換は可、フォント自体の単体販売は不可） | 可 | 無料 | 不要（フォントファイルを単体で再配布する場合はライセンス文を同梱。念のためクレジット欄に記載を推奨） | 確認済み（2026-10-18） |
+| Noto Sans JP（キービジュアルの文字。上と同じ `Assets/_Content/Fonts/Noto_Sans_JP/static/` の Black・Bold） | `Design/KeyVisual/title.html` のタイトル・キャッチコピーを PNG に描く | SIL Open Font License 1.1（公式の原文 https://github.com/notofonts/noto-cjk/blob/main/Sans/LICENSE で再確認。フォントで作った文書・画像はライセンスの対象外。フォントファイルは再配布しない） | 可 | 無料 | 不要 | 確認済み（2026-10-22） |
 | ParrelSync | エディタでの複数起動 | MIT | 可（エディタのみ） | 無料 | ― | 未確認 |
 | uLoopMCP（`io.github.hatayama.uloopmcp`） | AI からのエディタ操作 | 要確認 | エディタのみ | 無料 | ― | 未確認 |
 | STYLY NetSync | 同期 | 要確認 | 要確認 | 要確認 | 要確認 | 未確認 |
