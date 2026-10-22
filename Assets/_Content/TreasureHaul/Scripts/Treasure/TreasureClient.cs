@@ -692,7 +692,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         void PlaceDown(ClientItem m, Treasure t)
         {
             var rot = ThPlaceSolver.Upright(t.transform.localRotation);
-            var dest = ThPlaceSolver.Solve(_venue != null ? _venue.Root : null, t.transform.localPosition);
+            var dest = ThPlaceSolver.SolveClear(_venue != null ? _venue.Root : null, t.transform.localPosition, rot, t.BodyColliders, t.transform);
             _table.SetPlaceTarget(m.Index, dest, rot);
             ReleaseHolder(m.Index);
             t.ReturnTo(dest, rot, Grip.placeSeconds);

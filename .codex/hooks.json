@@ -1,0 +1,30 @@
+{
+  "description": "TibLbeExhibit の Codex 用ガードレール。Claude Code の .claude/hooks/guard.py と同じルールを共有する。",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run --no-project .codex/hooks/session_start.py",
+            "timeout": 30,
+            "statusMessage": "ガードレールを確認中"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|apply_patch|Write|Edit|blender|generate_3d|import_asset|search_assets|hyper3d|rodin|hunyuan|tripo|sketchfab",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run --no-project .codex/hooks/guard_codex.py",
+            "timeout": 30,
+            "statusMessage": "ガードレールを確認中"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,512 @@
+{
+  "human_radius_m": 0.3,
+  "wide_radius_m": 0.575,
+  "grid_m": 0.05,
+  "walkable_cells": 7415,
+  "main_loop_clear_1_15m": {
+    "entrance": true,
+    "corridor_w": true,
+    "corridor_e": true,
+    "cross": true,
+    "hall": true,
+    "front_room_doorway": true,
+    "back_room_doorway": true
+  },
+  "main_loop_walkable": {
+    "entrance": true,
+    "corridor_w": true,
+    "corridor_e": true,
+    "cross": true,
+    "hall": true,
+    "front_room_doorway": true,
+    "back_room_doorway": true
+  },
+  "slots_reachable": 34,
+  "slots_total": 34,
+  "slots_outside_venue": [],
+  "approaches": [
+    {
+      "slot": "TreasureSlot_01",
+      "zone": "block_front",
+      "host": "altar",
+      "approach": {
+        "stand_xd": [
+          -0.3,
+          3.05
+        ],
+        "stand_distance_m": 0.595,
+        "palm_to_slot_m": 0.371
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_02",
+      "zone": "block_front",
+      "host": "altar",
+      "approach": {
+        "stand_xd": [
+          0.3,
+          3.05
+        ],
+        "stand_distance_m": 0.595,
+        "palm_to_slot_m": 0.371
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_03",
+      "zone": "front_room",
+      "host": "sarcophagus",
+      "approach": {
+        "stand_xd": [
+          -0.15,
+          5.5
+        ],
+        "stand_distance_m": 0.65,
+        "palm_to_slot_m": 0.817
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_04",
+      "zone": "front_room",
+      "host": "niche",
+      "approach": {
+        "stand_xd": [
+          -0.45,
+          5.55
+        ],
+        "stand_distance_m": 0.458,
+        "palm_to_slot_m": 0.144
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_05",
+      "zone": "front_room",
+      "host": "niche",
+      "approach": {
+        "stand_xd": [
+          -0.15,
+          5.55
+        ],
+        "stand_distance_m": 0.755,
+        "palm_to_slot_m": 0.416
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_06",
+      "zone": "front_room",
+      "host": "niche",
+      "approach": {
+        "stand_xd": [
+          -0.4,
+          4.45
+        ],
+        "stand_distance_m": 0.43,
+        "palm_to_slot_m": 0.08
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_07",
+      "zone": "front_room",
+      "host": "niche",
+      "approach": {
+        "stand_xd": [
+          1.4,
+          5.55
+        ],
+        "stand_distance_m": 0.44,
+        "palm_to_slot_m": 0.105
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_08",
+      "zone": "back_room",
+      "host": "altar",
+      "approach": {
+        "stand_xd": [
+          -0.55,
+          7.1
+        ],
+        "stand_distance_m": 0.62,
+        "palm_to_slot_m": 0.335
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_09",
+      "zone": "back_room",
+      "host": "altar",
+      "approach": {
+        "stand_xd": [
+          0.0,
+          7.1
+        ],
+        "stand_distance_m": 0.62,
+        "palm_to_slot_m": 0.336
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_10",
+      "zone": "back_room",
+      "host": "crate",
+      "approach": {
+        "stand_xd": [
+          0.6,
+          6.95
+        ],
+        "stand_distance_m": 0.53,
+        "palm_to_slot_m": 0.742
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_11",
+      "zone": "back_room",
+      "host": "shelf",
+      "approach": {
+        "stand_xd": [
+          -0.55,
+          7.4
+        ],
+        "stand_distance_m": 0.455,
+        "palm_to_slot_m": 0.481
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_12",
+      "zone": "back_room",
+      "host": "shelf",
+      "approach": {
+        "stand_xd": [
+          -0.2,
+          7.4
+        ],
+        "stand_distance_m": 0.45,
+        "palm_to_slot_m": 0.48
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_13",
+      "zone": "back_room",
+      "host": "shelf",
+      "approach": {
+        "stand_xd": [
+          -0.4,
+          7.4
+        ],
+        "stand_distance_m": 0.45,
+        "palm_to_slot_m": 0.112
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_14",
+      "zone": "corridor_w",
+      "host": "niche",
+      "approach": {
+        "stand_xd": [
+          -1.8,
+          4.5
+        ],
+        "stand_distance_m": 0.573,
+        "palm_to_slot_m": 0.227
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_15",
+      "zone": "corridor_w",
+      "host": "niche",
+      "approach": {
+        "stand_xd": [
+          -1.8,
+          6.4
+        ],
+        "stand_distance_m": 0.573,
+        "palm_to_slot_m": 0.225
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_16",
+      "zone": "hall",
+      "host": "niche",
+      "approach": {
+        "stand_xd": [
+          -1.4,
+          10.0
+        ],
+        "stand_distance_m": 0.974,
+        "palm_to_slot_m": 0.626
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_17",
+      "zone": "corridor_w",
+      "host": "niche",
+      "approach": {
+        "stand_xd": [
+          -1.45,
+          7.15
+        ],
+        "stand_distance_m": 0.45,
+        "palm_to_slot_m": 0.1
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_18",
+      "zone": "corridor_e",
+      "host": "niche",
+      "approach": {
+        "stand_xd": [
+          1.45,
+          4.75
+        ],
+        "stand_distance_m": 0.45,
+        "palm_to_slot_m": 0.11
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_19",
+      "zone": "corridor_e",
+      "host": "niche",
+      "approach": {
+        "stand_xd": [
+          1.8,
+          7.3
+        ],
+        "stand_distance_m": 0.573,
+        "palm_to_slot_m": 0.242
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_20",
+      "zone": "hall",
+      "host": "niche",
+      "approach": {
+        "stand_xd": [
+          1.8,
+          9.95
+        ],
+        "stand_distance_m": 0.573,
+        "palm_to_slot_m": 0.223
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_21",
+      "zone": "cross",
+      "host": "niche",
+      "approach": {
+        "stand_xd": [
+          0.45,
+          7.7
+        ],
+        "stand_distance_m": 0.42,
+        "palm_to_slot_m": 0.084
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_22",
+      "zone": "cross",
+      "host": "niche",
+      "approach": {
+        "stand_xd": [
+          -0.4,
+          8.55
+        ],
+        "stand_distance_m": 0.43,
+        "palm_to_slot_m": 0.092
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_23",
+      "zone": "cross",
+      "host": "niche",
+      "approach": {
+        "stand_xd": [
+          -1.4,
+          9.9
+        ],
+        "stand_distance_m": 0.423,
+        "palm_to_slot_m": 0.086
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_24",
+      "zone": "cross",
+      "host": "niche",
+      "approach": {
+        "stand_xd": [
+          1.45,
+          9.9
+        ],
+        "stand_distance_m": 0.42,
+        "palm_to_slot_m": 0.07
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_25",
+      "zone": "cross",
+      "host": "crate",
+      "approach": {
+        "stand_xd": [
+          -1.8,
+          8.6
+        ],
+        "stand_distance_m": 0.589,
+        "palm_to_slot_m": 0.759
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_26",
+      "zone": "cross",
+      "host": "pallet",
+      "approach": {
+        "stand_xd": [
+          1.8,
+          8.6
+        ],
+        "stand_distance_m": 0.589,
+        "palm_to_slot_m": 0.882
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_27",
+      "zone": "hall",
+      "host": "altar",
+      "approach": {
+        "stand_xd": [
+          -0.85,
+          10.2
+        ],
+        "stand_distance_m": 0.695,
+        "palm_to_slot_m": 0.388
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_28",
+      "zone": "hall",
+      "host": "altar",
+      "approach": {
+        "stand_xd": [
+          0.85,
+          10.25
+        ],
+        "stand_distance_m": 0.671,
+        "palm_to_slot_m": 0.367
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_29",
+      "zone": "hall",
+      "host": "altar",
+      "approach": {
+        "stand_xd": [
+          -0.3,
+          9.85
+        ],
+        "stand_distance_m": 0.45,
+        "palm_to_slot_m": 0.558
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_30",
+      "zone": "hall",
+      "host": "altar",
+      "approach": {
+        "stand_xd": [
+          0.3,
+          9.85
+        ],
+        "stand_distance_m": 0.45,
+        "palm_to_slot_m": 0.558
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_31",
+      "zone": "hall",
+      "host": "plinth",
+      "approach": {
+        "stand_xd": [
+          1.8,
+          10.0
+        ],
+        "stand_distance_m": 0.602,
+        "palm_to_slot_m": 0.455
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_32",
+      "zone": "hall",
+      "host": "crate",
+      "approach": {
+        "stand_xd": [
+          1.4,
+          10.05
+        ],
+        "stand_distance_m": 0.52,
+        "palm_to_slot_m": 0.74
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_33",
+      "zone": "hall",
+      "host": "sarcophagus",
+      "approach": {
+        "stand_xd": [
+          -1.4,
+          10.0
+        ],
+        "stand_distance_m": 0.716,
+        "palm_to_slot_m": 0.843
+      },
+      "reachable": true
+    },
+    {
+      "slot": "TreasureSlot_34",
+      "zone": "hall",
+      "host": "pallet",
+      "approach": {
+        "stand_xd": [
+          -1.4,
+          10.0
+        ],
+        "stand_distance_m": 0.56,
+        "palm_to_slot_m": 0.875
+      },
+      "reachable": true
+    }
+  ],
+  "rules": {
+    "stand_min_from_edge_m": 0.7,
+    "stand_max_horizontal_m": 1.2,
+    "beam_m": 1.5,
+    "palm_height_m": 1.1
+  },
+  "limitation": "Static boxes. Stone relief and decor are not in the colliders; verify_stage.py measures the real clear width with rays."
+}

@@ -1,0 +1,433 @@
+{
+  "fbx": [
+    {
+      "path": "ExcavationDepot_5x11.fbx",
+      "triangles": 82789,
+      "meshes": 14,
+      "degenerate_triangles": 0,
+      "bounds_blender": [
+        [
+          -2.5,
+          -11.0,
+          0.0
+        ],
+        [
+          2.5,
+          -0.18,
+          2.42
+        ]
+      ],
+      "materials": [
+        "THStage_Atlas"
+      ]
+    },
+    {
+      "path": "modules/THStage_OuterWall_W.fbx",
+      "triangles": 12264,
+      "meshes": 1,
+      "degenerate_triangles": 0,
+      "bounds_blender": [
+        [
+          -2.5,
+          -11.0,
+          0.0
+        ],
+        [
+          -2.255,
+          -3.1959,
+          2.401
+        ]
+      ],
+      "materials": [
+        "THStage_Atlas"
+      ]
+    },
+    {
+      "path": "modules/THStage_OuterWall_E.fbx",
+      "triangles": 9794,
+      "meshes": 1,
+      "degenerate_triangles": 0,
+      "bounds_blender": [
+        [
+          2.255,
+          -11.0,
+          0.0
+        ],
+        [
+          2.5,
+          -3.1961,
+          2.3976
+        ]
+      ],
+      "materials": [
+        "THStage_Atlas"
+      ]
+    },
+    {
+      "path": "modules/THStage_BackWall.fbx",
+      "triangles": 6666,
+      "meshes": 1,
+      "degenerate_triangles": 0,
+      "bounds_blender": [
+        [
+          -2.2842,
+          -11.0,
+          0.0
+        ],
+        [
+          2.283,
+          -10.7885,
+          2.3949
+        ]
+      ],
+      "materials": [
+        "THStage_Atlas"
+      ]
+    },
+    {
+      "path": "modules/THStage_Block_Shell.fbx",
+      "triangles": 20954,
+      "meshes": 1,
+      "degenerate_triangles": 0,
+      "bounds_blender": [
+        [
+          -1.105,
+          -8.225,
+          0.0
+        ],
+        [
+          1.105,
+          -3.8888,
+          2.399
+        ]
+      ],
+      "materials": [
+        "THStage_Atlas"
+      ]
+    },
+    {
+      "path": "modules/THStage_Block_Partition.fbx",
+      "triangles": 3978,
+      "meshes": 1,
+      "degenerate_triangles": 0,
+      "bounds_blender": [
+        [
+          -0.8945,
+          -6.2118,
+          0.0
+        ],
+        [
+          0.894,
+          -5.875,
+          2.1282
+        ]
+      ],
+      "materials": [
+        "THStage_Atlas"
+      ]
+    },
+    {
+      "path": "modules/THStage_HallPartitions.fbx",
+      "triangles": 5466,
+      "meshes": 1,
+      "degenerate_triangles": 0,
+      "bounds_blender": [
+        [
+          -2.2947,
+          -9.6116,
+          0.0
+        ],
+        [
+          2.2947,
+          -9.375,
+          2.3937
+        ]
+      ],
+      "materials": [
+        "THStage_Atlas"
+      ]
+    },
+    {
+      "path": "modules/THStage_ExtractionBay.fbx",
+      "triangles": 3146,
+      "meshes": 1,
+      "degenerate_triangles": 0,
+      "bounds_blender": [
+        [
+          -1.5,
+          -2.08,
+          0.0
+        ],
+        [
+          1.5,
+          -0.18,
+          0.76
+        ]
+      ],
+      "materials": [
+        "THStage_Atlas"
+      ]
+    },
+    {
+      "path": "modules/THStage_EntryCamp.fbx",
+      "triangles": 2654,
+      "meshes": 1,
+      "degenerate_triangles": 0,
+      "bounds_blender": [
+        [
+          -2.4808,
+          -3.1963,
+          0.0
+        ],
+        [
+          2.4794,
+          -0.4845,
+          1.59
+        ]
+      ],
+      "materials": [
+        "THStage_Atlas"
+      ]
+    },
+    {
+      "path": "modules/THStage_BlockFront_Altar.fbx",
+      "triangles": 504,
+      "meshes": 1,
+      "degenerate_triangles": 0,
+      "bounds_blender": [
+        [
+          -0.9798,
+          -3.9019,
+          0.0
+        ],
+        [
+          0.9687,
+          -3.3889,
+          0.7214
+        ]
+      ],
+      "materials": [
+        "THStage_Atlas"
+      ]
+    },
+    {
+      "path": "modules/THStage_FrontRoom_Furniture.fbx",
+      "triangles": 2948,
+      "meshes": 1,
+      "degenerate_triangles": 0,
+      "bounds_blender": [
+        [
+          -0.9256,
+          -6.22,
+          0.0
+        ],
+        [
+          0.851,
+          -4.0913,
+          2.16
+        ]
+      ],
+      "materials": [
+        "THStage_Atlas"
+      ]
+    },
+    {
+      "path": "modules/THStage_BackRoom_Furniture.fbx",
+      "triangles": 4086,
+      "meshes": 1,
+      "degenerate_triangles": 0,
+      "bounds_blender": [
+        [
+          -0.9535,
+          -8.22,
+          0.0
+        ],
+        [
+          0.8979,
+          -5.88,
+          2.16
+        ]
+      ],
+      "materials": [
+        "THStage_Atlas"
+      ]
+    },
+    {
+      "path": "modules/THStage_Corridor_Props.fbx",
+      "triangles": 4484,
+      "meshes": 1,
+      "degenerate_triangles": 0,
+      "bounds_blender": [
+        [
+          -2.38,
+          -10.378,
+          0.0
+        ],
+        [
+          2.38,
+          -4.072,
+          2.42
+        ]
+      ],
+      "materials": [
+        "THStage_Atlas"
+      ]
+    },
+    {
+      "path": "modules/THStage_Hall_Furniture.fbx",
+      "triangles": 5602,
+      "meshes": 1,
+      "degenerate_triangles": 0,
+      "bounds_blender": [
+        [
+          -2.2709,
+          -11.0,
+          0.0
+        ],
+        [
+          2.2716,
+          -9.38,
+          2.13
+        ]
+      ],
+      "materials": [
+        "THStage_Atlas"
+      ]
+    },
+    {
+      "path": "modules/THStage_GroundFragments.fbx",
+      "triangles": 243,
+      "meshes": 1,
+      "degenerate_triangles": 0,
+      "bounds_blender": [
+        [
+          -2.29,
+          -10.99,
+          0.002
+        ],
+        [
+          2.3851,
+          -3.35,
+          0.003
+        ]
+      ],
+      "materials": [
+        "THStage_Atlas"
+      ]
+    }
+  ],
+  "blend": [
+    {
+      "path": "ExcavationDepot_5x11.blend",
+      "triangles": 82789,
+      "meshes": 14,
+      "degenerate_triangles": 0,
+      "bounds_blender": [
+        [
+          -2.5,
+          -11.0,
+          0.0
+        ],
+        [
+          2.5,
+          -0.18,
+          2.42
+        ]
+      ],
+      "materials": [
+        "THStage_Atlas"
+      ]
+    },
+    {
+      "path": "Stage_Review.blend",
+      "triangles": 82789,
+      "meshes": 14,
+      "degenerate_triangles": 0,
+      "bounds_blender": [
+        [
+          -2.5,
+          -11.0,
+          0.0
+        ],
+        [
+          2.5,
+          -0.18,
+          2.42
+        ]
+      ],
+      "materials": [
+        "THStage_Atlas"
+      ],
+      "clear_widths": {
+        "corridor_w": {
+          "min_clear_m": 1.175,
+          "at_depth_height": [
+            7.0,
+            0.97
+          ]
+        },
+        "corridor_e": {
+          "min_clear_m": 1.192,
+          "at_depth_height": [
+            7.9,
+            0.1
+          ]
+        },
+        "front_room_door": {
+          "min_clear_m": 1.198,
+          "at_depth_height": [
+            5.2,
+            0.9
+          ]
+        },
+        "back_room_door": {
+          "min_clear_m": 1.188,
+          "at_depth_height": [
+            7.1,
+            0.1
+          ]
+        }
+      },
+      "floating_stones": {
+        "checked": 420,
+        "unsupported": []
+      }
+    }
+  ],
+  "stage_triangles": 82789,
+  "combined_triangles": 143821,
+  "modules": 14,
+  "slots": 34,
+  "slots_reachable": 34,
+  "main_loop_clear_1_15m": {
+    "entrance": true,
+    "corridor_w": true,
+    "corridor_e": true,
+    "cross": true,
+    "hall": true,
+    "front_room_doorway": true,
+    "back_room_doorway": true
+  },
+  "search": {
+    "placed": 23,
+    "hidden_intent_placed": 12,
+    "hidden_concealed": 12,
+    "visible_cues_seen_from_entrance": 7,
+    "findable_standing": 23,
+    "grabbable": 23,
+    "intersections": 0,
+    "floor_placed": 0,
+    "not_resting": [],
+    "darkest_sky_open": 0.109,
+    "unlit_by_lamps": [
+      "TreasureSlot_05",
+      "TreasureSlot_14",
+      "TreasureSlot_15",
+      "TreasureSlot_21",
+      "TreasureSlot_22"
+    ],
+    "walkable_points": 1803
+  },
+  "unity_imported": false,
+  "pico_fps": "not measured"
+}

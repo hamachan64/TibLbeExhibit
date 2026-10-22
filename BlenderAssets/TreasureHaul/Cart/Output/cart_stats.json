@@ -1,0 +1,305 @@
+{
+  "meshes": 9,
+  "triangles": 4432,
+  "vertices": 2352,
+  "material_slots": 13,
+  "dimensions_m": [
+    0.816,
+    1.204,
+    0.78
+  ],
+  "bounds_blender": [
+    [
+      -0.40800002217292786,
+      0.40800002217292786
+    ],
+    [
+      -0.5839999914169312,
+      0.6200000047683716
+    ],
+    [
+      0.0,
+      0.7799999713897705
+    ]
+  ],
+  "load_floor_height_m": 0.32,
+  "load_clear_size_m": [
+    0.64,
+    0.88
+  ],
+  "wheel_radius_m": 0.1,
+  "turn_envelope_diameter_m": 1.484,
+  "stage_min_lane_m": 1.26,
+  "straight_side_margin_m": 0.222,
+  "colliders": [
+    {
+      "name": "Deck",
+      "center_unity_xyz": [
+        0,
+        0.28,
+        0
+      ],
+      "size_unity_xyz": [
+        0.66,
+        0.08,
+        0.94
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "Wall-1",
+      "center_unity_xyz": [
+        -0.35,
+        0.475,
+        0
+      ],
+      "size_unity_xyz": [
+        0.06,
+        0.31,
+        1
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "Wall1",
+      "center_unity_xyz": [
+        0.35,
+        0.475,
+        0
+      ],
+      "size_unity_xyz": [
+        0.06,
+        0.31,
+        1
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "End-0.48",
+      "center_unity_xyz": [
+        0,
+        0.475,
+        -0.48
+      ],
+      "size_unity_xyz": [
+        0.66,
+        0.31,
+        0.05
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "End0.48",
+      "center_unity_xyz": [
+        0,
+        0.475,
+        0.48
+      ],
+      "size_unity_xyz": [
+        0.66,
+        0.31,
+        0.05
+      ],
+      "rotation_unity_xyz": [
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "parts": [
+    {
+      "id": "THCart_Chassis",
+      "meshes": 1,
+      "triangles": 1936,
+      "vertices": 1056,
+      "material_slots": 3
+    },
+    {
+      "id": "THCart_PushHandle",
+      "meshes": 1,
+      "triangles": 220,
+      "vertices": 120,
+      "material_slots": 1
+    },
+    {
+      "id": "THCart_ValueConsole",
+      "meshes": 1,
+      "triangles": 132,
+      "vertices": 72,
+      "material_slots": 3
+    },
+    {
+      "id": "THCart_Wheel_FrontL",
+      "meshes": 1,
+      "triangles": 440,
+      "vertices": 224,
+      "material_slots": 1
+    },
+    {
+      "id": "THCart_Wheel_FrontR",
+      "meshes": 1,
+      "triangles": 440,
+      "vertices": 224,
+      "material_slots": 1
+    },
+    {
+      "id": "THCart_Fork_RearL",
+      "meshes": 1,
+      "triangles": 192,
+      "vertices": 104,
+      "material_slots": 1
+    },
+    {
+      "id": "THCart_Wheel_RearL",
+      "meshes": 1,
+      "triangles": 440,
+      "vertices": 224,
+      "material_slots": 1
+    },
+    {
+      "id": "THCart_Fork_RearR",
+      "meshes": 1,
+      "triangles": 192,
+      "vertices": 104,
+      "material_slots": 1
+    },
+    {
+      "id": "THCart_Wheel_RearR",
+      "meshes": 1,
+      "triangles": 440,
+      "vertices": 224,
+      "material_slots": 1
+    }
+  ],
+  "pivots": [
+    {
+      "id": "PushHandlePivot",
+      "parent": "TH_Cart_Root.003",
+      "location_blender": [
+        0.0,
+        0.5,
+        0.6399999856948853
+      ],
+      "axis": "X"
+    },
+    {
+      "id": "PushGrip_L",
+      "parent": "PushHandlePivot",
+      "location_blender": [
+        -0.25,
+        0.0899999737739563,
+        0.11000001430511475
+      ],
+      "axis": null
+    },
+    {
+      "id": "PushGrip_R",
+      "parent": "PushHandlePivot",
+      "location_blender": [
+        0.25,
+        0.0899999737739563,
+        0.11000001430511475
+      ],
+      "axis": null
+    },
+    {
+      "id": "ValueDisplay",
+      "parent": "TH_Cart_Root.003",
+      "location_blender": [
+        0.0,
+        0.6100000143051147,
+        0.6499999761581421
+      ],
+      "axis": null
+    },
+    {
+      "id": "CargoVolume",
+      "parent": "TH_Cart_Root.003",
+      "location_blender": [
+        0.0,
+        0.0,
+        0.49000000953674316
+      ],
+      "axis": null
+    },
+    {
+      "id": "Wheel_FrontL",
+      "parent": "TH_Cart_Root.003",
+      "location_blender": [
+        -0.28999999165534973,
+        -0.33000001311302185,
+        0.10000000149011612
+      ],
+      "axis": "X"
+    },
+    {
+      "id": "Wheel_FrontR",
+      "parent": "TH_Cart_Root.003",
+      "location_blender": [
+        0.28999999165534973,
+        -0.33000001311302185,
+        0.10000000149011612
+      ],
+      "axis": "X"
+    },
+    {
+      "id": "Caster_RearL",
+      "parent": "TH_Cart_Root.003",
+      "location_blender": [
+        -0.28999999165534973,
+        0.33000001311302185,
+        0.23000000417232513
+      ],
+      "axis": "Z"
+    },
+    {
+      "id": "Wheel_RearL",
+      "parent": "Caster_RearL",
+      "location_blender": [
+        0.0,
+        0.03999999165534973,
+        -0.12999999523162842
+      ],
+      "axis": "X"
+    },
+    {
+      "id": "Caster_RearR",
+      "parent": "TH_Cart_Root.003",
+      "location_blender": [
+        0.28999999165534973,
+        0.33000001311302185,
+        0.23000000417232513
+      ],
+      "axis": "Z"
+    },
+    {
+      "id": "Wheel_RearR",
+      "parent": "Caster_RearR",
+      "location_blender": [
+        0.0,
+        0.03999999165534973,
+        -0.12999999523162842
+      ],
+      "axis": "X"
+    }
+  ],
+  "unity_imported": false,
+  "gameplay": "model only; movable cart is future option U-4"
+}

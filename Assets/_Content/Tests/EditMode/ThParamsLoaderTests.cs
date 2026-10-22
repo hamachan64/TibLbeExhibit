@@ -198,6 +198,26 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
             Assert.AreEqual(0, ok.Warnings.Count);
         }
 
+        [Test] public void Mを置ける置き場所が出現数より少ないとP5グループが初期値に戻る()
+        {
+            // 初期値の最大は 4 人で M 9 個・S 14 個。M を置ける 8 か所（総数は足りる）では矛盾する
+            var env = new ThEnvironmentInfo { PlacementPointCount = 34, MPointCount = 8, SPointCount = 30 };
+            var r = Load("{\"layout\":{\"edgeMargin\":0.5}}", env);
+            Assert.AreEqual(0.3f, r.Params.layout.edgeMargin);
+            Assert.IsTrue(r.Warnings.Exists(w => w.Contains("M を置ける")));
+            var ok = Load("{\"layout\":{\"edgeMargin\":0.5}}", new ThEnvironmentInfo { PlacementPointCount = 34, MPointCount = 11, SPointCount = 28 });
+            Assert.AreEqual(0.5f, ok.Params.layout.edgeMargin);
+            Assert.AreEqual(0, ok.Warnings.Count);
+        }
+
+        [Test] public void Sを置ける置き場所が出現数より少ないとP5グループが初期値に戻る()
+        {
+            var env = new ThEnvironmentInfo { PlacementPointCount = 34, MPointCount = 11, SPointCount = 13 };
+            var r = Load("{\"layout\":{\"edgeMargin\":0.5}}", env);
+            Assert.AreEqual(0.3f, r.Params.layout.edgeMargin);
+            Assert.IsTrue(r.Warnings.Exists(w => w.Contains("S を置ける")));
+        }
+
         [Test] public void 初期値に戻しても矛盾していれば環境の確認を促す警告が足される()
         {
             var r = Load("{\"layout\":{\"edgeMargin\":0.5}}", new ThEnvironmentInfo { PlacementPointCount = 20 });

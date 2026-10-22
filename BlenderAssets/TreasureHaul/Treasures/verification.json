@@ -1,0 +1,218 @@
+[
+  {
+    "model": "clay_pot",
+    "triangles": 1688,
+    "aim_zones": 1,
+    "emissive": false,
+    "base_on_floor": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "clay_pot",
+    "triangles": 1688,
+    "aim_zones": 1,
+    "emissive": false,
+    "base_on_floor": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  },
+  {
+    "model": "bronze_figure",
+    "triangles": 2980,
+    "aim_zones": 1,
+    "emissive": false,
+    "base_on_floor": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "bronze_figure",
+    "triangles": 2980,
+    "aim_zones": 1,
+    "emissive": false,
+    "base_on_floor": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  },
+  {
+    "model": "silver_mirror",
+    "triangles": 2944,
+    "aim_zones": 1,
+    "emissive": false,
+    "base_on_floor": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "silver_mirror",
+    "triangles": 2944,
+    "aim_zones": 1,
+    "emissive": false,
+    "base_on_floor": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  },
+  {
+    "model": "gold_mask",
+    "triangles": 2872,
+    "aim_zones": 1,
+    "emissive": false,
+    "base_on_floor": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "gold_mask",
+    "triangles": 2872,
+    "aim_zones": 1,
+    "emissive": false,
+    "base_on_floor": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  },
+  {
+    "model": "clay_amphora",
+    "triangles": 3664,
+    "aim_zones": 2,
+    "emissive": false,
+    "base_on_floor": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "clay_amphora",
+    "triangles": 3664,
+    "aim_zones": 2,
+    "emissive": false,
+    "base_on_floor": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  },
+  {
+    "model": "clay_offering_bowl",
+    "triangles": 1856,
+    "aim_zones": 1,
+    "emissive": false,
+    "base_on_floor": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "clay_offering_bowl",
+    "triangles": 1856,
+    "aim_zones": 1,
+    "emissive": false,
+    "base_on_floor": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  },
+  {
+    "model": "stone_beast",
+    "triangles": 2986,
+    "aim_zones": 1,
+    "emissive": false,
+    "base_on_floor": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "stone_beast",
+    "triangles": 2986,
+    "aim_zones": 1,
+    "emissive": false,
+    "base_on_floor": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  },
+  {
+    "model": "stone_unguent_jar",
+    "triangles": 2492,
+    "aim_zones": 1,
+    "emissive": false,
+    "base_on_floor": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "stone_unguent_jar",
+    "triangles": 2492,
+    "aim_zones": 1,
+    "emissive": false,
+    "base_on_floor": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  },
+  {
+    "model": "bronze_amulet_disc",
+    "triangles": 2504,
+    "aim_zones": 1,
+    "emissive": false,
+    "base_on_floor": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "bronze_amulet_disc",
+    "triangles": 2504,
+    "aim_zones": 1,
+    "emissive": false,
+    "base_on_floor": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  },
+  {
+    "model": "stone_stele",
+    "triangles": 1512,
+    "aim_zones": 2,
+    "emissive": false,
+    "base_on_floor": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "stone_stele",
+    "triangles": 1512,
+    "aim_zones": 2,
+    "emissive": false,
+    "base_on_floor": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  },
+  {
+    "model": "bronze_tripod_cauldron",
+    "triangles": 3728,
+    "aim_zones": 2,
+    "emissive": false,
+    "base_on_floor": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "bronze_tripod_cauldron",
+    "triangles": 3728,
+    "aim_zones": 2,
+    "emissive": false,
+    "base_on_floor": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  },
+  {
+    "model": "gilded_sun_disc",
+    "triangles": 2868,
+    "aim_zones": 2,
+    "emissive": false,
+    "base_on_floor": true,
+    "dimension_roundtrip": true,
+    "format": "fbx"
+  },
+  {
+    "model": "gilded_sun_disc",
+    "triangles": 2868,
+    "aim_zones": 2,
+    "emissive": false,
+    "base_on_floor": true,
+    "dimension_roundtrip": true,
+    "format": "blend"
+  }
+]

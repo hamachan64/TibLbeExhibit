@@ -81,6 +81,8 @@ namespace STYLY.TIB_Template.TreasureHaul
         long _itemsRound;
         double _lastItemsSentAt = double.NegativeInfinity;
         string[] _baseWarnings = new string[0];
+        /// <summary>本編の配置で出た警告（置き場所が足りない・1.5m の決まりを外した）。待機に戻ると消える。運営UIの警告に足す</summary>
+        string[] _spawnWarnings = new string[0];
         /// <summary>状態表（本編の間だけ。それ以外は null）</summary>
         public HostItemTable Items => _items;
         /// <summary>本編で作った配置の指紋（ホストと端末で同じことを突き合わせる用のログ）</summary>
@@ -541,6 +543,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             if (st == RoundState.Waiting)
             {
                 _items = null;
+                _spawnWarnings = new string[0];
                 _itemsRound = 0;
                 _lastItemsSentAt = double.NegativeInfinity;
                 SpawnFingerprint = "";
@@ -549,6 +552,8 @@ namespace STYLY.TIB_Template.TreasureHaul
             {
                 var spawn = TreasureSpawner.Spawn(Machine.Seed, Machine.Participants.Count, Params, _setup.Points, _setup.Catalog);
                 SpawnFingerprint = spawn.Fingerprint();
+                _spawnWarnings = spawn.Warnings.ToArray();
+                foreach (var w in _spawnWarnings) Debug.LogWarning("[SessionHost] 配置の警告: " + w);
                 _items = new HostItemTable(spawn.Items, _setup.CollectBounds, (rpc, dto) => _tx.Send(rpc, ThMessages.EncodeObject(Machine.RoundId, dto)),
                     deviceId => Registry.Get(deviceId)?.ClientNo ?? -1, Params.treasure, Params.grip.placeSeconds);
                 if (_placeSolver != null) _items.PlaceSolver = _placeSolver;
@@ -621,6 +626,7 @@ namespace STYLY.TIB_Template.TreasureHaul
                 if (!d.Connected || d.CatalogHash == Registry.HostCatalogHash) continue;
                 all.Add($"お宝カタログのハッシュが違うので参加できません: {d.DeviceId}（端末 {d.CatalogHash} / 運営PC {Registry.HostCatalogHash}）");
             }
+            foreach (var w in _spawnWarnings) all.Add("配置: " + w);
             var cur = _warnings.Value;
             bool same = cur.Length == all.Count;
             for (int i = 0; same && i < cur.Length; i++) same = cur[i] == all[i];

@@ -1,0 +1,866 @@
+{
+  "summary": {
+    "placed": 23,
+    "hidden_intent_placed": 12,
+    "hidden_concealed": 12,
+    "visible_cues_seen_from_entrance": 7,
+    "findable_standing": 23,
+    "grabbable": 23,
+    "intersections": 0,
+    "floor_placed": 0,
+    "not_resting": [],
+    "darkest_sky_open": 0.109,
+    "unlit_by_lamps": [
+      "TreasureSlot_05",
+      "TreasureSlot_14",
+      "TreasureSlot_15",
+      "TreasureSlot_21",
+      "TreasureSlot_22"
+    ],
+    "walkable_points": 1803
+  },
+  "method": [
+    "Writes Output/search_visibility.json.",
+    "",
+    "Viewpoints: walkable cells (0.10 m grid, 0.30 m human radius, 8-connected) reached from the practice row.",
+    "Sight: rays from the eye to vertices of the treasure body, against every stage mesh and the other treasures.",
+    "  entrance   eyes on the practice row area (depth 1.9-3.2 m) at 1.45 / 1.65 m",
+    "  concealed  (hidden-intent slots) at most 10 % of the body seen from any entrance eye",
+    "  findable   at least 30 % of the body seen standing (1.45 / 1.65 m) from a walkable point within 1.3 m",
+    "  far        share of walkable points >= 2.0 m away (eye 1.65 m) that see more than 10 %",
+    "Beam: a palm (0.8-1.2 m) at a walkable point within 1.3 m, at least 25 % of the body in a clear line through the",
+    "  beam-blocking meshes only (walls; furniture does not stop the beam), within 1.5 m.",
+    "Light (darkness proxy; the venue light falls on virtual objects too, the lamps are the warm accents):",
+    "  sky_open   share of 64 cosine-weighted upward rays from the find that leave without hitting the stage (3 m)",
+    "  lamp_lit   names of preview spot lamps whose cone reaches the find without occlusion",
+    "Contact: no treasure mesh intersects a stage mesh (0.0015 m lift), no find stands on the floor, and the find rests",
+    "  on its host (a downward ray from the base reaches a stage mesh within 0.01 m)."
+  ],
+  "slots": [
+    {
+      "slot": "TreasureSlot_01",
+      "zone": "block_front",
+      "host": "altar",
+      "hidden_intent": false,
+      "model": "clay_amphora.001",
+      "entrance_max_visible": 1.0,
+      "concealed_from_entrance": false,
+      "best_near_view": {
+        "visible": 1.0,
+        "eye_unity_xyz": [
+          -0.3,
+          1.45,
+          2.8
+        ]
+      },
+      "findable_standing": true,
+      "far_viewpoints_seeing": "49/230",
+      "far_seen_ratio": 0.213,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          -0.3,
+          0.8,
+          3.0
+        ],
+        "clear": 1.0
+      },
+      "grabbable": true,
+      "sky_open": 0.625,
+      "lamp_lit": [
+        "Lamp_EntryW"
+      ],
+      "intersects": [],
+      "base_height_m": 0.721,
+      "rest_gap_m": 0.0
+    },
+    {
+      "slot": "TreasureSlot_02",
+      "zone": "block_front",
+      "host": "altar",
+      "hidden_intent": false,
+      "model": "clay_offering_bowl.001",
+      "entrance_max_visible": 1.0,
+      "concealed_from_entrance": false,
+      "best_near_view": {
+        "visible": 1.0,
+        "eye_unity_xyz": [
+          1.5,
+          1.45,
+          4.1
+        ]
+      },
+      "findable_standing": true,
+      "far_viewpoints_seeing": "43/236",
+      "far_seen_ratio": 0.182,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          0.3,
+          0.8,
+          3.0
+        ],
+        "clear": 1.0
+      },
+      "grabbable": true,
+      "sky_open": 0.641,
+      "lamp_lit": [
+        "Lamp_EntryW"
+      ],
+      "intersects": [],
+      "base_height_m": 0.721,
+      "rest_gap_m": 0.0004
+    },
+    {
+      "slot": "TreasureSlot_03",
+      "zone": "front_room",
+      "host": "sarcophagus",
+      "hidden_intent": true,
+      "model": "silver_mirror.001",
+      "entrance_max_visible": 0.0,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "visible": 1.0,
+        "eye_unity_xyz": [
+          -0.4,
+          1.65,
+          5.4
+        ]
+      },
+      "findable_standing": true,
+      "far_viewpoints_seeing": "26/283",
+      "far_seen_ratio": 0.092,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          -0.2,
+          0.8,
+          5.5
+        ],
+        "clear": 1.0
+      },
+      "grabbable": true,
+      "sky_open": 0.25,
+      "lamp_lit": [
+        "WorkLamp_03"
+      ],
+      "intersects": [],
+      "base_height_m": 0.24,
+      "rest_gap_m": -0.0
+    },
+    {
+      "slot": "TreasureSlot_04",
+      "zone": "front_room",
+      "host": "niche",
+      "hidden_intent": true,
+      "model": "bronze_figure",
+      "entrance_max_visible": 0.0,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "visible": 1.0,
+        "eye_unity_xyz": [
+          -0.4,
+          1.45,
+          5.4
+        ]
+      },
+      "findable_standing": true,
+      "far_viewpoints_seeing": "8/282",
+      "far_seen_ratio": 0.028,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          -0.5,
+          0.8,
+          5.5
+        ],
+        "clear": 0.934
+      },
+      "grabbable": true,
+      "sky_open": 0.234,
+      "lamp_lit": [
+        "Lamp_EntryW"
+      ],
+      "intersects": [],
+      "base_height_m": 0.904,
+      "rest_gap_m": -0.0
+    },
+    {
+      "slot": "TreasureSlot_05",
+      "zone": "front_room",
+      "host": "niche",
+      "hidden_intent": true,
+      "model": "stone_unguent_jar.001",
+      "entrance_max_visible": 0.041,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "visible": 1.0,
+        "eye_unity_xyz": [
+          -0.4,
+          1.45,
+          5.4
+        ]
+      },
+      "findable_standing": true,
+      "far_viewpoints_seeing": "14/280",
+      "far_seen_ratio": 0.05,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          -0.2,
+          0.8,
+          5.5
+        ],
+        "clear": 0.845
+      },
+      "grabbable": true,
+      "sky_open": 0.172,
+      "lamp_lit": [],
+      "intersects": [],
+      "base_height_m": 0.904,
+      "rest_gap_m": -0.0
+    },
+    {
+      "slot": "TreasureSlot_07",
+      "zone": "front_room",
+      "host": "niche",
+      "hidden_intent": true,
+      "model": "stone_beast",
+      "entrance_max_visible": 0.021,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "visible": 1.0,
+        "eye_unity_xyz": [
+          -0.2,
+          1.45,
+          5.3
+        ]
+      },
+      "findable_standing": true,
+      "far_viewpoints_seeing": "22/285",
+      "far_seen_ratio": 0.077,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          -0.2,
+          0.8,
+          5.5
+        ],
+        "clear": 0.948
+      },
+      "grabbable": true,
+      "sky_open": 0.219,
+      "lamp_lit": [
+        "WorkLamp_03"
+      ],
+      "intersects": [],
+      "base_height_m": 1.054,
+      "rest_gap_m": 0.0
+    },
+    {
+      "slot": "TreasureSlot_08",
+      "zone": "back_room",
+      "host": "altar",
+      "hidden_intent": true,
+      "model": "stone_stele.002",
+      "entrance_max_visible": 0.0,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "visible": 1.0,
+        "eye_unity_xyz": [
+          -0.1,
+          1.45,
+          7.4
+        ]
+      },
+      "findable_standing": true,
+      "far_viewpoints_seeing": "17/281",
+      "far_seen_ratio": 0.06,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          -0.5,
+          0.8,
+          7.1
+        ],
+        "clear": 1.0
+      },
+      "grabbable": true,
+      "sky_open": 0.391,
+      "lamp_lit": [
+        "WorkLamp_04",
+        "WorkLamp_05"
+      ],
+      "intersects": [],
+      "base_height_m": 0.801,
+      "rest_gap_m": -0.0
+    },
+    {
+      "slot": "TreasureSlot_09",
+      "zone": "back_room",
+      "host": "altar",
+      "hidden_intent": true,
+      "model": "clay_amphora",
+      "entrance_max_visible": 0.0,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "visible": 1.0,
+        "eye_unity_xyz": [
+          1.1,
+          1.45,
+          7.1
+        ]
+      },
+      "findable_standing": true,
+      "far_viewpoints_seeing": "8/270",
+      "far_seen_ratio": 0.03,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          0.0,
+          0.8,
+          7.1
+        ],
+        "clear": 1.0
+      },
+      "grabbable": true,
+      "sky_open": 0.469,
+      "lamp_lit": [
+        "WorkLamp_04",
+        "WorkLamp_05"
+      ],
+      "intersects": [],
+      "base_height_m": 0.801,
+      "rest_gap_m": 0.0006
+    },
+    {
+      "slot": "TreasureSlot_10",
+      "zone": "back_room",
+      "host": "crate",
+      "hidden_intent": true,
+      "model": "bronze_amulet_disc",
+      "entrance_max_visible": 0.0,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "visible": 1.0,
+        "eye_unity_xyz": [
+          1.1,
+          1.45,
+          7.1
+        ]
+      },
+      "findable_standing": true,
+      "far_viewpoints_seeing": "3/287",
+      "far_seen_ratio": 0.01,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          0.6,
+          0.8,
+          7.0
+        ],
+        "clear": 1.0
+      },
+      "grabbable": true,
+      "sky_open": 0.281,
+      "lamp_lit": [
+        "WorkLamp_04"
+      ],
+      "intersects": [],
+      "base_height_m": 0.28,
+      "rest_gap_m": 0.004
+    },
+    {
+      "slot": "TreasureSlot_11",
+      "zone": "back_room",
+      "host": "shelf",
+      "hidden_intent": true,
+      "model": "silver_mirror",
+      "entrance_max_visible": 0.0,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "visible": 1.0,
+        "eye_unity_xyz": [
+          -0.5,
+          1.45,
+          7.1
+        ]
+      },
+      "findable_standing": true,
+      "far_viewpoints_seeing": "17/262",
+      "far_seen_ratio": 0.065,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          -0.5,
+          0.8,
+          7.4
+        ],
+        "clear": 1.0
+      },
+      "grabbable": true,
+      "sky_open": 0.109,
+      "lamp_lit": [
+        "WorkLamp_05"
+      ],
+      "intersects": [],
+      "base_height_m": 0.531,
+      "rest_gap_m": 0.0007
+    },
+    {
+      "slot": "TreasureSlot_14",
+      "zone": "corridor_w",
+      "host": "niche",
+      "hidden_intent": false,
+      "model": "stone_unguent_jar",
+      "entrance_max_visible": 1.0,
+      "concealed_from_entrance": false,
+      "best_near_view": {
+        "visible": 1.0,
+        "eye_unity_xyz": [
+          -1.9,
+          1.45,
+          4.8
+        ]
+      },
+      "findable_standing": true,
+      "far_viewpoints_seeing": "126/300",
+      "far_seen_ratio": 0.42,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          -1.9,
+          0.8,
+          4.5
+        ],
+        "clear": 0.784
+      },
+      "grabbable": true,
+      "sky_open": 0.297,
+      "lamp_lit": [],
+      "intersects": [],
+      "base_height_m": 0.954,
+      "rest_gap_m": -0.0
+    },
+    {
+      "slot": "TreasureSlot_15",
+      "zone": "corridor_w",
+      "host": "niche",
+      "hidden_intent": false,
+      "model": "gold_mask",
+      "entrance_max_visible": 0.826,
+      "concealed_from_entrance": false,
+      "best_near_view": {
+        "visible": 1.0,
+        "eye_unity_xyz": [
+          -1.6,
+          1.45,
+          6.7
+        ]
+      },
+      "findable_standing": true,
+      "far_viewpoints_seeing": "138/309",
+      "far_seen_ratio": 0.447,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          -1.9,
+          0.8,
+          6.4
+        ],
+        "clear": 0.815
+      },
+      "grabbable": true,
+      "sky_open": 0.281,
+      "lamp_lit": [],
+      "intersects": [],
+      "base_height_m": 1.034,
+      "rest_gap_m": 0.0
+    },
+    {
+      "slot": "TreasureSlot_20",
+      "zone": "hall",
+      "host": "niche",
+      "hidden_intent": true,
+      "model": "clay_offering_bowl",
+      "entrance_max_visible": 0.0,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "visible": 1.0,
+        "eye_unity_xyz": [
+          1.7,
+          1.45,
+          10.0
+        ]
+      },
+      "findable_standing": true,
+      "far_viewpoints_seeing": "24/335",
+      "far_seen_ratio": 0.072,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          1.9,
+          0.8,
+          9.9
+        ],
+        "clear": 0.355
+      },
+      "grabbable": true,
+      "sky_open": 0.188,
+      "lamp_lit": [
+        "WorkLamp_11"
+      ],
+      "intersects": [],
+      "base_height_m": 1.004,
+      "rest_gap_m": -0.0
+    },
+    {
+      "slot": "TreasureSlot_21",
+      "zone": "cross",
+      "host": "niche",
+      "hidden_intent": false,
+      "model": "gold_mask.001",
+      "entrance_max_visible": 0.0,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "visible": 1.0,
+        "eye_unity_xyz": [
+          0.6,
+          1.45,
+          9.0
+        ]
+      },
+      "findable_standing": true,
+      "far_viewpoints_seeing": "5/250",
+      "far_seen_ratio": 0.02,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          0.5,
+          0.8,
+          8.6
+        ],
+        "clear": 0.924
+      },
+      "grabbable": true,
+      "sky_open": 0.281,
+      "lamp_lit": [],
+      "intersects": [],
+      "base_height_m": 0.954,
+      "rest_gap_m": -0.0
+    },
+    {
+      "slot": "TreasureSlot_22",
+      "zone": "cross",
+      "host": "niche",
+      "hidden_intent": false,
+      "model": "stone_beast.001",
+      "entrance_max_visible": 0.0,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "visible": 1.0,
+        "eye_unity_xyz": [
+          -1.2,
+          1.45,
+          8.8
+        ]
+      },
+      "findable_standing": true,
+      "far_viewpoints_seeing": "4/251",
+      "far_seen_ratio": 0.016,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          -0.4,
+          0.8,
+          8.6
+        ],
+        "clear": 0.875
+      },
+      "grabbable": true,
+      "sky_open": 0.25,
+      "lamp_lit": [],
+      "intersects": [],
+      "base_height_m": 0.954,
+      "rest_gap_m": -0.0
+    },
+    {
+      "slot": "TreasureSlot_23",
+      "zone": "cross",
+      "host": "niche",
+      "hidden_intent": false,
+      "model": "clay_pot",
+      "entrance_max_visible": 1.0,
+      "concealed_from_entrance": false,
+      "best_near_view": {
+        "visible": 1.0,
+        "eye_unity_xyz": [
+          -1.2,
+          1.45,
+          8.8
+        ]
+      },
+      "findable_standing": true,
+      "far_viewpoints_seeing": "96/301",
+      "far_seen_ratio": 0.319,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          -1.4,
+          0.8,
+          9.0
+        ],
+        "clear": 0.842
+      },
+      "grabbable": true,
+      "sky_open": 0.234,
+      "lamp_lit": [
+        "WorkLamp_07"
+      ],
+      "intersects": [],
+      "base_height_m": 0.954,
+      "rest_gap_m": -0.0
+    },
+    {
+      "slot": "TreasureSlot_25",
+      "zone": "cross",
+      "host": "crate",
+      "hidden_intent": false,
+      "model": "stone_stele",
+      "entrance_max_visible": 0.847,
+      "concealed_from_entrance": false,
+      "best_near_view": {
+        "visible": 1.0,
+        "eye_unity_xyz": [
+          -1.2,
+          1.65,
+          8.8
+        ]
+      },
+      "findable_standing": true,
+      "far_viewpoints_seeing": "140/312",
+      "far_seen_ratio": 0.449,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          -1.9,
+          0.8,
+          8.6
+        ],
+        "clear": 1.0
+      },
+      "grabbable": true,
+      "sky_open": 0.297,
+      "lamp_lit": [
+        "WorkLamp_07"
+      ],
+      "intersects": [],
+      "base_height_m": 0.28,
+      "rest_gap_m": 0.004
+    },
+    {
+      "slot": "TreasureSlot_26",
+      "zone": "cross",
+      "host": "pallet",
+      "hidden_intent": false,
+      "model": "stone_stele.001",
+      "entrance_max_visible": 1.0,
+      "concealed_from_entrance": false,
+      "best_near_view": {
+        "visible": 1.0,
+        "eye_unity_xyz": [
+          1.4,
+          1.45,
+          8.1
+        ]
+      },
+      "findable_standing": true,
+      "far_viewpoints_seeing": "141/309",
+      "far_seen_ratio": 0.456,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          1.9,
+          0.8,
+          8.6
+        ],
+        "clear": 1.0
+      },
+      "grabbable": true,
+      "sky_open": 0.359,
+      "lamp_lit": [
+        "WorkLamp_06"
+      ],
+      "intersects": [],
+      "base_height_m": 0.151,
+      "rest_gap_m": 0.001
+    },
+    {
+      "slot": "TreasureSlot_27",
+      "zone": "hall",
+      "host": "altar",
+      "hidden_intent": false,
+      "model": "bronze_tripod_cauldron.001",
+      "entrance_max_visible": 0.0,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "visible": 1.0,
+        "eye_unity_xyz": [
+          -0.1,
+          1.45,
+          9.7
+        ]
+      },
+      "findable_standing": true,
+      "far_viewpoints_seeing": "68/309",
+      "far_seen_ratio": 0.22,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          -0.2,
+          0.8,
+          9.8
+        ],
+        "clear": 1.0
+      },
+      "grabbable": true,
+      "sky_open": 0.562,
+      "lamp_lit": [
+        "WorkLamp_08",
+        "WorkLamp_09"
+      ],
+      "intersects": [],
+      "base_height_m": 0.821,
+      "rest_gap_m": 0.0008
+    },
+    {
+      "slot": "TreasureSlot_28",
+      "zone": "hall",
+      "host": "altar",
+      "hidden_intent": false,
+      "model": "gilded_sun_disc.001",
+      "entrance_max_visible": 0.0,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "visible": 1.0,
+        "eye_unity_xyz": [
+          -0.1,
+          1.45,
+          9.7
+        ]
+      },
+      "findable_standing": true,
+      "far_viewpoints_seeing": "78/308",
+      "far_seen_ratio": 0.253,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          0.3,
+          0.8,
+          9.8
+        ],
+        "clear": 1.0
+      },
+      "grabbable": true,
+      "sky_open": 0.562,
+      "lamp_lit": [
+        "WorkLamp_08",
+        "WorkLamp_09"
+      ],
+      "intersects": [],
+      "base_height_m": 0.821,
+      "rest_gap_m": 0.0014
+    },
+    {
+      "slot": "TreasureSlot_32",
+      "zone": "hall",
+      "host": "crate",
+      "hidden_intent": true,
+      "model": "bronze_tripod_cauldron",
+      "entrance_max_visible": 0.0,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "visible": 0.979,
+        "eye_unity_xyz": [
+          1.7,
+          1.65,
+          10.0
+        ]
+      },
+      "findable_standing": true,
+      "far_viewpoints_seeing": "50/329",
+      "far_seen_ratio": 0.152,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          1.4,
+          0.8,
+          10.0
+        ],
+        "clear": 1.0
+      },
+      "grabbable": true,
+      "sky_open": 0.375,
+      "lamp_lit": [
+        "WorkLamp_06",
+        "WorkLamp_08",
+        "WorkLamp_11"
+      ],
+      "intersects": [],
+      "base_height_m": 0.28,
+      "rest_gap_m": 0.004
+    },
+    {
+      "slot": "TreasureSlot_33",
+      "zone": "hall",
+      "host": "sarcophagus",
+      "hidden_intent": true,
+      "model": "bronze_amulet_disc.001",
+      "entrance_max_visible": 0.0,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "visible": 1.0,
+        "eye_unity_xyz": [
+          -1.4,
+          1.65,
+          9.9
+        ]
+      },
+      "findable_standing": true,
+      "far_viewpoints_seeing": "9/340",
+      "far_seen_ratio": 0.026,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          -1.4,
+          0.8,
+          10.0
+        ],
+        "clear": 1.0
+      },
+      "grabbable": true,
+      "sky_open": 0.172,
+      "lamp_lit": [
+        "WorkLamp_10"
+      ],
+      "intersects": [],
+      "base_height_m": 0.24,
+      "rest_gap_m": -0.0
+    },
+    {
+      "slot": "TreasureSlot_34",
+      "zone": "hall",
+      "host": "pallet",
+      "hidden_intent": true,
+      "model": "gilded_sun_disc",
+      "entrance_max_visible": 0.0,
+      "concealed_from_entrance": true,
+      "best_near_view": {
+        "visible": 1.0,
+        "eye_unity_xyz": [
+          -1.3,
+          1.45,
+          10.0
+        ]
+      },
+      "findable_standing": true,
+      "far_viewpoints_seeing": "56/331",
+      "far_seen_ratio": 0.169,
+      "beam_grab": {
+        "palm_unity_xyz": [
+          -1.4,
+          0.8,
+          10.0
+        ],
+        "clear": 1.0
+      },
+      "grabbable": true,
+      "sky_open": 0.312,
+      "lamp_lit": [
+        "WorkLamp_09",
+        "WorkLamp_10"
+      ],
+      "intersects": [],
+      "base_height_m": 0.151,
+      "rest_gap_m": 0.001
+    }
+  ]
+}
