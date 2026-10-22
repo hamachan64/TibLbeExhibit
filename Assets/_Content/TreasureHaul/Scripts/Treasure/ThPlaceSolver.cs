@@ -56,6 +56,79 @@ namespace STYLY.TIB_Template.TreasureHaul
             return new Vector3(localFrom.x, 0f, localFrom.z);
         }
 
+        // ---- 横の押し出し（立て直した外形が壁・家具に食い込まないようにする） ----
+
+        /// <summary>水平に押し出せる合計の上限（m）</summary>
+        public const float MaxPush = 0.3f;
+        const int MaxPushIterations = 3;
+        /// <summary>ComputePenetration の結果に足す余裕（m）。1mm 以下の重なりに収めるため</summary>
+        const float PushMargin = 0.0015f;
+        const float MinHorizontal = 0.1f;
+        static readonly Collider[] s_overlaps = new Collider[32];
+
+        /// <summary>
+        /// <see cref="Solve"/> の結果を基に、立て直した向きのお宝の本体コライダーが会場の物と重なるとき、重なりが無くなるまで水平に押し出す
+        /// （最大 3 回・合計 <see cref="MaxPush"/> まで。押し出した後はその XZ で Solve をやり直して高さを決め直す）。
+        /// 上限内で解消できなければそのまま置いて警告を出す。置くときに 1 回だけ呼ぶ（持ち主の端末のみ）。
+        /// お宝の本体コライダーは凸なので、相手が非凸の MeshCollider（家具）でも ComputePenetration で押し出せる。
+        /// </summary>
+        public static Vector3 SolveClear(Transform venueRoot, Vector3 localFrom, Quaternion localRot, Collider[] bodyColliders, Transform treasureRoot)
+        {
+            var dest = Solve(venueRoot, localFrom);
+            if (venueRoot == null || bodyColliders == null || bodyColliders.Length == 0 || treasureRoot == null) return dest;
+
+            float pushed = 0f;
+            for (int i = 0; i < MaxPushIterations; i++)
+            {
+                if (!TryFindPush(venueRoot, dest, localRot, bodyColliders, treasureRoot, out var push)) return dest;
+                float len = push.magnitude;
+                float room = MaxPush - pushed;
+                if (room <= 0f) break;
+                if (len > room) { push *= room / len; len = room; }
+                pushed += len;
+                // push は世界座標。VenueRoot ローカルへ直し、押し出した XZ で高さを決め直す
+                var lp = venueRoot.InverseTransformVector(push);
+                dest = Solve(venueRoot, new Vector3(dest.x + lp.x, dest.y, dest.z + lp.z));
+            }
+            if (TryFindPush(venueRoot, dest, localRot, bodyColliders, treasureRoot, out _))
+                Debug.LogWarning("[ThPlaceSolver] 押し出しの上限内で重なりを解消できなかったので、そのまま置きます。");
+            return dest;
+        }
+
+        /// <summary>dest（VenueRoot ローカル）に置いたとき重なる物があれば、水平の押し出しベクトル（世界座標）を返す</summary>
+        static bool TryFindPush(Transform venueRoot, Vector3 dest, Quaternion localRot, Collider[] bodies, Transform treasureRoot, out Vector3 push)
+        {
+            push = default;
+            var worldPos = venueRoot.TransformPoint(dest);
+            var worldRot = venueRoot.rotation * localRot;
+            int mask = Physics.DefaultRaycastLayers & ~ExcludedLayerMask();
+            float bestLen = 0f;
+            foreach (var body in bodies)
+            {
+                if (body == null) continue;
+                var bt = body.transform;
+                var relPos = treasureRoot.InverseTransformPoint(bt.position);
+                var relRot = Quaternion.Inverse(treasureRoot.rotation) * bt.rotation;
+                var pos = worldPos + worldRot * Vector3.Scale(relPos, treasureRoot.lossyScale);
+                var rot = worldRot * relRot;
+                float radius = body.bounds.extents.magnitude;
+                int n = Physics.OverlapSphereNonAlloc(pos, radius, s_overlaps, mask, QueryTriggerInteraction.Ignore);
+                for (int k = 0; k < n; k++)
+                {
+                    var other = s_overlaps[k];
+                    if (other == null || other == body) continue;
+                    if (other.GetComponentInParent<Styly.NetSync.NetSyncAvatar>() != null) continue;
+                    if (!Physics.ComputePenetration(body, pos, rot, other, other.transform.position, other.transform.rotation, out var dir, out var dist)) continue;
+                    var h = new Vector3(dir.x, 0f, dir.z);
+                    float hm = h.magnitude;
+                    if (hm < MinHorizontal) continue;   // ほぼ真上下の重なりは Solve の高さで決まる
+                    float amount = dist / hm + PushMargin;
+                    if (amount > bestLen) { bestLen = amount; push = h / hm * amount; }
+                }
+            }
+            return bestLen > 0f;
+        }
+
         /// <summary>今の向きの Y 回転だけを残して立てる</summary>
         public static Quaternion Upright(Quaternion rot) => Quaternion.Euler(0f, rot.eulerAngles.y, 0f);
     }
