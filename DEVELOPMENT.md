@@ -69,3 +69,15 @@
 - **イベント処理の統一**: UnityEventや標準のC#イベント（`event Action`）よりも、`R3` の `Observable` を用いたリアクティブな設計を推奨します。
 - **アニメーション制御**: オブジェクトの移動やUIのフェードなどの演出処理は、Updateメソッド内で計算するのではなく、極力 `DOTween` を使用してください。
 - **展示デバイスの制御**: デバイスに依存する処理（PICO Enterprise API等）を呼び出す場合は、他プラットフォーム（EditorやMeta Quest）でエラーにならないよう、適切なプラットフォーム分岐やコンパイルディレクティブを考慮してください。
+
+## git に入れていない素材
+リポジトリは公開なので、次の画像は git に入れず、作業する Mac にだけ置く（2026-11-03 のユーザー判断）。`.gitignore` で除いている。
+
+| 素材 | 置き場所 | 使い道 |
+| :--- | :--- | :--- |
+| タイトルロゴの元画像・キービジュアル | `Artwork/TreasureHaul/`（`TreasureHaul_title_logo.png`、`TreasureHaul_キービジュアル.jpg`） | 元データ。キービジュアルはアプリに入れない |
+| タイトルロゴのテクスチャ | `Assets/_Content/TreasureHaul/Textures/TH_TitleLogo.png`（`Textures/` フォルダごと git 管理外） | 待機中の空間のロゴ・開始の合図の正面のロゴ（`ThTitleLogo`） |
+
+- 新しい環境（クローンし直した・hacha さんのプロジェクトへ移す等）では、ロゴの元画像を手で受け渡し、`TH_TitleLogo.png` としてコピーしてから uloop で `AssetDatabase.Refresh()` する。インポート設定は sRGB・Alpha Is Transparency・ミップマップあり・最大 2048・Android は ASTC 6x6。
+  `.meta` も git に無いので guid が新しくなる。材質 `Assets/_Content/TreasureHaul/Materials/TH_TitleLogo.mat` の Base Map に、エディタ API で結線し直す。
+- 画像が無いときは、`ThTitleLogo` が警告を出してロゴを出さない（白い四角は出ない）。ビルドの前に、ロゴが出ることを PlayMode で確かめる。

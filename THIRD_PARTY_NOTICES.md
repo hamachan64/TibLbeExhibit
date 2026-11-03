@@ -44,6 +44,7 @@
 | STYLY NetSync サーバー（PyPI `styly-netsync-server` 0.17.4、`uvx` で取得） | 開発・展示の同期サーバー（運営PCで動かす）。疑似クライアント `styly-netsync-simulator` を含む | https://pypi.org/project/styly-netsync-server/ （github.com/styly-dev/STYLY-NetSync） | Apache-2.0（PyPI の表示） | 可 | 無料 | 再配布するならライセンス文の同梱（今は再配布しない） | 確認済み | 2026-10-18 |
 | MCP for Blender（PyPI `blender-mcp` 2.0.0 → `mcp-for-blender` 2.1.9、`uvx` で取得）＋ Blender アドオン | AI から Blender を操作してモデリングする開発ツール（成果物に同梱しない） | https://pypi.org/project/mcp-for-blender/ （github.com/ahujasid/blender-mcp） | MIT（PyPI の表示） | 可 | 無料（アドオン導入・コア機能。**Premium の AI 3D 生成は有料なので使わない**） | 不要（開発ツール） | 確認済み | 2026-10-18 |
 | ナレーション音声 | オープニング | ユーザーが用意 | ― | ― | ― | 生成サービスが求めるなら AI 音声である旨 | ユーザーが確認 | ― |
+| タイトルロゴ（元画像 `Artwork/TreasureHaul/TreasureHaul_title_logo.png` → `Assets/_Content/TreasureHaul/Textures/TH_TitleLogo.png`。**どちらも git 管理外**） | 待機中の空間のロゴと開始の合図の正面のロゴ | ユーザーが Claude（Anthropic）の画像生成で作成 | Anthropic Consumer Terms（Effective 2025-10-08）§4「we assign to you all of our right, title, and interest—if any—in Outputs」（https://www.anthropic.com/legal/consumer-terms）。第三者の商標・素材、R.E.P.O の素材、Anthropic/Claude の名称・ロゴ（§12）は含まない。評価目的の利用（§2、非商用）ではない前提。リポジトリが公開なので画像は git に入れない（ユーザー判断） | 可 | 追加費用なし | 不要（Consumer Terms・Usage Policy に AI 生成の表示義務なし。人が作ったと偽らない） | 確認済み（画像1つ・実行物なし） | 2026-11-03 |
 
 ## プロジェクトに入っている物
 
