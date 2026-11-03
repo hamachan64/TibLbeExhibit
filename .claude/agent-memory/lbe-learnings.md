@@ -507,3 +507,10 @@
 - **「文言の文字をフォントに足す」は、Play を止めた直後に実行しない**。Play 直後に実行したら、本体フォントに無いはずの「学」が集める文字から漏れ、予備フォントから消えた（もう一度実行したら直った）。Play の後に実行したときは、ログの「本体フォントに無い文字」と、フォントの差分を確かめる。
 - **練習中に見学にした端末は、本編の参加端末から外れ、目標額もその人数分になる**（Tutorial → Playing で参加端末を確定するため。F-FLOW-4、企画書 4.2 の「見学にして本編を始める」）。「参加人数・目標額が変わらない」のは本編中に切り替えたとき。
 - `pgrep -f "<クローンのパス>"` は、バックグラウンドで起動したときの zsh の親プロセスも拾うので、`kill` に PID が2つ渡って失敗する。`Unity.app/Contents/MacOS/Unity -batchmode -projectPath <パス>` まで含めて絞る。
+
+## タイトルロゴ（Issue #62、2026-11-03）で分かったこと
+- **`ClientRoundTracker.State` は初期値 Waiting の ReactiveProperty**。購読した瞬間にホストから何も受けていない Waiting が流れ、ホストを見失ったときも自分で Waiting に戻る。そのため「Waiting → Opening に変わった」だけで開始の瞬間とみなすと、起動直後・再接続の直後に途中から知った Opening でも成立してしまう。開始の瞬間を見分けるには、残り秒（`Tracker.RemainingSeconds`。State の通知より先に更新される）が〔オープニング〕に近いかも見る（`ThTitleLogo.IsStartCue`）。
+- **頭について来る面（`ThPlayerPanel`、正面やや下 -0.18m @1m）は、空間に固定した表示の下端とぶつかりやすい**。開始位置（納品場所から 2.5〜3.2m・目の高さ 1.6m）から見る物は、下端を目の高さより上に置く（タイトルロゴは中心 1.9m で文字と重なり、2.15m にした）。
+- **uloop の dynamic code**: ガード（guard.py）は `--code-file` の中身を検査できずに止めるので、`--code` でインラインに渡す。`using UnityEngine;` は既定で入っているので書くと `Object` があいまいになる（`UnityEngine.Object` と書く）。`await System.Threading.Tasks.Task.Delay(ms)` が使えるので、**数秒で消える Tween は「起こす → 待つ → `Time.timeScale = 0`」を1回の dynamic code でやってからスクリーンショットを撮る**（npx の起動に毎回約1秒かかり、別のコマンドで撮ると消えた後になる）。撮ったら `timeScale` を 1 に戻す。
+- `StageScoreMonitor/Quad`（前作から Environment にあるスコアモニター）は、納品場所の前から見ると壁の向こう約 6.4m に真横から見えて、白い破片のように映る。今回の変更とは関係なし。
+- Unity で一時的に作ったスクリプト（検証用のドライバ等）は、`.meta` を消すガードと dynamic code の Restricted で、エージェントからは消せない。作るなら最初から消す段取り（ユーザーに頼む）を前提にする。
