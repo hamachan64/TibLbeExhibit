@@ -14,12 +14,14 @@ namespace STYLY.TIB_Template.TreasureHaul
         [SerializeField, Tooltip("配置候補点（並びは全端末で同じになるよう、ここで固定する）")] List<ThPlacementPoint> _points = new List<ThPlacementPoint>();
         [SerializeField, Tooltip("荷台の上の回収範囲（トリガー。VenueRoot に対して回転させない）")] BoxCollider _collectZone;
         [SerializeField, Tooltip("荷台の表示板")] CargoBoardView _board;
+        [SerializeField, Tooltip("待機中に表示板の近くへ浮かべるタイトルロゴ（体験者の端末だけが出し消しする）")] ThTitleLogo _title;
         [SerializeField, Tooltip("練習用お宝の置き場所（色番号 0〜3 の 4 つ。納品場所の前）")] List<ThTutorialSlot> _tutorialSlots = new List<ThTutorialSlot>();
 
         public static ThVenue Instance { get; private set; }
 
         public Transform Root => _root != null ? _root : transform;
         public CargoBoardView Board => _board;
+        public ThTitleLogo Title => _title;
         public int PlacementPointCount => _points.Count;
         public int TutorialSlotCount => _tutorialSlots.Count;
 

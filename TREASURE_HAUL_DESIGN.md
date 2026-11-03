@@ -285,6 +285,7 @@
 
 - 値札・減額表示・発見演出・表示板・案内（F-FLOW-2、F-ITEM-5、F-DMG-4）・結果は View ごとに分け、Treasure / Session の状態（R3）を購読するだけにする。
 - 表示板（納品場所の上）は、その回の本編の合計額だけを出す（文言 `BoardTotalFormat`「{0:N0}G」）。練習〜結果の間だけ表示する（#38）。
+- **タイトルロゴ**（2026-11-03）: 待機中（`RoundState.Waiting`）は `ThVenue.Title` の面（表示板の上（高さ2.15m）、幅約2.4m、`ThTitleLogo`）を出して上下にゆっくり揺らす。`Waiting → Opening` に変わった瞬間に1回だけ、UserClient シーンの正面のロゴを `Camera.main` の水平前方1.5m・目の高さ+0.22m に置いて約1.9秒で出し消しする（頭には追従しない）。判断は静的メソッド `ThTitleLogo.ShowVenueLogo` / `IsStartCue`、同期済みの `Tracker.State` を `ThTitleLogoCue`（体験者の端末だけ）が購読する。運営PCには置かない。
 - `ScreenFader` は使わない（F-SAFE-3）。
 - **体験者の面**（#42）: 待機の一文・持ち方の一文・クレジット、オープニングの字幕、本編の「残り m:ss ／ 目標 N G」と「目標達成！」、結果を、頭について来る小さな面（XRI の `LazyFollow`、視界の正面やや下、半透明の背景と文字だけ）に出す。判断は純粋クラス `ThPanelPresenter`、見た目と音は `ThPlayerPanel`（UserClient シーン）。練習中と、回の途中から入って次の回を待っている間は何も出さない。目標達成は、目標額未満を見た後に初めて届いた瞬間だけ（途中参加・再接続で後から知った場合は出さない）。納品場所を光らせる案内（旧 F-SCORE-3）はしない（2026-10-21）。
 - 回の終わり（Result→Waiting、中断）で、お宝・View・Tween・R3 の購読を回ごとに破棄する（N-2）。
