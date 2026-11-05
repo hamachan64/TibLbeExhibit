@@ -1365,6 +1365,7 @@ GameObject:
   - component: {fileID: 1424104160}
   - component: {fileID: 1424104159}
   - component: {fileID: 1424104158}
+  - component: {fileID: 1424104162}
   m_Layer: 0
   m_Name: UserClient
   m_TagString: Untagged
@@ -1449,6 +1450,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0112e6716db7b4810aa71041c84d150c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::STYLY.TIB_Template.UserClient
+--- !u!114 &1424104162
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1424104152}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e299a6a1d02444bcaac33f150a39d4a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TibLbeExhibit.Core::STYLY.TIB_Template.AppConfigLoader
 --- !u!1 &1686949301
 GameObject:
   m_ObjectHideFlags: 0

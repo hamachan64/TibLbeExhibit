@@ -50,7 +50,8 @@ namespace STYLY.TIB_Template.TreasureHaul
             int band = Band;
             Gizmos.color = band == 0 ? Color.green : band == 1 ? Color.yellow : Color.red;
             Gizmos.DrawWireSphere(transform.position + Vector3.up * 0.05f, 0.08f);
-            var fwd = Quaternion.Euler(0f, _yawDegrees, 0f) * Vector3.forward;
+            var yaw = Quaternion.Euler(0f, _yawDegrees, 0f);   // VenueRoot ローカルの向き
+            var fwd = (transform.parent != null ? transform.parent.rotation * yaw : yaw) * Vector3.forward;
             Gizmos.DrawLine(transform.position + Vector3.up * 0.05f, transform.position + Vector3.up * 0.05f + fwd * 0.2f);
         }
     }

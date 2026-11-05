@@ -514,3 +514,14 @@
 - **uloop の dynamic code**: ガード（guard.py）は `--code-file` の中身を検査できずに止めるので、`--code` でインラインに渡す。`using UnityEngine;` は既定で入っているので書くと `Object` があいまいになる（`UnityEngine.Object` と書く）。`await System.Threading.Tasks.Task.Delay(ms)` が使えるので、**数秒で消える Tween は「起こす → 待つ → `Time.timeScale = 0`」を1回の dynamic code でやってからスクリーンショットを撮る**（npx の起動に毎回約1秒かかり、別のコマンドで撮ると消えた後になる）。撮ったら `timeScale` を 1 に戻す。
 - `StageScoreMonitor/Quad`（前作から Environment にあるスコアモニター）は、納品場所の前から見ると壁の向こう約 6.4m に真横から見えて、白い破片のように映る。今回の変更とは関係なし。
 - Unity で一時的に作ったスクリプト（検証用のドライバ等）は、`.meta` を消すガードと dynamic code の Restricted で、エージェントからは消せない。作るなら最初から消す段取り（ユーザーに頼む）を前提にする。
+
+## Inter BEE 会場への配置と AppConfig（2026-11-06 #48）
+- **Treasure Haul の `VenueRoot` はもう原点にない**: ワールド (11.45, 0, 2.4)・Y −90°（hacha さんのテンプレート `InterBEE.unity` の座標。原点 = `Map/CenterPosition` = 体験エリアの左下の角、+X = 図面の右・長辺、+Z = 待機エリア側）。
+  ステージのローカル値（`stage_layout.json`・過去の仕様書の「奥行 7.5」「X ≥ −2.28」等）をワールド座標として使わない。`ThLoopbackHarness` の `SetHead`/`AimHand`/`Items` や試作の `AvatarWalkDriver` の中心 (0.6,0,1.6) はワールドの値なので、検証では `venue.Root.TransformPoint` で直してから渡す。
+  上の「プレイエリア座標系」の節（中心 -4.9,0,-6.4 / 4×18m）は前作の会場の値で、Treasure Haul には当てはまらない。
+- **同期の照合ハッシュはワールドを往復させない**: `ThTreasureSetup.ComputeHash` は置き場所を mm に丸める。`InverseTransformPoint(transform.position)` は回転・移動のある Root だと約 2e-6m ずれ、.5mm ちょうどの値（TreasureSlot_04/05 の z=6.0075 等）で端末ごとに丸めが分かれうる → 全端末が参加不可。`ThVenue.LocalPointOf` で親のローカル値から組み立てる。エディタ（同じ Mac）では再現しないので要注意。
+- **`VenueRoot` を動かすのは編集時だけ**。モジュールは静的バッチ、ライトプローブはワールドで焼かれるので、動かしたら「Tools/Treasure Haul/ステージの灯りを焼く」をやり直す。
+- **AppConfigLoader**（`UserClient` に付く。実行順 −2000 の Awake）が `AppConfig.toml` の値で STYLY XR Rig を逆向きにずらす。エディタは `ExternalResources/AppConfig.toml`（git 管理。練習の列の後ろ (8.45,0,2.4) から +X を向いて始まる値）。ParrelSync の複製では初期値 0 で作られ、会場の角（外周の壁の中）から始まる。
+  NetSync の `NetSyncAvatar.PhysicalPosition` は Rig の yaw を反映しない（Human Presence を有効にすると AppConfig の回転でずれる。TH では未使用）。
+- テンプレートの `WarningWall` の Quad にはコライダーがあり、Quad (1) は石の壁の面より 3cm 通路側にある（お宝が当たると減額。石の壁と同じ扱いなので実害は小さい）。
+- 作業中のこの Mac に `Assets/_Content/TreasureHaul/Textures/`（ロゴ、git 管理外）が無いと、Unity が `TH_TitleLogo.mat` を保存し直して `_MainTex` を空にすることがある。コミットに含めない。
