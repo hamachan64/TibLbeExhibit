@@ -9,7 +9,7 @@
 
 | | |
 | :--- | :--- |
-| **フェーズ** | コア（0a・1〜5、3d）と素材 #46 はマージ済み（4b PR #60・5 PR #61・#46 PR #53 まで）。タイトルロゴ（[#62](https://github.com/hamachan64/TibLbeExhibit/issues/62)、PR #63）もマージ済み。会場レイアウト（[#48](https://github.com/hamachan64/TibLbeExhibit/issues/48)。会場図面に合わせた配置と `AppConfig` の取り込み）は PR レビュー中（PR 未発行） |
+| **フェーズ** | コア（0a・1〜5、3d）と素材 #46 はマージ済み（4b PR #60・5 PR #61・#46 PR #53 まで）。タイトルロゴ（[#62](https://github.com/hamachan64/TibLbeExhibit/issues/62)、PR #63）もマージ済み。会場レイアウト（[#48](https://github.com/hamachan64/TibLbeExhibit/issues/48)。会場図面に合わせた配置と `AppConfig` の取り込み）の PR [#64](https://github.com/hamachan64/TibLbeExhibit/pull/64) をレビュー中 |
 | **次にやること** | #48 の PR をレビューし、実機で壁・納品場所が現実の腰壁に重なるか確かめる。実機でロゴの見え方も確かめる。実機での試作 #49 と通し #45 |
 | **判断待ち** | 実機の入手（#49・#45 に必要）。U-1（原点の合わせ方と向き。hacha さんの回答待ち）は通し #45 までに必要。ほかは下の「判断待ち」 |
 | **締切** | 内容変更 **10/31**（あと11日）／最終データ 11/16／現地設営 11/17 |
@@ -40,7 +40,7 @@
 | お宝・納品場所・瓦礫の 3D モデル | [#46](https://github.com/hamachan64/TibLbeExhibit/issues/46)（PR [#53](https://github.com/hamachan64/TibLbeExhibit/pull/53)） | ✅ | ブランチ `repo/feature-th-asset-models`（worktree `TibLbeExhibit-assets`）。お宝 12 種（持ち手なし）と、高い壁の回廊ステージを Blender で制作し、Unity に取り込み済み（2026-10-22。お宝プレハブ・カタログ、Environment のステージ・置き場所 34・焼き込みの灯り。仕様 `.claude/loops/20261021-th-asset-import.md`）。そっと置いたお宝が壁・家具に食い込まない押し出しも入れた。`THIRD_PARTY_NOTICES.md` に記録（外部素材なし） |
 | タイトルロゴ（待機中は納品場所の上、開始の瞬間は各自の正面に一瞬） | [#62](https://github.com/hamachan64/TibLbeExhibit/issues/62)（PR [#63](https://github.com/hamachan64/TibLbeExhibit/pull/63)） | ✅ | ロゴは Claude の画像生成。公開リポジトリなので画像は git に入れない（`Artwork/TreasureHaul/` と `Assets/_Content/TreasureHaul/Textures/` は git 管理外。DEVELOPMENT.md）。ビルドする Mac に画像があることを確かめる |
 | オープニングのナレーション音声 | [#47](https://github.com/hamachan64/TibLbeExhibit/issues/47) | ⬜ | 原稿 `TREASURE_HAUL_NARRATION.md`。音声はユーザーが用意する |
-| 会場レイアウト（Environment） | [#48](https://github.com/hamachan64/TibLbeExhibit/issues/48)（PR 未発行） | 👀 | 順4b と同じシーンを触るので同時に作業しない |
+| 会場レイアウト（Environment） | [#48](https://github.com/hamachan64/TibLbeExhibit/issues/48)（PR [#64](https://github.com/hamachan64/TibLbeExhibit/pull/64)） | 👀 | 順4b と同じシーンを触るので同時に作業しない |
 
 ## 追加要素（11/12 まで。第2検証で採否を決める。Issue はコアの後に作る）
 
