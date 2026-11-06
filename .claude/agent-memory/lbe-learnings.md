@@ -524,4 +524,7 @@
 - **AppConfigLoader**（`UserClient` に付く。実行順 −2000 の Awake）が `AppConfig.toml` の値で STYLY XR Rig を逆向きにずらす。エディタは `ExternalResources/AppConfig.toml`（git 管理。練習の列の後ろ (8.45,0,2.4) から +X を向いて始まる値）。ParrelSync の複製では初期値 0 で作られ、会場の角（外周の壁の中）から始まる。
   NetSync の `NetSyncAvatar.PhysicalPosition` は Rig の yaw を反映しない（Human Presence を有効にすると AppConfig の回転でずれる。TH では未使用）。
 - テンプレートの `WarningWall` の Quad にはコライダーがあり、Quad (1) は石の壁の面より 3cm 通路側にある（お宝が当たると減額。石の壁と同じ扱いなので実害は小さい）。
-- 作業中のこの Mac に `Assets/_Content/TreasureHaul/Textures/`（ロゴ、git 管理外）が無いと、Unity が `TH_TitleLogo.mat` を保存し直して `_MainTex` を空にすることがある。コミットに含めない。
+- 作業中の Mac に `Assets/_Content/TreasureHaul/Textures/`（ロゴ、git 管理外）が無いと、Unity が `TH_TitleLogo.mat` を保存し直して `_MainTex` を空にすることがある。その変更はコミットしない。
+  2026-11-07 に、`~/Downloads/TreasureHaul_title_logo.png`（ユーザー確認済みの最終版、1866×755）から `Artwork/TreasureHaul/` と `Textures/TH_TitleLogo.png` に戻した。同じ Mac・同じパスなので、Unity（Library）が以前の guid `73b745722917647c2945c8a16b1c069a` を割り当て直し、材質はコミット済みの内容と一致した（結線し直しても差分なし）。クローンし直した環境では guid が変わるので、DEVELOPMENT.md の手順どおり結線し直して材質をコミットする。
+  エディタ単体ではセッションが Waiting にならず空間のロゴは出ない。画像の確認だけなら PlayMode で `ThTitleLogo.ShowVenue()` / `PlayCue(camera)` を直接呼んで写す。
+- `.claude/hooks/guard.py` は `uloop execute-dynamic-code --code-file` のファイルを実行前に読んで検査する。同じコマンド内で heredoc で作る・`$変数` でパスを渡すと読めずに止まるので、Write で先に作り、絶対パスで渡す。
