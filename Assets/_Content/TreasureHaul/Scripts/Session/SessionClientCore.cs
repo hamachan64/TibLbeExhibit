@@ -71,6 +71,19 @@ namespace STYLY.TIB_Template.TreasureHaul
         public string SpawnFingerprint { get; private set; } = "";
         public ThTreasureSetup TreasureSetup => _setup;
 
+        readonly Subject<ThPhantomPunishMsg> _phantomPunished = new Subject<ThPhantomPunishMsg>();
+        /// <summary>ホストが亡霊の罰を適用した（今の回のものだけ。演出と知らせの表示が読む）</summary>
+        public Observable<ThPhantomPunishMsg> PhantomPunished => _phantomPunished;
+        /// <summary>自分の DeviceId</summary>
+        public string DeviceId => _deviceId;
+
+        /// <summary>亡霊に見つかった（自分の頭で判定した）。ホストへ報告する。罰を決めるのはホスト</summary>
+        public void SendPhantomSpot(float elapsed)
+        {
+            if (Tracker.RoundId == 0) return;
+            _tx.Send(Rpc.ThPhantomSpot, ThMessages.Encode(Tracker.RoundId, new ThPhantomSpotMsg { elapsed = elapsed }));
+        }
+
         public SessionClientCore(string deviceId, IThTransport tx, ThParams defaults, ThEnvironmentInfo env, double now, ThTreasureSetup treasureSetup = null)
         {
             _deviceId = deviceId;
@@ -90,6 +103,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             _items.Value?.Dispose();
             _items.Dispose();
             _total.Dispose();
+            _phantomPunished.Dispose();
             Tracker.Dispose();
         }
 
@@ -185,7 +199,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         {
             if (items == null) return;
             var state = Tracker.State.CurrentValue;
-            items.ParticipantPlaying = Tracker.IsParticipant.CurrentValue && state == (items.IsPractice ? RoundState.Tutorial : RoundState.Playing);
+            items.ParticipantPlaying = Tracker.IsParticipant.CurrentValue && !Tracker.IsPhantomOut.CurrentValue && state == (items.IsPractice ? RoundState.Tutorial : RoundState.Playing);
             if (items.IsPractice) items.PracticeOwnIndex = OwnPracticeIndex;
         }
 
@@ -258,10 +272,20 @@ namespace STYLY.TIB_Template.TreasureHaul
                 case Rpc.ThPoses:
                     if (TryItemMsg(args, out ThPosesMsg pm2)) _items.Value.OnPoses(pm2, now);
                     break;
+                case Rpc.ThPhantomPunish:
+                    if (ThMessages.TryDecode(args, out long ppr, out ThPhantomPunishMsg pp) && ppr == Tracker.RoundId && ppr != 0) HandlePhantomPunish(ppr, pp);
+                    break;
                 case Rpc.ThParams:
                     if (ThMessages.TryDecode(args, out long _, out ThParamsMsg pm)) HandleParams(pm, now);
                     break;
             }
+        }
+
+        void HandlePhantomPunish(long roundId, ThPhantomPunishMsg m)
+        {
+            if (m.mode == (int)ThPhantomMode.TakeTreasure) _items.Value?.OnPhantomTaken(m);
+            else if (m.mode == (int)ThPhantomMode.PlayerOut && m.device == _deviceId) Tracker.MarkPhantomOut(roundId);
+            _phantomPunished.OnNext(m);
         }
 
         /// <summary>お宝のメッセージを読む。今の回のもので、お宝の表があるときだけ true</summary>

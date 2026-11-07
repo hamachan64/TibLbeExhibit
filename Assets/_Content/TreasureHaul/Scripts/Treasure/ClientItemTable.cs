@@ -143,6 +143,8 @@ namespace STYLY.TIB_Template.TreasureHaul
         PlaceStarted,
         /// <summary>ホストの ThForceRest（持ち主の切断など）。降ろす先は RestPos・RestRot。自分が持っていたなら手から外す</summary>
         ForceRested,
+        /// <summary>亡霊に奪われた（罰 A）。亡霊の方へ吸い込まれて消える（砕ける演出ではない）</summary>
+        Absorbed,
     }
 
     public readonly struct ItemEvent
@@ -400,6 +402,23 @@ namespace STYLY.TIB_Template.TreasureHaul
         }
 
         void Raise(ItemEvent e) => _events.OnNext(e);
+
+        /// <summary>亡霊の罰 A（ThPhantomPunish）。奪われたお宝を消滅にする（価値 0・世代を合わせる）。取りこぼしても ThItems の gone で追いつく</summary>
+        public void OnPhantomTaken(ThPhantomPunishMsg m)
+        {
+            if (m?.items == null || Frozen) return;
+            for (int i = 0; i < m.items.Length; i++)
+            {
+                var it = Get(m.items[i]);
+                if (it == null || it.Gone) continue;
+                it.Value = 0;
+                if (m.gens != null && i < m.gens.Length) it.Gen = Math.Max(it.Gen, m.gens[i]);
+                ClearOwnership(it);
+                it.State = ItemState.Destroyed;
+                it.Gone = true;
+                Raise(it, ItemEventKind.Absorbed);
+            }
+        }
 
         /// <summary>消滅: 自分の申請・送り直しを消す</summary>
         static void ClearOwnership(ClientItem it)

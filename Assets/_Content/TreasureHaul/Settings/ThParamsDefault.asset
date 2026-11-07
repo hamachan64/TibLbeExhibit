@@ -25,6 +25,7 @@ MonoBehaviour:
       itemsInterval: 1
       resendInterval: 0.5
       rpcLimit: 60
+      statusInterval: 2
     practice:
       hintSeconds: 10
       practiceValue: 150
@@ -85,3 +86,12 @@ MonoBehaviour:
     operation:
       batteryWarningPercent: 20
       abortConfirmSeconds: 3
+      autoConfirmAlignment: 0
+    phantom:
+      speed: 0.4
+      sightDistance: 3
+      sightHalfAngle: 35
+      spotSeconds: 0.7
+      ignoreSeconds: 3
+      eyeHeight: 1.5
+      startFraction: 0.5

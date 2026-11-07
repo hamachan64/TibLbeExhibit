@@ -30,6 +30,9 @@ namespace STYLY.TIB_Template.TreasureHaul
         public int target;
         /// <summary>結果（Result のときだけ present = true）。JsonUtility は null を出せないので present で「無い」を表す</summary>
         public ThResultMsg result = new ThResultMsg();
+        // ---- 遺跡の亡霊（末尾に足す。古い送り手からは空で届く） ----
+        /// <summary>亡霊の罰 B で退場した端末（DeviceId）。その回の間だけ。取りこぼしても ThState で追いつく</summary>
+        public string[] phantomOut = new string[0];
     }
 
     /// <summary>結果（ホストが決める。F-FLOW-5）</summary>
@@ -70,6 +73,30 @@ namespace STYLY.TIB_Template.TreasureHaul
         public bool waitNextRound;
         /// <summary>この端末のお宝カタログのハッシュ</summary>
         public string catalogHash = "";
+    }
+
+    /// <summary>端末→ホスト 亡霊に見つかった（中身なし。送り手の端末が見つかった人）</summary>
+    [Serializable]
+    public class ThPhantomSpotMsg
+    {
+        /// <summary>報告した端末の亡霊の経過秒（ログ用）</summary>
+        public float elapsed;
+    }
+
+    /// <summary>ホスト→全員 亡霊の罰を適用した</summary>
+    [Serializable]
+    public class ThPhantomPunishMsg
+    {
+        /// <summary>ThPhantomMode の値（1 = お宝を奪う、2 = 退場）</summary>
+        public int mode;
+        /// <summary>見つかった端末</summary>
+        public string device = "";
+        public int clientNo = -1;
+        /// <summary>罰 A: 消滅したお宝の番号と、消滅後の世代（同じ並び）</summary>
+        public int[] items = new int[0];
+        public int[] gens = new int[0];
+        /// <summary>罰 A: 奪われた額</summary>
+        public int lost;
     }
 
     /// <summary>端末→ホスト 状況報告（#44。〔状況報告の間隔〕ごと）。RoundId 引数には「知っている RoundId」を入れる（ホストは使わない）</summary>

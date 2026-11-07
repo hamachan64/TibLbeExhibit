@@ -528,3 +528,9 @@
   2026-11-07 に、`~/Downloads/TreasureHaul_title_logo.png`（ユーザー確認済みの最終版、1866×755）から `Artwork/TreasureHaul/` と `Textures/TH_TitleLogo.png` に戻した。同じ Mac・同じパスなので、Unity（Library）が以前の guid `73b745722917647c2945c8a16b1c069a` を割り当て直し、材質はコミット済みの内容と一致した（結線し直しても差分なし）。クローンし直した環境では guid が変わるので、DEVELOPMENT.md の手順どおり結線し直して材質をコミットする。
   エディタ単体ではセッションが Waiting にならず空間のロゴは出ない。画像の確認だけなら PlayMode で `ThTitleLogo.ShowVenue()` / `PlayCue(camera)` を直接呼んで写す。
 - `.claude/hooks/guard.py` は `uloop execute-dynamic-code --code-file` のファイルを実行前に読んで検査する。同じコマンド内で heredoc で作る・`$変数` でパスを渡すと読めずに止まるので、Write で先に作り、絶対パスで渡す。
+
+## 遺跡の亡霊（Issue #65、2026-11-07）で分かったこと
+- **Mac の画面がロックされると、Unity Editor が止まり、uloop の compile / execute-dynamic-code / get-logs がすべて約 180 秒でタイムアウトする**（`Editor.log` も更新されない）。`ioreg -n Root -d1 -a | grep -A1 CGSSessionScreenIsLocked` で `true` なら画面ロックが原因。エージェントからは解除できない（`caffeinate -u`・`osascript activate` は効かない）。Unity を強制終了せず、ユーザーに解除を頼んで止まる。解除後は「Compilation is already in progress」が一度返り、続けて普通に通る。長い作業を夜間に回すときは、先にロックしない設定にしてもらう。
+- **透明の材質（亡霊の体など）が近くにあると、頭について来る帯（`ThPlayerPanel`）・知らせの文字の上に描かれて読めなくなる**。どちらも透明の描画順 3000 なので、距離で並べ替えられる。空間に置く半透明の物は描画順を 2900 などに下げ、文字が常に手前に来るようにする（不透明に見せたい目も、順番を下げるために透明設定にした）。
+- **DOTween で `localPosition` を Yoyo で揺らす物を、非表示・再表示で使い回すときは、Awake で基準位置を控えて OnEnable で戻してから揺れを作る**。`OnDisable` で `Kill()` するだけだと止まった位置が次の基準になり、回を重ねるたびに上へずれていく（1回あたり平均で振れ幅の半分）。
+- **回の途中で、遷移しないままホストの状態が変わったとき（保留・亡霊の退場）は、Seq を +1 して `ThState` を送る**。Seq が同じだと、端末は Heartbeat から食い違いに気づけず、`ThState` を取りこぼすと次の遷移まで追いつけない。

@@ -819,7 +819,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
                 StartedAt = new DateTimeOffset(2026, 11, 18, 10, 5, 3, TimeSpan.FromHours(9)),
                 StartNow = 100.0,
                 Mode = "TargetAndScore",
-                Extras = RoundRecord.ExtrasOf(new ThGameSettings { statue = true, golem = true }),
+                Extras = RoundRecord.ExtrasOf(new ThGameSettings { statue = true, phantom = ThPhantomMode.TakeTreasure }),
                 GripStyle = "Beam",
                 ParamsVersion = "abcd1234",
             };
@@ -834,8 +834,8 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
         [Test] public void 追加要素の文字列()
         {
             Assert.AreEqual("", RoundRecord.ExtrasOf(new ThGameSettings()));
-            Assert.AreEqual("statue|golem", RoundRecord.ExtrasOf(new ThGameSettings { statue = true, golem = true }));
-            Assert.AreEqual("statue|large|golem|secret", RoundRecord.ExtrasOf(new ThGameSettings { statue = true, large = true, golem = true, secret = true }));
+            Assert.AreEqual("statue|phantom-take", RoundRecord.ExtrasOf(new ThGameSettings { statue = true, phantom = ThPhantomMode.TakeTreasure }));
+            Assert.AreEqual("statue|large|secret|phantom-out", RoundRecord.ExtrasOf(new ThGameSettings { statue = true, large = true, phantom = ThPhantomMode.PlayerOut, secret = true }));
             Assert.AreEqual("", RoundRecord.ExtrasOf(null));
         }
 
@@ -924,16 +924,17 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
             Assert.AreEqual("a,\"b,c\",,d\r\n", RoundCsv.Line(new[] { "a", "b,c", "", "d" }));
         }
 
-        [Test] public void 見出しは15列と11列()
+        [Test] public void 見出しは15列と13列()
         {
             var l = Labels();
             Assert.AreEqual(15, l.RoundsHeader.Length);
-            Assert.AreEqual(11, l.PlayersHeader.Length);
+            Assert.AreEqual(13, l.PlayersHeader.Length);
             Assert.AreEqual("開始時刻", l.RoundsHeader[0]);
             Assert.AreEqual("損害額", l.RoundsHeader[14]);
             Assert.AreEqual("減額の額", l.PlayersHeader[10]);
+            Assert.AreEqual("亡霊に奪われた額", l.PlayersHeader[12]);
             Assert.AreEqual(14, RoundCsv.RoundsHeaderLine(l).Count(c => c == ','));
-            Assert.AreEqual(10, RoundCsv.PlayersHeaderLine(l).Count(c => c == ','));
+            Assert.AreEqual(12, RoundCsv.PlayersHeaderLine(l).Count(c => c == ','));
         }
 
         [Test] public void roundsの1行_完了()
@@ -942,7 +943,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
             r.WasHeld = true; r.HeldSeconds = 12.34f;
             r.CollectedAmount = 2600; r.TargetAmount = 2500; r.DamageTotal = 450;
             var row = RoundCsv.RoundsRow(r, Labels());
-            Assert.AreEqual("2026-11-18T10:05:03+09:00,1700000000123,完了,,2,TargetAndScore,statue|golem,Beam,abcd1234,はい,12.3,2600,2500,はい,450\r\n", row);
+            Assert.AreEqual("2026-11-18T10:05:03+09:00,1700000000123,完了,,2,TargetAndScore,statue|phantom-take,Beam,abcd1234,はい,12.3,2600,2500,はい,450\r\n", row);
         }
 
         [Test] public void roundsの1行_中断()
@@ -951,7 +952,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
             r.Aborted = true; r.AbortedState = RoundState.Playing;
             r.CollectedAmount = 800; r.TargetAmount = 2500;
             var row = RoundCsv.RoundsRow(r, Labels());
-            Assert.AreEqual("2026-11-18T10:05:03+09:00,1700000000123,中断,Playing,2,TargetAndScore,statue|golem,Beam,abcd1234,いいえ,0.0,800,2500,いいえ,0\r\n", row);
+            Assert.AreEqual("2026-11-18T10:05:03+09:00,1700000000123,中断,Playing,2,TargetAndScore,statue|phantom-take,Beam,abcd1234,いいえ,0.0,800,2500,いいえ,0\r\n", row);
         }
 
         [Test] public void playersの1行_無い値は空欄()
@@ -962,8 +963,8 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
             r.NoteCollect("devA", 200, 140.0);
             r.NoteDamage("devA", 60);
             var p = r.Players();
-            Assert.AreEqual("1700000000123,1,devA,0,,12.3,40.0,1,200,1,60\r\n", RoundCsv.PlayersRow(r, p[0]));
-            Assert.AreEqual("1700000000123,,devB,,,,,0,0,0,0\r\n", RoundCsv.PlayersRow(r, p[1]), "未登録の端末番号・色なし・無い秒は空欄");
+            Assert.AreEqual("1700000000123,1,devA,0,,12.3,40.0,1,200,1,60,0,0\r\n", RoundCsv.PlayersRow(r, p[0]));
+            Assert.AreEqual("1700000000123,,devB,,,,,0,0,0,0,0,0\r\n", RoundCsv.PlayersRow(r, p[1]), "未登録の端末番号・色なし・無い秒は空欄");
         }
 
         [Test] public void 値にカンマが入ってもクォートされる()
