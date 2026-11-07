@@ -135,6 +135,8 @@ namespace STYLY.TIB_Template.TreasureHaul
         PhantomTakenSelf,
         /// <summary>オープニングの字幕 6（亡霊を入れる回だけ。墓守の一文。列挙の末尾に足した）</summary>
         OpeningLine6,
+        /// <summary>納品場所の表示板の左上の札（「納品額」。列挙の末尾に足した）</summary>
+        BoardLabel,
     }
 
     [Serializable]
@@ -199,6 +201,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             { ThTextId.OpPhantomOut, "退場" },
             { ThTextId.PhantomTakenSelf, "墓守にお宝を取り上げられた！" },
             { ThTextId.OpeningLine6, "王の墓守が、今も灯りを手に見回っている。灯りに照らされるなよ。" },
+            { ThTextId.BoardLabel, "納品額" },
         };
 
         /// <summary>組み込みの既定の文言（予備フォントの文字集めに使う。ThFontExtraMenu）</summary>

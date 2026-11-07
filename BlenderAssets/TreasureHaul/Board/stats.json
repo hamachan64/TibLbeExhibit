@@ -1,0 +1,263 @@
+{
+  "model": "CargoBoard",
+  "units": "m; *_unity = model local (FBX root, Bake Axis Conversion ON, front +Z); *_venue = VenueRoot local",
+  "root_venue_unity": [
+    0.0,
+    0.0,
+    0.09
+  ],
+  "root_origin": "floor (y=0), centre between the two post feet",
+  "overall_size_unity": [
+    3.9752,
+    2.445,
+    0.3458
+  ],
+  "overall_bounds_unity": {
+    "min": [
+      -2.3502,
+      0.0,
+      -0.08
+    ],
+    "max": [
+      1.625,
+      2.445,
+      0.2658
+    ]
+  },
+  "box": {
+    "outer_size_unity": [
+      1.93,
+      0.655,
+      0.135
+    ],
+    "body_size_unity": [
+      1.9,
+      0.59,
+      0.12
+    ],
+    "top_rail_size_unity": [
+      1.93,
+      0.075,
+      0.135
+    ],
+    "centre_unity": [
+      -0.0,
+      1.5675,
+      0.19
+    ],
+    "bottom_y": 1.24,
+    "top_y": 1.895,
+    "front_face_z_unity": 0.25,
+    "back_face_z_unity": 0.13,
+    "chamfer_m": 0.012
+  },
+  "screen": {
+    "object": "CargoBoard_Screen",
+    "material": "TH_CargoBoardScreen",
+    "centre_unity": [
+      -0.0,
+      1.5,
+      0.23
+    ],
+    "centre_venue": [
+      0.0,
+      1.5,
+      0.32
+    ],
+    "matches_ScoreBoardAnchor": true,
+    "size_unity_wh": [
+      1.726,
+      0.386
+    ],
+    "recess_depth_m": 0.02,
+    "bezel_m": 0.012,
+    "offset_root_to_screen_centre_unity": [
+      -0.0,
+      1.5,
+      0.23
+    ]
+  },
+  "digits_area": {
+    "anchor": "CargoBoard_DigitsAnchor",
+    "centre_unity": [
+      -0.0,
+      1.5,
+      0.234
+    ],
+    "centre_venue": [
+      0.0,
+      1.5,
+      0.324
+    ],
+    "size_unity_wh": [
+      1.6,
+      0.3
+    ],
+    "facing": "+Z",
+    "gap_in_front_of_screen_m": 0.004,
+    "note": "5 digits + thousands comma + G, right aligned; keep the glyphs inside this rectangle"
+  },
+  "label_plate": {
+    "anchor": "CargoBoard_LabelAnchor (1 mm in front of the plate face)",
+    "centre_unity": [
+      0.705,
+      1.757,
+      0.257
+    ],
+    "centre_venue": [
+      0.705,
+      1.757,
+      0.347
+    ],
+    "plate_size_unity_wh": [
+      0.3,
+      0.088
+    ],
+    "text_area_unity_wh": [
+      0.26,
+      0.058
+    ],
+    "facing": "+Z",
+    "note": "blank brushed-metal plate (light); put dark TMP text here (\"納品額\")"
+  },
+  "lamp": {
+    "object": "CargoBoard_Lamp",
+    "material": "TH_CargoBoardLamp",
+    "centre_unity": [
+      -0.8,
+      1.762,
+      0.25
+    ],
+    "centre_venue": [
+      -0.8,
+      1.762,
+      0.34
+    ],
+    "lens_radius_m": 0.019,
+    "lens_height_m": 0.0158
+  },
+  "bolts_front_unity": [
+    [
+      0.902,
+      1.292,
+      0.25
+    ],
+    [
+      0.902,
+      1.785,
+      0.25
+    ],
+    [
+      -0.902,
+      1.292,
+      0.25
+    ],
+    [
+      -0.902,
+      1.785,
+      0.25
+    ]
+  ],
+  "chains": [
+    {
+      "bottom_eye_centre_unity": [
+        0.7,
+        1.9305,
+        0.19
+      ],
+      "top_pad_eye_centre_unity": [
+        0.7,
+        2.2465,
+        0.19
+      ],
+      "links": 6,
+      "link_inner_len_m": 0.046
+    },
+    {
+      "bottom_eye_centre_unity": [
+        -0.7,
+        1.9305,
+        0.19
+      ],
+      "top_pad_eye_centre_unity": [
+        -0.7,
+        2.2465,
+        0.19
+      ],
+      "links": 6,
+      "link_inner_len_m": 0.046
+    }
+  ],
+  "gantry": {
+    "posts_centre_xz_unity": [
+      [
+        1.25,
+        0.0
+      ],
+      [
+        -1.25,
+        0.0
+      ]
+    ],
+    "posts_centre_xz_venue": [
+      [
+        1.25,
+        0.09
+      ],
+      [
+        -1.25,
+        0.09
+      ]
+    ],
+    "post_section_m": 0.08,
+    "base_plate_size_xz_m": [
+      0.34,
+      0.16
+    ],
+    "side_brace_feet_x_unity": [
+      -1.575,
+      1.575
+    ],
+    "cross_bar_bottom_y": 2.32,
+    "cross_bar_top_y": 2.44,
+    "cross_bar_length_m": 2.74,
+    "outrigger_hang_points_unity": [
+      [
+        0.7,
+        2.265,
+        0.19
+      ],
+      [
+        -0.7,
+        2.265,
+        0.19
+      ]
+    ]
+  },
+  "triangles": {
+    "CargoBoard_Body": 2688,
+    "CargoBoard_Screen": 2,
+    "CargoBoard_Lamp": 78
+  },
+  "triangles_body_parts": {
+    "box": 1066,
+    "gantry_chains_cable": 1622
+  },
+  "triangles_total": 2768,
+  "materials": {
+    "TH_CargoBoard": [
+      "CargoBoard_Body"
+    ],
+    "TH_CargoBoardScreen": [
+      "CargoBoard_Screen"
+    ],
+    "TH_CargoBoardLamp": [
+      "CargoBoard_Lamp"
+    ]
+  },
+  "textures": {
+    "textures/CargoBoard_BaseColor.png": "sRGB, 1024",
+    "textures/CargoBoard_MetallicSmoothness.png": "linear (sRGB off), 1024, R = metallic, A = smoothness"
+  },
+  "colliders": "none (does not block beams, treasures or the phantom sight)"
+}

@@ -171,3 +171,9 @@ bpy.ops.export_scene.fbx(
 - **採用した方法**: `axis_up='Z', axis_forward='Y'`（Blender の Z 上のまま書き出す）、`bake_space_transform=False`、書き出す間だけモデルを Z 軸 180° 回し（正面 -Y を +Y に）、Unity の取り込みで **Bake Axis Conversion をオン**。これで全ノードが回転 0・Y 上・正面 +Z で入り、子のローカル座標もそのまま使える（`BlenderAssets/TreasureHaul/Enemies/build_enemies.py` の `export()` / `turn_z180()`）。
 - 軸の試験で作った Unity の一時フォルダは、uloop の `AssetDatabase.DeleteAsset` が「Dangerous API」として拒否される。試験は `Assets/` の外で済ませるか、消すのを人に頼む前提で最小限にする。
 - Blender の確認画像（Cycles）と Unity の見た目は、照明でかなり違う（石像が一時シーンの暖色の灯りで赤茶に見えた）。色の検収は、ステージの照明の下で見る。
+
+## 20. Treasure Haul の表示板（電光掲示板、2026-11-07）での追加学習
+- **`bmesh.ops.extrude_face_region(bm, geom=[face])` は、面だけ渡すと元の面が裏返って残る**（押し出した凹みの口を、法線が内向きの面が塞ぐ。描画では凹みの中が見えず、中に置いた物が隠れる）。押し出した後で `if sf.is_valid and sf not in new_faces: bmesh.ops.delete(bm, geom=[sf], context='FACES_ONLY')` で消し、それから `recalc_face_normals` する（`BlenderAssets/TreasureHaul/Board/build_board.py` の `build_box_body`）。疑ったら `scene.ray_cast` を同じ線で数回繰り返し、当たった面と法線を並べると一発でわかる。
+- 箱の正面だけに切れ目を入れるときは、`bisect_plane` の geom を正面の面（＋その辺・頂点）だけに絞る。全体に掛けると側面・背面にも余計な辺が入り、三角形が増える。
+- 三角形の上限が厳しいとき、効くのは小物: 六角ボルトの面取りの段・座金・リベットの段をやめる（1 個 28→16 三角形）、小さな板の面取りをやめる（44→12）。鎖の輪は 8×3 断面（48 三角形）で、辺を全部なめらか扱いにすれば遠目では丸く見える。
+- Eevee の確認画像で発光の数字が白っぽく見えるのは、AgX の飽和だけでなく、発光面の Base Color に照明が当たって足されるため。発光で見せる物は Base Color を暗くする。
