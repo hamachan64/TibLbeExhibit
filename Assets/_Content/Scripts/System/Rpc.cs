@@ -74,5 +74,9 @@ namespace STYLY.TIB_Template
         ThItems,
         /// <summary>端末→ホスト 状況報告（手の認識状態・電池残量。〔状況報告の間隔〕ごと。#44）</summary>
         ThStatus,
+        /// <summary>端末→ホスト 亡霊に見つかった（自分の頭で判定した端末が報告する。罰を決めるのはホスト）</summary>
+        ThPhantomSpot,
+        /// <summary>ホスト→全員 亡霊の罰を適用した（罰 A: 消滅したお宝 / 罰 B: 退場した端末）</summary>
+        ThPhantomPunish,
     }
 }

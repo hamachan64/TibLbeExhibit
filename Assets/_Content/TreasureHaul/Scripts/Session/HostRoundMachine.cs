@@ -138,6 +138,17 @@ namespace STYLY.TIB_Template.TreasureHaul
             return true;
         }
 
+        /// <summary>状態の通し番号を +1 する（状態は変えない）。保留・解除と同じ扱いで、ホストの出来事（亡霊の退場）を ThState で追いつかせる</summary>
+        public void BumpSeq() => Seq++;
+
+        /// <summary>本編を時間より早く終えて Result へ進む（亡霊の罰 B で参加端末が全員退場したとき）。Playing 中だけ</summary>
+        public bool TryEndPlay(double now)
+        {
+            if (State != RoundState.Playing) return false;
+            EnterState(RoundState.Result, now);
+            return true;
+        }
+
         /// <summary>時間経過による遷移と、保留の上限での自動解除。Seq が変わったら（状態の遷移・保留の解除）true。</summary>
         public bool Tick(double now)
         {

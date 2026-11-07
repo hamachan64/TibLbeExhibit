@@ -7,6 +7,8 @@ namespace STYLY.TIB_Template.TreasureHaul
 {
     public enum ThMode { TargetAndScore = 0, TargetOnly = 1 }
     public enum ThGripStyle { Beam = 0, Direct = 1, Swing = 2 }
+    /// <summary>遺跡の亡霊（企画書 5.6 C）。Off = 出さない / TakeTreasure = 持っているお宝を奪う / PlayerOut = その回だけ退場</summary>
+    public enum ThPhantomMode { Off = 0, TakeTreasure = 1, PlayerOut = 2 }
 
     /// <summary>ゲーム設定（N-8）。運営PCで保持し、ThState で全端末へ配る。* の付く項目は #42 以降で使う。</summary>
     [Serializable]
@@ -15,14 +17,15 @@ namespace STYLY.TIB_Template.TreasureHaul
         public ThMode mode = ThMode.TargetAndScore;
         public bool statue;
         public bool large;
-        public bool golem;
+        public ThPhantomMode phantom = ThPhantomMode.Off;
         public bool secret;
         public ThGripStyle gripStyle = ThGripStyle.Beam;
 
         public ThGameSettings Clone() => (ThGameSettings)MemberwiseClone();
 
         public bool IsValid() =>
-            Enum.IsDefined(typeof(ThMode), mode) && Enum.IsDefined(typeof(ThGripStyle), gripStyle);
+            Enum.IsDefined(typeof(ThMode), mode) && Enum.IsDefined(typeof(ThGripStyle), gripStyle)
+            && Enum.IsDefined(typeof(ThPhantomMode), phantom);
 
         /// <summary>JSON から読む。null・空 → 初期値（警告なし）。壊れている・値が不正 → 初期値と警告。</summary>
         public static ThGameSettings Parse(string json, out string warning)

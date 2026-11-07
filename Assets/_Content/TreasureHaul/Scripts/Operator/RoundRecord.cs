@@ -18,6 +18,10 @@ namespace STYLY.TIB_Template.TreasureHaul
         public int CollectedAmount;
         public int DamageCount;
         public int DamageAmount;
+        /// <summary>亡霊の「見つかった」報告をホストが受け付けた回数（受け付け条件を通ったもの。罰 A で何も持っていない場合も含む）</summary>
+        public int PhantomFoundCount;
+        /// <summary>亡霊に奪われたお宝の額（罰 A で奪った額だけ。奪われたときの現在の価値の合計）</summary>
+        public int PhantomLostAmount;
     }
 
     /// <summary>
@@ -65,8 +69,9 @@ namespace STYLY.TIB_Template.TreasureHaul
             var list = new List<string>();
             if (s.statue) list.Add("statue");
             if (s.large) list.Add("large");
-            if (s.golem) list.Add("golem");
             if (s.secret) list.Add("secret");
+            if (s.phantom == ThPhantomMode.TakeTreasure) list.Add("phantom-take");
+            else if (s.phantom == ThPhantomMode.PlayerOut) list.Add("phantom-out");
             return string.Join("|", list);
         }
 
@@ -109,6 +114,15 @@ namespace STYLY.TIB_Template.TreasureHaul
             var p = Get(deviceId);
             p.DamageCount++;
             p.DamageAmount += amount;
+        }
+
+        /// <summary>亡霊の報告をホストが受け付けた（lostAmount = 罰 A で奪ったお宝の額。奪っていない・罰 B は 0）</summary>
+        public void NotePhantomFound(string deviceId, int lostAmount)
+        {
+            if (string.IsNullOrEmpty(deviceId)) return;
+            var p = Get(deviceId);
+            p.PhantomFoundCount++;
+            p.PhantomLostAmount += lostAmount;
         }
 
         /// <summary>本編のお宝の回収（回収した人 = 判定役 = 最後に持った人）</summary>

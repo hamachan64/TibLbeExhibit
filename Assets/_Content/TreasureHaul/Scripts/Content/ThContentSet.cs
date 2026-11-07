@@ -15,6 +15,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         public ThFxCatalog fx;
         public ThTreasureCatalog treasures;
         [Tooltip("プレーヤーの色（#43。ビーム・仲間のアバター・練習用お宝の色と記号）")] public ThPlayerPalette palette;
+        [Tooltip("遺跡の亡霊（見た目のプレハブと経路の点。空なら亡霊は出ない）")] public ThPhantomAssets phantom;
 
         /// <summary>重複・欠けの一覧（空なら問題なし）</summary>
         public List<string> Validate()

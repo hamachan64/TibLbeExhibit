@@ -154,9 +154,47 @@ namespace STYLY.TIB_Template.TreasureHaul
                 label.text = _t.Get(ThTextId.OpWriteDeviceTemplate);
             }
             _writeTemplateButton.OnClickAsObservable().Subscribe(_ => _host.RequestWriteDeviceTemplate()).AddTo(this);
+            BuildPhantomRow();
             DeviceRowView.CreateHeader(_deviceListRoot, _devicesText, _t.Get(ThTextId.OpDeviceColumns));
             _noDevicesText = DeviceRowView.Cell(_deviceListRoot, _devicesText, 400f);
             _noDevicesText.text = _t.Get(ThTextId.OpNoDevices);
+        }
+
+        // ---- 亡霊の切り替え（待機中だけ押せる。押すと treasure_haul_settings.json に保存） ----
+
+        readonly Dictionary<ThPhantomMode, Button> _phantomButtons = new Dictionary<ThPhantomMode, Button>();
+
+        static readonly Color PhantomSelected = new Color(0.2f, 0.5f, 0.85f, 1f);
+        static readonly Color PhantomNormal = new Color(0.25f, 0.25f, 0.3f, 1f);
+
+        /// <summary>「亡霊: [なし] [お宝を奪う] [退場]」の行。選ばれている物は色を変え、待機中以外は押せない</summary>
+        void BuildPhantomRow()
+        {
+            var core = _host.Core;
+            var row = DeviceRowView.CreateRow(_deviceListRoot, "PhantomRow");
+            DeviceRowView.Cell(row.transform, _devicesText, 60f).text = _t.Get(ThTextId.OpPhantomLabel);
+            var modes = new[]
+            {
+                (ThPhantomMode.Off, ThTextId.OpPhantomOff),
+                (ThPhantomMode.TakeTreasure, ThTextId.OpPhantomTake),
+                (ThPhantomMode.PlayerOut, ThTextId.OpPhantomOut),
+            };
+            foreach (var (mode, textId) in modes)
+            {
+                var b = DeviceRowView.CreateButton(row.transform, _devicesText, 130f, out var label);
+                label.text = _t.Get(textId);
+                var m = mode;
+                b.OnClickAsObservable().Subscribe(_ => _host.RequestSetPhantom(m)).AddTo(this);
+                _phantomButtons[mode] = b;
+            }
+            core.PhantomMode.CombineLatest(core.State, (mode, state) => (mode, state)).Subscribe(x =>
+            {
+                foreach (var kv in _phantomButtons)
+                {
+                    kv.Value.interactable = x.state == RoundState.Waiting;
+                    if (kv.Value.targetGraphic != null) kv.Value.targetGraphic.color = kv.Key == x.mode ? PhantomSelected : PhantomNormal;
+                }
+            }).AddTo(this);
         }
 
         void ApplyDevices(DeviceRowData[] rows)

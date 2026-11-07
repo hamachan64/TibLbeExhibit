@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using R3;
 using TMPro;
 using UnityEngine;
@@ -99,6 +100,12 @@ namespace STYLY.TIB_Template.TreasureHaul
         public ThGripParams Grip => _core != null ? _core.Params.grip : new ThGripParams();
         public bool CanGrab => _table != null && _table.ParticipantPlaying && !_table.Frozen;
         public ClientItemTable Table => _table;
+        /// <summary>亡霊の罰 B で退場している（ビームを出さない・つかめない）</summary>
+        public bool IsPhantomOut => _core != null && _core.Tracker.IsPhantomOut.CurrentValue;
+        PhantomClient _phantom;
+        bool _phantomSearched;
+        /// <summary>お宝が吸い込まれる先（亡霊の体。亡霊がいなければ、お宝の少し上）</summary>
+        const float AbsorbSeconds = 0.6f;
         public int ViewCount => _views.Count;
         public Treasure GetTreasure(int index) => _views.TryGetValue(index, out var v) ? v.Treasure : null;
         /// <summary>〔飛びの判定〕（m）。手の目標が 1 フレームでこれ以上動いたら飛び</summary>
@@ -653,6 +660,9 @@ namespace STYLY.TIB_Template.TreasureHaul
                 case ItemEventKind.Damaged:
                     OnDamagedEvent(v, e);
                     break;
+                case ItemEventKind.Absorbed:
+                    OnAbsorbed(v, m);
+                    break;
                 case ItemEventKind.HitsSynced:
                     // ThDamaged を取りこぼした: ヒビと値札だけ合わせる（「-NNG」と音は出さない）
                     v.Label.SetState(m.Revealed, m.Value);
@@ -665,6 +675,29 @@ namespace STYLY.TIB_Template.TreasureHaul
                     OnDestroyedEvent(v, e, false);
                     break;
             }
+        }
+
+        /// <summary>
+        /// 亡霊に奪われた（罰 A）: 手から外し、亡霊の体へ吸い込まれながら縮んで消える（砕ける演出ではない）。
+        /// 当たり判定とつかむ範囲は先に止める。亡霊がいなければその場で縮んで消える
+        /// </summary>
+        void OnAbsorbed(View v, ClientItem m)
+        {
+            ReleaseHolder(m.Index);
+            if (v.Label != null) Destroy(v.Label.gameObject);
+            if (v.Tag != null) Destroy(v.Tag.gameObject);
+            var t = v.Treasure;
+            if (t == null) return;
+            t.StopInPlace();
+            foreach (var c in t.BodyColliders) if (c != null) c.enabled = false;
+            t.SetGrabZonesActive(false);
+            if (!_phantomSearched) { _phantomSearched = true; _phantom = FindFirstObjectByType<PhantomClient>(); }
+            var target = _phantom != null && _phantom.HasAbsorbPoint ? _phantom.AbsorbWorldPoint : t.transform.position + Vector3.up * 0.3f;
+            var seq = DOTween.Sequence();
+            seq.Append(t.transform.DOMove(target, AbsorbSeconds).SetEase(Ease.InCubic));
+            seq.Join(t.transform.DOScale(Vector3.zero, AbsorbSeconds).SetEase(Ease.InCubic));
+            seq.OnComplete(() => { if (t != null) Destroy(t.gameObject); });
+            seq.SetLink(t.gameObject);
         }
 
         /// <summary>見失い待ちから手が戻って持ち続ける: 握りの判定を握っている状態へ戻し、手（M は両手の目標）への追従を再開する</summary>

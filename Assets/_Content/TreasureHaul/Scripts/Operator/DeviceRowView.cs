@@ -155,8 +155,9 @@ namespace STYLY.TIB_Template.TreasureHaul
             _battery.text = d.Battery >= 0 ? t.Format(ThTextId.OpBatteryFormat, d.Battery) : t.Get(ThTextId.OpBatteryUnknown);
             _battery.color = d.Battery < 0 ? DimColor : d.BatteryWarning ? WarningColor : NormalColor;
             _practice.text = !d.PracticeVisible ? "" : t.Get(d.PracticeDone ? ThTextId.OpPracticeDone : ThTextId.OpPracticeNotDone);
-            _spectator.text = t.Get(d.Spectator ? ThTextId.OpSpectatorTag : ThTextId.OpParticipantTag);
-            _spectator.color = d.Spectator ? AttentionColor : NormalColor;
+            // 亡霊の罰 B で退場している端末は、この欄に「退場」を出す（見学の表示より優先）
+            _spectator.text = t.Get(d.PhantomOut ? ThTextId.OpPhantomOut : d.Spectator ? ThTextId.OpSpectatorTag : ThTextId.OpParticipantTag);
+            _spectator.color = d.PhantomOut ? WarningColor : d.Spectator ? AttentionColor : NormalColor;
             _spectatorLabel.text = t.Get(d.Spectator ? ThTextId.OpClearSpectator : ThTextId.OpSetSpectator);
             _alignmentLabel.text = t.Get(d.AlignmentConfirmed ? ThTextId.OpUnconfirmAlignment : ThTextId.OpConfirmAlignment);
             // 切断中の端末は切り替えても意味がない（再接続で未確認に戻る）ので、確認ボタンは接続中だけ

@@ -158,6 +158,26 @@ namespace STYLY.TIB_Template.TreasureHaul
         public bool autoConfirmAlignment = false;
     }
 
+    /// <summary>P-7 遺跡の亡霊（追加要素。設定が Off のときは使わない）</summary>
+    [Serializable]
+    public class ThPhantomParams
+    {
+        /// <summary>亡霊の速さ（m/s）</summary>
+        [Range(0.05f, 2f)] public float speed = 0.4f;
+        /// <summary>【仮】視界の距離（水平。m）</summary>
+        [Range(0.5f, 10f)] public float sightDistance = 3f;
+        /// <summary>【仮】視界の半角（度）</summary>
+        [Range(5f, 90f)] public float sightHalfAngle = 35f;
+        /// <summary>【要検証】見られ続けて「見つかった」になるまで（秒）</summary>
+        [Range(0.1f, 5f)] public float spotSeconds = 0.7f;
+        /// <summary>見つかった後に、同じ端末を数えない時間（秒）</summary>
+        [Range(0f, 30f)] public float ignoreSeconds = 3f;
+        /// <summary>亡霊の目の高さ（m。壁の遮りの判定に使う）</summary>
+        [Range(0.5f, 2.4f)] public float eyeHeight = 1.5f;
+        /// <summary>Playing 開始時の出発位置（経路の全長に対する割合。0.5 = 奥の横通路の中央）</summary>
+        [Range(0f, 1f)] public float startFraction = 0.5f;
+    }
+
     /// <summary>全パラメータ。JSON のキーはフィールド名（グループ単位で書ける）。</summary>
     [Serializable]
     public class ThParams
@@ -168,6 +188,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         public ThTreasureParams treasure = new ThTreasureParams();
         public ThLayoutParams layout = new ThLayoutParams();
         public ThOperationParams operation = new ThOperationParams();
+        public ThPhantomParams phantom = new ThPhantomParams();
 
         public ThParams Clone() => JsonUtility.FromJson<ThParams>(JsonUtility.ToJson(this));
     }
