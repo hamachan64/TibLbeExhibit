@@ -348,6 +348,13 @@ namespace STYLY.TIB_Template.TreasureHaul.Editor
             return list;
         }
 
+        /// <summary>VenueRoot の直下の子ならローカル位置を直接入れる（ワールドを経由しない）。そうでなければ TransformPoint 経由</summary>
+        static void SetLocalOrWorld(Transform root, Transform t, Vector3 local)
+        {
+            if (t.parent == root) t.localPosition = local;
+            else t.position = root.TransformPoint(local);
+        }
+
         static void AssignVenue(ThVenue venue, List<ThPlacementPoint> slots, StageLayout layout)
         {
             var so = new SerializedObject(venue);
@@ -362,13 +369,14 @@ namespace STYLY.TIB_Template.TreasureHaul.Editor
             {
                 if (m.role == "collection_volume" && zone != null)
                 {
-                    zone.transform.position = venue.Root.TransformPoint(V3(m.position_unity_xyz));
+                    SetLocalOrWorld(venue.Root, zone.transform, V3(m.position_unity_xyz));
+                    zone.transform.localRotation = Quaternion.identity;   // VenueRoot に対して回転させない
                     zone.center = Vector3.zero;
                     zone.size = V3(m.size);
                 }
                 else if (m.name == "ScoreBoardAnchor" && board != null)
                 {
-                    board.transform.position = venue.Root.TransformPoint(V3(m.position_unity_xyz));
+                    SetLocalOrWorld(venue.Root, board.transform, V3(m.position_unity_xyz));
                 }
             }
 
@@ -381,8 +389,9 @@ namespace STYLY.TIB_Template.TreasureHaul.Editor
             {
                 var slot = tutProp.GetArrayElementAtIndex(i).objectReferenceValue as ThTutorialSlot;
                 if (slot == null || slot.ColorIndex < 0 || slot.ColorIndex >= tut.Count) continue;
-                var pos = venue.Root.TransformPoint(V3(tut[slot.ColorIndex].position_unity_xyz));
-                slot.transform.position = new Vector3(pos.x, 0f, pos.z);
+                // 高さは VenueRoot ローカルで 0 にする（VenueRoot の y や回転に依らない）
+                var local = V3(tut[slot.ColorIndex].position_unity_xyz);
+                SetLocalOrWorld(venue.Root, slot.transform, new Vector3(local.x, 0f, local.z));
             }
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(venue);

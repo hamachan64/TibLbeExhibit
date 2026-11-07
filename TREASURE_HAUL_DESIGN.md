@@ -12,7 +12,9 @@
 - **配置は同期しない**: 共通シード＋参加人数から、ホストと全端末が同じ配置・値段を計算する。
 - **古いメッセージを捨てる**: すべてのメッセージの先頭に RoundId を付ける。RoundId は「開始」時の Unix ミリ秒で、前の回の RoundId 以下なら前の値 +1 にする（同じ秒に中断→開始しても重ならず、必ず増える。運営PCの再起動をまたいで増えるのは、運営PCの時計が巻き戻らないことが前提。待機中は回が無いので 0）。すべての `Th*` の引数は `[0]` = RoundId、`[1]` = 中身の JSON（`ThMessages`）。お宝のメッセージには加えて世代番号（ホストがお宝の持ち主・状態を変えるたびに +1）を、つかむ申請には申請ID（端末ごとの通し番号）を付ける。ホストの受け付け条件は 6.1。端末は古い世代を捨て、自分の知るより新しい世代は採用する。
 - **RPC は取りこぼす前提で作る**: NetSync の RPC は、1端末あたりの送信数の上限（既定 30回/秒）を超えると捨てられ、送信待ちがあふれても捨てられる（パッケージのコードで確認済み）。重要な状態は、ホストが定期的に送る状態表（6.2）で必ず追いつけるようにする。
-- **座標**: 同期する位置・配置候補点・納品場所・境界はすべて Environment シーンの `VenueRoot` のローカル座標で扱う。位置合わせ（U-1）は `VenueRoot` の合わせ方だけを差し替える。
+- **座標**: 同期する位置・配置候補点・納品場所・境界はすべて Environment シーンの `VenueRoot` のローカル座標で扱う。会場図面への配置は `VenueRoot` の位置・向き（編集時に固定）で決め、現実との合わせ込みは `AppConfigLoader` が XR Rig をずらして行う（U-1）。
+  - 2026-11-06（#48）: `VenueRoot` は hacha さんのテンプレートの会場図面に合わせ、ワールド (11.45, 0, 2.4)・Y −90°・拡縮 1 に置いた（子のローカル値は変えない）。`VenueRoot` は **Y 軸の回転だけしてよい**（拡縮・傾けはしない。回収範囲は VenueRoot ローカルの軸並行 Bounds なので、`CollectZone` は VenueRoot に対して回転させない）。`ThStageBuilder` は VenueRoot の位置・回転に依らず作り直せる（練習の枠の高さはローカルで 0）。
+  - 現実との合わせ込みは、テンプレートの `AppConfigLoader`（`UserClient` に付く）が `AppConfig.toml` の値で XR Rig を逆向きにずらして行う。コンテンツ側の座標は変えない。
 - ゲームのロジック（状態遷移・配置・減額計算・集計・パラメータ）は純粋な C# クラスにし、EditMode テストで確かめる。
 
 ---
@@ -315,9 +317,9 @@
 | `GameSession`（Core） | 使わない。前作用に残す |
 | `HandPinchTracker`（Core） | 使わない（前作用にそのまま残す）。握る判定は新規の `HandGripTracker`（4.4） |
 | `Rpc` / `RpcManager` / `VariableManager`（Core） | 使う。`Rpc` の末尾に `Th*` を足す |
-| `UserClient`（Core） | 使う。システムメニュー・スリープの抑止（N-4）を `#if UNITY_ANDROID` で囲んで足す。PICO 本体の安全境界は STYLY 側の設定なので触らない。起動時の `Recenter()` は位置合わせ（U-1）が決まったら見直す |
+| `UserClient`（Core） | 使う。システムメニュー・スリープの抑止（N-4）を `#if UNITY_ANDROID` で囲んで足す。PICO 本体の安全境界は STYLY 側の設定なので触らない。起動時の `Recenter()` は位置合わせ（U-1）が決まったら見直す（2026-11-06: 変更しない。`AppConfigLoader`（`UserClient` と同じ GameObject）が、Recenter した地点から見た中心位置で XR Rig を逆向きにずらす） |
 | `OperatorClient` / `ScoreMonitorView` / `StageScoreMonitorView` | 使わない（開始はホスト、表示板は新規） |
-| `VRArea` / `WarningWall` | 会場寸法で作り直し、`VenueRoot` の子に置く（F-SAFE-1） |
+| `VRArea` / `WarningWall` | 会場寸法で作り直し、`VenueRoot` の子に置く（F-SAFE-1）。2026-11-06: テンプレートの位置・大きさのまま、`VenueRoot` の外（シーンのルート）に置いた（ワールド座標は会場図面の原点基準）。図面に合わせた腰壁の目安 `InterBEE_Guide`（タグ `EditorOnly`・非 Static・コライダーなし）もルートに置いた |
 
 ---
 
