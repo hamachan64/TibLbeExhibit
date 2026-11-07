@@ -2,6 +2,7 @@
 
 > **「現在地」だけ読めば、今どこかがわかる**ように保つ。
 > 更新するタイミング: dev-loop で PR を出したとき（状態を「PRレビュー中」に）、PR がマージされたとき（「完了」に）、決定事項が出たとき。
+> PR の向き先 `repo/develop` は既定のブランチではないので、PR の `Closes #番号` では Issue が自動で閉じない。マージされたら Issue を手で閉じ、ボードを「完了」にする。
 > 各行の中身は GitHub Issue、仕様は `TREASURE_HAUL_DESIGN.md` 13章（依存関係の図あり）。
 > ボード: https://github.com/users/hamachan64/projects/2 （状態の列はこのファイルと同じ5つ。両方を同時に更新する）
 
@@ -9,8 +10,8 @@
 
 | | |
 | :--- | :--- |
-| **フェーズ** | コア（0a・1〜5、3d）と素材 #46 はマージ済み（4b PR #60・5 PR #61・#46 PR #53 まで）。タイトルロゴ（[#62](https://github.com/hamachan64/TibLbeExhibit/issues/62)、PR #63）と会場レイアウト（[#48](https://github.com/hamachan64/TibLbeExhibit/issues/48)、PR #64）もマージ済み。追加要素の遺跡の亡霊（[#65](https://github.com/hamachan64/TibLbeExhibit/issues/65)）の PR [#66](https://github.com/hamachan64/TibLbeExhibit/pull/66) をレビュー中 |
-| **次にやること** | PR #66 をレビューし、デモ会で亡霊の罰（U-20）を決める。実機で壁・納品場所が現実の腰壁に重なるか、ロゴの見え方を確かめる。番人の石像 #68・敵のモデル #67。実機での試作 #49 と通し #45 |
+| **フェーズ** | コア（0a・1〜5、3d）と素材 #46 はマージ済み（4b PR #60・5 PR #61・#46 PR #53 まで）。タイトルロゴ（[#62](https://github.com/hamachan64/TibLbeExhibit/issues/62)、PR #63）と会場レイアウト（[#48](https://github.com/hamachan64/TibLbeExhibit/issues/48)、PR #64）もマージ済み。追加要素の遺跡の亡霊（[#65](https://github.com/hamachan64/TibLbeExhibit/issues/65)、PR #66）もマージ済み。マージ済みの Issue（#44・#46・#48・#62・#65）は 2026-11-07 に閉じた |
+| **次にやること** | デモ会で亡霊の罰（U-20）を決める。実機で壁・納品場所が現実の腰壁に重なるか、ロゴの見え方を確かめる。番人の石像 #68・敵のモデル #67。実機での試作 #49 と通し #45 |
 | **判断待ち** | 実機の入手（#49・#45 に必要）。U-1（原点の合わせ方と向き。hacha さんの回答待ち）は通し #45 までに必要。ほかは下の「判断待ち」 |
 | **締切** | 内容変更 **10/31**（あと11日）／最終データ 11/16／現地設営 11/17 |
 
@@ -49,7 +50,7 @@
 2. L（2人で持つお宝）
 3. 目標額のみモード、本日のランキング、運営PCの追加要素の選択・練習未完了の表示
 4. 持ち方の切り替え（直接つかむ／離れたまま揺れて運ぶ）
-5. 👀 遺跡の亡霊 [#65](https://github.com/hamachan64/TibLbeExhibit/issues/65)（PR [#66](https://github.com/hamachan64/TibLbeExhibit/pull/66) をレビュー中。ゴーレムから変更。2026-11-07 に前倒しで着手。ブランチ `repo/feature-th-phantom`、仕様 `.claude/loops/20261107-th-phantom.md`）。（時間が残れば）秘宝、演出の作り込み
+5. ✅ 遺跡の亡霊 [#65](https://github.com/hamachan64/TibLbeExhibit/issues/65)（PR [#66](https://github.com/hamachan64/TibLbeExhibit/pull/66) でマージ済み。ゴーレムから変更。罰はデモ会で決める（U-20）。仕様 `.claude/loops/20261107-th-phantom.md`）。（時間が残れば）秘宝、演出の作り込み
 
 11/13〜11/16 は機能を追加せず、不具合修正と実機検証だけ。
 
