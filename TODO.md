@@ -40,11 +40,12 @@
 | お宝・納品場所・瓦礫の 3D モデル | [#46](https://github.com/hamachan64/TibLbeExhibit/issues/46)（PR [#53](https://github.com/hamachan64/TibLbeExhibit/pull/53)） | ✅ | ブランチ `repo/feature-th-asset-models`（worktree `TibLbeExhibit-assets`）。お宝 12 種（持ち手なし）と、高い壁の回廊ステージを Blender で制作し、Unity に取り込み済み（2026-10-22。お宝プレハブ・カタログ、Environment のステージ・置き場所 34・焼き込みの灯り。仕様 `.claude/loops/20261021-th-asset-import.md`）。そっと置いたお宝が壁・家具に食い込まない押し出しも入れた。`THIRD_PARTY_NOTICES.md` に記録（外部素材なし） |
 | タイトルロゴ（待機中は納品場所の上、開始の瞬間は各自の正面に一瞬） | [#62](https://github.com/hamachan64/TibLbeExhibit/issues/62)（PR [#63](https://github.com/hamachan64/TibLbeExhibit/pull/63)） | 👀 | ロゴは Claude の画像生成。公開リポジトリなので画像は git に入れない（`Artwork/TreasureHaul/` と `Assets/_Content/TreasureHaul/Textures/` は git 管理外。DEVELOPMENT.md）。ビルドする Mac に画像があることを確かめる |
 | オープニングのナレーション音声 | [#47](https://github.com/hamachan64/TibLbeExhibit/issues/47) | ⬜ | 原稿 `TREASURE_HAUL_NARRATION.md`。音声はユーザーが用意する |
+| 番人の石像・遺跡の亡霊の 3D モデル | [#67](https://github.com/hamachan64/TibLbeExhibit/issues/67) | ⬜ | 石像は壁（2.4m）より背が高く、頭と目を別パーツに。亡霊は半透明で怖くしすぎない。今の亡霊は仮の形（#65） |
 | 会場レイアウト（Environment） | [#48](https://github.com/hamachan64/TibLbeExhibit/issues/48) | ⬜ | 順4b と同じシーンを触るので同時に作業しない |
 
 ## 追加要素（11/12 まで。第2検証で採否を決める。Issue はコアの後に作る）
 
-1. 番人の石像（見つかったら持っているお宝が即壊れる。壁より背の高い像が全体を見下ろす。U-18 は 2026-11-07 に決定）
+1. 番人の石像 [#68](https://github.com/hamachan64/TibLbeExhibit/issues/68)（見つかったら持っているお宝が即壊れる。壁より背の高い像が全体を見下ろす。U-18 は 2026-11-07 に決定）
 2. L（2人で持つお宝）
 3. 目標額のみモード、本日のランキング、運営PCの追加要素の選択・練習未完了の表示
 4. 持ち方の切り替え（直接つかむ／離れたまま揺れて運ぶ）
