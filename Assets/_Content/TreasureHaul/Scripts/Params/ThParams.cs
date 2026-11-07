@@ -12,6 +12,8 @@ namespace STYLY.TIB_Template.TreasureHaul
     public class ThProgressParams
     {
         [Range(1f, 120f)] public float openingSeconds = 10f;
+        /// <summary>亡霊を入れる回だけ、オープニングを延ばす秒数（5文目の後に墓守の一文を足す。企画書 4.2）</summary>
+        [Range(0f, 30f)] public float phantomOpeningExtraSeconds = 4f;
         [Range(1f, 600f)] public float practiceSeconds = 30f;
         [Range(0f, 600f)] public float holdMaxSeconds = 30f;
         [Range(5f, 1800f)] public float playingSeconds = 180f;

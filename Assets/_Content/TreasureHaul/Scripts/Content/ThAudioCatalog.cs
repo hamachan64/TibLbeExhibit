@@ -22,6 +22,8 @@ namespace STYLY.TIB_Template.TreasureHaul
         TargetReached,
         /// <summary>亡霊に見られている間の警告音（素材が入るまでは無音）</summary>
         PhantomWarning,
+        /// <summary>亡霊を入れる回だけ、オープニングの 6 文目（墓守の一文）のナレーション。素材が無ければ字幕だけ</summary>
+        OpeningLine6,
     }
 
     [Serializable]
@@ -67,6 +69,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             new ThAudioEntry(ThSoundId.OpeningLine5, false),
             new ThAudioEntry(ThSoundId.TargetReached, false),
             new ThAudioEntry(ThSoundId.PhantomWarning, false),
+            new ThAudioEntry(ThSoundId.OpeningLine6, false),
         };
 
         public ThAudioEntry Find(ThSoundId id)

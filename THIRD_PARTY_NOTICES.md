@@ -4,6 +4,14 @@
 >
 > 2026-10-19: `BlenderAssets/TreasureHaul/Stage/Revision2/`〜`Revision6/` は作業ツリーから削除した（Git の履歴には残っている）。下の記録で「同フォルダーのREADME」とあるものは履歴から参照する。現在の出力 `Stage/Output/`（`Stage/build_stage.py` で生成。旧 Revision7）も、同じ自作の形状・自作アトラスだけでできていて、外部の素材・サービスは追加していない。
 
+## 追加記録: 納品場所の表示板（発掘隊の電光掲示板） (2026-11-07)
+
+`BlenderAssets/TreasureHaul/Board/`（`build_board.py` で生成）のモデルとテクスチャ、`Assets/_Content/TreasureHaul/Shaders/TH_SegmentDisplay.shader`、7 セグメントの数字（`SevenSegmentDisplay.cs` がコードで作るメッシュ）は、ローカルの Blender 5.1（`blender -b` のスクリプト）と手書きの C#・HLSL だけで自作した。数字に外部のフォントは使っていない。札の「納品額」は既存の Noto Sans JP（下の記録、OFL）。4点確認: 商用展示可（自作物）／第三者の権利・R.E.P.O の素材を含まない／無料（ローカル制作）／外部ダウンロード・API キー利用なし。見た目の案の画像もローカルで自作し、成果物には入れていない。
+
+## 追加記録: 番人の石像（角冠の王）・遺跡の亡霊（墓守の霊） (2026-11-07, #67)
+
+`BlenderAssets/TreasureHaul/Enemies/`（`build_enemies.py` で生成）の2体のモデルとテクスチャ、`Assets/_Content/TreasureHaul/Shaders/TH_PhantomGhost.shader`・`TH_PhantomFan.shader`・`TH_PhantomSolid.shader` は、ローカルの Blender 5.1（`blender -b` のスクリプト）と手書きの HLSL だけで自作した。外部の素材・有料の生成機能（Hyper3D・Hunyuan3D 等）・Sketchfab 等は使っていない。4点確認: 商用展示可（自作物）／第三者の権利・実在の像・R.E.P.O の素材を含まない／無料（ローカル制作）／外部ダウンロード・API キー利用なし。イメージ合わせのラフも同じくローカルで自作し、成果物には入れていない。
+
 ## 追加記録: 遺跡の風化・床際改修 (2026-10-19)
 
 `BlenderAssets/TreasureHaul/Stage/Revision4/` の石積み、漆喰、土・敷石と共有アトラスはローカルBlender MCPで自作。商用可（自作物）／第三者素材・R.E.P.O.アセット不使用／無料・クレジット消費なし／外部ダウンロード・APIキー利用なし、の4点を確認。既存の自作お宝と台車は確認用に再利用。

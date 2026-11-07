@@ -58,6 +58,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Prototype
             var venue = ThVenue.Instance;
             var defaults = (ThParamsAsset)typeof(SessionClient).GetField("_defaults", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(_session);
             var p = defaults.values.Clone();
+            p.progress.phantomOpeningExtraSeconds = 0;   // 確認用はすぐ始める
             p.progress.openingSeconds = 1; p.progress.practiceSeconds = 1; p.progress.playingSeconds = PlayingSeconds; p.progress.resultSeconds = 30;
             p.operation.autoConfirmAlignment = true;
             var env = venue.CreateEnvironmentInfo();

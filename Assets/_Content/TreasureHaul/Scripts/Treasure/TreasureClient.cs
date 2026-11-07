@@ -272,9 +272,10 @@ namespace STYLY.TIB_Template.TreasureHaul
             var board = _venue != null ? _venue.Board : null;
             if (board != null && _content != null)
             {
+                board.SetLabel(_content.text.Get(ThTextId.BoardLabel));
                 _boardSub = core.Total.CombineLatest(core.Tracker.State, (total, state) => (total, state)).Subscribe(x =>
                 {
-                    board.SetText(_content.text.Format(ThTextId.BoardTotalFormat, x.total));
+                    board.SetTotal(x.total);
                     board.SetVisible(x.state == RoundState.Tutorial || x.state == RoundState.Playing || x.state == RoundState.Result);
                 });
             }

@@ -23,7 +23,10 @@ namespace STYLY.TIB_Template.TreasureHaul
         /// <summary>回の途中から入って次の回を待っている</summary>
         public bool WaitNextRound;
         public float Remaining;
+        /// <summary>オープニングの基本の長さ（字幕 1〜5 を等分する 〔オープニング〕）</summary>
         public float OpeningSeconds;
+        /// <summary>亡霊を入れる回の延長分（無い回は 0。字幕 6 を出す）。<see cref="ThOpeningTime.ExtraSeconds"/></summary>
+        public float OpeningExtraSeconds;
         public int Target;
         public int Total;
         public ThResultMsg Result;
@@ -37,7 +40,7 @@ namespace STYLY.TIB_Template.TreasureHaul
     public struct ThPanelFrame
     {
         public ThPanelKind Kind;
-        /// <summary>オープニングの字幕の番号（1〜5。それ以外は 0）</summary>
+        /// <summary>オープニングの字幕の番号（1〜6。それ以外は 0）</summary>
         public int OpeningLine;
         public int RemainMinutes;
         public int RemainSeconds;
@@ -53,7 +56,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         // ---- 合図（その更新だけ true / 非 0） ----
         /// <summary>オープニングが始まった（効果音を鳴らす）</summary>
         public bool OpeningStarted;
-        /// <summary>新しい字幕が始まった番号（1〜5。無ければ 0。その文のナレーションを鳴らす）</summary>
+        /// <summary>新しい字幕が始まった番号（1〜6。無ければ 0。その文のナレーションを鳴らす）</summary>
         public int LineStarted;
         /// <summary>目標額に届いた瞬間（音を鳴らす）</summary>
         public bool TargetReachedNow;
@@ -65,7 +68,10 @@ namespace STYLY.TIB_Template.TreasureHaul
     /// </summary>
     public sealed class ThPanelPresenter
     {
+        /// <summary>等分して出す字幕の枚数（1〜5）。亡霊を入れる回は、この後に延長分で 6 枚目を出す</summary>
         public const int OpeningLineCount = 5;
+        /// <summary>字幕の最大の番号（亡霊を入れる回の 6 枚目）</summary>
+        public const int OpeningLineMax = OpeningLineCount + 1;
         /// <summary>「目標達成！」を大きく出す秒数（見た目の調整値）</summary>
         public const float TargetReachedSeconds = 3f;
 
@@ -88,11 +94,18 @@ namespace STYLY.TIB_Template.TreasureHaul
             seconds = total % 60;
         }
 
-        /// <summary>オープニングの字幕の番号（1〜5）。〔オープニング〕を 5 等分して 1 枚ずつ。</summary>
-        public static int OpeningLineIndex(float remaining, float openingSeconds)
+        /// <summary>
+        /// オープニングの字幕の番号。〔オープニング〕（openingSeconds）を 5 等分して 1〜5。
+        /// 亡霊を入れる回（extraSeconds &gt; 0）は、延長分（openingSeconds 〜 openingSeconds + extraSeconds）で 6。残り秒は全体（基本 + 延長）から数える。
+        /// extraSeconds が 0 なら、延長が無かった頃と全く同じ。
+        /// </summary>
+        public static int OpeningLineIndex(float remaining, float openingSeconds, float extraSeconds = 0f)
         {
             if (openingSeconds <= 0f) return 1;
-            float elapsed = Math.Min(Math.Max(0f, openingSeconds - remaining), openingSeconds);
+            extraSeconds = Math.Max(0f, extraSeconds);
+            float total = openingSeconds + extraSeconds;
+            float elapsed = Math.Min(Math.Max(0f, total - remaining), total);
+            if (extraSeconds > 0f && elapsed >= openingSeconds) return OpeningLineMax;
             int i = (int)(elapsed / (openingSeconds / OpeningLineCount)) + 1;
             return Math.Min(Math.Max(i, 1), OpeningLineCount);
         }
@@ -126,7 +139,7 @@ namespace STYLY.TIB_Template.TreasureHaul
                 case RoundState.Opening:
                     f.Kind = ThPanelKind.Opening;
                     // 時間合わせで残り秒が少し戻っても、字幕を戻さない（同じ文のナレーションを 2 回鳴らさない）
-                    f.OpeningLine = Math.Max(_lastLine, OpeningLineIndex(inp.Remaining, inp.OpeningSeconds));
+                    f.OpeningLine = Math.Max(_lastLine, OpeningLineIndex(inp.Remaining, inp.OpeningSeconds, inp.OpeningExtraSeconds));
                     if (!_openingNotified) { _openingNotified = true; f.OpeningStarted = true; }
                     if (f.OpeningLine > _lastLine) { _lastLine = f.OpeningLine; f.LineStarted = f.OpeningLine; }
                     break;
@@ -181,7 +194,10 @@ namespace STYLY.TIB_Template.TreasureHaul
                     r.Credit = t.Get(ThTextId.Credits);
                     break;
                 case ThPanelKind.Opening:
-                    r.Main = t.Get(ThTextId.OpeningLine1 + (Math.Min(Math.Max(f.OpeningLine, 1), OpeningLineCount) - 1));
+                    // OpeningLine6 は列挙の末尾に足したので、OpeningLine1 + 5 では引けない
+                    r.Main = f.OpeningLine >= OpeningLineMax
+                        ? t.Get(ThTextId.OpeningLine6)
+                        : t.Get(ThTextId.OpeningLine1 + (Math.Min(Math.Max(f.OpeningLine, 1), OpeningLineCount) - 1));
                     break;
                 case ThPanelKind.Playing:
                     if (f.ShowTargetReached) { r.Main = t.Get(ThTextId.TargetReached); r.Large = true; }
@@ -207,8 +223,8 @@ namespace STYLY.TIB_Template.TreasureHaul
             return r;
         }
 
-        /// <summary>音の ID（字幕の番号 1〜5 から）</summary>
-        public static ThSoundId LineSound(int line) => ThSoundId.OpeningLine1 + (Math.Min(Math.Max(line, 1), OpeningLineCount) - 1);
+        /// <summary>音の ID（字幕の番号 1〜6 から）</summary>
+        public static ThSoundId LineSound(int line) => line >= OpeningLineMax ? ThSoundId.OpeningLine6 : ThSoundId.OpeningLine1 + (Math.Min(Math.Max(line, 1), OpeningLineCount) - 1);
     }
 
     /// <summary>面に出す文字</summary>

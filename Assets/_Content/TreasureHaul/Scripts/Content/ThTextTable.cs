@@ -124,7 +124,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         PhantomNoticeOut,
         /// <summary>退場した本人に大きく出す</summary>
         PhantomOutSelf,
-        /// <summary>仲間が見つかった知らせ（書式「{0} が亡霊に見つかった」。色と記号）</summary>
+        /// <summary>仲間が見つかった知らせ（書式「{0} が墓守に見つかった」。色と記号）</summary>
         PhantomOutPeerFormat,
         /// <summary>運営UI: 亡霊の切り替え</summary>
         OpPhantomLabel,
@@ -133,6 +133,10 @@ namespace STYLY.TIB_Template.TreasureHaul
         OpPhantomOut,
         /// <summary>罰 A で持っているお宝を奪われた本人に短く出す（理由が分かるように）</summary>
         PhantomTakenSelf,
+        /// <summary>オープニングの字幕 6（亡霊を入れる回だけ。墓守の一文。列挙の末尾に足した）</summary>
+        OpeningLine6,
+        /// <summary>納品場所の表示板の左上の札（「納品額」。列挙の末尾に足した）</summary>
+        BoardLabel,
     }
 
     [Serializable]
@@ -187,15 +191,17 @@ namespace STYLY.TIB_Template.TreasureHaul
             { ThTextId.CsvYes, "はい" },
             { ThTextId.CsvNo, "いいえ" },
             { ThTextId.OpDeviceColumns, "端末,接続,位置合わせ,手,電池,練習,見学" },
-            { ThTextId.PhantomNoticeTake, "亡霊に見つかると、持っているお宝を奪われる。光の中に入らないで" },
-            { ThTextId.PhantomNoticeOut, "亡霊に見つかると、その回はゲームオーバー。光の中に入らないで" },
-            { ThTextId.PhantomOutSelf, "亡霊に見つかった…\nこの回はここまで" },
-            { ThTextId.PhantomOutPeerFormat, "{0} が亡霊に見つかった" },
+            { ThTextId.PhantomNoticeTake, "墓守の灯りに照らされると、持っているお宝を取り上げられる。灯りに入らないで" },
+            { ThTextId.PhantomNoticeOut, "墓守の灯りに照らされると、その回はここまで。灯りに入らないで" },
+            { ThTextId.PhantomOutSelf, "墓守に見つかった…\nこの回はここまで" },
+            { ThTextId.PhantomOutPeerFormat, "{0} が墓守に見つかった" },
             { ThTextId.OpPhantomLabel, "亡霊" },
             { ThTextId.OpPhantomOff, "なし" },
             { ThTextId.OpPhantomTake, "お宝を奪う" },
             { ThTextId.OpPhantomOut, "退場" },
-            { ThTextId.PhantomTakenSelf, "亡霊にお宝を奪われた！" },
+            { ThTextId.PhantomTakenSelf, "墓守にお宝を取り上げられた！" },
+            { ThTextId.OpeningLine6, "王の墓守が、今も灯りを手に見回っている。灯りに照らされるなよ。" },
+            { ThTextId.BoardLabel, "納品額" },
         };
 
         /// <summary>組み込みの既定の文言（予備フォントの文字集めに使う。ThFontExtraMenu）</summary>

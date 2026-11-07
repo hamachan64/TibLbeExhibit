@@ -1,0 +1,209 @@
+{
+  "ok": true,
+  "checks": [
+    {
+      "check": "fbx: node CargoBoard_Root",
+      "ok": true,
+      "detail": "parent=-"
+    },
+    {
+      "check": "fbx: node CargoBoard_Body",
+      "ok": true,
+      "detail": "parent=CargoBoard_Root"
+    },
+    {
+      "check": "fbx: node CargoBoard_Screen",
+      "ok": true,
+      "detail": "parent=CargoBoard_Root"
+    },
+    {
+      "check": "fbx: node CargoBoard_Lamp",
+      "ok": true,
+      "detail": "parent=CargoBoard_Root"
+    },
+    {
+      "check": "fbx: node CargoBoard_DigitsAnchor",
+      "ok": true,
+      "detail": "parent=CargoBoard_Root"
+    },
+    {
+      "check": "fbx: node CargoBoard_LabelAnchor",
+      "ok": true,
+      "detail": "parent=CargoBoard_Root"
+    },
+    {
+      "check": "fbx: every node rotation 0 / scale 1 (Bake Axis Conversion gives rotation 0 in Unity)",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "check": "fbx: triangles <= 3000",
+      "ok": true,
+      "detail": "{'CargoBoard_Body': 2688, 'CargoBoard_Screen': 2, 'CargoBoard_Lamp': 78} total 2768"
+    },
+    {
+      "check": "fbx: triangles match stats.json",
+      "ok": true,
+      "detail": "2768 / 2768"
+    },
+    {
+      "check": "fbx: materials <= 3 (atlas, screen, lamp)",
+      "ok": true,
+      "detail": "['TH_CargoBoard', 'TH_CargoBoardLamp', 'TH_CargoBoardScreen']"
+    },
+    {
+      "check": "fbx: one material per mesh",
+      "ok": true,
+      "detail": "{'CargoBoard_Body': 1, 'CargoBoard_Screen': 1, 'CargoBoard_Lamp': 1}"
+    },
+    {
+      "check": "fbx: every mesh has UVs",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "fbx: screen faces +Y in the file (Unity front +Z)",
+      "ok": true,
+      "detail": "normal (0.0, 1.0, 0.0)"
+    },
+    {
+      "check": "fbx: screen centre offset (Unity) = stats.json",
+      "ok": true,
+      "detail": "[0.0, 1.5, 0.23] vs [-0.0, 1.5, 0.23]"
+    },
+    {
+      "check": "blend: box outside about 1.9 x 0.65 x 0.12 m (frame rails included)",
+      "ok": true,
+      "detail": "w 1.930 h 0.655 d 0.135 (body without the rails 1.90 x 0.59 x 0.12)"
+    },
+    {
+      "check": "blend: model stands on the floor (min z = 0)",
+      "ok": true,
+      "detail": "min z 0.0000"
+    },
+    {
+      "check": "blend: screen centre on ScoreBoardAnchor (VenueRoot local)",
+      "ok": true,
+      "detail": "[0.0, 1.5, 0.32] vs [0, 1.5, 0.32]"
+    },
+    {
+      "check": "blend: digits area fits inside the screen",
+      "ok": true,
+      "detail": "digits 1.600 x 0.300 in screen 1.726 x 0.386"
+    },
+    {
+      "check": "blend: no colliders in the model",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "stage (as placed): no intersection with THStage_ExtractionBay",
+      "ok": true,
+      "detail": "0 triangle pairs"
+    },
+    {
+      "check": "stage (as placed): no intersection with THStage_EntryCamp",
+      "ok": true,
+      "detail": "0 triangle pairs"
+    },
+    {
+      "check": "stage (as placed): no vertex inside a stage collider of the entrance zone",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "check": "stage (as placed): nothing inside the CollectionVolume (2.3 x 0.92 x 1.56 at (0, 0.49, 1.2))",
+      "ok": true,
+      "detail": "0 vertices"
+    },
+    {
+      "check": "stage (as placed): inside the venue (z >= 0, |x| <= 2.5)",
+      "ok": true,
+      "detail": "z 0.0100..0.3558, |x| max 2.350"
+    },
+    {
+      "check": "stage (as placed): practice spots (z = 2.5) at least 2 m in front of the whole model",
+      "ok": true,
+      "detail": "2.144 m"
+    },
+    {
+      "check": "stage (x mirrored): no intersection with THStage_ExtractionBay",
+      "ok": true,
+      "detail": "0 triangle pairs"
+    },
+    {
+      "check": "stage (x mirrored): no intersection with THStage_EntryCamp",
+      "ok": true,
+      "detail": "0 triangle pairs"
+    },
+    {
+      "check": "stage (x mirrored): no vertex inside a stage collider of the entrance zone",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "check": "stage (x mirrored): nothing inside the CollectionVolume (2.3 x 0.92 x 1.56 at (0, 0.49, 1.2))",
+      "ok": true,
+      "detail": "0 vertices"
+    },
+    {
+      "check": "stage (x mirrored): inside the venue (z >= 0, |x| <= 2.5)",
+      "ok": true,
+      "detail": "z 0.0100..0.3558, |x| max 2.350"
+    },
+    {
+      "check": "stage (x mirrored): practice spots (z = 2.5) at least 2 m in front of the whole model",
+      "ok": true,
+      "detail": "2.144 m"
+    },
+    {
+      "check": "stage: gantry feet end before the bay starts (Unity z)",
+      "ok": true,
+      "detail": "feet up to z 0.1700, bay from z 0.1800 (gap 0.0100 m)"
+    },
+    {
+      "check": "stage: board bottom above the back of the bay",
+      "ok": true,
+      "detail": "board bottom 1.240 m, bay back top 0.715 m"
+    },
+    {
+      "check": "texture CargoBoard_BaseColor.png <= 1024",
+      "ok": true,
+      "detail": "1024x1024"
+    },
+    {
+      "check": "texture CargoBoard_MetallicSmoothness.png <= 1024",
+      "ok": true,
+      "detail": "1024x1024"
+    },
+    {
+      "check": "texture CargoBoard_MetallicSmoothness.png has alpha (smoothness)",
+      "ok": true,
+      "detail": "4 channels"
+    }
+  ],
+  "clearance": {
+    "as placed": {
+      "min_gap_gantry_feet_to_bay_m": 0.0157,
+      "min_gap_any_to_bay_m": 0.0157,
+      "model_z_range_venue": [
+        0.01,
+        0.3558
+      ],
+      "gap_model_to_practice_line_m": 2.1442
+    },
+    "x mirrored": {
+      "min_gap_gantry_feet_to_bay_m": 0.0157,
+      "min_gap_any_to_bay_m": 0.0157,
+      "model_z_range_venue": [
+        0.01,
+        0.3558
+      ],
+      "gap_model_to_practice_line_m": 2.1442
+    },
+    "feet_max_z_venue": 0.17,
+    "bay_min_z_venue": 0.18,
+    "board_bottom_y": 1.24,
+    "bay_back_top_y": 0.715
+  }
+}

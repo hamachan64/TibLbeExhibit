@@ -111,3 +111,5 @@ MonoBehaviour:
     text: "\u7D0D\u54C1\u5834\u6240\u307E\u3067\u904B\u307C\u3046"
   - id: 48
     text: "\u7D0D\u54C1\u5834\u6240\u306E\u4E0A\u3067\u624B\u3092\u958B\u3053\u3046"
+  - id: 89
+    text: "\u7D0D\u54C1\u984D"
