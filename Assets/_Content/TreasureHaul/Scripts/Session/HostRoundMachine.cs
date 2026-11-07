@@ -12,6 +12,8 @@ namespace STYLY.TIB_Template.TreasureHaul
     {
         readonly DeviceRegistry _registry;
         ThProgressParams _times;
+        // その回の亡霊の設定（開始時に確定。オープニングの長さ用）
+        ThPhantomMode _phantom = ThPhantomMode.Off;
 
         double _enteredAt;
         // 保留（#42）
@@ -71,7 +73,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         {
             switch (s)
             {
-                case RoundState.Opening: return _times.openingSeconds;
+                case RoundState.Opening: return ThOpeningTime.TotalSeconds(_times, _phantom);
                 case RoundState.Tutorial: return _times.practiceSeconds;
                 case RoundState.Playing: return _times.playingSeconds;
                 case RoundState.Result: return _times.resultSeconds;
@@ -80,9 +82,10 @@ namespace STYLY.TIB_Template.TreasureHaul
         }
 
         /// <summary>「開始」。Waiting 中かつ参加できる端末が 1 台以上のときだけ。</summary>
-        public bool TryStart(double now, long unixMs, int seed)
+        public bool TryStart(double now, long unixMs, int seed, ThPhantomMode phantom = ThPhantomMode.Off)
         {
             if (!CanStart) return false;
+            _phantom = phantom;
             RoundId = RoundIdGenerator.Next(unixMs, LastRoundId);
             LastRoundId = RoundId;
             Seed = seed;

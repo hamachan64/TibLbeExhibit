@@ -235,10 +235,10 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
         [Test] public void 亡霊の文言は組み込みの既定がある()
         {
             var t = ScriptableObject.CreateInstance<ThTextTable>();
-            Assert.AreEqual("亡霊に見つかると、持っているお宝を奪われる。光の中に入らないで", t.Get(ThTextId.PhantomNoticeTake));
-            Assert.AreEqual("亡霊に見つかると、その回はゲームオーバー。光の中に入らないで", t.Get(ThTextId.PhantomNoticeOut));
+            Assert.AreEqual("墓守の灯りに照らされると、持っているお宝を取り上げられる。灯りに入らないで", t.Get(ThTextId.PhantomNoticeTake));
+            Assert.AreEqual("墓守の灯りに照らされると、その回はここまで。灯りに入らないで", t.Get(ThTextId.PhantomNoticeOut));
             StringAssert.Contains("この回はここまで", t.Get(ThTextId.PhantomOutSelf));
-            StringAssert.Contains("亡霊に見つかった", t.Format(ThTextId.PhantomOutPeerFormat, "赤●"));
+            StringAssert.Contains("墓守に見つかった", t.Format(ThTextId.PhantomOutPeerFormat, "赤●"));
             UnityEngine.Object.DestroyImmediate(t);
         }
     }
@@ -275,6 +275,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
         {
             var p = new ThParams();
             p.operation.autoConfirmAlignment = true;
+            p.progress.phantomOpeningExtraSeconds = 0;   // 罰の確認が目的。オープニングの延長（ThEnemyModelsTests）は別に確かめる
             p.progress.openingSeconds = 3; p.progress.practiceSeconds = 5; p.progress.playingSeconds = 30; p.progress.resultSeconds = 3;
             return p;
         }

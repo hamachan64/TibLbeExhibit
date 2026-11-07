@@ -165,3 +165,9 @@ bpy.ops.export_scene.fbx(
 - **4 近傍の格子の流し込み（人の円の判定）は、斜めの狭い隙間を通れないと判定する**。8 近傍にする。1.15m 幅の判定は、通路の余裕が 2〜3cm しかないと 5cm 格子では中心が置けず「通れない」になる（2.5cm 格子＋0.5m のバケットで速くした）。
 - 置き場所に近づけるかは、家具の箱だけでなく**作業灯の三脚や祭壇の角と仕切りの端の間**で決まることが多い。床置きの灯りは壁の上に留める型にすると通り道が空く。
 - 画像の削除（rm）はガードレールで止められる。不要になった出力は README に列挙して人に消してもらう。
+
+## 19. Treasure Haul の敵2体（石像・亡霊、#67、2026-11-07）での追加学習
+- **入れ子の EMPTY がある FBX は、`axis_forward='-Z', axis_up='Y'` だと Unity の Bake Axis Conversion が効かない**（FBX の軸が最初から Y 上なので、ルートに X 270° が残り、メッシュも Z 上のまま入る）。`bake_space_transform=True` にすると、EMPTY の下の入れ子のメッシュ（吊り灯りの枠・石像の目）が 1〜2m ずれる。
+- **採用した方法**: `axis_up='Z', axis_forward='Y'`（Blender の Z 上のまま書き出す）、`bake_space_transform=False`、書き出す間だけモデルを Z 軸 180° 回し（正面 -Y を +Y に）、Unity の取り込みで **Bake Axis Conversion をオン**。これで全ノードが回転 0・Y 上・正面 +Z で入り、子のローカル座標もそのまま使える（`BlenderAssets/TreasureHaul/Enemies/build_enemies.py` の `export()` / `turn_z180()`）。
+- 軸の試験で作った Unity の一時フォルダは、uloop の `AssetDatabase.DeleteAsset` が「Dangerous API」として拒否される。試験は `Assets/` の外で済ませるか、消すのを人に頼む前提で最小限にする。
+- Blender の確認画像（Cycles）と Unity の見た目は、照明でかなり違う（石像が一時シーンの暖色の灯りで赤茶に見えた）。色の検収は、ステージの照明の下で見る。

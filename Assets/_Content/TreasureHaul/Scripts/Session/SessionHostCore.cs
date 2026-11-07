@@ -268,7 +268,7 @@ namespace STYLY.TIB_Template.TreasureHaul
 
         public bool Start(double now, long unixMs, int seed)
         {
-            if (!Machine.TryStart(now, unixMs, seed)) return false;
+            if (!Machine.TryStart(now, unixMs, seed, Settings.phantom)) return false;
             _now = now;
             ClearPracticeRound();
             _phantomOut.Clear();

@@ -29,7 +29,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         void OnState(RoundState state)
         {
             var t = _core.Tracker;
-            var a = _logic.OnState(state, t.RemainingSeconds.CurrentValue, _core.Params.progress.openingSeconds);
+            var a = _logic.OnState(state, t.RemainingSeconds.CurrentValue, ThOpeningTime.TotalSeconds(_core.Params.progress, t.Settings.phantom));   // 亡霊を入れる回は延長分を含む（ホストと同じ式）
             var venue = ThVenue.Instance;
             var title = venue != null ? venue.Title : null;
             if (title != null)

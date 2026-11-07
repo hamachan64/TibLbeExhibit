@@ -1,0 +1,212 @@
+[
+  {
+    "model": "GraveKeeper",
+    "height_m": 1.9913,
+    "dimensions_m": [
+      0.7408,
+      1.1906,
+      1.9913
+    ],
+    "lowest_z_m": 0.0393,
+    "triangles": {
+      "GraveKeeper_Body": 2730,
+      "GraveKeeper_Void": 126,
+      "GraveKeeper_Eye_L": 80,
+      "GraveKeeper_Eye_R": 80,
+      "GraveKeeper_LanternFrame": 556,
+      "GraveKeeper_LanternGlow": 36
+    },
+    "triangles_total": 3608,
+    "eye_center_unity": {
+      "L": [
+        -0.043,
+        1.5,
+        0.11
+      ],
+      "R": [
+        0.043,
+        1.5,
+        0.11
+      ]
+    },
+    "eye_height_m": 1.5,
+    "lantern_pivot_unity": [
+      0.24,
+      1.96,
+      0.8
+    ],
+    "lantern_glow_center_unity": [
+      0.24,
+      1.7668,
+      0.8
+    ],
+    "lantern_forward_m": 0.8,
+    "lantern_height_m": 1.7668,
+    "hem_fade_start_m": 0.15,
+    "hem_fade_full_m": 0.7,
+    "vertex_color": "Col (corner, byte): RGB = fold shade multiplier, A = opacity multiplier (sleeve ends, cape edge, pole tail -> 0)",
+    "materials": {
+      "TH_PhantomBody": [
+        "GraveKeeper_Body"
+      ],
+      "TH_PhantomVoid": [
+        "GraveKeeper_Void"
+      ],
+      "TH_PhantomEye": [
+        "GraveKeeper_Eye_L",
+        "GraveKeeper_Eye_R",
+        "GraveKeeper_LanternGlow"
+      ],
+      "TH_PhantomLantern": [
+        "GraveKeeper_LanternFrame"
+      ]
+    },
+    "textures": [
+      "textures/GraveKeeper_Lantern_BaseColor.png",
+      "textures/GraveKeeper_Lantern_MetallicSmoothness.png"
+    ]
+  },
+  {
+    "model": "KingStatue",
+    "height_m": 3.5868,
+    "dimensions_m": [
+      1.7173,
+      1.4996,
+      3.5868
+    ],
+    "bounds_unity": {
+      "min": [
+        -0.8404,
+        0.0,
+        -0.7484
+      ],
+      "max": [
+        0.8769,
+        3.5868,
+        0.7512
+      ]
+    },
+    "triangles": {
+      "KingStatue_Body": 8950,
+      "KingStatue_Head": 4548,
+      "KingStatue_Eye_L": 168,
+      "KingStatue_Eye_R": 168
+    },
+    "triangles_total": 13834,
+    "eye_center_unity": {
+      "L": [
+        -0.0717,
+        2.8857,
+        0.17
+      ],
+      "R": [
+        0.0717,
+        2.8857,
+        0.17
+      ]
+    },
+    "eye_height_m": 2.8857,
+    "head_pivot_unity": [
+      -0.0,
+      2.59,
+      0.01
+    ],
+    "head_pivot_note": "turn KingStatue_HeadPivot about the world up axis (local Y with Bake Axis Conversion on; local Z without it)",
+    "colliders": [
+      {
+        "name": "Collider_Plinth1",
+        "center_unity": [
+          0.0005,
+          0.1,
+          0.0014
+        ],
+        "size_unity": [
+          1.6817,
+          0.2,
+          1.4996
+        ]
+      },
+      {
+        "name": "Collider_Plinth2",
+        "center_unity": [
+          0.0003,
+          0.3,
+          0.0069
+        ],
+        "size_unity": [
+          1.3985,
+          0.2,
+          1.2529
+        ]
+      },
+      {
+        "name": "Collider_Plinth3",
+        "center_unity": [
+          -0.0002,
+          0.49,
+          0.0062
+        ],
+        "size_unity": [
+          1.1181,
+          0.18,
+          1.0113
+        ]
+      },
+      {
+        "name": "Collider_RobeLower",
+        "center_unity": [
+          0.0091,
+          0.94,
+          0.0393
+        ],
+        "size_unity": [
+          1.0082,
+          0.72,
+          0.9394
+        ]
+      },
+      {
+        "name": "Collider_RobeUpper",
+        "center_unity": [
+          -0.0186,
+          1.7,
+          -0.0124
+        ],
+        "size_unity": [
+          1.2758,
+          0.8,
+          0.7069
+        ]
+      },
+      {
+        "name": "Collider_Staff",
+        "center_unity": [
+          0.74,
+          1.15,
+          0.0709
+        ],
+        "size_unity": [
+          0.188,
+          1.9,
+          0.173
+        ]
+      }
+    ],
+    "materials": {
+      "TH_Statue": [
+        "KingStatue_Body",
+        "KingStatue_Head"
+      ],
+      "TH_StatueEye": [
+        "KingStatue_Eye_L",
+        "KingStatue_Eye_R"
+      ]
+    },
+    "textures": [
+      "textures/KingStatue_BaseColor.png",
+      "textures/KingStatue_Roughness.png",
+      "textures/KingStatue_MetallicSmoothness.png"
+    ],
+    "texture_size": 2048
+  }
+]

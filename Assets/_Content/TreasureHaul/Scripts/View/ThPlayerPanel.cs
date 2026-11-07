@@ -70,6 +70,8 @@ namespace STYLY.TIB_Template.TreasureHaul
                 WaitNextRound = t.WaitNextRound,
                 Remaining = t.RemainingSeconds.CurrentValue,
                 OpeningSeconds = core.Params.progress.openingSeconds,
+                // その回の設定（ThState で全員に配られる。亡霊の PhantomClient と同じ t.Settings）から、ホストと同じ式で延長分を出す
+                OpeningExtraSeconds = ThOpeningTime.ExtraSeconds(core.Params.progress, t.Settings.phantom),
                 Target = t.Target,
                 Total = core.Total.CurrentValue,
                 Result = t.Result,
