@@ -514,3 +514,9 @@
 - **uloop の dynamic code**: ガード（guard.py）は `--code-file` の中身を検査できずに止めるので、`--code` でインラインに渡す。`using UnityEngine;` は既定で入っているので書くと `Object` があいまいになる（`UnityEngine.Object` と書く）。`await System.Threading.Tasks.Task.Delay(ms)` が使えるので、**数秒で消える Tween は「起こす → 待つ → `Time.timeScale = 0`」を1回の dynamic code でやってからスクリーンショットを撮る**（npx の起動に毎回約1秒かかり、別のコマンドで撮ると消えた後になる）。撮ったら `timeScale` を 1 に戻す。
 - `StageScoreMonitor/Quad`（前作から Environment にあるスコアモニター）は、納品場所の前から見ると壁の向こう約 6.4m に真横から見えて、白い破片のように映る。今回の変更とは関係なし。
 - Unity で一時的に作ったスクリプト（検証用のドライバ等）は、`.meta` を消すガードと dynamic code の Restricted で、エージェントからは消せない。作るなら最初から消す段取り（ユーザーに頼む）を前提にする。
+
+## 遺跡の亡霊（Issue #65、2026-11-07）で分かったこと
+- **Mac の画面がロックされると、Unity Editor が止まり、uloop の compile / execute-dynamic-code / get-logs がすべて約 180 秒でタイムアウトする**（`Editor.log` も更新されない）。`ioreg -n Root -d1 -a | grep -A1 CGSSessionScreenIsLocked` で `true` なら画面ロックが原因。エージェントからは解除できない（`caffeinate -u`・`osascript activate` は効かない）。Unity を強制終了せず、ユーザーに解除を頼んで止まる。解除後は「Compilation is already in progress」が一度返り、続けて普通に通る。長い作業を夜間に回すときは、先にロックしない設定にしてもらう。
+- **透明の材質（亡霊の体など）が近くにあると、頭について来る帯（`ThPlayerPanel`）・知らせの文字の上に描かれて読めなくなる**。どちらも透明の描画順 3000 なので、距離で並べ替えられる。空間に置く半透明の物は描画順を 2900 などに下げ、文字が常に手前に来るようにする（不透明に見せたい目も、順番を下げるために透明設定にした）。
+- **DOTween で `localPosition` を Yoyo で揺らす物を、非表示・再表示で使い回すときは、Awake で基準位置を控えて OnEnable で戻してから揺れを作る**。`OnDisable` で `Kill()` するだけだと止まった位置が次の基準になり、回を重ねるたびに上へずれていく（1回あたり平均で振れ幅の半分）。
+- **回の途中で、遷移しないままホストの状態が変わったとき（保留・亡霊の退場）は、Seq を +1 して `ThState` を送る**。Seq が同じだと、端末は Heartbeat から食い違いに気づけず、`ThState` を取りこぼすと次の遷移まで追いつけない。
