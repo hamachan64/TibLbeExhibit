@@ -1,0 +1,19 @@
+# アプリの起動時設定。リビルド無しで現場調整するためのもの。
+#
+# 置き場所
+#   Editor : <リポジトリ>/ExternalResources/AppConfig.toml
+#   Android: /sdcard/Android/data/<PackageName>/files/AppConfig.toml
+#            （アンインストールすると消えるので注意。adb install -r なら残る）
+# ファイルが無ければ起動時にこの初期値で作られる。
+#
+# このファイルはエディタ専用。実機は /sdcard/Android/data/com.hamachan.tib/files/AppConfig.toml を使う（実機の初期値は全部 0）。
+# 下の値は、エディタで遊ぶときに、練習の列の後ろ（ワールド (8.45, 0, 2.4)）から納品場所（+X）を向いて始めるためのもの。
+
+# アプリの中心位置（m）。Recenter した地点（起動時のHMD位置・向き）から見た位置で指定する。
+# X: 右が正 / Y: 上が正 / Z: 前が正。
+CenterPositionX = 2.4
+CenterPositionY = 0.0
+CenterPositionZ = -8.45
+
+# アプリの中心の向き（Y軸回転、度）。Recenter した向きから右回りが正。
+CenterRotationY = -90.0

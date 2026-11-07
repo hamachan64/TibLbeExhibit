@@ -9,9 +9,9 @@
 
 | | |
 | :--- | :--- |
-| **フェーズ** | コア（0a・1〜5、3d）と素材 #46 はマージ済み（4b PR #60・5 PR #61・#46 PR #53 まで）。タイトルロゴ（[#62](https://github.com/hamachan64/TibLbeExhibit/issues/62)）の PR [#63](https://github.com/hamachan64/TibLbeExhibit/pull/63) をレビュー中。追加要素の遺跡の亡霊（[#65](https://github.com/hamachan64/TibLbeExhibit/issues/65)）の PR [#66](https://github.com/hamachan64/TibLbeExhibit/pull/66) をレビュー中 |
-| **次にやること** | PR #66 をレビューし、デモ会で亡霊の罰（U-20）を決める。PR #63 をレビューし、実機でロゴの見え方を確かめる。実機での試作 #49 と通し #45 |
-| **判断待ち** | 実機の入手（#49・#45 に必要）。U-1 は通し #45 までに必要。ほかは下の「判断待ち」 |
+| **フェーズ** | コア（0a・1〜5、3d）と素材 #46 はマージ済み（4b PR #60・5 PR #61・#46 PR #53 まで）。タイトルロゴ（[#62](https://github.com/hamachan64/TibLbeExhibit/issues/62)、PR #63）と会場レイアウト（[#48](https://github.com/hamachan64/TibLbeExhibit/issues/48)、PR #64）もマージ済み。追加要素の遺跡の亡霊（[#65](https://github.com/hamachan64/TibLbeExhibit/issues/65)）の PR [#66](https://github.com/hamachan64/TibLbeExhibit/pull/66) をレビュー中 |
+| **次にやること** | PR #66 をレビューし、デモ会で亡霊の罰（U-20）を決める。実機で壁・納品場所が現実の腰壁に重なるか、ロゴの見え方を確かめる。番人の石像 #68・敵のモデル #67。実機での試作 #49 と通し #45 |
+| **判断待ち** | 実機の入手（#49・#45 に必要）。U-1（原点の合わせ方と向き。hacha さんの回答待ち）は通し #45 までに必要。ほかは下の「判断待ち」 |
 | **締切** | 内容変更 **10/31**（あと11日）／最終データ 11/16／現地設営 11/17 |
 
 状態: ⬜ 未着手 ／ 🔨 作業中 ／ 👀 PRレビュー中 ／ ✅ 完了 ／ ⛔ 止まっている
@@ -38,10 +38,10 @@
 | 内容 | Issue | 状態 | メモ |
 | :--- | :--- | :---: | :--- |
 | お宝・納品場所・瓦礫の 3D モデル | [#46](https://github.com/hamachan64/TibLbeExhibit/issues/46)（PR [#53](https://github.com/hamachan64/TibLbeExhibit/pull/53)） | ✅ | ブランチ `repo/feature-th-asset-models`（worktree `TibLbeExhibit-assets`）。お宝 12 種（持ち手なし）と、高い壁の回廊ステージを Blender で制作し、Unity に取り込み済み（2026-10-22。お宝プレハブ・カタログ、Environment のステージ・置き場所 34・焼き込みの灯り。仕様 `.claude/loops/20261021-th-asset-import.md`）。そっと置いたお宝が壁・家具に食い込まない押し出しも入れた。`THIRD_PARTY_NOTICES.md` に記録（外部素材なし） |
-| タイトルロゴ（待機中は納品場所の上、開始の瞬間は各自の正面に一瞬） | [#62](https://github.com/hamachan64/TibLbeExhibit/issues/62)（PR [#63](https://github.com/hamachan64/TibLbeExhibit/pull/63)） | 👀 | ロゴは Claude の画像生成。公開リポジトリなので画像は git に入れない（`Artwork/TreasureHaul/` と `Assets/_Content/TreasureHaul/Textures/` は git 管理外。DEVELOPMENT.md）。ビルドする Mac に画像があることを確かめる |
+| タイトルロゴ（待機中は納品場所の上、開始の瞬間は各自の正面に一瞬） | [#62](https://github.com/hamachan64/TibLbeExhibit/issues/62)（PR [#63](https://github.com/hamachan64/TibLbeExhibit/pull/63)） | ✅ | ロゴは Claude の画像生成。公開リポジトリなので画像は git に入れない（`Artwork/TreasureHaul/` と `Assets/_Content/TreasureHaul/Textures/` は git 管理外。DEVELOPMENT.md）。ビルドする Mac に画像があることを確かめる |
 | オープニングのナレーション音声 | [#47](https://github.com/hamachan64/TibLbeExhibit/issues/47) | ⬜ | 原稿 `TREASURE_HAUL_NARRATION.md`。音声はユーザーが用意する |
 | 番人の石像・遺跡の亡霊の 3D モデル | [#67](https://github.com/hamachan64/TibLbeExhibit/issues/67) | ⬜ | 石像は壁（2.4m）より背が高く、頭と目を別パーツに。亡霊は半透明で怖くしすぎない。今の亡霊は仮の形（#65） |
-| 会場レイアウト（Environment） | [#48](https://github.com/hamachan64/TibLbeExhibit/issues/48) | ⬜ | 順4b と同じシーンを触るので同時に作業しない |
+| 会場レイアウト（Environment） | [#48](https://github.com/hamachan64/TibLbeExhibit/issues/48)（PR [#64](https://github.com/hamachan64/TibLbeExhibit/pull/64)） | ✅ | 会場図面に合わせた配置と `AppConfig` の取り込み。実機で壁・納品場所が現実の腰壁に重なるかは未確認 |
 
 ## 追加要素（11/12 まで。第2検証で採否を決める。Issue はコアの後に作る）
 
@@ -58,7 +58,7 @@
 | ID | 内容 | 必要になる作業 |
 | :--- | :--- | :--- |
 | ― | 実機（PICO）の入手。10月中の見込み | #49、#45 |
-| U-1 | 全端末の位置合わせの方法（hacha さんに確認。保留中） | 全体、#45 |
+| U-1 | 全端末の位置合わせの方法（ほぼ決定: テンプレートの `Map/CenterPosition` を原点に合わせ、ずれは `AppConfig.toml` で直す。原点の合わせ方と向きは hacha さんの回答待ち） | 全体、#45 |
 | U-5 | ナレーションの文言（音声はユーザーが用意） | #47 |
 | U-7 | ランキングの単位とリセットの時期 | 追加要素 |
 | U-20 | 亡霊に見つかったときの罰（お宝を奪う／退場）。両方作って運営PCで切り替え、デモ会で決める | 亡霊 |
@@ -67,6 +67,8 @@
 ## 最近決まったこと
 
 - 2026-11-07（亡霊）: 徘徊する敵をゴーレムから「遺跡の亡霊」に変え、石像より先に作る。1体が本編の間だけ中央の塊の周りを 0.4 m/s で一周し、前方の視界（3m・左右 35°、壁でさえぎる）に頭が 0.7秒入ると見つかる。罰は「お宝を奪う（0G で消える）」と「その回は退場（お宝はそっと置く）」の2通りを作り、運営PCで切り替えてデモ会で決める（U-20）。石像は、見つかったら持っているお宝が即壊れる（U-18）、壁より背の高い像が全体を見下ろす。企画書 5.6、要件 F-EXT を更新。
+
+- 2026-11-06（#48）: 会場を Inter BEE の会場図面に合わせる。`VenueRoot` をワールド (11.45, 0, 2.4)・Y −90° に置き（納品場所は入口側の右端、回廊は受付側へ延びる）、`WarningWall`・`VRArea`・`Area_Floor` はテンプレートの位置のまま。前の会場のスキャンとスコアモニターは非表示。ルートの `InterBEE_Guide`（EditorOnly）に腰壁の目安を置いた。hacha さんの `AppConfig` を取り込み、エディタでは練習の列の後ろから納品場所を向いて始まる（`ExternalResources/AppConfig.toml`）。`VenueRoot` は Y 回転だけ可。原点の合わせ方と向きは hacha さんの回答待ち（U-1）。
 
 - 2026-11-03（#62）: タイトルロゴを出す。待機中は納品場所の上の空間（高さ 2.15m・幅約 2.4m）に固定し、開始（Waiting → Opening）の瞬間に各自の顔の正面（1.5m 先・目の高さ +0.22m・幅約 0.9m）へ約 1.9 秒だけ出す（頭には追従しない）。キービジュアルはアプリに入れない。ロゴ画像は公開リポジトリに入れない。企画書 4.1・4.2、要件 F-FLOW-2、設計書を更新。
 

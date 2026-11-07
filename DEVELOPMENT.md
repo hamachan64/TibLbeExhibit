@@ -81,3 +81,16 @@
 - 新しい環境（クローンし直した・hacha さんのプロジェクトへ移す等）では、ロゴの元画像を手で受け渡し、`TH_TitleLogo.png` としてコピーしてから uloop で `AssetDatabase.Refresh()` する。インポート設定は sRGB・Alpha Is Transparency・ミップマップあり・最大 2048・Android は ASTC 6x6。
   `.meta` も git に無いので guid が新しくなる。材質 `Assets/_Content/TreasureHaul/Materials/TH_TitleLogo.mat` の Base Map に、エディタ API で結線し直す。
 - 画像が無いときは、`ThTitleLogo` が警告を出してロゴを出さない（白い四角は出ない）。ビルドの前に、ロゴが出ることを PlayMode で確かめる。
+
+## AppConfig（現場での基準位置の調整）
+hacha さん（STYLY）の Inter BEE 用テンプレートの仕組み（`Assets/_Content/Scripts/System/AppConfig.cs` / `AppConfigLoader.cs`。`TreasureHaulUserClient` の `UserClient` に付いている）。リビルドせずに、端末ごとの基準位置を設定ファイル `AppConfig.toml` で直せる。
+
+- **置き場所**: エディタはリポジトリの `ExternalResources/AppConfig.toml`。実機（PICO）は `/sdcard/Android/data/com.hamachan.tib/files/AppConfig.toml`（ファイルが無ければ起動時に初期値で作られる。初期値は全部 0）。
+- **キー**（Recenter した地点＝起動時の頭の位置・向きから見た値）:
+  - `CenterPositionX` / `CenterPositionY` / `CenterPositionZ`: アプリの中心（ワールド原点）の位置（m）。X は右が正、Y は上が正、Z は前が正。
+  - `CenterRotationY`: アプリの中心の向き（Y 軸回転、度。右回りが正）。
+  - `AppConfigLoader` が、この中心がワールド原点・正面に来るよう、XR Rig を逆向きにずらす（コンテンツ側の座標は変えない）。
+- **本プロジェクトのエディタ値**: `ExternalResources/AppConfig.toml` は git に入れてある。エディタで遊ぶとき、練習の列の後ろ（ワールド (8.45, 0, 2.4)）から納品場所（+X）を向いて始まる値（`CenterPositionX = 2.4`、`CenterPositionZ = -8.45`、`CenterRotationY = -90.0`）。実機には使わない。
+- **実機での直し方**: `adb push AppConfig.toml /sdcard/Android/data/com.hamachan.tib/files/` → アプリを再起動。アンインストールすると消える（`adb install -r` なら残る）。
+- **テンプレートとの違い**: エディタ用の置き場所を、本プロジェクトは Unity プロジェクトがリポジトリ直下にあるため 1 段浅く（`../ExternalResources`）直している。hacha さんのプロジェクトへ移すときは、テンプレート側の `AppConfigLoader.cs` をそのまま使う（guid は同じ）。
+- **ParrelSync の複製**: 複製側にも `ExternalResources/` が無ければ、初期値（全部 0）で作られる。その場合は会場の角（ワールド原点）から始まる。

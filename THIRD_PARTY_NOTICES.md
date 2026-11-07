@@ -104,6 +104,7 @@
 | PICO OpenXR SDK / PXR_Enterprise | PICO 対応 | PICO SDK の規約 | 要確認 | 無料 | 要確認 | 未確認 |
 | Unity 公式パッケージ（URP・XRI・XR Hands・OpenXR 等）と付属サンプル（XRI の「XR Interaction Simulator」「Hands Interaction Demo」「Starter Assets」、XR Hands の「HandVisualizer」「Gestures」） | 基盤、エディタでの手のシミュレーション | Unity Companion License 等 | 可 | 無料 | ― | 未確認 |
 | XR Hands のサンプル「HandVisualizer」の手のモデル（`Assets/Samples/XR Hands/1.7.3/HandVisualizer/Models/` の `LeftHand.fbx`・`RightHand.fbx`） | 練習の10秒のヒント（手の横で「開く⇄握る」を見せる。#43） | Unity Package Distribution License（パッケージ同梱の `LICENSE.md` と公式ページ https://unity.com/legal/licenses/unity-package-distribution-license の原文で確認。Unity で作ったアプリに組み込んだバイナリとしての使用・配布は可。改変の許可は無いのでメッシュは改変しない（実行時に関節の回転を動かすだけ）。モデル単体では再配布しない） | 可 | 無料 | 不要 | 確認済み（2026-10-21） |
+| TIB テンプレートの `AppConfig.cs` / `AppConfigLoader.cs`（`Assets/_Content/Scripts/System/`。#48） | 現場でリビルドせずに基準位置を直す設定ファイル（`AppConfig.toml`）の読み書き。入手元は hacha さん（STYLY）配布のテンプレート（2026-11-06 受領）。エディタ用の置き場所の1行だけ本プロジェクト用に直した | この展示のために主催側から提供されたコード（本プロジェクトの Core 自体が同じテンプレートの派生） | 可（展示のために提供された物） | 無料 | 不要 | 全文を読み、ネットワーク通信がなく、ローカルの設定ファイルを読み書きするだけで、実行ファイルを含まないことを確認した。確認済み（2026-11-06） |
 
 ## 使わないと決めた物
 
