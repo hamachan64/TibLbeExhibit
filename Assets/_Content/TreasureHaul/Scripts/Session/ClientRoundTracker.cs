@@ -19,6 +19,7 @@ namespace STYLY.TIB_Template.TreasureHaul
         readonly ReactiveProperty<bool> _isHostLost = new ReactiveProperty<bool>(false);
         readonly ReactiveProperty<bool> _isHeld = new ReactiveProperty<bool>(false);
         readonly ReactiveProperty<int> _ownColor = new ReactiveProperty<int>(-1);
+        readonly ReactiveProperty<bool> _isPhantomOut = new ReactiveProperty<bool>(false);
 
         public ReadOnlyReactiveProperty<RoundState> State => _state;
         public ReadOnlyReactiveProperty<float> RemainingSeconds => _remaining;
@@ -28,6 +29,10 @@ namespace STYLY.TIB_Template.TreasureHaul
         public ReadOnlyReactiveProperty<bool> IsHeld => _isHeld;
         /// <summary>自分の色番号（ホストの ThState の tutorialColors から。割り当てが無い・Waiting では -1。回が変わる・待機に戻ると消える）</summary>
         public ReadOnlyReactiveProperty<int> OwnColor => _ownColor;
+        /// <summary>亡霊の罰 B でこの回は退場している（Playing・Result の間。回の中では戻らない。待機・回が変わると false）</summary>
+        public ReadOnlyReactiveProperty<bool> IsPhantomOut => _isPhantomOut;
+        /// <summary>退場している端末（ホストの ThState から。DeviceId）</summary>
+        public string[] PhantomOutDevices { get; private set; } = new string[0];
         /// <summary>DeviceId → 色番号（全員分。Tutorial 〜 Result の間。待機に戻る・回が変わると空になる）</summary>
         public System.Collections.Generic.IReadOnlyDictionary<string, int> DeviceColors => _deviceColors;
         /// <summary>その端末の色番号（無ければ -1）</summary>
@@ -83,7 +88,7 @@ namespace STYLY.TIB_Template.TreasureHaul
 
         public void Dispose()
         {
-            _state.Dispose(); _remaining.Dispose(); _isParticipant.Dispose(); _isHostLost.Dispose(); _isHeld.Dispose(); _ownColor.Dispose();
+            _state.Dispose(); _remaining.Dispose(); _isParticipant.Dispose(); _isHostLost.Dispose(); _isHeld.Dispose(); _ownColor.Dispose(); _isPhantomOut.Dispose();
         }
 
         double Remaining(double now) => _isHeld.Value ? _anchorRemaining : Math.Max(0.0, _anchorRemaining - (now - _anchorTime));
@@ -140,6 +145,13 @@ namespace STYLY.TIB_Template.TreasureHaul
             Target = state == RoundState.Waiting ? 0 : Math.Max(0, msg.target);
             Result = state == RoundState.Result && msg.result != null && msg.result.present ? msg.result : null;
 
+            // 亡霊の退場。回の中では戻さない（古い ThState が順番を入れ替えて届いても退場が消えないように）
+            bool outState = state == RoundState.Playing || state == RoundState.Result;
+            PhantomOutDevices = outState && msg.phantomOut != null ? msg.phantomOut : new string[0];
+            bool keep = outState && !newRound && _isPhantomOut.Value;
+            bool isOut = keep || Array.IndexOf(PhantomOutDevices, _deviceId) >= 0;
+            if (_isPhantomOut.Value != isOut) _isPhantomOut.Value = isOut;
+
             // 色（練習の割り当て）。参加・状態の通知より先に揃える
             ApplyColors(state, msg);
 
@@ -191,6 +203,13 @@ namespace STYLY.TIB_Template.TreasureHaul
             }
         }
 
+        /// <summary>ホストの罰 B の知らせ（ThPhantomPunish）を受けた。今の回の Playing 中だけ、すぐ退場にする（ThState を待たない）</summary>
+        public void MarkPhantomOut(long roundId)
+        {
+            if (roundId == 0 || roundId != RoundId || _state.Value != RoundState.Playing || WaitNextRound) return;
+            if (!_isPhantomOut.Value) _isPhantomOut.Value = true;
+        }
+
         /// <summary>ホストの起動値を記録する。報告済みの起動値と違えば NeedsResync が true になり、報告を送ったとき（TryTakeResync / NoteResyncSent）だけ解消する。</summary>
         void NoteEpoch(long epoch)
         {
@@ -221,6 +240,8 @@ namespace STYLY.TIB_Template.TreasureHaul
                     Result = null;
                     _deviceColors = new System.Collections.Generic.Dictionary<string, int>();
                     _ownColor.Value = -1;
+                    _isPhantomOut.Value = false;
+                    PhantomOutDevices = new string[0];
                     _isHeld.Value = false;
                     _remaining.Value = 0f;
                     SetParticipant(false);

@@ -87,7 +87,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             Int(r.DamageTotal),
         });
 
-        /// <summary>players の 1 行（11 列）。端末番号 0（未登録）・色なし・無い秒は空欄</summary>
+        /// <summary>players の 1 行（13 列）。端末番号 0（未登録）・色なし・無い秒は空欄</summary>
         public static string PlayersRow(RoundRecord r, PlayerRecord p) => Line(new[]
         {
             r.RoundId.ToString(CultureInfo.InvariantCulture),
@@ -101,6 +101,8 @@ namespace STYLY.TIB_Template.TreasureHaul
             Int(p.CollectedAmount),
             Int(p.DamageCount),
             Int(p.DamageAmount),
+            Int(p.PhantomFoundCount),
+            Int(p.PhantomLostAmount),
         });
     }
 

@@ -286,10 +286,13 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
                 }
 
                 // 回収範囲・表示板
+                var zoneT = (venue.GetType().GetField("_collectZone", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(venue) as BoxCollider).transform;
+                Assert.Less(Quaternion.Angle(venue.Root.rotation, zoneT.rotation), 0.01f, "CollectZone は VenueRoot に対して回転しない");
                 var bounds = venue.GetCollectBounds();
-                Assert.AreEqual(new Vector3(0f, 0.49f, 1.2f), bounds.center);
-                Assert.AreEqual(new Vector3(2.3f, 0.92f, 1.56f), bounds.size);
-                Assert.AreEqual(new Vector3(0f, 1.5f, 0.32f), venue.Board.transform.position);
+                // VenueRoot は回転・移動してよいので、ローカルで比べる（回転による誤差は許容差で吸収）
+                Assert.AreEqual(0f, Vector3.Distance(new Vector3(0f, 0.49f, 1.2f), bounds.center), 0.001f);
+                Assert.AreEqual(0f, Vector3.Distance(new Vector3(2.3f, 0.92f, 1.56f), bounds.size), 0.001f);
+                Assert.AreEqual(0f, Vector3.Distance(new Vector3(0f, 1.5f, 0.32f), venue.Root.InverseTransformPoint(venue.Board.transform.position)), 0.001f);
 
                 // 灯り 23（すべて焼き込み）。スポット 11・点光源 12
                 var lights = stage.GetComponentsInChildren<Light>(true);

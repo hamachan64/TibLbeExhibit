@@ -40,6 +40,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             new Group { Field = nameof(ThParams.treasure), Label = "P-4 お宝・減額", Validate = ValidateTreasure },
             new Group { Field = nameof(ThParams.layout), Label = "P-5 配置・バランス", Validate = ValidateLayout },
             new Group { Field = nameof(ThParams.operation), Label = "P-6 運営", Validate = (p, e) => new List<string>() },
+            new Group { Field = nameof(ThParams.phantom), Label = "P-7 亡霊", Validate = (p, e) => new List<string>() },
         };
 
         public static ThParamsLoadResult Load(ThParams defaults, string json, ThEnvironmentInfo env)

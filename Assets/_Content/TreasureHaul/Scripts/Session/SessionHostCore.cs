@@ -50,7 +50,16 @@ namespace STYLY.TIB_Template.TreasureHaul
         // #44
         readonly ReactiveProperty<DeviceRowData[]> _devices = new ReactiveProperty<DeviceRowData[]>(new DeviceRowData[0]);
         readonly Subject<RoundRecord> _roundFinished = new Subject<RoundRecord>();
+        readonly ReactiveProperty<ThPhantomMode> _phantomMode = new ReactiveProperty<ThPhantomMode>(ThPhantomMode.Off);
+        // 遺跡の亡霊: 罰 B で退場した端末（その回の間だけ）と、端末ごとに最後に罰を適用した時刻
+        readonly HashSet<string> _phantomOut = new HashSet<string>();
+        readonly Dictionary<string, double> _phantomLastAt = new Dictionary<string, double>();
 
+        /// <summary>亡霊の設定（運営UIの切り替えボタンが読む・待機中だけ <see cref="SetPhantomMode"/> で変える）</summary>
+        public ReadOnlyReactiveProperty<ThPhantomMode> PhantomMode => _phantomMode;
+        /// <summary>罰 B で退場している端末（DeviceId。その回の間だけ）</summary>
+        public IReadOnlyCollection<string> PhantomOut => _phantomOut;
+        public bool IsPhantomOut(string deviceId) => deviceId != null && _phantomOut.Contains(deviceId);
         public ReadOnlyReactiveProperty<RoundState> State => _state;
         public ReadOnlyReactiveProperty<float> RemainingSeconds => _remaining;
         public ReadOnlyReactiveProperty<long> RoundId => _roundId;
@@ -120,7 +129,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             _state.Dispose(); _remaining.Dispose(); _roundId.Dispose(); _connectedCount.Dispose();
             _eligibleCount.Dispose(); _paramsVersionRp.Dispose(); _warnings.Dispose();
             _held.Dispose(); _canHold.Dispose(); _holdRemaining.Dispose(); _target.Dispose(); _total.Dispose();
-            _devices.Dispose(); _roundFinished.Dispose();
+            _devices.Dispose(); _roundFinished.Dispose(); _phantomMode.Dispose();
         }
 
         void Adopt(ThParamsLoadResult p, ThGameSettings settings, IEnumerable<string> settingsWarnings)
@@ -129,6 +138,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             ParamsVersion = p.Version;
             ParamsJson = JsonUtility.ToJson(p.Params);
             Settings = settings ?? new ThGameSettings();
+            _phantomMode.Value = Settings.phantom;
             Registry.HostParamsVersion = p.Version;
             Registry.AutoConfirm = p.Params.operation.autoConfirmAlignment;   // 以後に登録・再接続する端末から効く
             Machine.TrySetTimes(p.Params.progress);
@@ -145,6 +155,16 @@ namespace STYLY.TIB_Template.TreasureHaul
             if (Machine.State != RoundState.Waiting) return false;
             Adopt(p, settings, settingsWarnings);
             SendParams(-1);
+            Refresh(now);
+            return true;
+        }
+
+        /// <summary>亡霊の設定を切り替える（待機中だけ。回の途中は変えない）。変えたら true</summary>
+        public bool SetPhantomMode(ThPhantomMode mode, double now)
+        {
+            if (Machine.State != RoundState.Waiting || !Enum.IsDefined(typeof(ThPhantomMode), mode)) return false;
+            Settings.phantom = mode;
+            _phantomMode.Value = mode;
             Refresh(now);
             return true;
         }
@@ -251,6 +271,8 @@ namespace STYLY.TIB_Template.TreasureHaul
             if (!Machine.TryStart(now, unixMs, seed)) return false;
             _now = now;
             ClearPracticeRound();
+            _phantomOut.Clear();
+            _phantomLastAt.Clear();
             BeginRecord(now, unixMs);
             // 版が違う端末にはその場で ThParams を送り直す（N-7）
             foreach (var d in Registry.Devices)
@@ -320,6 +342,7 @@ namespace STYLY.TIB_Template.TreasureHaul
                     held = Machine.IsHeld,
                 }));
             }
+            if (Machine.State == RoundState.Playing && CheckAllPhantomOut(now)) SendState(now);
             _items?.Tick(now, Machine.State == RoundState.Playing);   // そっと置かせたお宝を、〔置く時間〕の後につかめる／回収にする
             _practice?.Tick(now, Machine.State == RoundState.Tutorial);
             var sendTable = Machine.State == RoundState.Tutorial ? _practice : Machine.State == RoundState.Playing ? _items : null;
@@ -340,6 +363,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             RebindSender(senderClientNo);
             if (rpc == Rpc.ThResync) HandleResync(senderClientNo, args, now);
             else if (rpc == Rpc.ThStatus) HandleStatus(senderClientNo, args, now);
+            else if (rpc == Rpc.ThPhantomSpot) HandlePhantomSpot(senderClientNo, args, now);
             else if (rpc == Rpc.ThGrab || rpc == Rpc.ThLift || rpc == Rpc.ThRelease || rpc == Rpc.ThRest || rpc == Rpc.ThCollect
                 || rpc == Rpc.ThDamage || rpc == Rpc.ThPoses) HandleItemMessage(rpc, senderClientNo, args, now);
         }
@@ -395,6 +419,70 @@ namespace STYLY.TIB_Template.TreasureHaul
                     table.OnPoses(device, poses);
                     break;
             }
+        }
+
+        // ---- 遺跡の亡霊（罰を決めるのはホスト。企画書 5.6 C） ----
+
+        /// <summary>
+        /// 端末の「亡霊に見つかった」。Playing 中・参加端末・見学/退場でない・設定が Off でない・同じ端末の〔無視時間〕以内でない、のときだけ罰を適用する。
+        /// 罰 A: 持っている本編のお宝（Held・Flying）を消滅（何も持っていなければ罰なしで捨てる）。罰 B: その回だけ退場。
+        /// </summary>
+        void HandlePhantomSpot(int sender, string[] args, double now)
+        {
+            if (Machine.State != RoundState.Playing || _items == null) return;
+            var mode = Settings.phantom;
+            if (mode == ThPhantomMode.Off) return;
+            if (!ThMessages.TryDecode(args, out long roundId, out ThPhantomSpotMsg _) || !Gate.Accept(roundId, sender)) return;
+            var device = Registry.GetDeviceId(sender);
+            if (device == null || _phantomOut.Contains(device)) return;
+            if (_phantomLastAt.TryGetValue(device, out var last) && now - last < Params.phantom.ignoreSeconds) return;
+
+            var punish = new ThPhantomPunishMsg { mode = (int)mode, device = device, clientNo = sender };
+            int lost = 0;
+            bool punished = true;
+            if (mode == ThPhantomMode.TakeTreasure)
+            {
+                var taken = _items.TakeHeldBy(device);
+                punish.items = new int[taken.Count];
+                punish.gens = new int[taken.Count];
+                for (int i = 0; i < taken.Count; i++)
+                {
+                    punish.items[i] = taken[i].Item;
+                    punish.gens[i] = taken[i].Gen;
+                    lost += taken[i].Value;
+                }
+                punish.lost = lost;
+                punished = taken.Count > 0;   // 何も持っていなければ罰なし（報告は受け付けたので数え、無視時間はかける）
+            }
+            else
+            {
+                _phantomOut.Add(device);
+                ReleaseItemsOf(device, now);   // 見学への切り替えと同じ解放（減額なし）
+                Machine.BumpSeq();             // 退場の追いつき: ThPhantomPunish と ThState を両方取りこぼしても、Heartbeat の通し番号の食い違いから ThResync → ThState で追いつく
+            }
+            _phantomLastAt[device] = now;
+            _record?.NotePhantomFound(device, lost);   // 受け付けた報告の数。失った額は罰 A で奪った額だけ
+            Debug.Log($"[SessionHost] 亡霊の報告を受け付けた mode={mode} device={device} 罰={punished} 奪った額={lost}");
+            if (!punished) return;
+            _tx.Send(Rpc.ThPhantomPunish, ThMessages.Encode(Machine.RoundId, punish));
+            if (mode == ThPhantomMode.PlayerOut) SendState(now);   // 退場の一覧を ThState にも載せる
+        }
+
+        /// <summary>
+        /// 罰 B: 本編の参加端末のうち「まだ遊んでいる端末」が 0 で、退場が 1 人以上なら Result へ進む。
+        /// 遊んでいない端末 = 退場、または接続中で見学・位置合わせ未確認に切り替えられた端末。切断中の端末は戻ってくるかもしれないので「遊んでいる」と数える（回を終わらせない）
+        /// </summary>
+        bool CheckAllPhantomOut(double now)
+        {
+            if (_phantomOut.Count == 0) return false;
+            foreach (var id in Machine.Participants)
+            {
+                if (_phantomOut.Contains(id)) continue;
+                var d = Registry.Get(id);
+                bool notPlaying = d != null && d.Connected && (d.Spectator || !d.AlignmentConfirmed);
+                if (!notPlaying) return false;
+            }
+            return Machine.TryEndPlay(now);
         }
 
         /// <summary>サーバーの再起動で ClientNo が入れ替わると、接続・切断イベントなしに対応が変わる。受け取るたびに引き直す。</summary>
@@ -461,7 +549,17 @@ namespace STYLY.TIB_Template.TreasureHaul
                 held = m.IsHeld,
                 target = TargetAmount,
                 result = BuildResult(),
+                phantomOut = PhantomOutArray(),
             }));
+        }
+
+        string[] PhantomOutArray()
+        {
+            var st = Machine.State;
+            if (_phantomOut.Count == 0 || (st != RoundState.Playing && st != RoundState.Result)) return new string[0];
+            var arr = new List<string>(_phantomOut);
+            arr.Sort(StringComparer.Ordinal);
+            return arr.ToArray();
         }
 
         // ---- 目標額と結果（ホストが決める。F-FLOW-5） ----
@@ -543,6 +641,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             if (st == RoundState.Waiting)
             {
                 _items = null;
+                _phantomOut.Clear();
                 _spawnWarnings = new string[0];
                 _itemsRound = 0;
                 _lastItemsSentAt = double.NegativeInfinity;
@@ -557,6 +656,7 @@ namespace STYLY.TIB_Template.TreasureHaul
                 _items = new HostItemTable(spawn.Items, _setup.CollectBounds, (rpc, dto) => _tx.Send(rpc, ThMessages.EncodeObject(Machine.RoundId, dto)),
                     deviceId => Registry.Get(deviceId)?.ClientNo ?? -1, Params.treasure, Params.grip.placeSeconds);
                 if (_placeSolver != null) _items.PlaceSolver = _placeSolver;
+                _items.DeviceBlocked = d => _phantomOut.Contains(d);
                 _items.Log = Debug.Log;
                 _items.Confirmed = OnItemConfirmed;
                 _itemsRound = Machine.RoundId;
@@ -698,7 +798,7 @@ namespace STYLY.TIB_Template.TreasureHaul
             if (_record != null && Machine.State == RoundState.Playing) _record.ReachedPlaying = true;
             if (_record != null && Machine.State != RoundState.Waiting)
                 _record.SetParticipants(Machine.Participants, Registry.Numbers.Compare, Registry.Numbers.NumberOf);   // Opening → Tutorial・Tutorial → Playing で減った分を追う
-            var rows = DeviceRowBuilder.Build(Registry, Machine.State, _practiceDoneAt, now, Params.progress.statusInterval, Params.operation.batteryWarningPercent);
+            var rows = DeviceRowBuilder.Build(Registry, Machine.State, _practiceDoneAt, now, Params.progress.statusInterval, Params.operation.batteryWarningPercent, _phantomOut);
             if (!DeviceRowData.SameList(_devices.Value, rows)) _devices.Value = rows;
             _state.Value = Machine.State;
             _remaining.Value = Machine.RemainingSeconds(now);

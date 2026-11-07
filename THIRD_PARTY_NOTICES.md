@@ -48,6 +48,7 @@
 | STYLY NetSync サーバー（PyPI `styly-netsync-server` 0.17.4、`uvx` で取得） | 開発・展示の同期サーバー（運営PCで動かす）。疑似クライアント `styly-netsync-simulator` を含む | https://pypi.org/project/styly-netsync-server/ （github.com/styly-dev/STYLY-NetSync） | Apache-2.0（PyPI の表示） | 可 | 無料 | 再配布するならライセンス文の同梱（今は再配布しない） | 確認済み | 2026-10-18 |
 | MCP for Blender（PyPI `blender-mcp` 2.0.0 → `mcp-for-blender` 2.1.9、`uvx` で取得）＋ Blender アドオン | AI から Blender を操作してモデリングする開発ツール（成果物に同梱しない） | https://pypi.org/project/mcp-for-blender/ （github.com/ahujasid/blender-mcp） | MIT（PyPI の表示） | 可 | 無料（アドオン導入・コア機能。**Premium の AI 3D 生成は有料なので使わない**） | 不要（開発ツール） | 確認済み | 2026-10-18 |
 | ナレーション音声 | オープニング | ユーザーが用意 | ― | ― | ― | 生成サービスが求めるなら AI 音声である旨 | ユーザーが確認 | ― |
+| タイトルロゴ（元画像 `Artwork/TreasureHaul/TreasureHaul_title_logo.png` → `Assets/_Content/TreasureHaul/Textures/TH_TitleLogo.png`。**どちらも git 管理外**） | 待機中の空間のロゴと開始の合図の正面のロゴ | ユーザーが Claude（Anthropic）の画像生成で作成 | Anthropic Consumer Terms（Effective 2025-10-08）§4「we assign to you all of our right, title, and interest—if any—in Outputs」（https://www.anthropic.com/legal/consumer-terms）。第三者の商標・素材、R.E.P.O の素材、Anthropic/Claude の名称・ロゴ（§12）は含まない。評価目的の利用（§2、非商用）ではない前提。リポジトリが公開なので画像は git に入れない（ユーザー判断） | 可 | 追加費用なし | 不要（Consumer Terms・Usage Policy に AI 生成の表示義務なし。人が作ったと偽らない） | 確認済み（画像1つ・実行物なし） | 2026-11-03 |
 
 ## プロジェクトに入っている物
 
@@ -108,6 +109,7 @@
 | PICO OpenXR SDK / PXR_Enterprise | PICO 対応 | PICO SDK の規約 | 要確認 | 無料 | 要確認 | 未確認 |
 | Unity 公式パッケージ（URP・XRI・XR Hands・OpenXR 等）と付属サンプル（XRI の「XR Interaction Simulator」「Hands Interaction Demo」「Starter Assets」、XR Hands の「HandVisualizer」「Gestures」） | 基盤、エディタでの手のシミュレーション | Unity Companion License 等 | 可 | 無料 | ― | 未確認 |
 | XR Hands のサンプル「HandVisualizer」の手のモデル（`Assets/Samples/XR Hands/1.7.3/HandVisualizer/Models/` の `LeftHand.fbx`・`RightHand.fbx`） | 練習の10秒のヒント（手の横で「開く⇄握る」を見せる。#43） | Unity Package Distribution License（パッケージ同梱の `LICENSE.md` と公式ページ https://unity.com/legal/licenses/unity-package-distribution-license の原文で確認。Unity で作ったアプリに組み込んだバイナリとしての使用・配布は可。改変の許可は無いのでメッシュは改変しない（実行時に関節の回転を動かすだけ）。モデル単体では再配布しない） | 可 | 無料 | 不要 | 確認済み（2026-10-21） |
+| TIB テンプレートの `AppConfig.cs` / `AppConfigLoader.cs`（`Assets/_Content/Scripts/System/`。#48） | 現場でリビルドせずに基準位置を直す設定ファイル（`AppConfig.toml`）の読み書き。入手元は hacha さん（STYLY）配布のテンプレート（2026-11-06 受領）。エディタ用の置き場所の1行だけ本プロジェクト用に直した | この展示のために主催側から提供されたコード（本プロジェクトの Core 自体が同じテンプレートの派生） | 可（展示のために提供された物） | 無料 | 不要 | 全文を読み、ネットワーク通信がなく、ローカルの設定ファイルを読み書きするだけで、実行ファイルを含まないことを確認した。確認済み（2026-11-06） |
 
 ## 使わないと決めた物
 

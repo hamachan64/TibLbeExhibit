@@ -507,3 +507,30 @@
 - **「文言の文字をフォントに足す」は、Play を止めた直後に実行しない**。Play 直後に実行したら、本体フォントに無いはずの「学」が集める文字から漏れ、予備フォントから消えた（もう一度実行したら直った）。Play の後に実行したときは、ログの「本体フォントに無い文字」と、フォントの差分を確かめる。
 - **練習中に見学にした端末は、本編の参加端末から外れ、目標額もその人数分になる**（Tutorial → Playing で参加端末を確定するため。F-FLOW-4、企画書 4.2 の「見学にして本編を始める」）。「参加人数・目標額が変わらない」のは本編中に切り替えたとき。
 - `pgrep -f "<クローンのパス>"` は、バックグラウンドで起動したときの zsh の親プロセスも拾うので、`kill` に PID が2つ渡って失敗する。`Unity.app/Contents/MacOS/Unity -batchmode -projectPath <パス>` まで含めて絞る。
+
+## タイトルロゴ（Issue #62、2026-11-03）で分かったこと
+- **`ClientRoundTracker.State` は初期値 Waiting の ReactiveProperty**。購読した瞬間にホストから何も受けていない Waiting が流れ、ホストを見失ったときも自分で Waiting に戻る。そのため「Waiting → Opening に変わった」だけで開始の瞬間とみなすと、起動直後・再接続の直後に途中から知った Opening でも成立してしまう。開始の瞬間を見分けるには、残り秒（`Tracker.RemainingSeconds`。State の通知より先に更新される）が〔オープニング〕に近いかも見る（`ThTitleLogo.IsStartCue`）。
+- **頭について来る面（`ThPlayerPanel`、正面やや下 -0.18m @1m）は、空間に固定した表示の下端とぶつかりやすい**。開始位置（納品場所から 2.5〜3.2m・目の高さ 1.6m）から見る物は、下端を目の高さより上に置く（タイトルロゴは中心 1.9m で文字と重なり、2.15m にした）。
+- **uloop の dynamic code**: ガード（guard.py）は `--code-file` の中身を検査できずに止めるので、`--code` でインラインに渡す。`using UnityEngine;` は既定で入っているので書くと `Object` があいまいになる（`UnityEngine.Object` と書く）。`await System.Threading.Tasks.Task.Delay(ms)` が使えるので、**数秒で消える Tween は「起こす → 待つ → `Time.timeScale = 0`」を1回の dynamic code でやってからスクリーンショットを撮る**（npx の起動に毎回約1秒かかり、別のコマンドで撮ると消えた後になる）。撮ったら `timeScale` を 1 に戻す。
+- `StageScoreMonitor/Quad`（前作から Environment にあるスコアモニター）は、納品場所の前から見ると壁の向こう約 6.4m に真横から見えて、白い破片のように映る。今回の変更とは関係なし。
+- Unity で一時的に作ったスクリプト（検証用のドライバ等）は、`.meta` を消すガードと dynamic code の Restricted で、エージェントからは消せない。作るなら最初から消す段取り（ユーザーに頼む）を前提にする。
+
+## Inter BEE 会場への配置と AppConfig（2026-11-06 #48）
+- **Treasure Haul の `VenueRoot` はもう原点にない**: ワールド (11.45, 0, 2.4)・Y −90°（hacha さんのテンプレート `InterBEE.unity` の座標。原点 = `Map/CenterPosition` = 体験エリアの左下の角、+X = 図面の右・長辺、+Z = 待機エリア側）。
+  ステージのローカル値（`stage_layout.json`・過去の仕様書の「奥行 7.5」「X ≥ −2.28」等）をワールド座標として使わない。`ThLoopbackHarness` の `SetHead`/`AimHand`/`Items` や試作の `AvatarWalkDriver` の中心 (0.6,0,1.6) はワールドの値なので、検証では `venue.Root.TransformPoint` で直してから渡す。
+  上の「プレイエリア座標系」の節（中心 -4.9,0,-6.4 / 4×18m）は前作の会場の値で、Treasure Haul には当てはまらない。
+- **同期の照合ハッシュはワールドを往復させない**: `ThTreasureSetup.ComputeHash` は置き場所を mm に丸める。`InverseTransformPoint(transform.position)` は回転・移動のある Root だと約 2e-6m ずれ、.5mm ちょうどの値（TreasureSlot_04/05 の z=6.0075 等）で端末ごとに丸めが分かれうる → 全端末が参加不可。`ThVenue.LocalPointOf` で親のローカル値から組み立てる。エディタ（同じ Mac）では再現しないので要注意。
+- **`VenueRoot` を動かすのは編集時だけ**。モジュールは静的バッチ、ライトプローブはワールドで焼かれるので、動かしたら「Tools/Treasure Haul/ステージの灯りを焼く」をやり直す。
+- **AppConfigLoader**（`UserClient` に付く。実行順 −2000 の Awake）が `AppConfig.toml` の値で STYLY XR Rig を逆向きにずらす。エディタは `ExternalResources/AppConfig.toml`（git 管理。練習の列の後ろ (8.45,0,2.4) から +X を向いて始まる値）。ParrelSync の複製では初期値 0 で作られ、会場の角（外周の壁の中）から始まる。
+  NetSync の `NetSyncAvatar.PhysicalPosition` は Rig の yaw を反映しない（Human Presence を有効にすると AppConfig の回転でずれる。TH では未使用）。
+- テンプレートの `WarningWall` の Quad にはコライダーがあり、Quad (1) は石の壁の面より 3cm 通路側にある（お宝が当たると減額。石の壁と同じ扱いなので実害は小さい）。
+- 作業中の Mac に `Assets/_Content/TreasureHaul/Textures/`（ロゴ、git 管理外）が無いと、Unity が `TH_TitleLogo.mat` を保存し直して `_MainTex` を空にすることがある。その変更はコミットしない。
+  2026-11-07 に、`~/Downloads/TreasureHaul_title_logo.png`（ユーザー確認済みの最終版、1866×755）から `Artwork/TreasureHaul/` と `Textures/TH_TitleLogo.png` に戻した。同じ Mac・同じパスなので、Unity（Library）が以前の guid `73b745722917647c2945c8a16b1c069a` を割り当て直し、材質はコミット済みの内容と一致した（結線し直しても差分なし）。クローンし直した環境では guid が変わるので、DEVELOPMENT.md の手順どおり結線し直して材質をコミットする。
+  エディタ単体ではセッションが Waiting にならず空間のロゴは出ない。画像の確認だけなら PlayMode で `ThTitleLogo.ShowVenue()` / `PlayCue(camera)` を直接呼んで写す。
+- `.claude/hooks/guard.py` は `uloop execute-dynamic-code --code-file` のファイルを実行前に読んで検査する。同じコマンド内で heredoc で作る・`$変数` でパスを渡すと読めずに止まるので、Write で先に作り、絶対パスで渡す。
+
+## 遺跡の亡霊（Issue #65、2026-11-07）で分かったこと
+- **Mac の画面がロックされると、Unity Editor が止まり、uloop の compile / execute-dynamic-code / get-logs がすべて約 180 秒でタイムアウトする**（`Editor.log` も更新されない）。`ioreg -n Root -d1 -a | grep -A1 CGSSessionScreenIsLocked` で `true` なら画面ロックが原因。エージェントからは解除できない（`caffeinate -u`・`osascript activate` は効かない）。Unity を強制終了せず、ユーザーに解除を頼んで止まる。解除後は「Compilation is already in progress」が一度返り、続けて普通に通る。長い作業を夜間に回すときは、先にロックしない設定にしてもらう。
+- **透明の材質（亡霊の体など）が近くにあると、頭について来る帯（`ThPlayerPanel`）・知らせの文字の上に描かれて読めなくなる**。どちらも透明の描画順 3000 なので、距離で並べ替えられる。空間に置く半透明の物は描画順を 2900 などに下げ、文字が常に手前に来るようにする（不透明に見せたい目も、順番を下げるために透明設定にした）。
+- **DOTween で `localPosition` を Yoyo で揺らす物を、非表示・再表示で使い回すときは、Awake で基準位置を控えて OnEnable で戻してから揺れを作る**。`OnDisable` で `Kill()` するだけだと止まった位置が次の基準になり、回を重ねるたびに上へずれていく（1回あたり平均で振れ幅の半分）。
+- **回の途中で、遷移しないままホストの状態が変わったとき（保留・亡霊の退場）は、Seq を +1 して `ThState` を送る**。Seq が同じだと、端末は Heartbeat から食い違いに気づけず、`ThState` を取りこぼすと次の遷移まで追いつけない。

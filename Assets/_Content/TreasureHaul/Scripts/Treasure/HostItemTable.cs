@@ -141,6 +141,12 @@ namespace STYLY.TIB_Template.TreasureHaul
             }
         }
 
+        /// <summary>
+        /// その端末がつかめない（亡霊の罰 B で退場している）か。true の端末のつかむ申請・持ち上げは否認する。
+        /// 判断は呼び出し側（SessionHostCore）が持つ。null なら全員つかめる
+        /// </summary>
+        public System.Func<string, bool> DeviceBlocked { get; set; }
+
         public HostItem Get(int index) => _byIndex.TryGetValue(index, out var it) ? it : null;
 
         /// <summary>練習用でない表では練習用の行を扱わない（練習用の表の行は扱う）</summary>
@@ -157,6 +163,12 @@ namespace STYLY.TIB_Template.TreasureHaul
             var it = Get(m.item);
             if (it == null || m.reqId <= 0) return;
             if (_cancelled.Contains(Key(deviceId, m.item, m.reqId))) return;   // 取りやめ済み。認めない（返事も要らない）
+            if (DeviceBlocked != null && DeviceBlocked(deviceId))
+            {
+                // 退場した端末のつかむ申請は認めない（端末は自分で止めているので、遅れて届いた申請の始末）
+                _emit(Rpc.ThGrabDenied, new ThGrabDeniedMsg { item = it.Index, clientNo = clientNo, reqId = m.reqId });
+                return;
+            }
 
             // 同じ申請の再送: すでに認めていれば同じ承認を送り直す（S は Held、M は予約中の Locked）
             if (it.OwnerDevice == deviceId && it.AcceptedReqId == m.reqId
@@ -208,6 +220,11 @@ namespace STYLY.TIB_Template.TreasureHaul
         {
             var it = Get(m.item);
             if (it == null || m.reqId <= 0) return;
+            if (DeviceBlocked != null && DeviceBlocked(deviceId))
+            {
+                _emit(Rpc.ThGrabDenied, new ThGrabDeniedMsg { item = it.Index, clientNo = clientNo, reqId = m.reqId });
+                return;
+            }
             bool match = it.Kind == TreasureKind.M && !it.Gone && it.OwnerDevice != null && it.OwnerDevice == deviceId
                 && it.AcceptedReqId == m.reqId && it.Gen == m.gen;
             if (match && it.State == ItemState.Locked)
@@ -271,6 +288,43 @@ namespace STYLY.TIB_Template.TreasureHaul
                 LogLine($"切断などでそっと置く item={it.Index} device={deviceId} 降ろす先={dest}");
                 _emit(Rpc.ThForceRest, new ThForceRestMsg { item = it.Index, gen = it.Gen, pos = dest, rot = rot });
             }
+        }
+
+        /// <summary>亡霊に奪われたお宝 1 つ（番号・消滅後の世代・奪われたときの価値）</summary>
+        public readonly struct PhantomTaken
+        {
+            public readonly int Item, Gen, Value;
+            public PhantomTaken(int item, int gen, int value) { Item = item; Gen = gen; Value = value; }
+        }
+
+        /// <summary>
+        /// 亡霊の罰 A: その端末が持っている本編のお宝（持ち主がその端末で Held / Flying）をすべて消滅させる
+        /// （現在の価値 0・状態 Destroyed・世代 +1・Gone）。練習用の行・予約中（Locked）・落下中は対象外。
+        /// 奪ったお宝を返す（無ければ空。メッセージは送らない。呼び出し側が ThPhantomPunish をまとめて送る）。
+        /// ThItems の gone + Destroyed で、取りこぼした端末も追いつく
+        /// </summary>
+        public List<PhantomTaken> TakeHeldBy(string deviceId)
+        {
+            var list = new List<PhantomTaken>();
+            if (deviceId == null || _practiceTable) return list;
+            foreach (var it in _items)
+            {
+                if (it.Gone || it.Practice || it.OwnerDevice != deviceId) continue;
+                if (it.State != ItemState.Held && it.State != ItemState.Flying) continue;
+                int lost = it.Value;
+                it.Value = 0;
+                it.Gone = true;
+                it.State = ItemState.Destroyed;
+                it.OwnerDevice = null;
+                it.OwnerClientNo = -1;
+                it.ControllerDevice = null;   // 遅れた ThRest・ThCollect・ThPoses・ThDamage は捨てられる
+                it.ControllerClientNo = -1;
+                it.ExemptReported = false;
+                it.Gen++;
+                list.Add(new PhantomTaken(it.Index, it.Gen, lost));
+                LogLine($"亡霊に奪われた item={it.Index} device={deviceId} 額={lost}");
+            }
+            return list;
         }
 
         /// <summary>

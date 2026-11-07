@@ -112,6 +112,15 @@ namespace STYLY.TIB_Template.TreasureHaul
             if (jump.Jumped) _client.OnHandJumped(this);
             else _anchor.SetPositionAndRotation(target.position, target.rotation);
 
+            // 亡霊の罰 B で退場している: ビームを出さず、何も狙わない
+            if (_client.IsPhantomOut)
+            {
+                _aimed = null;
+                _aimedZone = -1;
+                SetBeam(false, default, default);
+                return;
+            }
+
             float length = _style.BeamLength(_client.Grip);
             // 手のひらが壁の中・壁の向こう（肩から手のひらまでの線が壁を横切る）なら、そのフレームは対象なし・ビームなし
             if (IsHandBehindWall(shoulder, palm.position, _wallMask))

@@ -291,7 +291,7 @@ namespace STYLY.TIB_Template.TreasureHaul.Tests
         {
             var s = new ThGameSettings();
             Assert.AreEqual(ThMode.TargetAndScore, s.mode);
-            Assert.IsFalse(s.statue || s.large || s.golem || s.secret);
+            Assert.IsFalse(s.statue || s.large || s.phantom != ThPhantomMode.Off || s.secret);
             Assert.AreEqual(ThGripStyle.Beam, s.gripStyle);
         }
 

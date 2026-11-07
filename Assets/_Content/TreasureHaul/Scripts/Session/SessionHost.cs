@@ -99,7 +99,7 @@ namespace STYLY.TIB_Template.TreasureHaul
                 Debug.Log($"[SessionHost] ready clientNo={_nm.ClientNo} deviceId={_nm.DeviceId} paramsVersion={Core.ParamsVersion}");
 
                 // 端末の登録は ThResync で行う（ステルスの運営PC・クローンを数えない）。切断だけ NetSync のイベントを使う。
-                foreach (var rpc in new[] { Rpc.ThResync, Rpc.ThGrab, Rpc.ThLift, Rpc.ThRelease, Rpc.ThRest, Rpc.ThCollect, Rpc.ThDamage, Rpc.ThPoses, Rpc.ThStatus })
+                foreach (var rpc in new[] { Rpc.ThResync, Rpc.ThGrab, Rpc.ThLift, Rpc.ThRelease, Rpc.ThRest, Rpc.ThCollect, Rpc.ThDamage, Rpc.ThPoses, Rpc.ThStatus, Rpc.ThPhantomSpot })
                 {
                     var r = rpc;
                     RpcManager.Instance.AsObservable(r)
@@ -192,6 +192,21 @@ namespace STYLY.TIB_Template.TreasureHaul
             if (error != null) { Debug.LogWarning("[SessionHost] " + error); return false; }
             Core.SetDeviceNumbers(ThSettingsFiles.LoadDeviceNumbers(_dataDir), Now);
             Debug.Log($"[SessionHost] device template written: {ThSettingsFiles.DevicesPath(_dataDir)}");
+            return true;
+        }
+
+        /// <summary>亡霊の切り替え（待機中だけ）。切り替えたら treasure_haul_settings.json に保存する</summary>
+        public bool RequestSetPhantom(ThPhantomMode mode)
+        {
+            if (Core == null || !Core.SetPhantomMode(mode, Now)) return false;
+            try { SaveSettings(Core.Settings); }
+            catch (Exception e)
+            {
+                Core.SetRuntimeWarning("settings", $"ゲーム設定を保存できません: {e.Message}");
+                Debug.LogWarning("[SessionHost] ゲーム設定を保存できません: " + e.Message);
+                return true;
+            }
+            Core.SetRuntimeWarning("settings", null);
             return true;
         }
 

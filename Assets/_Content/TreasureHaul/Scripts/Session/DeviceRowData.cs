@@ -23,11 +23,13 @@ namespace STYLY.TIB_Template.TreasureHaul
         /// <summary>練習完了の列を出す局面か（Tutorial〜Result の間だけ）</summary>
         public bool PracticeVisible;
         public bool PracticeDone;
+        /// <summary>亡霊の罰 B で、この回は退場している（回の間だけ）</summary>
+        public bool PhantomOut;
 
         public bool Equals(DeviceRowData o) =>
             o != null && DeviceId == o.DeviceId && Number == o.Number && Connected == o.Connected && AlignmentConfirmed == o.AlignmentConfirmed
             && Spectator == o.Spectator && Hand == o.Hand && Battery == o.Battery && BatteryWarning == o.BatteryWarning
-            && PracticeVisible == o.PracticeVisible && PracticeDone == o.PracticeDone;
+            && PracticeVisible == o.PracticeVisible && PracticeDone == o.PracticeDone && PhantomOut == o.PhantomOut;
 
         public override bool Equals(object obj) => Equals(obj as DeviceRowData);
         public override int GetHashCode() => DeviceId == null ? 0 : DeviceId.GetHashCode();
@@ -54,7 +56,7 @@ namespace STYLY.TIB_Template.TreasureHaul
     {
         /// <param name="statusInterval">状況報告の間隔。これの 3 倍を過ぎて届かない手・電池は「不明」</param>
         public static DeviceRowData[] Build(DeviceRegistry registry, RoundState state, IReadOnlyDictionary<string, double> practiceDone,
-            double now, float statusInterval, int batteryWarningPercent)
+            double now, float statusInterval, int batteryWarningPercent, IReadOnlyCollection<string> phantomOut = null)
         {
             var ids = registry.SortedDeviceIds();
             var rows = new DeviceRowData[ids.Count];
@@ -75,6 +77,7 @@ namespace STYLY.TIB_Template.TreasureHaul
                     Battery = fresh ? d.BatteryPercent : -1,
                     PracticeVisible = practiceVisible,
                     PracticeDone = practiceDone != null && practiceDone.ContainsKey(d.DeviceId),
+                    PhantomOut = phantomOut != null && System.Linq.Enumerable.Contains(phantomOut, d.DeviceId),
                 };
                 row.BatteryWarning = row.Battery >= 0 && row.Battery <= batteryWarningPercent;
                 rows[i] = row;

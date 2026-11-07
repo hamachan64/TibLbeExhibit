@@ -117,6 +117,22 @@ namespace STYLY.TIB_Template.TreasureHaul
         CsvNo,
         /// <summary>端末一覧の列見出し（カンマ区切りで 7 列: 端末番号・接続・位置合わせ・手・電池・練習・見学）</summary>
         OpDeviceColumns,
+        // 遺跡の亡霊（追加要素）。組み込みの既定の文言あり
+        /// <summary>本編の開始時の一文（罰 A: お宝を奪う）</summary>
+        PhantomNoticeTake,
+        /// <summary>本編の開始時の一文（罰 B: 退場）</summary>
+        PhantomNoticeOut,
+        /// <summary>退場した本人に大きく出す</summary>
+        PhantomOutSelf,
+        /// <summary>仲間が見つかった知らせ（書式「{0} が亡霊に見つかった」。色と記号）</summary>
+        PhantomOutPeerFormat,
+        /// <summary>運営UI: 亡霊の切り替え</summary>
+        OpPhantomLabel,
+        OpPhantomOff,
+        OpPhantomTake,
+        OpPhantomOut,
+        /// <summary>罰 A で持っているお宝を奪われた本人に短く出す（理由が分かるように）</summary>
+        PhantomTakenSelf,
     }
 
     [Serializable]
@@ -165,12 +181,21 @@ namespace STYLY.TIB_Template.TreasureHaul
             { ThTextId.OpWriteDeviceTemplate, "接続中の端末を書き出す" },
             { ThTextId.OpNoDevices, "端末がありません" },
             { ThTextId.CsvRoundsHeader, "開始時刻,RoundId,終わり方,中断した状態,人数,モード,追加要素,持ち方,パラメータ版,保留の有無,延長秒,回収額,目標額,目標達成,損害額" },
-            { ThTextId.CsvPlayersHeader, "RoundId,端末番号,DeviceId,色番号,練習完了秒,初めて持った秒,初めて回収した秒,回収した数,回収額,減額の回数,減額の額" },
+            { ThTextId.CsvPlayersHeader, "RoundId,端末番号,DeviceId,色番号,練習完了秒,初めて持った秒,初めて回収した秒,回収した数,回収額,減額の回数,減額の額,亡霊に見つかった回数,亡霊に奪われた額" },
             { ThTextId.CsvCompleted, "完了" },
             { ThTextId.CsvAborted, "中断" },
             { ThTextId.CsvYes, "はい" },
             { ThTextId.CsvNo, "いいえ" },
             { ThTextId.OpDeviceColumns, "端末,接続,位置合わせ,手,電池,練習,見学" },
+            { ThTextId.PhantomNoticeTake, "亡霊に見つかると、持っているお宝を奪われる。光の中に入らないで" },
+            { ThTextId.PhantomNoticeOut, "亡霊に見つかると、その回はゲームオーバー。光の中に入らないで" },
+            { ThTextId.PhantomOutSelf, "亡霊に見つかった…\nこの回はここまで" },
+            { ThTextId.PhantomOutPeerFormat, "{0} が亡霊に見つかった" },
+            { ThTextId.OpPhantomLabel, "亡霊" },
+            { ThTextId.OpPhantomOff, "なし" },
+            { ThTextId.OpPhantomTake, "お宝を奪う" },
+            { ThTextId.OpPhantomOut, "退場" },
+            { ThTextId.PhantomTakenSelf, "亡霊にお宝を奪われた！" },
         };
 
         /// <summary>組み込みの既定の文言（予備フォントの文字集めに使う。ThFontExtraMenu）</summary>
