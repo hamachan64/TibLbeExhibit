@@ -77,6 +77,7 @@
 | :--- | :--- | :--- |
 | タイトルロゴの元画像・キービジュアル | `Artwork/TreasureHaul/`（`TreasureHaul_title_logo.png`、`TreasureHaul_キービジュアル.jpg`） | 元データ。キービジュアルはアプリに入れない |
 | タイトルロゴのテクスチャ | `Assets/_Content/TreasureHaul/Textures/TH_TitleLogo.png`（`Textures/` フォルダごと git 管理外） | 待機中の空間のロゴ・開始の合図の正面のロゴ（`ThTitleLogo`） |
+| キービジュアルの下絵（3D 描画・案1）と Blender のシーン | `Design/KeyVisual/` の PNG・SVG・`render/`・`scene/KeyVisual_Scene.blend`（スクリプトと README だけ git に入れる） | キービジュアルの下絵。`.blend` はスクリプトだけでは作り直せないので消さない（`Design/KeyVisual/README.md`） |
 
 - 新しい環境（クローンし直した・hacha さんのプロジェクトへ移す等）では、ロゴの元画像を手で受け渡し、`TH_TitleLogo.png` としてコピーしてから uloop で `AssetDatabase.Refresh()` する。インポート設定は sRGB・Alpha Is Transparency・ミップマップあり・最大 2048・Android は ASTC 6x6。
   `.meta` も git に無いので guid が新しくなる。材質 `Assets/_Content/TreasureHaul/Materials/TH_TitleLogo.mat` の Base Map に、エディタ API で結線し直す。

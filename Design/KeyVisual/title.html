@@ -1,0 +1,33 @@
+<!doctype html>
+<!-- Title version of the key visual. Rendered to PNG by render_title.sh (headless Edge).
+     Background: render/kv_3d_full.png (3840x2160) shown at 1920x1080 CSS px.
+     Font: Noto Sans JP from the repo (SIL OFL 1.1). -->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: "KV Noto"; font-weight: 900; src: url("../../Assets/_Content/Fonts/Noto_Sans_JP/static/NotoSansJP-Black.ttf"); }
+  @font-face { font-family: "KV Noto"; font-weight: 700; src: url("../../Assets/_Content/Fonts/Noto_Sans_JP/static/NotoSansJP-Bold.ttf"); }
+  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #000; }
+  .kv { position: relative; width: 1920px; height: 1080px; background: url("render/kv_3d_full.png") center / cover no-repeat; }
+  /* Darken the upper left (cavern rock) so the title reads. */
+  .kv::before { content: ""; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 1100px 560px at 0% 0%, rgba(5,6,9,.85) 0%, rgba(5,6,9,.5) 45%, rgba(5,6,9,0) 100%); }
+  .block { position: absolute; left: 88px; top: 70px; }
+  .title { font: 900 168px/0.9 "KV Noto", sans-serif; letter-spacing: -.01em; margin: 0;
+    background: linear-gradient(to bottom, #fff4d6 0%, #f6d27a 48%, #d18a22 100%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 5px 0 #2a1604) drop-shadow(0 14px 28px rgba(0,0,0,.7)); }
+  .catch { margin-top: 26px; font: 700 50px/1 "KV Noto", sans-serif; letter-spacing: .14em; color: #fff;
+    text-shadow: 0 3px 0 rgba(0,0,0,.75), 0 8px 20px rgba(0,0,0,.6); }
+</style>
+</head>
+<body>
+  <div class="kv">
+    <div class="block">
+      <div class="title">Treasure<br>Haul</div>
+      <div class="catch">見つけて、運んで、壊すな。</div>
+    </div>
+  </div>
+</body>
+</html>
