@@ -5,12 +5,12 @@
 > 各行の中身は GitHub Issue、仕様は `TREASURE_HAUL_DESIGN.md` 13章（依存関係の図あり）。
 > ボード: https://github.com/users/hamachan64/projects/2 （状態の列はこのファイルと同じ5つ。両方を同時に更新する）
 
-## 現在地（2026-11-03 更新）
+## 現在地（2026-11-07 更新）
 
 | | |
 | :--- | :--- |
-| **フェーズ** | コア（0a・1〜5、3d）と素材 #46 はマージ済み（4b PR #60・5 PR #61・#46 PR #53 まで）。タイトルロゴ（[#62](https://github.com/hamachan64/TibLbeExhibit/issues/62)）の PR [#63](https://github.com/hamachan64/TibLbeExhibit/pull/63) をレビュー中 |
-| **次にやること** | PR #63 をレビューし、実機でロゴの見え方を確かめる。実機での試作 #49 と通し #45 |
+| **フェーズ** | コア（0a・1〜5、3d）と素材 #46 はマージ済み（4b PR #60・5 PR #61・#46 PR #53 まで）。タイトルロゴ（[#62](https://github.com/hamachan64/TibLbeExhibit/issues/62)）の PR [#63](https://github.com/hamachan64/TibLbeExhibit/pull/63) をレビュー中。追加要素の遺跡の亡霊（[#65](https://github.com/hamachan64/TibLbeExhibit/issues/65)）の PR [#66](https://github.com/hamachan64/TibLbeExhibit/pull/66) をレビュー中 |
+| **次にやること** | PR #66 をレビューし、デモ会で亡霊の罰（U-20）を決める。PR #63 をレビューし、実機でロゴの見え方を確かめる。実機での試作 #49 と通し #45 |
 | **判断待ち** | 実機の入手（#49・#45 に必要）。U-1 は通し #45 までに必要。ほかは下の「判断待ち」 |
 | **締切** | 内容変更 **10/31**（あと11日）／最終データ 11/16／現地設営 11/17 |
 
@@ -48,7 +48,7 @@
 2. L（2人で持つお宝）
 3. 目標額のみモード、本日のランキング、運営PCの追加要素の選択・練習未完了の表示
 4. 持ち方の切り替え（直接つかむ／離れたまま揺れて運ぶ）
-5. 遺跡の亡霊 [#65](https://github.com/hamachan64/TibLbeExhibit/issues/65)（ゴーレムから変更。2026-11-07 に前倒しで着手。ブランチ `repo/feature-th-phantom`、仕様 `.claude/loops/20261107-th-phantom.md`）。（時間が残れば）秘宝、演出の作り込み
+5. 👀 遺跡の亡霊 [#65](https://github.com/hamachan64/TibLbeExhibit/issues/65)（PR [#66](https://github.com/hamachan64/TibLbeExhibit/pull/66) をレビュー中。ゴーレムから変更。2026-11-07 に前倒しで着手。ブランチ `repo/feature-th-phantom`、仕様 `.claude/loops/20261107-th-phantom.md`）。（時間が残れば）秘宝、演出の作り込み
 
 11/13〜11/16 は機能を追加せず、不具合修正と実機検証だけ。
 
